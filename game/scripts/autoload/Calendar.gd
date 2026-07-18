@@ -3,7 +3,7 @@ extends Node
 ## (patrz docs/MECHANIKI_EKONOMICZNE.md pkt. 8 — pełny event-driven
 ## scheduler oryginału to rozważane rozszerzenie post-MVP).
 
-signal day_advanced(current_day: int)
+signal day_advanced(days_elapsed: int, current_day: int)
 signal new_year(year: int)  ## okazja do Noworocznej Loterii (GDD 4.8)
 
 const START_YEAR := 1918
@@ -21,7 +21,7 @@ func reset_new_game() -> void:
 func advance_days(n: int) -> void:
 	var prev_year := get_year()
 	current_day += n
-	day_advanced.emit(current_day)
+	day_advanced.emit(n, current_day)
 	var year := get_year()
 	if year > prev_year:
 		new_year.emit(year)

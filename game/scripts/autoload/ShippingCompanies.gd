@@ -60,7 +60,7 @@ func sell_shares(company_id: String, count: int) -> bool:
 	return true
 
 
-func _on_day_advanced(_current_day: int) -> void:
+func _on_day_advanced(_days_elapsed: int, _current_day: int) -> void:
 	for company_id in COMPANIES.keys():
 		var change_percent := randf_range(-DAILY_DRIFT_RANGE, DAILY_DRIFT_RANGE)
 		stock_price[company_id] = max(1.0, stock_price[company_id] * (1.0 + change_percent))

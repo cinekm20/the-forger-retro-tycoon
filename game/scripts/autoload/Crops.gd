@@ -53,6 +53,22 @@ const SEASONAL_YIELD_FACTOR := {
 ## Pola przylegające do rzeki dają podwójny plon.
 const RIVER_YIELD_MULTIPLIER := 2.0
 
+## Ceny bazowe towarów na rynku (marek za jednostkę) — nasza własna wycena,
+## do balansowania. Świadomie wyrównane między uprawami (patrz GDD.md pkt. 11),
+## nie kopiujemy przechyłu oryginału na rzecz tytoniu.
+const BASE_CROP_PRICE := {"coffee": 9.0, "tobacco": 9.0, "tea": 9.0, "cocoa": 9.0}
+const DAILY_DRIFT_RANGE := 0.02  ## losowe wahanie ceny ±2% dziennie
+
+var market_price: Dictionary = {}
+
+
+func _ready() -> void:
+	Calendar.day_advanced.connect(_on_day_advanced)
+
+
+func reset_new_game() -> void:
+	market_price = BASE_CROP_PRICE.duplicate()
+
 
 func get_transport_cost(warehouse: String, from_city: String) -> int:
 	return TRANSPORT_COST.get(warehouse, {}).get(from_city, -1)
@@ -60,3 +76,13 @@ func get_transport_cost(warehouse: String, from_city: String) -> int:
 
 func get_reference_yield(city_id: String, crop: String) -> int:
 	return REFERENCE_YIELD.get(city_id, {}).get(crop, 0)
+
+
+func get_price(crop: String) -> float:
+	return market_price.get(crop, BASE_CROP_PRICE.get(crop, 9.0))
+
+
+func _on_day_advanced(_days_elapsed: int, _current_day: int) -> void:
+	for crop in CROPS:
+		var change_percent := randf_range(-DAILY_DRIFT_RANGE, DAILY_DRIFT_RANGE)
+		market_price[crop] = max(1.0, get_price(crop) * (1.0 + change_percent))

@@ -117,9 +117,10 @@ func harvest(plantation_index: int) -> int:
 	return amount
 
 
-## Wysyła zebrany towar do magazynu i sprzedaje go — podbija też odpowiednią
-## linię żeglugową (docs/MECHANIKI_EKONOMICZNE.md pkt. 7).
-func ship_and_sell(plantation_index: int, warehouse: String, sell_price_per_unit: float) -> int:
+## Wysyła zebrany towar do magazynu i sprzedaje go po aktualnej cenie rynkowej
+## (Crops.get_price) — podbija też odpowiednią linię żeglugową
+## (docs/MECHANIKI_EKONOMICZNE.md pkt. 7).
+func ship_and_sell(plantation_index: int, warehouse: String) -> int:
 	var plantation: Dictionary = plantations[plantation_index]
 	var amount: int = plantation["stored_goods"]
 	if amount <= 0:
@@ -128,9 +129,34 @@ func ship_and_sell(plantation_index: int, warehouse: String, sell_price_per_unit
 	if transport_cost < 0:
 		return 0
 	Economy.player_money -= transport_cost * amount
-	Economy.earn(amount * sell_price_per_unit)
+	Economy.earn(amount * Crops.get_price(plantation["crop"]))
 	plantation["stored_goods"] = 0
 
 	var region: String = Cities.CITIES[plantation["city"]]["region"]
 	ShippingCompanies.boost_from_region_activity(region, amount * 0.01)
 	return amount
+
+
+## Suma zebranego towaru danej uprawy w magazynach wszystkich plantacji gracza
+## (uproszczenie: "magazyn" = suma stored_goods plantacji uprawiających dany
+## towar — bez modelowania osobnych magazynów w Nowym Jorku/Londynie).
+func get_total_stored(crop: String) -> int:
+	var total := 0
+	for plantation in plantations:
+		if plantation["crop"] == crop:
+			total += plantation["stored_goods"]
+	return total
+
+
+## Zużywa zebrany towar (np. na poczet kontraktu terminowego) z plantacji
+## uprawiających dany towar, w kolejności iteracji.
+func consume_stored(crop: String, amount: int) -> void:
+	var remaining := amount
+	for plantation in plantations:
+		if remaining <= 0:
+			break
+		if plantation["crop"] != crop:
+			continue
+		var take: int = min(remaining, int(plantation["stored_goods"]))
+		plantation["stored_goods"] -= take
+		remaining -= take

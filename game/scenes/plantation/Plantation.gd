@@ -125,7 +125,7 @@ func _on_harvest_pressed() -> void:
 
 
 func _on_sell_pressed() -> void:
-	PlayerPlantations.ship_and_sell(plantation_index, "new_york", 10.0)
+	PlayerPlantations.ship_and_sell(plantation_index, "new_york")
 	_update_info()
 
 

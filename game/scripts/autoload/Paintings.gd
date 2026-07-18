@@ -32,14 +32,48 @@ const CATALOG := {
 	36: "modern", 37: "modern", 38: "modern", 39: "modern", 40: "modern",
 }
 
+## Szacunkowa wartość bazowa wg kategorii — nasza własna wycena do
+## balansowania, nie dane źródłowe.
+const CATEGORY_BASE_VALUE := {
+	"vermeer": 15000.0,
+	"baroque": 8000.0,
+	"classicism": 6000.0,
+	"romanticism": 6000.0,
+	"impressionism": 9000.0,
+	"symbolism": 5000.0,
+	"expressionism": 7000.0,
+	"modern": 12000.0,
+}
+
+const MAX_EXPERTISE := 0.9
+
 ## Numery obrazów aktualnie skatalogowanych przez gracza (nieodwracalne —
 ## patrz docs/ZRODLA_C64_WIKI.md pkt. "Fragment 4", bug #4 oryginału,
 ## który u nas świadomie staje się zamierzoną mechaniką).
 var catalogued_numbers: Array[int] = []
 
+## Eksperckość (0.0–0.9) — patrz GDD.md pkt. 4.6: podnosi szansę na wczesne
+## ostrzeżenie o duplikacie numeru katalogowego przed licytacją.
+var expertise: float = 0.0
+
 
 func reset_new_game() -> void:
 	catalogued_numbers.clear()
+	expertise = 0.0
+
+
+func increase_expertise(amount: float) -> void:
+	expertise = min(MAX_EXPERTISE, expertise + amount)
+
+
+## Zwraca true, jeśli szkoła sztuki zdąży ostrzec gracza przed podróbką
+## (tylko ma sens, gdy is_forgery_by_duplicate(number) == true).
+func warns_about_forgery(number: int) -> bool:
+	return is_forgery_by_duplicate(number) and randf() < expertise
+
+
+func get_estimated_value(number: int) -> float:
+	return CATEGORY_BASE_VALUE.get(get_category(number), 5000.0)
 
 
 ## Zwraca true, jeśli próba katalogowania tego numeru ujawnia fałszywkę

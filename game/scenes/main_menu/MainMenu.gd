@@ -8,6 +8,7 @@ func _ready() -> void:
 	ScreenHelpers.make_button(root, "Nowa gra", func():
 		Calendar.reset_new_game()
 		Economy.reset_new_game()
+		Crops.reset_new_game()
 		Paintings.reset_new_game()
 		ShippingCompanies.reset_new_game()
 		ForwardContracts.reset_new_game()

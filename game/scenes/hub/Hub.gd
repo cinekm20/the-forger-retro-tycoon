@@ -37,8 +37,13 @@ func _on_advance_week_pressed() -> void:
 
 
 func _update_status() -> void:
-	status_label.text = "Gotówka: %.0f M | Data: %s | Obrazy: %d/40" % [
+	var text := "Gotówka: %.0f M | Data: %s | Obrazy: %d/40" % [
 		Economy.player_money,
 		Calendar.get_date_string(),
 		Paintings.owned_count(),
 	]
+	if Economy.is_reform_imminent():
+		text += "\n⚠ Kurs dolara wysoki — zbliża się reforma walutowa!"
+	if Paintings.has_all_paintings():
+		text += "\n🏆 WYGRANA! Kolekcja wuja Walthera jest kompletna."
+	status_label.text = text
