@@ -1,0 +1,37 @@
+; Vermeer — szkielet projektu Godot 4
+; Zobacz docs/GDD.md w repo głównym po pełny projekt gry.
+
+config_version=5
+
+[application]
+
+config/name="Vermeer"
+config/description="Ekonomiczna gra strategiczna inspirowana grą Vermeer (Ariolasoft, 1987)."
+run/main_scene="res://scenes/main_menu/MainMenu.tscn"
+config/features=PackedStringArray("4.3", "Mobile")
+
+[autoload]
+
+SceneRouter="*res://scripts/autoload/SceneRouter.gd"
+Calendar="*res://scripts/autoload/Calendar.gd"
+Cities="*res://scripts/autoload/Cities.gd"
+Crops="*res://scripts/autoload/Crops.gd"
+Economy="*res://scripts/autoload/Economy.gd"
+Paintings="*res://scripts/autoload/Paintings.gd"
+ShippingCompanies="*res://scripts/autoload/ShippingCompanies.gd"
+ForwardContracts="*res://scripts/autoload/ForwardContracts.gd"
+AIPlayers="*res://scripts/autoload/AIPlayers.gd"
+SaveGame="*res://scripts/autoload/SaveGame.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation="landscape"
+
+[rendering]
+
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"

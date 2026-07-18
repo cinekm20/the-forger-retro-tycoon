@@ -1,0 +1,39 @@
+extends Node
+## Zapis/odczyt stanu gry do pojedynczego pliku JSON w katalogu użytkownika.
+
+const SAVE_PATH := "user://vermeer_save.json"
+
+
+func has_save() -> bool:
+	return FileAccess.file_exists(SAVE_PATH)
+
+
+func save_game() -> void:
+	var data := {
+		"current_day": Calendar.current_day,
+		"player_money": Economy.player_money,
+		"dollar_rate": Economy.dollar_rate,
+		"inflation": Economy.inflation,
+		"catalogued_numbers": Paintings.catalogued_numbers,
+		"shipping_prices": ShippingCompanies.stock_price,
+	}
+	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	file.store_string(JSON.stringify(data))
+	file.close()
+
+
+func load_game() -> void:
+	if not has_save():
+		return
+	var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
+	var data: Dictionary = JSON.parse_string(file.get_as_text())
+	file.close()
+	if data == null:
+		return
+	Calendar.current_day = data.get("current_day", 0)
+	Economy.player_money = data.get("player_money", Economy.STARTING_MONEY)
+	Economy.dollar_rate = data.get("dollar_rate", Economy.STARTING_DOLLAR_RATE)
+	Economy.inflation = data.get("inflation", Economy.STARTING_INFLATION)
+	var loaded_numbers: Array = data.get("catalogued_numbers", [])
+	Paintings.catalogued_numbers.assign(loaded_numbers)
+	ShippingCompanies.stock_price = data.get("shipping_prices", {})

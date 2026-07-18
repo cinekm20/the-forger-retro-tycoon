@@ -175,18 +175,25 @@ lub rywal komplementuje kolekcję pierwszy.
 - Architektura: autoloady na stan gry (Economy, Calendar, Paintings, AIPlayers),
   osobne sceny na każdy ekran z pkt. 4, wspólny UI-theme (art déco).
 
-Struktura katalogów (proponowana, do stworzenia w kolejnym kroku):
+Struktura katalogów (szkielet już utworzony w `game/`, patrz `game/README.md`):
 ```
-/project.godot
-/scenes
-  /hub, /plantation, /stock_market, /races, /auction_house, /art_school, /gallery
-/scripts
-  /autoload  (Economy.gd, Calendar.gd, Paintings.gd, AIPlayers.gd, SaveGame.gd,
-              Cities.gd, ShippingCompanies.gd, ForwardContracts.gd)
-/art
+game/project.godot
+game/scenes
+  /main_menu, /hub, /plantation, /stock_market, /races, /auction_house,
+  /art_school, /gallery  — każdy: Scene.tscn + Scene.gd
+game/scripts
+  /autoload  (SceneRouter, Calendar, Cities, Crops, Economy, Paintings,
+              ShippingCompanies, ForwardContracts, AIPlayers, SaveGame)
+  /ui  (screen_helpers.gd — wspólne budowniczowie placeholderowego UI)
+game/art        — puste, do wypełnienia grafikami z Leonardo.ai (docs/GRAFIKA_LEONARDO.md)
   /ui, /characters, /paintings, /backgrounds, /icons
-/audio
+game/audio      — puste, do wypełnienia
 ```
+
+Autoloady mają już wpięte realne dane źródłowe (miasta i czasy podróży,
+plony upraw, koszty transportu, katalog 40 obrazów, linie żeglugowe) —
+ekrany to na razie proste, tekstowe placeholdery z nawigacją, gotowe do
+podmiany na docelową grafikę.
 
 ## 9. Kierunek artystyczny
 
