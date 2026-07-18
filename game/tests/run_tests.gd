@@ -24,6 +24,7 @@ func _initialize() -> void:
 	_test_win_threshold_easy_mode()
 	_test_forward_contract_penalty_on_failure()
 	_test_players_hotseat_swap()
+	_test_security_bodyguard_and_gangster()
 
 	print("\n=== Wynik: %d/%d testów przeszło ===" % [total - failures, total])
 	quit(1 if failures > 0 else 0)
@@ -161,6 +162,7 @@ func _test_players_hotseat_swap() -> void:
 	ShippingCompanies.reset_new_game()
 	ForwardContracts.reset_new_game()
 	Travel.reset_new_game()
+	Security.reset_new_game()
 	Players.reset_new_game(2)
 
 	Economy.player_money = 12345.0
@@ -177,3 +179,32 @@ func _test_players_hotseat_swap() -> void:
 	_assert(Players.active_index == 0, "po drugim end_turn wracamy do gracza 1")
 	_assert(Economy.player_money == 12345.0, "stan gracza 1 poprawnie przywrócony z migawki")
 	_assert(Paintings.owned_count() == 1, "gracz 1 nadal ma swój obraz")
+
+
+func _test_security_bodyguard_and_gangster() -> void:
+	print("-- Security: ochroniarz i gangster (docs/DODATKOWE_MECHANIKI.md) --")
+	Economy.reset_new_game()
+	Security.reset_new_game()
+
+	_assert(not Security.has_bodyguard, "na starcie brak ochroniarza")
+	var cost_before := Economy.player_money
+	_assert(Security.hire_bodyguard(), "zatrudnienie ochroniarza się udaje przy wystarczających środkach")
+	_assert(Security.has_bodyguard, "po zatrudnieniu: has_bodyguard == true")
+	_assert(Economy.player_money == cost_before - Security.BODYGUARD_COST, "gotówka spadła dokładnie o koszt ochroniarza")
+	_assert(not Security.hire_bodyguard(), "nie da się zatrudnić drugiego ochroniarza")
+
+	AIPlayers.reset_new_game()
+	Paintings.reset_new_game()
+	var rival_id: String = AIPlayers.rivals[0]["id"]
+	AIPlayers.rivals[0]["paintings"] = [7]
+	Economy.player_money = 100000.0
+
+	var money_before_gangster := Economy.player_money
+	Security.send_gangster(rival_id)
+	_assert(Economy.player_money == money_before_gangster - Security.GANGSTER_COST, "opłata za gangstera pobrana niezależnie od wyniku")
+
+	# Rywal bez obrazów -> próba musi się nie udać (nie ma czego ukraść).
+	AIPlayers.rivals[0]["paintings"] = []
+	Economy.player_money = 100000.0
+	var stolen := Security.send_gangster(rival_id)
+	_assert(not stolen, "gangster nie może ukraść obrazu, którego rywal nie posiada")

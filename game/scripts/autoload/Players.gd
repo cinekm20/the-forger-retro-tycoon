@@ -57,6 +57,7 @@ func _empty_snapshot() -> Dictionary:
 		"current_city": Travel.START_CITY,
 		"travel_route": [],
 		"travel_days_remaining": 0.0,
+		"has_bodyguard": false,
 	}
 
 
@@ -72,6 +73,7 @@ func _capture_active() -> Dictionary:
 		"current_city": Travel.current_city,
 		"travel_route": Travel.route.duplicate(),
 		"travel_days_remaining": Travel.days_remaining,
+		"has_bodyguard": Security.has_bodyguard,
 	}
 
 
@@ -94,6 +96,7 @@ func _apply_snapshot(state: Dictionary) -> void:
 	route.assign(state["travel_route"])
 	Travel.route = route
 	Travel.days_remaining = state["travel_days_remaining"]
+	Security.has_bodyguard = state.get("has_bodyguard", false)
 
 
 ## Kończy turę aktywnego gracza: dolicza tydzień (płace, kontrakty, dług —

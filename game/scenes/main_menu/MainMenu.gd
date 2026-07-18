@@ -34,6 +34,7 @@ func _ready() -> void:
 		AIPlayers.reset_new_game()
 		PlayerPlantations.reset_new_game()
 		Travel.reset_new_game()
+		Security.reset_new_game()
 		Players.reset_new_game(player_count_option.selected + 1)
 		GameState.reset_new_game()
 		SceneRouter.goto_hub()

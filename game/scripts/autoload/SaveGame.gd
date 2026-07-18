@@ -31,6 +31,7 @@ func save_game() -> void:
 		"active_index": Players.active_index,
 		"player_names": Players.player_names,
 		"player_snapshots": Players.snapshots,
+		"has_bodyguard": Security.has_bodyguard,
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	file.store_string(JSON.stringify(data))
@@ -74,3 +75,4 @@ func load_game() -> void:
 	Players.player_names.assign(loaded_names)
 	var loaded_snapshots: Array = data.get("player_snapshots", [])
 	Players.snapshots.assign(loaded_snapshots)
+	Security.has_bodyguard = data.get("has_bodyguard", false)
