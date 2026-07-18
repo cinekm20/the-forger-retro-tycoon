@@ -137,8 +137,9 @@ func find_route(from_city: String, to_city: String) -> Dictionary:
 		unvisited.erase(current)
 		if current == to_city:
 			break
-		for neighbor in get_direct_neighbors(current):
-			var alt: float = distances[current] + get_direct_neighbors(current)[neighbor]
+		var neighbors := get_direct_neighbors(current)
+		for neighbor in neighbors:
+			var alt: float = distances[current] + neighbors[neighbor]
 			if alt < distances.get(neighbor, INF):
 				distances[neighbor] = alt
 				previous[neighbor] = current

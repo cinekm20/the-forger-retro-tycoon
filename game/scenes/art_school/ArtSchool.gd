@@ -33,6 +33,8 @@ func _on_train_pressed() -> void:
 	Paintings.increase_expertise(EXPERTISE_GAIN)
 	Calendar.advance_days(TRAINING_DAYS)
 	_update_info()
+	if GameState.check_game_over():
+		SceneRouter.goto_scene(SceneRouter.ENDING)
 
 
 func _update_info() -> void:

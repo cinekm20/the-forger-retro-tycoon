@@ -18,9 +18,9 @@ func _ready() -> void:
 
 func reset_new_game() -> void:
 	rivals = [
-		{"id": "vico", "name": "Vico Vermeer", "money": 50000.0, "is_named_rival": true},
-		{"id": "rival_2", "name": "Rywal II", "money": 50000.0, "is_named_rival": false},
-		{"id": "rival_3", "name": "Rywal III", "money": 50000.0, "is_named_rival": false},
+		{"id": "vico", "name": "Vico Vermeer", "money": 50000.0, "is_named_rival": true, "paintings": []},
+		{"id": "rival_2", "name": "Rywal II", "money": 50000.0, "is_named_rival": false, "paintings": []},
+		{"id": "rival_3", "name": "Rywal III", "money": 50000.0, "is_named_rival": false, "paintings": []},
 	]
 
 
@@ -29,6 +29,34 @@ func get_rival(id: String) -> Dictionary:
 		if rival["id"] == id:
 			return rival
 	return {}
+
+
+## Rywal wygrywa aukcję: płaci i katalog jego kolekcji rośnie (obraz może
+## być fałszywką tak samo jak u gracza — patrz Paintings.is_forgery_by_duplicate,
+## ale to nie blokuje rywala przed dalszym graniem, tylko go nie liczy do
+## jego postępu, tak jak u gracza).
+func award_painting(rival_id: String, number: int, price: float) -> void:
+	var rival := get_rival(rival_id)
+	if rival.is_empty():
+		return
+	rival["money"] -= price
+	var paintings: Array = rival["paintings"]
+	if not paintings.has(number):
+		paintings.append(number)
+
+
+func get_rival_painting_count(rival_id: String) -> int:
+	var rival := get_rival(rival_id)
+	return rival.get("paintings", []).size()
+
+
+## Zwraca id pierwszego rywala, który skompletował całą wymaganą liczbę
+## obrazów (Paintings.win_threshold) — pusty string, jeśli żaden.
+func get_rival_who_won() -> String:
+	for rival in rivals:
+		if get_rival_painting_count(rival["id"]) >= Paintings.win_threshold:
+			return rival["id"]
+	return ""
 
 
 func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:

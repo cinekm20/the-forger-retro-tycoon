@@ -16,6 +16,8 @@ func save_game() -> void:
 		"inflation": Economy.inflation,
 		"catalogued_numbers": Paintings.catalogued_numbers,
 		"expertise": Paintings.expertise,
+		"win_threshold": Paintings.win_threshold,
+		"days_in_debt": Economy.days_in_debt,
 		"shipping_prices": ShippingCompanies.stock_price,
 		"shipping_shares": ShippingCompanies.shares_owned,
 		"plantations": PlayerPlantations.plantations,
@@ -43,9 +45,11 @@ func load_game() -> void:
 	Economy.player_money = data.get("player_money", Economy.STARTING_MONEY)
 	Economy.dollar_rate = data.get("dollar_rate", Economy.STARTING_DOLLAR_RATE)
 	Economy.inflation = data.get("inflation", Economy.STARTING_INFLATION)
+	Economy.days_in_debt = data.get("days_in_debt", 0)
 	var loaded_numbers: Array = data.get("catalogued_numbers", [])
 	Paintings.catalogued_numbers.assign(loaded_numbers)
 	Paintings.expertise = data.get("expertise", 0.0)
+	Paintings.win_threshold = data.get("win_threshold", Paintings.CATALOG.size())
 	ShippingCompanies.stock_price = data.get("shipping_prices", {})
 	ShippingCompanies.shares_owned = data.get("shipping_shares", {})
 	var loaded_plantations: Array = data.get("plantations", [])

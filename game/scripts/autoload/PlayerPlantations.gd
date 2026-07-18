@@ -61,8 +61,13 @@ func buy_tile(plantation_index: int, tile_index: int) -> bool:
 	return true
 
 
+## Zmiana uprawy czyści niesprzedany zapas — inaczej stary towar zostałby po
+## cichu "przemianowany" na nową uprawę przy kolejnym get_total_stored/sell.
 func set_crop(plantation_index: int, crop: String) -> void:
-	plantations[plantation_index]["crop"] = crop
+	var plantation: Dictionary = plantations[plantation_index]
+	if plantation["crop"] != crop:
+		plantation["stored_goods"] = 0
+	plantation["crop"] = crop
 
 
 func hire_workers(plantation_index: int, count: int) -> bool:

@@ -47,6 +47,8 @@ const CATEGORY_BASE_VALUE := {
 
 const MAX_EXPERTISE := 0.9
 
+const EASY_WIN_THRESHOLD := 15  ## docs/GDD.md pkt. 6: tryb łatwy = 15/40 obrazów
+
 ## Numery obrazów aktualnie skatalogowanych przez gracza (nieodwracalne —
 ## patrz docs/ZRODLA_C64_WIKI.md pkt. "Fragment 4", bug #4 oryginału,
 ## który u nas świadomie staje się zamierzoną mechaniką).
@@ -56,10 +58,15 @@ var catalogued_numbers: Array[int] = []
 ## ostrzeżenie o duplikacie numeru katalogowego przed licytacją.
 var expertise: float = 0.0
 
+## Ile obrazów trzeba skatalogować, by wygrać — CATALOG.size() (40) w trybie
+## normalnym, EASY_WIN_THRESHOLD (15) w trybie łatwym.
+var win_threshold: int = CATALOG.size()
 
-func reset_new_game() -> void:
+
+func reset_new_game(easy_mode: bool = false) -> void:
 	catalogued_numbers.clear()
 	expertise = 0.0
+	win_threshold = EASY_WIN_THRESHOLD if easy_mode else CATALOG.size()
 
 
 func increase_expertise(amount: float) -> void:
@@ -92,7 +99,7 @@ func owned_count() -> int:
 
 
 func has_all_paintings() -> bool:
-	return owned_count() >= CATALOG.size()
+	return owned_count() >= win_threshold
 
 
 func get_category(number: int) -> String:

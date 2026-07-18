@@ -82,7 +82,8 @@ func get_price(crop: String) -> float:
 	return market_price.get(crop, BASE_CROP_PRICE.get(crop, 9.0))
 
 
-func _on_day_advanced(_days_elapsed: int, _current_day: int) -> void:
+func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
+	var weeks: float = float(days_elapsed) / 7.0
 	for crop in CROPS:
-		var change_percent := randf_range(-DAILY_DRIFT_RANGE, DAILY_DRIFT_RANGE)
+		var change_percent := randf_range(-DAILY_DRIFT_RANGE, DAILY_DRIFT_RANGE) * weeks
 		market_price[crop] = max(1.0, get_price(crop) * (1.0 + change_percent))

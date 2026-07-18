@@ -7,6 +7,7 @@ const BID_INCREMENT_RATIO := 0.1  ## gracz podbija o 10% szacunkowej wartości
 var current_number: int = -1
 var current_bid: float = 0.0
 var current_leader: String = ""  ## "" = nikt, "player", albo id rywala
+var current_forgery_warning: bool = false  ## losowane raz na aukcję w _start_new_auction
 
 var painting_label: Label
 var bid_label: Label
@@ -52,6 +53,7 @@ func _start_new_auction() -> void:
 	var estimated_value := Paintings.get_estimated_value(current_number)
 	current_bid = estimated_value * 0.2
 	current_leader = ""
+	current_forgery_warning = Paintings.warns_about_forgery(current_number)
 	_update_labels()
 
 
@@ -94,15 +96,17 @@ func _resolve_auction() -> void:
 		else:
 			Paintings.catalogue(current_number)
 			status_label.text = "Wygrywasz aukcję! Obraz trafia do kolekcji (%d/%d)." % [
-				Paintings.owned_count(), Paintings.CATALOG.size(),
+				Paintings.owned_count(), Paintings.win_threshold,
 			]
 	elif current_leader == "":
 		status_label.text = "Nikt nie licytował — obraz zostaje niesprzedany."
 	else:
-		var rival: Dictionary = AIPlayers.get_rival(current_leader)
-		rival["money"] -= current_bid
-		status_label.text = "%s wygrywa aukcję." % rival["name"]
+		AIPlayers.award_painting(current_leader, current_number, current_bid)
+		status_label.text = "%s wygrywa aukcję." % AIPlayers.get_rival(current_leader)["name"]
 	_update_labels()
+
+	if GameState.check_game_over():
+		SceneRouter.goto_scene(SceneRouter.ENDING)
 
 
 func _update_labels() -> void:
@@ -112,7 +116,7 @@ func _update_labels() -> void:
 		current_number, category_name, Paintings.get_estimated_value(current_number),
 	]
 
-	if Paintings.warns_about_forgery(current_number):
+	if current_forgery_warning:
 		warning_label.text = "⚠ Szkoła Sztuki ostrzega: ten numer już masz w kolekcji — to może być podróbka!"
 	else:
 		warning_label.text = ""

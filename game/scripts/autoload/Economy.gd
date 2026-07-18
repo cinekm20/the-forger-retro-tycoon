@@ -17,9 +17,14 @@ const REFORM_CHANCE_PER_WEEK := 0.15  ## szansa reformy w tygodniu, gdy grozi
 const NEW_YEAR_MONEY_RANGE := Vector2(1000.0, 5000.0)
 const NEW_YEAR_PAINTING_CHANCE := 0.15  ## docs/DODATKOWE_MECHANIKI.md — Noworoczna Loteria
 
+## Bankructwo: przegrana, jeśli gotówka pozostaje ujemna przez tyle dni
+## z rzędu — docs/GDD.md pkt. 6.
+const BANKRUPTCY_THRESHOLD_DAYS := 60
+
 var player_money: float = STARTING_MONEY
 var dollar_rate: float = STARTING_DOLLAR_RATE
 var inflation: float = STARTING_INFLATION
+var days_in_debt: int = 0
 
 
 func _ready() -> void:
@@ -31,6 +36,11 @@ func reset_new_game() -> void:
 	player_money = STARTING_MONEY
 	dollar_rate = STARTING_DOLLAR_RATE
 	inflation = STARTING_INFLATION
+	days_in_debt = 0
+
+
+func is_bankrupt() -> bool:
+	return days_in_debt >= BANKRUPTCY_THRESHOLD_DAYS
 
 
 func is_reform_imminent() -> bool:
@@ -68,6 +78,11 @@ func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
 
 	if is_reform_imminent() and randf() < REFORM_CHANCE_PER_WEEK * weeks:
 		apply_currency_reform(REFORM_RATIO)
+
+	if player_money < 0.0:
+		days_in_debt += days_elapsed
+	else:
+		days_in_debt = 0
 
 
 ## Noworoczna Loteria (Neujahrstombola) — docs/GDD.md pkt. 4.8,
