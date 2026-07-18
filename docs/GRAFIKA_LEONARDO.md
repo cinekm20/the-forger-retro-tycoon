@@ -3,6 +3,52 @@
 Dokument roboczy: lista wszystkich assetów graficznych potrzebnych do gry oraz
 gotowe prompty pod Leonardo.ai, tak by wszystko trzymało spójny styl.
 
+## Ustawienia techniczne w Leonardo.ai
+
+Nazwy modeli w Leonardo zmieniają się dość często, więc zamiast sztywno
+wskazywać jeden model, szukaj takiego, który pasuje do poniższego opisu (w
+razie wątpliwości dobrym punktem startu są modele typu "Phoenix" lub inne
+opisane jako dobre do stylizowanej ilustracji/concept-artu):
+
+- **Typ modelu:** stylizowana ilustracja / concept art / "flat illustration" —
+  **nie** fotorealizm, **nie** anime, **nie** 3D render.
+- **PhotoReal:** wyłączony (chcemy płaską ilustrację, nie zdjęcie).
+- **Alchemy:** włączony, jeśli dostępny — zwykle poprawia spójność kompozycji
+  i nasycenie kolorów przy stylizowanych promptach.
+- **Preset stylu (jeśli model go oferuje):** "Illustration" / "Concept Art" /
+  "Graphic Design Art" — unikać presetów "Cinematic", "Photography", "3D".
+- **Liczba generacji na prompt:** 4 na raz — wybierz najlepszą, dopiero ją
+  upscaluj (oszczędza kredyty/tokeny względem upscalowania wszystkiego).
+- **Upscaling:** finalnie wybrany obraz przepuść przez "Universal Upscaler"
+  (albo odpowiednik) do docelowej rozdzielczości z sekcji "Format eksportu"
+  na końcu dokumentu.
+
+### Negative prompt (wklej do pola "Negative Prompt" przy KAŻDYM promencie)
+
+```
+blurry, low quality, photorealistic photo, modern smartphone, modern clothing,
+contemporary fashion, text, watermark, signature, logo, extra fingers,
+deformed hands, cropped, oversaturated, 3D render, video game HUD, UI overlay,
+photo, realistic skin texture
+```
+
+### Workflow zachowania spójności między generacjami
+
+1. Wygeneruj **1 obraz referencyjny** (najlepiej ekran tytułowy/logo, punkt 1
+   niżej) bez żadnej referencji stylu — to on ustala paletę i kreskę.
+2. Dodaj go jako **Style Reference / Image Guidance** (w zależności od wersji
+   UI Leonardo bywa to nazwane "Elements" albo "Image Guidance → Style
+   Reference") przy wadze ok. **30–50%** dla wszystkich kolejnych generacji.
+3. Dla **wariantów tego samego obiektu** (np. 3 fazy wzrostu tej samej
+   rośliny, 3 wyrazy twarzy Vico) używaj trybu **Image-to-Image** na bazie
+   poprzedniego wariantu z niskim **Strength ~20–35%**, zamiast generować od
+   zera — dużo lepsza spójność kształtu/koloru.
+4. Dla ikon/sprite'ów z przezroczystym tłem: generuj na jednolitym,
+   kontrastowym tle (czysta zieleń albo magenta) i usuń tło narzędziem
+   "Remove Background" (Leonardo ma wbudowane, ewentualnie remove.bg).
+5. Trzymaj się **jednego aspect ratio na kategorię assetu** (patrz tabela w
+   sekcji "Plan produkcji" na końcu) — łatwiej potem poskładać w silniku.
+
 ## Spójność stylu — najważniejsza zasada
 
 Leonardo.ai generuje różne obrazy za każdym razem, więc żeby cała gra nie
@@ -288,23 +334,47 @@ center for text, transparent background, mobile game UI element,
 [Base style tag]
 ```
 
-## Praktyczna kolejność generowania
+## Plan produkcji — pełna lista do odhaczania
 
-1. Najpierw 1 grafika referencyjna stylu (logo lub ekran tytułowy) → ustal
-   "Style Reference" w Leonardo.
-2. Tła ekranów (7 sztuk) — największy wpływ na odbiór gry, rób je najpierw.
-3. Ikony mapy i UI.
-4. Postacie/portrety rywali.
-5. Rośliny/plantacje (fazy wzrostu).
-6. Konie.
-7. 40 obrazów kolekcji — rób na końcu, seriami po ~5, żeby łatwiej kontrolować
-   spójność rodziny (nie muszą pasować stylistycznie do reszty gry, tylko do
-   siebie nawzajem).
+Kolejność = priorytet (1 = rób najpierw). "Szt." to liczba **unikalnych**
+finalnych grafik (nie liczba generacji — na każdą liczyć ~4 generacje w
+Leonardo, żeby mieć z czego wybrać).
+
+| # | Priorytet | Asset | Szt. | Format / proporcje | Sekcja promptu |
+|---|---|---|---|---|---|
+| 1 | 1 | Obraz referencyjny stylu (tytuł/logo) | 1 | 16:9, docelowo 1920×1080 | §1 |
+| 2 | 1 | Logo "VERMEER" | 1 | dowolne, PNG transparent | §1 |
+| 3 | 2 | Tła głównych ekranów (mapa, plantacja, giełda, wyścigi, aukcja, szkoła, galeria) | 7 | 16:9, 1920×1080 | §2, §3, §4, §5, §6, §8, §9 |
+| 4 | 2 | Szablony regionalne teł miast | 5 | 16:9, 1920×1080 | §2.1 |
+| 5 | 3 | Ikony pinezek mapy (plantacja/giełda/wyścigi/aukcja/szkoła) | 5 | 1:1, 256×256, transparent | §2 |
+| 6 | 3 | Ramka obrazu (do aukcji/galerii) | 1 | 1:1, transparent | §6 |
+| 7 | 3 | Elementy UI ogólne (panel, ramka, ikony statystyk) | ~6 | 1:1, transparent | §10 |
+| 8 | 4 | Fazy wzrostu roślin (4 uprawy × 3 fazy) | 12 | 1:1, 512×512, transparent | §3 |
+| 9 | 4 | Portrety rywali AI (w tym Vico, 2–3 warianty mimiki) | ~7 | 3:4, transparent lub jednolite tło | §6 |
+| 10 | 5 | Konie + dżokeje (różne barwy jeźdźców) | 4–6 | 1:1 lub 4:3, transparent | §5 |
+| 11 | 6 | 40 obrazów kolekcji (na końcu, seriami po 5 per kategoria) | 40 | 1:1, min. 1024×1024 | §7 |
+| 12 | 7 (opcjonalnie) | Warianty "fałszywka" wybranych obrazów (do szkoły sztuki) | ~8–10 | 1:1, jak oryginał | §7, §8 |
+
+**Razem: ~90 unikalnych grafik docelowych** (~360+ generacji licząc 4 warianty
+na prompt) — realny zakres na kilka sesji w Leonardo, nie jeden wieczór.
+Priorytety 1–3 (14 grafik) wystarczą, żeby gra przestała wyglądać jak
+placeholder i dała się już sensownie testować/pokazać.
 
 ## Format eksportu
 
 - Tła: 1920×1080 lub 2048×1152 (potem skalowane w silniku)
 - Ikony/sprite'y: kwadratowe, potęgi 2 (128×128, 256×256, 512×512), PNG z
   kanałem alfa
+- Portrety postaci: 3:4, min. 768×1024, PNG z alfa lub jednolitym tłem do
+  łatwego wycięcia
 - Obrazy kolekcji: kwadrat 1:1, min. 1024×1024 (będą powiększane w widoku
   galerii/aukcji)
+
+## Gdzie odkładać pliki w projekcie
+
+Po wygenerowaniu wrzucaj gotowe PNG-i do `game/art/` wg podfolderów z
+`game/README.md` (`ui/`, `characters/`, `paintings/`, `backgrounds/`,
+`icons/`) — nazywaj pliki opisowo i po angielsku, zgodnie z id używanymi w
+kodzie (np. `backgrounds/hub_map.png`, `characters/vico_smirk.png`,
+`paintings/painting_06_rembrandt.png`), żeby łatwo było je później podpiąć
+w skryptach ekranów.

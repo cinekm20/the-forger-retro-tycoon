@@ -12,6 +12,7 @@ func _ready() -> void:
 		ShippingCompanies.reset_new_game()
 		ForwardContracts.reset_new_game()
 		AIPlayers.reset_new_game()
+		PlayerPlantations.reset_new_game()
 		SceneRouter.goto_hub()
 	)
 
