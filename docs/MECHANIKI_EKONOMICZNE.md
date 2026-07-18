@@ -76,12 +76,33 @@ naturalny gradient trudności geograficznej zamiast sztucznego "poziomu".
 ## 3. Plantacje — plony wg lokalizacji
 
 Każde miasto plantacyjne ma inny profil upraw (kawa / tytoń / herbata /
-kakao). Z tabeli źródłowej (500 robotników, 30 dni, pola przy rzece):
+kakao). Poniżej pełna tabela źródłowa: plon przy 500 robotnikach po 30
+dniach, dla plantacji złożonej ze wszystkich pól przylegających (poziomo/
+pionowo/po przekątnej) do pola rzeki — to nie jest optymalna plantacja, tylko
+punkt odniesienia pokazujący profil regionu. "total" = łączny plon, "/ha" =
+plon na hektar, "ha" = liczba branych pod uwagę hektarów przy rzece.
 
-- **Najlepszy tytoń:** Richmond, St. Louis, Rio, Bombaj, Meksyk
-- **Najlepsza kawa:** Abidżan, Gwatemala, Rio, Bogota, Duala
-- **Najlepsza herbata:** Ankara, Bombaj, Mombasa, Colombo
-- **Najlepsze kakao:** Abidżan, Duala, Bogota, Rio
+| Miasto | Kawa (total) | Kawa (/ha) | Tytoń (total) | Tytoń (/ha) | Herbata (total) | Herbata (/ha) | Kakao (total) | Kakao (/ha) | ha przy rzece |
+|---|---|---|---|---|---|---|---|---|---|
+| Ankara | 16 | 0,4 | 318 | 7,2 | 206 | 4,7 | 15 | 0,3 | 44 |
+| Bombaj | 18 | 0,3 | 362 | 5,7 | 235 | 3,7 | 17 | 0,3 | 64 |
+| Colombo | 17 | 0,4 | 30 | 0,7 | 215 | 5,1 | 15 | 0,4 | 42 |
+| Mombasa | 207 | 3,8 | 33 | 0,6 | 242 | 4,4 | 17 | 0,3 | 55 |
+| Duala | 208 | 3,9 | 34 | 0,6 | 22 | 0,4 | 188 | 3,5 | 54 |
+| Abidżan | 240 | 3,6 | 39 | 0,6 | 26 | 0,4 | 218 | 3,3 | 66 |
+| Rio | 220 | 3,3 | 396 | 5,9 | 24 | 0,4 | 199 | 3,0 | 67 |
+| Bogota | 215 | 4,5 | 35 | 0,7 | 23 | 0,5 | 195 | 4,1 | 48 |
+| Gwatemala | 226 | 4,5 | 37 | 0,7 | 24 | 0,5 | 19 | 0,4 | 50 |
+| Meksyk | 206 | 3,6 | 373 | 6,5 | 22 | 0,4 | 17 | 0,3 | 57 |
+| Richmond | 22 | 0,3 | 428 | 6,8 | 25 | 0,4 | 20 | 0,3 | 63 |
+| St. Louis | 22 | 0,3 | 433 | 6,6 | 26 | 0,4 | 20 | 0,3 | 66 |
+
+Odczyt skrócony (najlepsze lokacje per uprawa, na bazie tabeli):
+
+- **Najlepszy tytoń:** St. Louis (433), Richmond (428), Rio (396), Bombaj (362), Meksyk (373)
+- **Najlepsza kawa:** Abidżan (240), Rio (220), Gwatemala (226), Mombasa (207), Duala (208)
+- **Najlepsza herbata:** Mombasa (242), Bombaj (235), Colombo (215), Ankara (206)
+- **Najlepsze kakao:** Abidżan (218), Rio (199), Bogota (195), Duala (188)
 
 **Bonus rzeki:** pola przylegające (poziomo/pionowo/po przekątnej) do pola
 rzeki mają wyraźnie wyższy plon na hektar. To sugeruje **siatkowy/kafelkowy
@@ -147,6 +168,23 @@ odpowiedniej linii żeglugowej**. To spina plantacje i giełdę w jeden system �
 dobra mechanika sprzężenia zwrotnego do zaimplementowania w remake'u (giełda
 przestaje być osobną minigrą, tylko realnie reaguje na Twoje działania w
 świecie).
+
+### 7.1 Koszty transportu towaru (pełna tabela)
+
+Koszt transportu **jednej jednostki towaru** z danego miasta plantacyjnego do
+magazynu w Londynie lub Nowym Jorku. W przeciwieństwie do cen sprzedaży,
+koszty transportu są **stałe przez całą grę** (nie rosną z inflacją) — "-"
+oznacza brak/nie dotyczy (miasto własnego magazynu).
+
+| Do ↓ / Z miasta → | St.Louis | Richmond | N.Jork | Meksyk | Gwatemala | Bogota | Rio | Abidżan | Duala | Mombasa | Colombo | Bombaj | Ankara | Londyn |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Londyn** | 23 | 21 | 18 | 30 | 29 | 27 | 26 | 12 | 14 | 22 | 29 | 25 | 11 | – |
+| **Nowy Jork** | 4 | 3 | – | 11 | 10 | 9 | 20 | 22 | 26 | 34 | 40 | 37 | 23 | 18 |
+
+Odczyt: wysyłka towaru z Richmond do Nowego Jorku kosztuje 3, ale z Richmond
+do Londynu już 21 — stąd sensowność trzymania plantacji blisko "swojego"
+magazynu (amerykańskie miasta → Nowy Jork, afrykańskie/bliskie Europie →
+Londyn).
 
 ## 8. Struktura tur — kolejność wg czasu podróży (ważna decyzja projektowa)
 
