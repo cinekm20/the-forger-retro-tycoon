@@ -1,0 +1,179 @@
+extends SceneTree
+## Lekki zestaw testów uruchamiany bez edytora, prosto na tym samym kodzie
+## co gra (nie na kopii formuł, jak tools/balance_simulation.py w Pythonie).
+##
+## Uruchomienie lokalnie (gdy będzie już Godot pod ręką):
+##   godot --headless --script res://tests/run_tests.gd --path game
+##
+## W CI odpalane automatycznie przez .github/workflows/godot-check.yml.
+## Kod wyjścia 1, jeśli którykolwiek test nie przejdzie.
+
+var failures: int = 0
+var total: int = 0
+
+
+func _initialize() -> void:
+	print("=== Vermeer — testy autoloadów ===")
+
+	_test_cities_direct_travel()
+	_test_cities_route_via_transfer()
+	_test_river_adjacency_detection()
+	_test_harvest_requires_elapsed_time()
+	_test_harvest_scales_with_time()
+	_test_forgery_by_duplicate_number()
+	_test_win_threshold_easy_mode()
+	_test_forward_contract_penalty_on_failure()
+	_test_players_hotseat_swap()
+
+	print("\n=== Wynik: %d/%d testów przeszło ===" % [total - failures, total])
+	quit(1 if failures > 0 else 0)
+
+
+func _assert(condition: bool, description: String) -> void:
+	total += 1
+	if condition:
+		print("  OK   %s" % description)
+	else:
+		failures += 1
+		print("  FAIL %s" % description)
+
+
+func _test_cities_direct_travel() -> void:
+	print("-- Cities: bezpośrednie trasy (docs/MECHANIKI_EKONOMICZNE.md pkt. 2.1) --")
+	_assert(is_equal_approx(Cities.get_travel_days("richmond", "st_louis"), 1.9), "Richmond -> St. Louis = 1,9 dnia")
+	_assert(is_equal_approx(Cities.get_travel_days("st_louis", "richmond"), 1.9), "macierz symetryczna: St. Louis -> Richmond też 1,9 dnia")
+	_assert(Cities.get_travel_days("richmond", "richmond") == 0.0, "to samo miasto = 0 dni")
+
+
+func _test_cities_route_via_transfer() -> void:
+	print("-- Cities: trasa z przesiadką (Dijkstra) --")
+	# Berlin nie ma bezpośredniej trasy do St. Louis w danych źródłowych —
+	# musi znaleźć trasę przez co najmniej jedno miasto pośrednie.
+	_assert(Cities.get_travel_days("berlin", "st_louis") < 0.0, "brak bezpośredniej trasy Berlin -> St. Louis w danych źródłowych")
+	var result := Cities.find_route("berlin", "st_louis")
+	_assert(not result["path"].is_empty(), "mimo to find_route znajduje jakąś trasę")
+	_assert(result["path"][0] == "berlin", "trasa zaczyna się w Berlinie")
+	_assert(result["path"][-1] == "st_louis", "trasa kończy się w St. Louis")
+	_assert(result["path"].size() > 2, "trasa wymaga przynajmniej jednej przesiadki")
+	_assert(result["total_days"] > 0.0, "całkowity czas podróży dodatni")
+
+
+func _test_river_adjacency_detection() -> void:
+	print("-- PlayerPlantations: wykrywanie sąsiedztwa z rzeką --")
+	# RIVER_COLUMN = 2, GRID_SIZE = 6 -> tile_index = y*6+x
+	_assert(PlayerPlantations.is_river_tile(2), "pole (2,0) to sama rzeka")
+	_assert(not PlayerPlantations.is_adjacent_to_river(2), "rzeka nie jest 'sąsiadem samej siebie' (nieistotne w grze — rzeka i tak nie do kupienia)")
+	_assert(PlayerPlantations.is_adjacent_to_river(1), "pole (1,0), tuż obok rzeki -> sąsiaduje")
+	_assert(PlayerPlantations.is_adjacent_to_river(3), "pole (3,0), po drugiej stronie rzeki -> też sąsiaduje")
+	_assert(not PlayerPlantations.is_adjacent_to_river(5), "pole (5,0), daleko od rzeki -> nie sąsiaduje")
+
+
+func _test_harvest_requires_elapsed_time() -> void:
+	print("-- PlayerPlantations: zbiory wymagają upływu czasu (regresja na naprawiony exploit) --")
+	PlayerPlantations.reset_new_game()
+	Calendar.reset_new_game()
+	var idx := PlayerPlantations.found_plantation("richmond")
+	PlayerPlantations.set_crop(idx, "tobacco")
+	PlayerPlantations.hire_workers(idx, 500)
+	Economy.reset_new_game()
+	PlayerPlantations.buy_tile(idx, 0)
+
+	Calendar.advance_days(30)
+	var first_harvest := PlayerPlantations.harvest(idx)
+	var second_harvest := PlayerPlantations.harvest(idx)  # bez upływu czasu od pierwszych zbiorów
+
+	_assert(first_harvest > 0, "pierwsze zbiory po 30 dniach dają plon > 0")
+	_assert(second_harvest == 0, "powtórne zbiory BEZ upływu czasu dają 0 (exploit z sesji naprawiony)")
+
+
+func _test_harvest_scales_with_time() -> void:
+	print("-- PlayerPlantations: plon skaluje się proporcjonalnie do czasu --")
+	# Oba pomiary w tym samym miesiącu (dni 1-29 = styczeń, stały czynnik
+	# sezonowy), żeby sezonowość nie zaburzała porównania.
+	PlayerPlantations.reset_new_game()
+	Calendar.reset_new_game()
+	var idx := PlayerPlantations.found_plantation("richmond")
+	PlayerPlantations.set_crop(idx, "tobacco")
+	PlayerPlantations.hire_workers(idx, 500)
+	Economy.reset_new_game()
+	PlayerPlantations.buy_tile(idx, 0)
+	Calendar.advance_days(10)
+	var harvest_10_days := PlayerPlantations.harvest(idx)
+
+	PlayerPlantations.reset_new_game()
+	Calendar.reset_new_game()
+	idx = PlayerPlantations.found_plantation("richmond")
+	PlayerPlantations.set_crop(idx, "tobacco")
+	PlayerPlantations.hire_workers(idx, 500)
+	Economy.reset_new_game()
+	PlayerPlantations.buy_tile(idx, 0)
+	Calendar.advance_days(20)
+	var harvest_20_days := PlayerPlantations.harvest(idx)
+
+	_assert(harvest_20_days > harvest_10_days, "20 dni upraw daje więcej plonu niż 10 dni (ten sam miesiąc)")
+	_assert(absi(harvest_20_days - harvest_10_days * 2) <= 2, "plon skaluje się z grubsza liniowo z czasem (20d ≈ 2×10d)")
+
+
+func _test_forgery_by_duplicate_number() -> void:
+	print("-- Paintings: wykrywanie fałszywek po numerze katalogowym --")
+	Paintings.reset_new_game()
+	_assert(not Paintings.is_forgery_by_duplicate(6), "obraz nr 6 jeszcze nie posiadany -> nie jest 'duplikatem'")
+	Paintings.catalogue(6)
+	_assert(Paintings.owned_count() == 1, "po katalogowaniu: 1 obraz w kolekcji")
+	_assert(Paintings.is_forgery_by_duplicate(6), "próba zdobycia drugiego obrazu nr 6 = wykryta fałszywka")
+	_assert(Paintings.get_category(6) == "baroque", "obraz nr 6 należy do kategorii 'baroque' (docs/ZRODLA_C64_WIKI.md)")
+
+
+func _test_win_threshold_easy_mode() -> void:
+	print("-- Paintings: próg zwycięstwa (tryb łatwy vs normalny) --")
+	Paintings.reset_new_game(true)
+	_assert(Paintings.win_threshold == Paintings.EASY_WIN_THRESHOLD, "tryb łatwy: win_threshold == 15")
+	Paintings.reset_new_game(false)
+	_assert(Paintings.win_threshold == Paintings.CATALOG.size(), "tryb normalny: win_threshold == 40")
+
+
+func _test_forward_contract_penalty_on_failure() -> void:
+	print("-- ForwardContracts: kara za niedostarczony kontrakt --")
+	Calendar.reset_new_game()
+	Economy.reset_new_game()
+	Crops.reset_new_game()
+	PlayerPlantations.reset_new_game()
+	ForwardContracts.reset_new_game()
+
+	ForwardContracts.propose_contract("tobacco")
+	_assert(ForwardContracts.active_contracts.size() == 1, "kontrakt utworzony")
+	var money_before := Economy.player_money
+
+	# Żadna plantacja nie dostarcza tytoniu -> po terminie kontrakt musi zawieść.
+	Calendar.advance_days(ForwardContracts.DUE_IN_DAYS + 1)
+
+	_assert(ForwardContracts.active_contracts.is_empty(), "kontrakt rozliczony i usunięty z listy aktywnych")
+	_assert(Economy.player_money < money_before, "gotówka spadła o karę umowną za niedostarczenie")
+
+
+func _test_players_hotseat_swap() -> void:
+	print("-- Players: przełączanie graczy hot-seat --")
+	Calendar.reset_new_game()
+	Economy.reset_new_game()
+	Crops.reset_new_game()
+	Paintings.reset_new_game()
+	PlayerPlantations.reset_new_game()
+	ShippingCompanies.reset_new_game()
+	ForwardContracts.reset_new_game()
+	Travel.reset_new_game()
+	Players.reset_new_game(2)
+
+	Economy.player_money = 12345.0
+	Paintings.catalogue(1)
+
+	Players.end_turn()  # gracz 1 -> gracz 2
+
+	_assert(Players.active_index == 1, "po end_turn: aktywny indeks = 1 (gracz 2)")
+	_assert(Economy.player_money == Economy.STARTING_MONEY, "gracz 2 widzi swój świeży stan, nie kasę gracza 1")
+	_assert(Paintings.owned_count() == 0, "gracz 2 nie widzi obrazów gracza 1")
+
+	Players.end_turn()  # gracz 2 -> gracz 1 (pełny obrót)
+
+	_assert(Players.active_index == 0, "po drugim end_turn wracamy do gracza 1")
+	_assert(Economy.player_money == 12345.0, "stan gracza 1 poprawnie przywrócony z migawki")
+	_assert(Paintings.owned_count() == 1, "gracz 1 nadal ma swój obraz")
