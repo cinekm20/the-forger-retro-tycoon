@@ -54,9 +54,13 @@ const SEASONAL_YIELD_FACTOR := {
 const RIVER_YIELD_MULTIPLIER := 2.0
 
 ## Ceny bazowe towarów na rynku (marek za jednostkę) — nasza własna wycena,
-## do balansowania. Świadomie wyrównane między uprawami (patrz GDD.md pkt. 11),
-## nie kopiujemy przechyłu oryginału na rzecz tytoniu.
-const BASE_CROP_PRICE := {"coffee": 9.0, "tobacco": 9.0, "tea": 9.0, "cocoa": 9.0}
+## świadomie wyrównana między uprawami (patrz GDD.md pkt. 11), nie kopiujemy
+## przechyłu oryginału na rzecz tytoniu. Skalibrowana względem historycznej
+## płacy robotnika (PlayerPlantations.WORKER_DAILY_WAGE = 1,0/dzień, ta
+## liczba JEST z materiałów źródłowych — patrz docs/DODATKOWE_MECHANIKI.md),
+## tak by w pełni obsadzona plantacja referencyjna (500 robotników, 50 pól)
+## wychodziła na plus — patrz tools/balance_simulation.py.
+const BASE_CROP_PRICE := {"coffee": 50.0, "tobacco": 50.0, "tea": 50.0, "cocoa": 50.0}
 const DAILY_DRIFT_RANGE := 0.02  ## losowe wahanie ceny ±2% dziennie
 
 var market_price: Dictionary = {}

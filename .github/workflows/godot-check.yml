@@ -1,0 +1,46 @@
+name: Godot project sanity check
+
+on:
+  push:
+    paths:
+      - "game/**"
+      - ".github/workflows/godot-check.yml"
+  pull_request:
+    paths:
+      - "game/**"
+
+jobs:
+  boot-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot binary
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/godot
+          key: godot-4.3-stable-linux-x86_64
+
+      - name: Download Godot 4.3 headless binary
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          curl -sSL -o godot.zip \
+            "https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          chmod +x Godot_v4.3-stable_linux.x86_64
+          sudo mv Godot_v4.3-stable_linux.x86_64 /usr/local/bin/godot
+
+      # Booting the project headless forces Godot to parse project.godot,
+      # every autoload, and the main scene. GDScript parse errors, missing
+      # autoload paths, or broken scene/script references surface here as
+      # non-zero exit / stderr output instead of only being caught by
+      # opening the editor by hand.
+      - name: Boot project headless (surfaces script/scene errors)
+        working-directory: game
+        run: |
+          timeout 60 godot --headless --quit --path . 2>&1 | tee godot_output.log
+          if grep -Ei "SCRIPT ERROR|Parse Error|Cannot get class|Failed to load script" godot_output.log; then
+            echo "Godot reported script/scene errors above."
+            exit 1
+          fi

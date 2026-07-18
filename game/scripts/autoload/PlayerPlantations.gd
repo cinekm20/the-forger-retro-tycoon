@@ -15,8 +15,22 @@ const REFERENCE_TILE_COUNT := 50.0  ## odniesienie do tabeli plonów (ok. 50 ha 
 var plantations: Array[Dictionary] = []
 
 
+func _ready() -> void:
+	Calendar.day_advanced.connect(_on_day_advanced)
+
+
 func reset_new_game() -> void:
 	plantations.clear()
+
+
+## Płaca robotników nalicza się cyklicznie za każdy dzień pracy (nie
+## jednorazowo przy zatrudnieniu) — brak pieniędzy nie blokuje pracy, tylko
+## pogłębia dług gracza (spójne z mechaniką bankructwa w Economy.gd).
+func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
+	for plantation in plantations:
+		var wage_cost: float = int(plantation["workers"]) * WORKER_DAILY_WAGE * days_elapsed
+		if wage_cost > 0.0:
+			Economy.player_money -= wage_cost
 
 
 func found_plantation(city_id: String) -> int:
@@ -29,6 +43,7 @@ func found_plantation(city_id: String) -> int:
 		"crop": "",
 		"workers": 0,
 		"stored_goods": 0,
+		"last_harvest_day": Calendar.current_day,
 	})
 	return plantations.size() - 1
 
@@ -70,14 +85,10 @@ func set_crop(plantation_index: int, crop: String) -> void:
 	plantation["crop"] = crop
 
 
-func hire_workers(plantation_index: int, count: int) -> bool:
-	var plantation: Dictionary = plantations[plantation_index]
-	count = clampi(count, 0, MAX_WORKERS)
-	var wage_delta := (count - int(plantation["workers"])) * WORKER_DAILY_WAGE
-	if wage_delta > 0.0 and not Economy.spend(wage_delta):
-		return false
-	plantation["workers"] = count
-	return true
+## Zmienia liczbę robotników. Sam akt zatrudnienia nic nie kosztuje — koszt to
+## bieżąca płaca naliczana codziennie (patrz _on_day_advanced).
+func hire_workers(plantation_index: int, count: int) -> void:
+	plantations[plantation_index]["workers"] = clampi(count, 0, MAX_WORKERS)
 
 
 func get_owned_tile_count(plantation_index: int) -> int:
@@ -97,12 +108,18 @@ func get_river_adjacent_owned_count(plantation_index: int) -> int:
 	return count
 
 
-## Zbiory "na żądanie" (uproszczenie skeletonu — brak modelowania realnego
-## upływu dni między zbiorami, patrz nagłówek pliku).
+const REFERENCE_PERIOD_DAYS := 30.0  ## REFERENCE_YIELD w Crops.gd to plon za 30 dni
+
+## Plon skalowany rzeczywistym czasem od ostatnich zbiorów (patrz harvest())
+## — reference w Crops.gd to plon za REFERENCE_PERIOD_DAYS, więc krótszy/dłuższy
+## odstęp od ostatnich zbiorów daje proporcjonalnie mniej/więcej.
 func calculate_harvest(plantation_index: int) -> int:
 	var plantation: Dictionary = plantations[plantation_index]
 	var crop: String = plantation["crop"]
 	if crop == "":
+		return 0
+	var days_since_harvest: int = Calendar.current_day - int(plantation["last_harvest_day"])
+	if days_since_harvest <= 0:
 		return 0
 	var reference: int = Crops.get_reference_yield(plantation["city"], crop)
 	if reference == 0:
@@ -113,12 +130,17 @@ func calculate_harvest(plantation_index: int) -> int:
 	var effective_tiles := normal_tiles + river_tiles * Crops.RIVER_YIELD_MULTIPLIER
 	var tile_factor: float = effective_tiles / REFERENCE_TILE_COUNT
 	var seasonal_factor: float = Crops.SEASONAL_YIELD_FACTOR[Calendar.get_month()]
-	return int(reference * worker_factor * tile_factor * seasonal_factor)
+	var time_factor: float = days_since_harvest / REFERENCE_PERIOD_DAYS
+	return int(reference * worker_factor * tile_factor * seasonal_factor * time_factor)
 
 
+## Zbiera plon narosły od ostatnich zbiorów i resetuje licznik dni — kolejne
+## wywołanie bez upływu czasu (Calendar.advance_days) zwróci 0.
 func harvest(plantation_index: int) -> int:
 	var amount := calculate_harvest(plantation_index)
-	plantations[plantation_index]["stored_goods"] += amount
+	var plantation: Dictionary = plantations[plantation_index]
+	plantation["stored_goods"] += amount
+	plantation["last_harvest_day"] = Calendar.current_day
 	return amount
 
 
