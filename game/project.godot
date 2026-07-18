@@ -15,6 +15,7 @@ config/features=PackedStringArray("4.3", "Mobile")
 SceneRouter="*res://scripts/autoload/SceneRouter.gd"
 Calendar="*res://scripts/autoload/Calendar.gd"
 Cities="*res://scripts/autoload/Cities.gd"
+Travel="*res://scripts/autoload/Travel.gd"
 Crops="*res://scripts/autoload/Crops.gd"
 Economy="*res://scripts/autoload/Economy.gd"
 PlayerPlantations="*res://scripts/autoload/PlayerPlantations.gd"

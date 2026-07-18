@@ -22,6 +22,9 @@ func save_game() -> void:
 		"crop_prices": Crops.market_price,
 		"forward_contracts": ForwardContracts.active_contracts,
 		"rivals": AIPlayers.rivals,
+		"current_city": Travel.current_city,
+		"travel_route": Travel.route,
+		"travel_days_remaining": Travel.days_remaining,
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	file.store_string(JSON.stringify(data))
@@ -53,3 +56,7 @@ func load_game() -> void:
 	var loaded_rivals: Array = data.get("rivals", [])
 	if not loaded_rivals.is_empty():
 		AIPlayers.rivals.assign(loaded_rivals)
+	Travel.current_city = data.get("current_city", Travel.START_CITY)
+	var loaded_route: Array = data.get("travel_route", [])
+	Travel.route.assign(loaded_route)
+	Travel.days_remaining = data.get("travel_days_remaining", 0.0)

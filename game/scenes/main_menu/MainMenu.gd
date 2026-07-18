@@ -14,6 +14,7 @@ func _ready() -> void:
 		ForwardContracts.reset_new_game()
 		AIPlayers.reset_new_game()
 		PlayerPlantations.reset_new_game()
+		Travel.reset_new_game()
 		SceneRouter.goto_hub()
 	)
 

@@ -94,3 +94,62 @@ func get_plantation_cities() -> Array:
 
 func get_auction_cities() -> Array:
 	return CITIES.keys().filter(func(id): return CITIES[id]["type"] == "auction")
+
+
+## Wszyscy sąsiedzi miasta z bezpośrednią trasą (w obie strony macierzy).
+func get_direct_neighbors(city_id: String) -> Dictionary:
+	var neighbors := {}
+	if TRAVEL_DAYS.has(city_id):
+		for other in TRAVEL_DAYS[city_id]:
+			neighbors[other] = TRAVEL_DAYS[city_id][other]
+	for other in TRAVEL_DAYS:
+		if TRAVEL_DAYS[other].has(city_id):
+			neighbors[other] = TRAVEL_DAYS[other][city_id]
+	return neighbors
+
+
+## Najkrótsza trasa (Dijkstra) między dwoma miastami — dane źródłowe nie mają
+## bezpośredniej trasy dla każdej pary (patrz get_travel_days), więc realna
+## podróż często wymaga przesiadki (np. przez Londyn). Zwraca
+## {"path": [miasto, miasto, ...], "total_days": float}, albo pustą ścieżkę
+## i total_days = -1.0, jeśli miasto jest nieosiągalne.
+func find_route(from_city: String, to_city: String) -> Dictionary:
+	if from_city == to_city:
+		return {"path": [from_city], "total_days": 0.0}
+
+	var distances := {}
+	var previous := {}
+	var unvisited := {}
+	for city_id in CITIES.keys():
+		distances[city_id] = INF
+		unvisited[city_id] = true
+	distances[from_city] = 0.0
+
+	while not unvisited.is_empty():
+		var current := ""
+		var current_dist := INF
+		for city_id in unvisited:
+			if distances[city_id] < current_dist:
+				current_dist = distances[city_id]
+				current = city_id
+		if current == "" or current_dist == INF:
+			break
+		unvisited.erase(current)
+		if current == to_city:
+			break
+		for neighbor in get_direct_neighbors(current):
+			var alt: float = distances[current] + get_direct_neighbors(current)[neighbor]
+			if alt < distances.get(neighbor, INF):
+				distances[neighbor] = alt
+				previous[neighbor] = current
+
+	if distances.get(to_city, INF) == INF:
+		return {"path": [], "total_days": -1.0}
+
+	var path: Array[String] = []
+	var step := to_city
+	while step != from_city:
+		path.push_front(step)
+		step = previous[step]
+	path.push_front(from_city)
+	return {"path": path, "total_days": distances[to_city]}
