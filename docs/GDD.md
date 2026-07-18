@@ -12,6 +12,12 @@ Cel tego projektu: **stworzyć od nowa, w pełni graficzną wersję na Androida*
 zachowując rdzeń mechaniki (ekonomia + kolekcjonowanie sztuki), ale z nowoczesnym UI,
 animacjami i oprawą wizualną w klimacie lat 20. XX wieku (art déco).
 
+Ten dokument opisuje ekrany i strukturę projektu. Szczegółowe dane
+ekonomiczne oryginału (miasta, czasy podróży, plony wg lokalizacji, kontrakty
+terminowe, reformy walutowe, linie żeglugowe) są rozpisane osobno w
+`docs/MECHANIKI_EKONOMICZNE.md` — surowe fragmenty źródłowe w
+`docs/ZRODLA_C64_WIKI.md`.
+
 ## 2. High concept
 
 > Jesteś jednym ze spadkobierców rodzinnej fortuny roztrwonionej i rozproszonej po
@@ -38,18 +44,44 @@ Ekran startowy — stylizowana mapa świata (art déco, sepiowe odcienie + akcen
 złota/turkusu) z pinezkami: Twoje plantacje, giełdy (NY/Londyn), tor wyścigowy, dom
 aukcyjny, szkoła sztuki. Tap na pinezkę = wejście w dany ekran. Górny pasek: gotówka,
 data w grze (tura = tydzień/miesiąc), licznik posiadanych obrazów (np. "7/40").
+Mapa obejmuje **ok. 18 lokacji** (12 miast plantacyjnych + Nowy Jork + 5 miast
+aukcyjnych w Europie) — pełna lista i czasy podróży w
+`docs/MECHANIKI_EKONOMICZNE.md`. Podróż między lokacjami zajmuje dni gry i
+jest wizualizowana (patrz 4.9), nie jest natychmiastowym przeskokiem.
 
 ### 4.2 Plantacje
-Widok izometryczny/rzutu z góry pojedynczej plantacji z polami uprawnymi.
-Mechaniki: wybór uprawy, inwestycja w robotników/narzędzia, ryzyko pogodowe
-(susza, szkodniki — losowe zdarzenia z ilustrowanym popupem), zbiory i wysyłka
-towaru do portu. Animacja wzrostu upraw (etapy graficzne: zasiew → wzrost →
-zbiory).
+Widok siatkowy (grid) pojedynczej plantacji z rzeką przebiegającą przez pole —
+**pola przylegające do rzeki dają wyższy plon**, co zachęca do zwartego,
+przemyślanego układania upraw zamiast maksymalizowania powierzchni (patrz
+`MECHANIKI_EKONOMICZNE.md` pkt. 3–4). Mechaniki: wybór uprawy (kawa/tytoń/
+herbata/kakao — profil plonu zależny od lokalizacji), zatrudnianie
+robotników (plon skaluje się liniowo z ich liczbą), ryzyko regionalne
+(strajki przy braku wypłat, zamieszki/wywłaszczenia w niestabilnych
+regionach), zbiory i wysyłka towaru do magazynu (Nowy Jork/Londyn). Animacja
+wzrostu upraw (etapy graficzne: zasiew → wzrost → zbiory).
 
 ### 4.3 Giełda
 Ekran z wykresem cen (świece/linia, animowana), lista spółek/surowców, przyciski
 kupna/sprzedaży. Wydarzenia makro (krach 1929, hiperinflacja, reformy walutowe)
 jako karty zdarzeń z ilustracją gazety/nagłówka epoki.
+
+Notowane są też **4 fikcyjne linie żeglugowe** — Lloyd (Azja), Star (Afryka),
+Hanse (Ameryka Płd.), Royal (Ameryka Płn.) — których kurs realnie rośnie wraz
+z aktywnością gracza na plantacjach w danym regionie. To spina giełdę z
+plantacjami w jeden system zamiast dwóch osobnych minigier (szczegóły:
+`MECHANIKI_EKONOMICZNE.md` pkt. 7).
+
+**Kontrakty terminowe (forward contracts):** osobna zakładka giełdy —
+gracz zobowiązuje się dostarczyć określoną ilość towaru w przyszłości po
+ustalonej dziś cenie. Cena nie zmienia się nawet po reformie walutowej, co
+czyni je kluczowym narzędziem zabezpieczenia (i ryzykownej spekulacji) wokół
+nadchodzących reform (patrz 4.3.1 niżej i `MECHANIKI_EKONOMICZNE.md` pkt. 5–6).
+
+### 4.3.1 Reformy walutowe
+Okresowe, historycznie umotywowane reformy walutowe (np. przelicznik 5:1)
+gwałtownie tną gotówkę graczy — z wyraźnym sygnałem ostrzegawczym w UI (np.
+rosnący kurs dolara). Doświadczeni gracze mogą się zabezpieczyć kontraktami
+terminowymi zawartymi tuż przed reformą.
 
 ### 4.4 Tor wyścigów konnych
 Prosty ekran zakładów: lista koni z kursami, animowana scena wyścigu (można
@@ -97,11 +129,14 @@ moment na krótką, satysfakcjonującą animację (fajerwerki, konfetti, kalenda
 przewracający rok).
 
 ### 4.9 Podróże między lokacjami
-Przemieszczanie się między miastami/plantacjami na mapie świata nie jest
-natychmiastowe — zajmuje dni gry i jest wizualizowane (np. płynący statek po
-trasie na mapie). Krótkie podróże można "przyspieszyć" płacąc więcej, długie
-wymagają dłuższego oczekiwania — dobry haczyk na decyzje ekonomiczne
-("czy warto lecieć osobiście na aukcję, czy wysłać pośrednika?").
+Przemieszczanie się między ~18 miastami na mapie świata (lista i czasy
+podróży: `MECHANIKI_EKONOMICZNE.md` pkt. 2) nie jest natychmiastowe — zajmuje
+od ok. 1,5 dnia (np. Paryż–Berlin) do ponad 30 dni (np. Colombo–Nowy Jork) i
+jest wizualizowane (płynący statek/pociąg po trasie na mapie). Miasta bliżej
+Europy/Ameryki są wygodniejsze, ale odległe (Ankara, Afryka, Azja) bywają
+bardziej opłacalne pod konkretne uprawy — naturalny gradient trudności
+geograficznej. Dobry haczyk na decyzje ekonomiczne ("czy warto lecieć
+osobiście na aukcję, czy wysłać pośrednika?").
 
 ## 5. Systemy ekonomiczne
 
@@ -146,7 +181,8 @@ Struktura katalogów (proponowana, do stworzenia w kolejnym kroku):
 /scenes
   /hub, /plantation, /stock_market, /races, /auction_house, /art_school, /gallery
 /scripts
-  /autoload  (Economy.gd, Calendar.gd, Paintings.gd, AIPlayers.gd, SaveGame.gd)
+  /autoload  (Economy.gd, Calendar.gd, Paintings.gd, AIPlayers.gd, SaveGame.gd,
+              Cities.gd, ShippingCompanies.gd, ForwardContracts.gd)
 /art
   /ui, /characters, /paintings, /backgrounds, /icons
 /audio
@@ -178,4 +214,15 @@ mobile.
   do rozważenia later — wymaga decyzji przed projektowaniem UI tur.
 - **Vico jako antagonista:** czy to zwykły, mocniejszy przeciwnik AI, czy
   dedykowany "boss" z unikalnymi zachowaniami (np. czasem świadomie
-  podstawia fałszywki)? Do doprecyzowania fabularnego.
+  podstawia fałszywki)? Do doprecyzowania fabularnego. Vico to w oryginale
+  nazwany fałszerz z własnymi scenkami i humorem — patrz
+  `MECHANIKI_EKONOMICZNE.md` pkt. 9 po pełny profil.
+- **Struktura tur:** oryginał nie ma stałych rund — kolejność wyznacza czas
+  zakończenia podróży/pobytu każdego gracza (kolejka zdarzeń). MVP zakłada
+  uproszczony model turowy z globalnym kalendarzem dni (patrz
+  `MECHANIKI_EKONOMICZNE.md` pkt. 8); pełny event-driven scheduler to
+  potencjalne rozszerzenie po MVP, do decyzji przed implementacją Calendar.gd.
+- **Balans ekonomiczny:** gracze oryginału krytykowali słabą opłacalność
+  kawy/kakao względem tytoniu oraz regionów afrykańskich względem bliższych
+  lokacji. W remake'u warto świadomie wyrównać rentowność upraw zamiast
+  kopiować stare liczby 1:1 — do przetestowania przy implementacji Economy.gd.

@@ -36,6 +36,10 @@ silhouette, no photorealism
 ### 1. Ekran startowy / logo
 - Logo gry "VERMEER" w liternictwie art déco, złote litery na sepiowym tle
 - Ekran tytułowy: sylwetka kolekcjonera sztuki przed sztalugą, mapa świata w tle
+- Opcjonalny motyw: własna, stylizowana reinterpretacja "Dziewczyny z perłą"
+  Jana Vermeera (obraz z ok. 1665, domena publiczna) — subtelne mrugnięcie do
+  oryginalnej gry, która miała podobny motyw na ekranie tytułowym. To ma być
+  **inspirowana reinterpretacja w naszym stylu art déco**, nie kopia obrazu.
 
 **Prompt:**
 ```
@@ -60,6 +64,29 @@ top-down board game map, [Base style tag]
 Small game map pin icon of a [coffee plantation / stock exchange building /
 horse racetrack / auction house / art academy], simple flat icon, transparent
 background, [Base style tag]
+```
+
+### 2.1 Tła miast (lokacje na mapie — ~18 sztuk, patrz `MECHANIKI_EKONOMICZNE.md`)
+
+18 unikalnych, w pełni bespoke teł miast to dużo pracy ręcznej w Leonardo —
+rozsądniej **wygenerować 5 tematycznych szablonów regionalnych** i tylko
+lekko wariantować per miasto (inny akcent koloru/rekwizyt), zamiast 18 zupełnie
+osobnych scen od zera:
+
+1. **Port tropikalny — Ameryka** (Rio, Bogota, Gwatemala, Meksyk)
+2. **Port zachodnioafrykański** (Abidżan, Duala, Mombasa)
+3. **Port południowo/wschodnioazjatycki** (Bombaj, Colombo, Ankara jako
+   pomost Europa/Azja)
+4. **Amerykańskie miasteczko śródlądowe** (Richmond, St. Louis)
+5. **Europejska stolica** (Londyn, Lizbona, Amsterdam, Paryż, Berlin, Nowy Jork
+   jako wariant "wielka metropolia")
+
+**Prompt (szablon regionalny, podmieniać nawias):**
+```
+1920s [tropical Latin American port town / West African colonial port /
+South Asian trading port / American heartland riverside town / grand
+European capital street], establishing shot game background, warm afternoon
+light, [Base style tag]
 ```
 
 ### 3. Plantacje
@@ -133,6 +160,16 @@ art, [Base style tag]
 monocle / feather boa] accessory, bust portrait, game character icon,
 [Base style tag]
 ```
+
+**Prompt (Vico Vermeer — nazwany rywal-fałszerz, patrz `MECHANIKI_EKONOMICZNE.md`
+pkt. 9, generować 2–3 warianty min z tym samym seedem: neutralny/uśmiechnięty/
+podejrzliwy, do scenek "Meanwhile"):**
+```
+1920s dapper art forger character portrait, sly confident smirk, slicked
+hair, pencil moustache, fine tailored suit with pocket square, bust portrait,
+game character icon, [Base style tag]
+```
+
 **Prompt (rama):**
 ```
 Ornate gold Art Deco picture frame, empty center, isolated on transparent
