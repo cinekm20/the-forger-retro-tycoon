@@ -29,6 +29,44 @@ nawet losową wariancję (10% szans na przybycie dzień wcześniej) — u nas
 wystarczy prosty przedział/losowanie ±1 dzień dla klimatu, bez przesadnej
 symulacji.
 
+### 2.1 Pełna macierz czasów podróży (w dniach gry)
+
+Surowe dane liczbowe z oryginału — macierz symetryczna (czas A→B = B→A), więc
+każda para miast podana jest tylko raz, w wierszu "dalszego" miasta. "—"
+oznacza brak bezpośredniej trasy w tabeli źródłowej (prawdopodobnie brak
+bezpośredniego połączenia w grze — trzeba jechać przez miasto pośrednie).
+
+| z \ do | St.Louis | Richmond | N.Jork | Meksyk | Gwatemala | Bogota | Rio | Abidżan | Duala | Mombasa | Colombo | Bombaj | Ankara | Londyn | Lizbona | Amsterdam | Paryż |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Berlin** | — | — | — | — | — | — | — | — | — | — | — | — | 5,1 | 3,0 | 5,5 | 1,5 | 2,3 |
+| **Paryż** | — | — | — | — | — | — | — | — | — | — | — | — | 6,5 | 1,5 | 3,4 | 1,3 | — |
+| **Amsterdam** | — | — | 15,4 | 21,8 | 20,5 | 18,8 | 18,7 | 11,0 | 11,1 | 14,1 | 17,5 | 15,6 | 6,5 | 1,5 | 4,7 | — | — |
+| **Lizbona** | — | — | 12,3 | 18,0 | 16,5 | 14,3 | 14,0 | 6,9 | 7,9 | 12,5 | 17,9 | 16,5 | 8,1 | 4,1 | — | — | — |
+| **Londyn** | — | — | 13,9 | 20,4 | 19,2 | 17,6 | 18,0 | 10,8 | 11,3 | 14,8 | 18,7 | 16,9 | 7,8 | — | — | — | — |
+| **Ankara** | — | — | 20,4 | 25,9 | 24,4 | 21,7 | 19,4 | 10,4 | 8,9 | 9,0 | 11,1 | 9,2 | — | — | — | — | — |
+| **Bombaj** | — | — | 28,7 | 33,3 | 31,5 | 28,1 | 23,8 | 15,5 | 12,9 | 8,1 | 2,5 | — | — | — | — | — | — |
+| **Colombo** | — | — | 29,8 | 34,0 | 32,1 | 28,5 | 23,7 | 15,9 | 13,2 | 7,7 | — | — | — | — | — | — | — |
+| **Mombasa** | — | — | 23,2 | 26,7 | 24,8 | 21,0 | 16,0 | 8,6 | 5,9 | — | — | — | — | — | — | — | — |
+| **Duala** | — | — | 17,4 | 20,9 | 19,0 | 15,3 | 11,1 | 2,7 | — | — | — | — | — | — | — | — | — |
+| **Abidżan** | — | — | 14,9 | 18,2 | 16,3 | 12,6 | 9,0 | — | — | — | — | — | — | — | — | — | — |
+| **Rio** | — | — | 14,1 | 13,3 | 11,3 | 7,0 | — | — | — | — | — | — | — | — | — | — | — |
+| **Bogota** | — | — | 8,4 | 6,3 | 4,3 | — | — | — | — | — | — | — | — | — | — | — | — |
+| **Gwatemala** | — | — | 6,8 | 2,0 | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| **Meksyk** | — | — | 7,2 | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| **N.Jork** | 3,1 | 1,9 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| **Richmond** | 1,9 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
+
+Przykład odczytu: Richmond → St. Louis = 1,9 dnia; Nowy Jork → St. Louis =
+3,1 dnia, Nowy Jork → Richmond = 1,9 dnia; Colombo → Nowy Jork = 29,8 dnia
+(najdłuższa trasa w tabeli); Berlin → Amsterdam = 1,5 dnia (najkrótsza,
+razem z Paryż → Amsterdam = 1,3 dnia).
+
+Wartości ułamkowe wynikają z tego, że w oryginale data w grze jest liczona z
+częścią dziesiętną — np. 14,9 dnia oznacza zwykle 15 pełnych dni podróży, ale
+średnio raz na 10 podróży tylko 14 (bardzo wczesny wyjazd rano). Do naszego
+remake'u wystarczy zaokrąglać w górę i ew. dodać drobną losowość ±1 dzień,
+bez modelowania ułamków dnia.
+
 **Konsekwencja projektowa:** miasta blisko Europy/Ameryki (Richmond, St.
 Louis, Rio, Meksyk, Gwatemala, Bogota) są wygodne i "bezpieczne" — dobre na
 start. Miasta odległe (Ankara, Bombaj, Colombo, Afryka) są ryzykowne, wolno
