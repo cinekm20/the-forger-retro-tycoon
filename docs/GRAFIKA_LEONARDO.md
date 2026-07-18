@@ -139,20 +139,80 @@ Ornate gold Art Deco picture frame, empty center, isolated on transparent
 background, game UI asset, [Base style tag]
 ```
 
-### 7. 40 obrazów kolekcji
-Zamiast 40 ręcznie pisanych promptów — użyj jednego **szablonu z podmiennymi
-zmiennymi** (temat, paleta, kompozycja), żeby dało się szybko wygenerować całą
-serię zachowując rodzinę stylu:
+### 7. 40 obrazów kolekcji (8 kategorii × 5 obrazów)
 
+Pełna lista i numeracja: `docs/ZRODLA_C64_WIKI.md`. Zamiast jednego ogólnego
+szablonu — **osobny prompt-szablon na każdą z 8 kategorii stylistycznych**,
+tak żeby galeria realnie wyglądała jak przekrój historii sztuki (co jest
+sensem tej mechaniki w oryginale). Nazwiska konkretnych malarzy z tabeli
+źródłowej służą tylko jako **wewnętrzna wskazówka stylu dla nas** (część z
+nich, np. Picasso czy Braque, wciąż podlega prawom autorskim w wielu krajach
+— w promptach do Leonardo opisujemy więc **styl/okres**, nie generujemy
+bezpośrednio "w stylu [nazwisko]").
+
+Każda z 40 grafik NIE dostaje "Base style tag" gry — mają wyglądać jak
+prawdziwe malarstwo muzealne, nie jak ikony gry, żeby kontrastowały z resztą
+UI.
+
+**1) Vermeer (obrazy 1–5)** — malarstwo holenderskie złotego wieku:
 ```
-Fine art painting in the style of 1920s [post-impressionist / classical
-portrait / still life / landscape] painting, subject: [portrait of a woman /
-countryside landscape / bowl of fruit / harbor scene], rich oil painting
-texture, ornate composition, museum piece, square canvas, no frame
+17th century Dutch Golden Age genre painting, domestic interior scene, soft
+window light, muted earthy palette, oil painting texture, intimate
+composition, museum piece, square canvas, no frame
 ```
-(Ta grafika NIE dostaje "Base style tag" gry — obrazy w kolekcji powinny
-wyglądać jak prawdziwe malarstwo, nie jak ikony gry, żeby kontrastowały z
-resztą UI i "czuły się" jak prawdziwe dzieła sztuki).
+
+**2) Barok (6–10):**
+```
+Baroque oil painting, dramatic chiaroscuro lighting, rich dark background,
+opulent fabric and gesture, portrait or group scene, oil painting texture,
+museum piece, square canvas, no frame
+```
+
+**3) Klasycyzm (11–15):**
+```
+Neoclassical oil painting, balanced formal composition, clean idealized
+figures, restrained noble color palette, historical or genre subject, oil
+painting texture, museum piece, square canvas, no frame
+```
+
+**4) Romantyzm (16–20):**
+```
+Romantic era oil painting, dramatic sky and landscape, sublime nature,
+emotional atmosphere, sweeping brushwork, oil painting texture, museum piece,
+square canvas, no frame
+```
+
+**5) Impresjonizm (21–25):**
+```
+Impressionist oil painting, loose visible brushstrokes, dappled natural
+light, outdoor or garden scene, vibrant pastel palette, oil painting texture,
+museum piece, square canvas, no frame
+```
+
+**6) Symbolizm (26–30):**
+```
+Symbolist oil painting, dreamlike mysterious mood, decorative ornamental
+detail, muted jewel-tone palette, allegorical figure or landscape, oil
+painting texture, museum piece, square canvas, no frame
+```
+
+**7) Ekspresjonizm (31–35):**
+```
+Expressionist oil painting, bold distorted forms, intense unnatural color
+contrasts, emotional raw brushwork, early 20th century avant-garde, oil
+painting texture, museum piece, square canvas, no frame
+```
+
+**8) Moderna (36–40):**
+```
+Early modernist oil painting, simplified geometric forms, flattened
+perspective, bold unconventional color blocks, early 20th century avant-garde
+composition, oil painting texture, museum piece, square canvas, no frame
+```
+
+Do konkretnego obrazu dopisz temat z zamiennika: `subject: [portrait of a
+woman / countryside landscape / bowl of fruit / harbor scene / self-portrait
+/ still life with flowers]`.
 
 Do wariantu "podróbka" tego samego obrazu: powtórz prompt z tym samym seedem,
 dopisując `slightly different brushwork, subtle color mismatch, forged

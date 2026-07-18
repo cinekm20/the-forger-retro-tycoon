@@ -60,26 +60,63 @@ wynik i wypłata.
 Najbardziej "grafozależny" ekran. Prezentacja obrazu (w pełnej krasie, w ramie),
 licytacja w czasie rzeczywistym z paskiem czasu i konkurencyjnymi ofertami AI
 (z portretami rywali i ich "bid" bąbelkami). Opcja: wysłać pośrednika zamiast
-licytować osobiście (ryzyko przepłacenia/przegapienia).
+licytować osobiście (ryzyko przepłacenia/przegapienia). Wśród licytujących
+może pojawić się **Vico** — nazwany rywal-fałszerz, rozpoznawalna postać z
+własnym portretem/animacją, który świadomie podbija ceny lub sprzedaje
+podróbki.
+
+**System autentykacji (na bazie mechaniki oryginału):** każdy z 40 obrazów ma
+unikalny numer katalogowy w obrębie swojej kategorii stylistycznej. Jeśli
+gracz kupi/skataloguje obraz o numerze, który już posiada — zostaje on
+**automatycznie ujawniony jako fałszywka** (usuwany z kolekcji lub oznaczany).
+To główny, "systemowy" mechanizm wykrywania podróbek. Szkoła sztuki (patrz
+4.6) nie zastępuje tego systemu, tylko go wspiera — podnosi szansę, że gra
+*ostrzeże* gracza przed zakupem podejrzanego obrazu na aukcji, zanim ten
+padnie ofiarą duplikatu.
 
 ### 4.6 Szkoła sztuki / autentykacja
 Mini-gra "znajdź różnicę" lub quiz porównawczy: dwa podobne obrazy, gracz uczy się
 wskazówek (pociągnięcia pędzla, sygnatura, patyna) — podnosi statystykę
-"eksperckość", która potem wpływa na szansę wykrycia fałszywki na aukcji.
+"eksperckość", która zwiększa szansę na wczesne ostrzeżenie o duplikacie numeru
+katalogowego (patrz 4.5) przed przybiciem młotka na aukcji.
 
 ### 4.7 Galeria / kolekcja
-Ekran-nagroda: wirtualna galeria, w której zdobyte obrazy wieszane są na ścianach.
-Satysfakcjonujący element progresji — im więcej obrazów, tym bardziej wypełniona
-i "żywa" galeria (zmieniające się oświetlenie, ambient muzyka).
+Ekran-nagroda: wirtualna galeria z **8 sekcjami stylistycznymi** (Vermeer,
+Barok, Klasycyzm, Romantyzm, Impresjonizm, Symbolizm, Ekspresjonizm, Moderna),
+po 5 slotów na obraz każda — układ gabloty/ściany tematycznej, nie płaska
+lista 40. Zdobyty i skatalogowany obraz **zostaje przypisany do gracza na
+stałe w statystykach kolekcji**, nawet jeśli fizycznie zmieni właściciela w
+dalszej rozgrywce (tak jak w oryginale — katalogowanie jest nieodwracalne).
+Im więcej wypełnionych sekcji, tym bardziej "żywa" galeria (zmieniające się
+oświetlenie, ambient muzyka).
+
+### 4.8 Noworoczna Loteria (Neujahrstombola)
+Coroczne wydarzenie, osobne od aukcji i giełdy — losowanie/loteria na przełomie
+roku w grze, dodatkowe źródło pieniędzy lub nawet obrazu-niespodzianki. Dobry
+moment na krótką, satysfakcjonującą animację (fajerwerki, konfetti, kalendarz
+przewracający rok).
+
+### 4.9 Podróże między lokacjami
+Przemieszczanie się między miastami/plantacjami na mapie świata nie jest
+natychmiastowe — zajmuje dni gry i jest wizualizowane (np. płynący statek po
+trasie na mapie). Krótkie podróże można "przyspieszyć" płacąc więcej, długie
+wymagają dłuższego oczekiwania — dobry haczyk na decyzje ekonomiczne
+("czy warto lecieć osobiście na aukcję, czy wysłać pośrednika?").
 
 ## 5. Systemy ekonomiczne
 
 - Waluta w grze podlega inflacji (nawiązanie do lat 20./30.) — wpływa na ceny
   towarów i obrazów w czasie.
-- 40 unikalnych obrazów, każdy z: nazwą, autorem (fikcyjnym lub inspirowanym
-  epoką), szacowaną wartością, poziomem trudności rozpoznania fałszywki.
+- **40 obrazów w 8 kategoriach stylistycznych po 5 sztuk** (Vermeer, Barok,
+  Klasycyzm, Romantyzm, Impresjonizm, Symbolizm, Ekspresjonizm, Moderna),
+  każdy z unikalnym numerem katalogowym 1–40 — pełna lista w
+  `docs/ZRODLA_C64_WIKI.md`. Numer decyduje o systemie autentykacji (patrz
+  4.5).
 - Ekonomia AI-rywali: mają własny kapitał, też inwestują i licytują — muszą
-  sprawiać wrażenie żywych konkurentów (widoczne w rankingu bocznym).
+  sprawiać wrażenie żywych konkurentów (widoczne w rankingu bocznym). Jeden z
+  rywali to nazwana postać **Vico** — rywal-fałszerz z własną osobowością.
+- **Noworoczna Loteria** — coroczny dodatkowy zastrzyk gotówki/nagród, system
+  niezależny od giełdy i aukcji.
 
 ## 6. Warunki zwycięstwa/porażki
 
@@ -132,3 +169,13 @@ mobile.
 5. Plantacje → Giełda → Wyścigi → Dom aukcyjny → Szkoła sztuki → Galeria
 6. Dźwięk/muzyka, polish, testy na urządzeniu
 7. Eksport APK / AAB, podpisywanie, ewentualnie Google Play
+
+## 11. Otwarte pytania projektowe
+
+- **Multiplayer:** oryginał obsługiwał do 4 graczy lokalnie (hot-seat na
+  jednym C64). Wersja mobilna na start zakłada 1 gracza + 3 AI (patrz sekcja
+  6), ale hot-seat pass-and-play na jednym telefonie jest tanim rozszerzeniem
+  do rozważenia later — wymaga decyzji przed projektowaniem UI tur.
+- **Vico jako antagonista:** czy to zwykły, mocniejszy przeciwnik AI, czy
+  dedykowany "boss" z unikalnymi zachowaniami (np. czasem świadomie
+  podstawia fałszywki)? Do doprecyzowania fabularnego.
