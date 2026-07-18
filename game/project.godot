@@ -23,6 +23,7 @@ Paintings="*res://scripts/autoload/Paintings.gd"
 ShippingCompanies="*res://scripts/autoload/ShippingCompanies.gd"
 ForwardContracts="*res://scripts/autoload/ForwardContracts.gd"
 AIPlayers="*res://scripts/autoload/AIPlayers.gd"
+Players="*res://scripts/autoload/Players.gd"
 GameState="*res://scripts/autoload/GameState.gd"
 SaveGame="*res://scripts/autoload/SaveGame.gd"
 

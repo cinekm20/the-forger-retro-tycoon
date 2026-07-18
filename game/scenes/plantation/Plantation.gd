@@ -15,6 +15,7 @@ var worker_spin: SpinBox
 func _ready() -> void:
 	var root := ScreenHelpers.make_root(self)
 	ScreenHelpers.make_title(root, "Plantacje")
+	ScreenHelpers.make_turn_indicator(root)
 
 	var city_option := OptionButton.new()
 	for city_id in Cities.get_plantation_cities():

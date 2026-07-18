@@ -12,6 +12,7 @@ var info_label: Label
 func _ready() -> void:
 	var root := ScreenHelpers.make_root(self)
 	ScreenHelpers.make_title(root, "Giełda")
+	ScreenHelpers.make_turn_indicator(root)
 
 	info_label = Label.new()
 	info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

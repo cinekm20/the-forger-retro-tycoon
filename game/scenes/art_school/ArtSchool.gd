@@ -13,6 +13,7 @@ var info_label: Label
 func _ready() -> void:
 	var root := ScreenHelpers.make_root(self)
 	ScreenHelpers.make_title(root, "Szkoła sztuki")
+	ScreenHelpers.make_turn_indicator(root)
 
 	info_label = ScreenHelpers.make_label(root, "")
 

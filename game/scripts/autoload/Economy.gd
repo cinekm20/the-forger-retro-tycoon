@@ -49,9 +49,11 @@ func is_reform_imminent() -> bool:
 
 ## Wywoływać gdy silnik decyzyjny gry uzna, że reforma powinna nastąpić
 ## (np. po przekroczeniu progu przez dłuższy czas). ratio np. 5.0 = reforma 5:1.
+## Dotyka gotówki WSZYSTKICH graczy (Players.apply_reform_to_all), nie tylko
+## aktywnego — to zdarzenie globalne, nie efekt czyjejś tury.
 func apply_currency_reform(ratio: float) -> void:
-	player_money /= ratio
 	dollar_rate /= ratio
+	Players.apply_reform_to_all(ratio)
 	currency_reform.emit(ratio)
 
 
@@ -86,13 +88,8 @@ func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
 
 
 ## Noworoczna Loteria (Neujahrstombola) — docs/GDD.md pkt. 4.8,
-## docs/DODATKOWE_MECHANIKI.md.
+## docs/DODATKOWE_MECHANIKI.md. Trafia w losowego gracza (Players), niekoniecznie
+## akurat aktywnego — to też zdarzenie globalne, nie efekt czyjejś tury.
 func _on_new_year(_year: int) -> void:
-	earn(randf_range(NEW_YEAR_MONEY_RANGE.x, NEW_YEAR_MONEY_RANGE.y))
-	if randf() < NEW_YEAR_PAINTING_CHANCE:
-		var available_numbers: Array[int] = []
-		for number in Paintings.CATALOG.keys():
-			if not Paintings.catalogued_numbers.has(number):
-				available_numbers.append(number)
-		if not available_numbers.is_empty():
-			Paintings.catalogue(available_numbers[randi() % available_numbers.size()])
+	var money_bonus := randf_range(NEW_YEAR_MONEY_RANGE.x, NEW_YEAR_MONEY_RANGE.y)
+	Players.grant_new_year_to_random_player(money_bonus, NEW_YEAR_PAINTING_CHANCE)

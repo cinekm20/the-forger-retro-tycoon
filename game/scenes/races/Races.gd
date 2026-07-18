@@ -19,6 +19,7 @@ var info_label: Label
 func _ready() -> void:
 	var root := ScreenHelpers.make_root(self)
 	ScreenHelpers.make_title(root, "Wyścigi konne")
+	ScreenHelpers.make_turn_indicator(root)
 
 	for horse in HORSES:
 		ScreenHelpers.make_label(root, "%s — kurs ×%.1f" % [horse["name"], horse["odds"]])

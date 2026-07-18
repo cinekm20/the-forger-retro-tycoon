@@ -27,6 +27,10 @@ func save_game() -> void:
 		"current_city": Travel.current_city,
 		"travel_route": Travel.route,
 		"travel_days_remaining": Travel.days_remaining,
+		"player_count": Players.player_count,
+		"active_index": Players.active_index,
+		"player_names": Players.player_names,
+		"player_snapshots": Players.snapshots,
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	file.store_string(JSON.stringify(data))
@@ -64,3 +68,9 @@ func load_game() -> void:
 	var loaded_route: Array = data.get("travel_route", [])
 	Travel.route.assign(loaded_route)
 	Travel.days_remaining = data.get("travel_days_remaining", 0.0)
+	Players.player_count = data.get("player_count", 1)
+	Players.active_index = data.get("active_index", 0)
+	var loaded_names: Array = data.get("player_names", ["Gracz 1"])
+	Players.player_names.assign(loaded_names)
+	var loaded_snapshots: Array = data.get("player_snapshots", [])
+	Players.snapshots.assign(loaded_snapshots)

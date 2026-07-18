@@ -17,9 +17,8 @@ const FREE_DESTINATIONS := {
 	"Galeria": "res://scenes/gallery/Gallery.tscn",
 }
 
-const DAYS_PER_WEEK_ADVANCE := 7
-
 var status_label: Label
+var turn_label: Label
 var travel_status_label: Label
 var destination_option: OptionButton
 var travel_button: Button
@@ -29,6 +28,7 @@ func _ready() -> void:
 	var root := ScreenHelpers.make_root(self)
 	ScreenHelpers.make_title(root, "VERMEER — Mapa świata")
 
+	turn_label = ScreenHelpers.make_label(root, "")
 	status_label = ScreenHelpers.make_label(root, "")
 	travel_status_label = ScreenHelpers.make_label(root, "")
 
@@ -59,7 +59,7 @@ func _ready() -> void:
 		var path: String = FREE_DESTINATIONS[destination_name]
 		ScreenHelpers.make_button(root, destination_name, func(): SceneRouter.goto_scene(path))
 
-	ScreenHelpers.make_button(root, "Tydzień naprzód »", _on_advance_week_pressed)
+	ScreenHelpers.make_button(root, "Koniec tury »", _on_end_turn_pressed)
 
 	_update_status()
 
@@ -72,14 +72,20 @@ func _on_travel_pressed() -> void:
 	_update_status()
 
 
-func _on_advance_week_pressed() -> void:
-	Calendar.advance_days(DAYS_PER_WEEK_ADVANCE)
-	_update_status()
+func _on_end_turn_pressed() -> void:
+	Players.end_turn()
 	if GameState.check_game_over():
 		SceneRouter.goto_scene(SceneRouter.ENDING)
+	else:
+		SceneRouter.goto_hub()  # przeładuj scenę — nowy aktywny gracz ma inną mapę/plantacje
 
 
 func _update_status() -> void:
+	if Players.is_multiplayer():
+		turn_label.text = "Tura: %s (gracz %d/%d)" % [
+			Players.active_name(), Players.active_index + 1, Players.player_count,
+		]
+
 	var text := "Gotówka: %.0f M | Data: %s | Obrazy: %d/%d" % [
 		Economy.player_money,
 		Calendar.get_date_string(),

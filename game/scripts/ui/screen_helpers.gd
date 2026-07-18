@@ -40,3 +40,12 @@ static func make_button(root: VBoxContainer, text: String, on_pressed: Callable)
 
 static func make_back_button(root: VBoxContainer) -> Button:
 	return make_button(root, "« Powrót do mapy", func(): SceneRouter.goto_hub())
+
+
+## W hot-seat multiplayer pokazuje, czyja jest tura — ważne, żeby osoba
+## trzymająca telefon wiedziała, w czyim imieniu działa. W solo nic nie
+## dodaje (zwraca null).
+static func make_turn_indicator(root: VBoxContainer) -> Label:
+	if not Players.is_multiplayer():
+		return null
+	return make_label(root, "Tura: %s" % Players.active_name())

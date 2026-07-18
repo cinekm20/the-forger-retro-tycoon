@@ -8,25 +8,27 @@ extends Control
 func _ready() -> void:
 	var root := ScreenHelpers.make_root(self)
 
-	match GameState.last_outcome:
-		"win":
-			_build_win(root)
-		"bankrupt":
-			_build_bankrupt(root)
-		_:
-			if GameState.last_outcome.begins_with("rival_win:"):
-				_build_rival_win(root, GameState.last_outcome.substr(10))
-			else:
-				ScreenHelpers.make_title(root, "Koniec gry")
+	var outcome := GameState.last_outcome
+	if outcome.begins_with("win:"):
+		_build_win(root, int(outcome.substr(4)))
+	elif outcome.begins_with("bankrupt:"):
+		_build_bankrupt(root, int(outcome.substr(9)))
+	elif outcome.begins_with("rival_win:"):
+		_build_rival_win(root, outcome.substr(10))
+	else:
+		ScreenHelpers.make_title(root, "Koniec gry")
 
 	ScreenHelpers.make_button(root, "Powrót do menu głównego", func(): SceneRouter.goto_scene(SceneRouter.MAIN_MENU))
 
 
-func _build_win(root: VBoxContainer) -> void:
+## player_index wskazuje, KTO wygrał — w multiplayerze może to nie być ten
+## gracz, który akurat kończył turę, gdy wygrana została wykryta.
+func _build_win(root: VBoxContainer, player_index: int) -> void:
+	var name_prefix := (Players.player_names[player_index] + ": ") if Players.is_multiplayer() else ""
 	ScreenHelpers.make_title(root, "Kolekcja kompletna")
 	ScreenHelpers.make_label(
 		root,
-		"Ostatni obraz trafia do gabloty. Posłaniec przynosi wiadomość: " +
+		name_prefix + "Ostatni obraz trafia do gabloty. Posłaniec przynosi wiadomość: " +
 		"wuj Walther chce Cię widzieć natychmiast.",
 	)
 	ScreenHelpers.make_label(
@@ -46,20 +48,23 @@ func _build_win(root: VBoxContainer) -> void:
 	ScreenHelpers.make_label(
 		root,
 		"Dni gry: %d | Gotówka: %.0f M | Obrazy: %d" % [
-			Calendar.current_day, Economy.player_money, Paintings.owned_count(),
+			Calendar.current_day, Economy.player_money, Players.get_painting_count(player_index),
 		],
 	)
 
 
-func _build_bankrupt(root: VBoxContainer) -> void:
+func _build_bankrupt(root: VBoxContainer, player_index: int) -> void:
+	var name_prefix := (Players.player_names[player_index] + ": ") if Players.is_multiplayer() else ""
 	ScreenHelpers.make_title(root, "Bankructwo")
 	ScreenHelpers.make_label(
 		root,
-		"Wierzyciele stracili cierpliwość. Twoje interesy zostają przejęte, " +
+		name_prefix + "Wierzyciele stracili cierpliwość. Twoje interesy zostają przejęte, " +
 		"a marzenie o spadku po wuju Waltherze przechodzi na innego, " +
 		"sprawniejszego kandydata.",
 	)
-	ScreenHelpers.make_label(root, "Dni gry: %d | Obrazy zebrane: %d" % [Calendar.current_day, Paintings.owned_count()])
+	ScreenHelpers.make_label(root, "Dni gry: %d | Obrazy zebrane: %d" % [
+		Calendar.current_day, Players.get_painting_count(player_index),
+	])
 
 
 func _build_rival_win(root: VBoxContainer, rival_id: String) -> void:

@@ -18,6 +18,7 @@ var status_label: Label
 func _ready() -> void:
 	var root := ScreenHelpers.make_root(self)
 	ScreenHelpers.make_title(root, "Dom aukcyjny")
+	ScreenHelpers.make_turn_indicator(root)
 
 	painting_label = ScreenHelpers.make_label(root, "")
 	warning_label = ScreenHelpers.make_label(root, "")

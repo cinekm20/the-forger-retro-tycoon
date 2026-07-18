@@ -18,6 +18,14 @@ func _ready() -> void:
 				owned_in_category += 1
 		ScreenHelpers.make_label(root, "%s: %d/5" % [category_name, owned_in_category])
 
+	if Players.is_multiplayer():
+		ScreenHelpers.make_title(root, "Gracze")
+		for i in Players.player_count:
+			var marker := " (Ty)" if i == Players.active_index else ""
+			ScreenHelpers.make_label(root, "%s%s: %d obrazów" % [
+				Players.player_names[i], marker, Players.get_painting_count(i),
+			])
+
 	ScreenHelpers.make_title(root, "Rywale")
 	for rival in AIPlayers.rivals:
 		ScreenHelpers.make_label(root, "%s: %d obrazów" % [
