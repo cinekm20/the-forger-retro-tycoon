@@ -5,6 +5,7 @@ var player_count_option: OptionButton
 
 
 func _ready() -> void:
+	ScreenHelpers.make_background(self, "res://art/backgrounds/main_menu_title.jpg")
 	var root := ScreenHelpers.make_root(self)
 	ScreenHelpers.make_title(root, "VERMEER")
 	ScreenHelpers.make_label(root, "Ekonomiczna gra strategiczna — lata 20. XX wieku")

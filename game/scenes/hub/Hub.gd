@@ -1,7 +1,7 @@
 extends Control
-## Mapa świata / hub — docelowo zastąpiona właściwą mapą (docs/GRAFIKA_LEONARDO.md
-## pkt. 2). Na razie: pasek stanu, podróże między miastami i nawigacja do
-## wszystkich ekranów.
+## Mapa świata / hub — tło art/backgrounds/hub_map.jpg (docs/GRAFIKA_LEONARDO.md
+## pkt. 2), reszta ekranu wciąż na surowym UI Godota: pasek stanu, podróże
+## między miastami i nawigacja do wszystkich ekranów.
 
 ## Ekrany, które wymagają bycia w mieście danego typu (patrz Cities.CITIES),
 ## na wzór "zablokowanych" opcji menu z oryginału (docs/ZRODLA_C64_WIKI.md,
@@ -25,6 +25,7 @@ var travel_button: Button
 
 
 func _ready() -> void:
+	ScreenHelpers.make_background(self, "res://art/backgrounds/hub_map.jpg")
 	var root := ScreenHelpers.make_root(self)
 	ScreenHelpers.make_title(root, "VERMEER — Mapa świata")
 

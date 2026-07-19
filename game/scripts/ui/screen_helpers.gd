@@ -3,6 +3,25 @@ class_name ScreenHelpers
 ## Docelowo zastąpione właściwymi scenami z grafiką (docs/GRAFIKA_LEONARDO.md).
 
 
+## Pełnoekranowe tło + półprzezroczysta nakładka (dla czytelności tekstu na
+## bogatej w szczegóły grafice). Wywoływać PRZED make_root, żeby tło zostało
+## dodane jako pierwsze dziecko (czyli renderuje się pod resztą UI).
+static func make_background(parent: Control, texture_path: String) -> TextureRect:
+	var bg := TextureRect.new()
+	bg.texture = load(texture_path)
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bg.stretch_mode = TextureRect.STRETCH_SCALE
+	parent.add_child(bg)
+
+	var overlay := ColorRect.new()
+	overlay.color = Color(0, 0, 0, 0.45)
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(overlay)
+	return bg
+
+
 static func make_root(parent: Control) -> VBoxContainer:
 	var root := VBoxContainer.new()
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
