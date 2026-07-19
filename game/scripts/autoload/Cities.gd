@@ -96,6 +96,39 @@ func get_auction_cities() -> Array:
 	return CITIES.keys().filter(func(id): return CITIES[id]["type"] == "auction")
 
 
+## Przybliżone pozycje pinezek na mapie świata — ułamek szerokości/wysokości
+## ekranu (0,0 = lewy górny róg), z grubsza odpowiadające realnej
+## długości/szerokości geograficznej miast, skalibrowane pod
+## game/art/backgrounds/hub_map.jpg. To orientacyjne wartości — nie mam tu
+## podglądu graficznego, więc realnie będą wymagać ręcznej korekty o kilka
+## % po zobaczeniu na żywo w grze (przesuń liczby niżej, jeśli pinezka
+## wypada obok, nie na mieście).
+const MAP_POSITION := {
+	"berlin": Vector2(0.54, 0.22),
+	"paris": Vector2(0.50, 0.24),
+	"amsterdam": Vector2(0.51, 0.22),
+	"lisbon": Vector2(0.46, 0.29),
+	"london": Vector2(0.49, 0.22),
+	"ankara": Vector2(0.58, 0.28),
+	"bombay": Vector2(0.68, 0.39),
+	"colombo": Vector2(0.70, 0.45),
+	"mombasa": Vector2(0.59, 0.50),
+	"duala": Vector2(0.52, 0.47),
+	"abidjan": Vector2(0.48, 0.46),
+	"rio": Vector2(0.38, 0.60),
+	"bogota": Vector2(0.30, 0.47),
+	"guatemala": Vector2(0.26, 0.42),
+	"mexico": Vector2(0.24, 0.39),
+	"new_york": Vector2(0.29, 0.28),
+	"richmond": Vector2(0.28, 0.29),
+	"st_louis": Vector2(0.25, 0.29),
+}
+
+
+func get_map_position(city_id: String) -> Vector2:
+	return MAP_POSITION.get(city_id, Vector2(0.5, 0.5))
+
+
 ## Wszyscy sąsiedzi miasta z bezpośrednią trasą (w obie strony macierzy).
 func get_direct_neighbors(city_id: String) -> Dictionary:
 	var neighbors := {}
