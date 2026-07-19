@@ -340,25 +340,37 @@ Kolejność = priorytet (1 = rób najpierw). "Szt." to liczba **unikalnych**
 finalnych grafik (nie liczba generacji — na każdą liczyć ~4 generacje w
 Leonardo, żeby mieć z czego wybrać).
 
-| # | Priorytet | Asset | Szt. | Format / proporcje | Sekcja promptu |
-|---|---|---|---|---|---|
-| 1 | 1 | Obraz referencyjny stylu (tytuł/logo) | 1 | 16:9, docelowo 1920×1080 | §1 |
-| 2 | 1 | Logo "VERMEER" | 1 | dowolne, PNG transparent | §1 |
-| 3 | 2 | Tła głównych ekranów (mapa, plantacja, giełda, wyścigi, aukcja, szkoła, galeria) | 7 | 16:9, 1920×1080 | §2, §3, §4, §5, §6, §8, §9 |
-| 4 | 2 | Szablony regionalne teł miast | 5 | 16:9, 1920×1080 | §2.1 |
-| 5 | 3 | Ikony pinezek mapy (plantacja/giełda/wyścigi/aukcja/szkoła) | 5 | 1:1, 256×256, transparent | §2 |
-| 6 | 3 | Ramka obrazu (do aukcji/galerii) | 1 | 1:1, transparent | §6 |
-| 7 | 3 | Elementy UI ogólne (panel, ramka, ikony statystyk) | ~6 | 1:1, transparent | §10 |
-| 8 | 4 | Fazy wzrostu roślin (4 uprawy × 3 fazy) | 12 | 1:1, 512×512, transparent | §3 |
-| 9 | 4 | Portrety rywali AI (w tym Vico, 2–3 warianty mimiki) | ~7 | 3:4, transparent lub jednolite tło | §6 |
-| 10 | 5 | Konie + dżokeje (różne barwy jeźdźców) | 4–6 | 1:1 lub 4:3, transparent | §5 |
-| 11 | 6 | 40 obrazów kolekcji (na końcu, seriami po 5 per kategoria) | 40 | 1:1, min. 1024×1024 | §7 |
-| 12 | 7 (opcjonalnie) | Warianty "fałszywka" wybranych obrazów (do szkoły sztuki) | ~8–10 | 1:1, jak oryginał | §7, §8 |
+| # | Priorytet | Asset | Szt. | Format / proporcje | Sekcja promptu | Status |
+|---|---|---|---|---|---|---|
+| 1 | 1 | Obraz referencyjny stylu / tło menu głównego | 1 | 16:9, docelowo 1920×1080 | §1 | ✅ zrobione (`main_menu_title.jpg`) |
+| 2 | 1 | Logo "VERMEER" | 1 | dowolne, PNG transparent | §1 | ⏸ zastąpione na razie tekstem w kodzie (Label), nie pilne |
+| 3a | **2 (następne)** | Tło Plantacji | 1 | 16:9, 1920×1080 | §3 | ⬜ do zrobienia |
+| 3b | **2 (następne)** | Tło Domu aukcyjnego | 1 | 16:9, 1920×1080 | §6 | ⬜ do zrobienia |
+| 3c | 2 | Tło Giełdy | 1 | 16:9, 1920×1080 | §4 | ⬜ do zrobienia |
+| 3d | 2 | Tło Wyścigów | 1 | 16:9, 1920×1080 | §5 | ⬜ do zrobienia |
+| 3e | 2 | Tło Szkoły sztuki | 1 | 16:9, 1920×1080 | §8 | ⬜ do zrobienia |
+| 3f | 2 | Tło Galerii | 1 | 16:9, 1920×1080 | §9 | ⬜ do zrobienia |
+| — | — | Tło Mapy świata (Hub) | 1 | 16:9, 1920×1080 | §2 | ✅ zrobione (`hub_map.jpg`) |
+| 4 | 3 (opcjonalnie) | Szablony regionalne teł miast (osobny ekran "przyjazdu" do miasta — na razie nieużywane) | 5 | 16:9, 1920×1080 | §2.1 | ⬜ opcjonalne, niski priorytet |
+| 5 | — | ~~Ikony pinezek mapy~~ | — | — | §2 | ✅ **rozwiązane w kodzie**, nie generować — Leonardo uparcie robiło pełne sceny zamiast ikon, więc pinezki są teraz rysowane natywnie w Godocie (`MapPin.gd`), bez grafiki |
+| 6 | 3 | Ramka obrazu (do aukcji/galerii) | 1 | 1:1, transparent | §6 | ⬜ do zrobienia |
+| 7 | 3 | Elementy UI ogólne (panel, ramka, ikony statystyk) | ~6 | 1:1, transparent | §10 | ⬜ do zrobienia — **uwaga**, ten sam typ zadania co pinezki (mały, wyizolowany element), może mieć ten sam problem ze "sceną" |
+| 8 | 4 | Portrety rywali AI (w tym Vico, 2–3 warianty mimiki) | ~7 | 3:4, transparent lub jednolite tło | §6 | ⬜ do zrobienia — portrety zwykle nie mają problemu ze "sceną" |
+| 9 | 4 | Fazy wzrostu roślin (4 uprawy × 3 fazy) | 12 | 1:1, 512×512, transparent | §3 | ⬜ do zrobienia — **uwaga**, jak pinezki: mały wyizolowany obiekt, ryzyko tego samego problemu |
+| 10 | 5 | Konie + dżokeje (różne barwy jeźdźców) | 4–6 | 1:1 lub 4:3, transparent | §5 | ⬜ do zrobienia |
+| 11 | 6 | 40 obrazów kolekcji (na końcu, seriami po 5 per kategoria) | 40 | 1:1, min. 1024×1024 | §7 | ⬜ do zrobienia, na sam koniec |
+| 12 | 7 (opcjonalnie) | Warianty "fałszywka" wybranych obrazów (do szkoły sztuki) | ~8–10 | 1:1, jak oryginał | §7, §8 | ⬜ opcjonalne |
 
-**Razem: ~90 unikalnych grafik docelowych** (~360+ generacji licząc 4 warianty
-na prompt) — realny zakres na kilka sesji w Leonardo, nie jeden wieczór.
-Priorytety 1–3 (14 grafik) wystarczą, żeby gra przestała wyglądać jak
-placeholder i dała się już sensownie testować/pokazać.
+**Zasada dla wierszy oznaczonych "uwaga" (7 i 9):** jeśli Leonardo znowu
+zacznie robić pełne sceny zamiast wyizolowanych ikon/sprite'ów mimo
+poprawionego promptu (patrz workflow wyżej), nie trzeba dalej walczyć z
+modelem — dam znać, że można to zrobić prościej bezpośrednio w kodzie, tak
+jak pinezki.
+
+**Następne 6 grafik do wygenerowania (priorytet 2):** tła sześciu
+pozostałych ekranów (3a–3f wyżej). Polecam zacząć od **Plantacji** i **Domu
+aukcyjnego** — to dwa ekrany z najwięcej interakcji, największy zysk
+wizualny na wygenerowaną grafikę.
 
 ## Format eksportu
 
