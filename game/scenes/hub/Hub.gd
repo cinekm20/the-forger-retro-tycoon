@@ -73,6 +73,7 @@ func _ready() -> void:
 		ScreenHelpers.make_button(root, destination_name, func(): SceneRouter.goto_scene(path))
 
 	ScreenHelpers.make_button(root, "Koniec tury »", _on_end_turn_pressed)
+	ScreenHelpers.make_button(root, "Zapisz i wyjdź do menu", _on_save_and_exit_pressed)
 
 	_update_status()
 
@@ -111,6 +112,11 @@ func _on_travel_pressed() -> void:
 	var destination: String = destination_option.get_item_metadata(destination_option.selected)
 	Travel.start_travel(destination)
 	_update_status()
+
+
+func _on_save_and_exit_pressed() -> void:
+	SaveGame.save_game()
+	SceneRouter.goto_scene(SceneRouter.MAIN_MENU)
 
 
 func _on_end_turn_pressed() -> void:

@@ -2,24 +2,101 @@
 
 Wszystkie 7 ekranów ma już działającą logikę (nie tylko nawigację) —
 plantacje, giełda, dom aukcyjny, szkoła sztuki, wyścigi, galeria, mapa
-świata z podróżami. Brakuje tylko grafiki — UI to na razie surowe kontrolki
-Godota (przyciski, etykiety, listy). Zapis/odczyt gry i pętla
-wygrana/przegrana (kompletna kolekcja / bankructwo / rywal wygrywa
-pierwszy) działają.
+świata z podróżami i klikalnymi pinezkami. Menu główne i mapa świata mają
+już prawdziwe tło graficzne, reszta ekranów wciąż na surowym UI Godota
+(przyciski, etykiety, listy). Zapis/odczyt gry, hot-seat multiplayer (1-4
+graczy) i pętla wygrana/przegrana (kompletna kolekcja / bankructwo / rywal
+wygrywa pierwszy) działają.
 
-## Jak otworzyć
+## 1. Instalacja i otwarcie
 
 1. Zainstaluj Godot 4.3+ (stable, wersja "Standard" wystarczy — projekt jest
-   w czystym GDScript, bez C#).
-2. Otwórz (Import) folder `game/` w Godot Engine — to tu jest `project.godot`.
-3. Naciśnij F5. Scena startowa to `scenes/main_menu/MainMenu.tscn`.
+   w czystym GDScript, bez C#): https://godotengine.org/download
+2. W Godot Engine kliknij **Import** (nie "New Project") i wskaż folder
+   `game/` w tym repo — to tu jest `project.godot`.
+3. Naciśnij **F5** (albo przycisk Play w prawym górnym rogu). Scena
+   startowa to `scenes/main_menu/MainMenu.tscn`.
 
-## Uruchomienie na telefonie
+## 2. Przewodnik testowy — pełne przejście przez grę (10-15 min)
+
+Poniższe kroki sprawdzają, czy wszystkie systemy realnie działają, nie
+tylko się uruchamiają. Jeśli coś na którymś kroku wygląda inaczej niż
+opisano — to sygnał, że coś jest nie tak (zrzut ekranu + krok, na którym
+się wywaliło, bardzo ułatwi mi naprawę).
+
+1. **Start:** po F5 powinno pojawić się menu główne z tłem (kobieta przy
+   sztaludze i globusem). Zostaw "Liczba graczy" na 1, tryb łatwy
+   odznaczony, kliknij **Nowa gra**.
+2. **Hub:** powinieneś trafić na mapę świata z tłem-mapą i ok. 18
+   kolorowymi pinezkami rozrzuconymi po niej — jedna **biała** (Twoja
+   aktualna lokalizacja, Londyn), reszta złota (miasta plantacyjne) i
+   burgundowa (miasta aukcyjne). Pasek stanu: gotówka 50000 M, data
+   01.01.1918, obrazy 0/40.
+3. **Podróż:** kliknij dowolną **złotą** pinezkę (miasto plantacyjne, np.
+   Richmond albo St. Louis — najbliżej). Status powinien zmienić się na "W
+   podróży do...". Kliknij **Koniec tury** kilka razy, aż status zmieni się
+   na "Jesteś w: [miasto]" — teraz przycisk **Plantacje** powinien
+   przestać być wyszarzony.
+4. **Plantacje:** wejdź, kup kilka pól (klikaj "+" w siatce; pola z "~" to
+   rzeka, nie da się ich kupić — pola tuż obok rzeki oznaczone "✓+" po
+   zakupie dają podwójny plon), wybierz uprawę (np. Tytoń), ustaw
+   robotników suwakiem (np. 500), kliknij **Zbierz plony** — na razie 0,
+   bo nie minął żaden czas. Wróć do Hubu, kliknij **Koniec tury** kilka
+   razy (np. 5×), wróć do Plantacji i zbierz ponownie — tym razem plon
+   powinien być > 0. Kliknij **Wyślij i sprzedaj** — gotówka powinna
+   wzrosnąć.
+5. **Giełda:** z Hubu wejdź w Giełdę — kup/sprzedaj kilka akcji linii
+   żeglugowych, zawrzyj kontrakt terminowy na dowolny towar (sprawdź, czy
+   pojawia się na liście aktywnych kontraktów).
+6. **Dom aukcyjny:** pojedź pinezką do **burgundowego** miasta (np.
+   Londyn, Paryż), wejdź do Domu aukcyjnego. Podbijaj ofertę, klikaj
+   "Zakończ rundę" aż licytacja się rozstrzygnie — sprawdź komunikat
+   (wygrana/fałszywka/przegrana z rywalem).
+7. **Szkoła sztuki i wyścigi:** kup kurs w Szkole Sztuki (eksperckość
+   powinna wzrosnąć), postaw zakład w Wyścigach (gotówka się zmienia po
+   rozstrzygnięciu).
+8. **Galeria:** sprawdź podział kolekcji na 8 kategorii, sekcję "Ochrona"
+   (zatrudnienie ochroniarza) i "Rywale" (ich postęp w zbieraniu obrazów).
+9. **Zapis/odczyt:** z Hubu kliknij **Zapisz i wyjdź do menu**, potem w
+   menu głównym **Wczytaj grę** — stan powinien się zgadzać z tym, co
+   zostawiłeś.
+10. **Multiplayer (opcjonalnie):** zacznij nową grę z "Liczba graczy" = 2.
+    Na każdym ekranie powinien pojawić się napis "Tura: Gracz N". Po
+    "Koniec tury" na Hubie gra powinna przełączyć się na Gracza 2 z jego
+    własnym (świeżym) stanem — gotówka/kolekcja Gracza 1 nie powinny być
+    widoczne.
+
+## 3. Czego szukać, jeśli coś nie działa
+
+- **Czerwony tekst w panelu "Debugger" / "Output"** na dole edytora =
+  błąd skryptu. Skopiuj cały komunikat (nazwa pliku + numer linii) — to
+  wystarczy, żebym to naprawił bez zgadywania.
+- **Czarny/pusty ekran** = prawdopodobnie błąd w `_ready()` sceny, sprawdź
+  panel Output.
+- **Pinezka w złym miejscu na mapie** = znany, spodziewany problem —
+  współrzędne w `scripts/autoload/Cities.gd` (`MAP_POSITION`) są
+  policzone matematycznie, nie sprawdzone wizualnie. Podaj, o ile trzeba
+  przesunąć (np. "Ankara wypada za wysoko, o jakieś 5%"), poprawię.
+- **Przycisk cały czas wyszarzony** (np. "Plantacje") = sprawdź, czy
+  jesteś w mieście właściwego typu — te przyciski działają tylko w
+  konkretnych miastach (plantacyjnych/aukcyjnych), patrz krok 3 wyżej.
+
+## 4. Testy automatyczne (bez klikania)
+
+W terminalu, z poziomu folderu `game/`:
+```
+godot --headless --script res://tests/run_tests.gd --path .
+```
+Powinno wypisać listę `OK`/`FAIL` dla ok. 30 asercji i zakończyć się kodem
+wyjścia 0. To samo odpala się automatycznie w GitHub Actions przy każdym
+pushu (`.github/workflows/godot-check.yml`).
+
+## 5. Uruchomienie na telefonie
 
 - **Szybko, bez Android SDK:** eksport Web (`Project > Export`, preset
   "Web" — już skonfigurowany w `export_presets.cfg`), potem otwórz
   wyeksportowaną stronę w przeglądarce na telefonie (w tej samej sieci
-  Wi-Fi, przez prosty serwer HTTP).
+  Wi-Fi, przez prosty serwer HTTP, np. `python3 -m http.server`).
 - **Prawdziwy APK:** wymaga JDK 17 + Android SDK (najprościej przez Android
   Studio) skonfigurowanych w Godocie, potem `Project > Export` z presetem
   "Android" (już przygotowanym w `export_presets.cfg` — zmień
@@ -31,19 +108,22 @@ pierwszy) działają.
 ```
 project.godot
 export_presets.cfg — startowa konfiguracja eksportu Web + Android
+art/backgrounds/   — grafiki teł (main_menu_title.jpg, hub_map.jpg, ...)
 scenes/            — ekrany gry (Control + skrypt): main_menu, hub,
                      plantation, stock_market, races, auction_house,
                      art_school, gallery, ending
 scripts/autoload/  — globalny stan gry: Calendar, Cities, Travel, Crops,
                      Economy, PlayerPlantations, Paintings,
                      ShippingCompanies, ForwardContracts, AIPlayers,
-                     GameState, SaveGame, SceneRouter
-scripts/ui/        — wspólne budowniczowie prostego UI (ScreenHelpers)
+                     Security, Players, GameState, SaveGame, SceneRouter
+scripts/ui/        — wspólne budowniczowie prostego UI (ScreenHelpers,
+                     MapPin — pinezki rysowane natywnie, bez grafiki)
+tests/             — run_tests.gd, testy autoloadów uruchamiane w CI
 ```
 
 ## Co dalej
 
-Generowanie grafik (`docs/GRAFIKA_LEONARDO.md`) i podpięcie ich pod
-istniejące ekrany — logika biznesowa jest gotowa i nie powinna wymagać
-większych zmian przy dodawaniu grafiki, tylko podmianę prostych
-kontrolek na `TextureRect`/`AnimatedSprite2D`/stylizowany `Theme`.
+Generowanie pozostałych teł ekranów (`docs/GRAFIKA_LEONARDO.md`, priorytet
+2: Plantacje, Dom aukcyjny, Giełda, Wyścigi, Szkoła sztuki, Galeria) i
+podpięcie ich tak samo jak menu główne/Hub — logika biznesowa jest gotowa
+i nie powinna wymagać większych zmian przy dodawaniu grafiki.
