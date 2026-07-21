@@ -4,9 +4,13 @@ extends Control
 ## klikalnymi pinezkami żyje teraz na osobnym ekranie (scenes/travel_map),
 ## otwieranym przyciskiem "Jedź »" (patrz GDD.md pkt. 4.9).
 
-## Ekrany, które wymagają bycia w mieście danego typu (patrz Cities.CITIES),
-## na wzór "zablokowanych" opcji menu z oryginału (docs/ZRODLA_C64_WIKI.md,
-## sekcja Bedienung). Ekrany spoza tej listy są dostępne z każdego miasta.
+## Ekrany, które wymagają bycia w mieście danego typu (patrz Cities.CITIES).
+## W oryginale menu w ogóle nie pokazywało niedostępnych opcji (np. Londyn:
+## TRAVEL/BANK/MARK./AUCTION/COLLECT./OVERVIEW, ale St. Louis zamiast
+## AUCTION/COLLECT. miało PLANTAT./WORKERS) — więc te przyciski są tu
+## całkiem UKRYWANE poza właściwym typem miasta, nie tylko wyszarzane
+## (patrz _update_gated_button niżej). Ekrany spoza tej listy są dostępne
+## z każdego miasta.
 const LOCATION_GATED_DESTINATIONS := {
 	"Plantacje": {"path": "res://scenes/plantation/Plantation.tscn", "requires_type": "plantation"},
 	"Dom aukcyjny": {"path": "res://scenes/auction_house/AuctionHouse.tscn", "requires_type": "auction"},
@@ -120,6 +124,6 @@ func _update_gated_button(node: Node) -> void:
 	if node is Button and node.has_meta("requires_type"):
 		var requires_type: String = node.get_meta("requires_type")
 		var current_type: String = Cities.CITIES.get(Travel.current_city, {}).get("type", "")
-		node.disabled = Travel.is_traveling() or current_type != requires_type
+		node.visible = not Travel.is_traveling() and current_type == requires_type
 	for child in node.get_children():
 		_update_gated_button(child)

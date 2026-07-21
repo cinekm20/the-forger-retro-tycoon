@@ -44,8 +44,10 @@ się wywaliło, bardzo ułatwi mi naprawę).
    — powinna polecieć krótka animacja
    (pociąg albo samolot, w zależności od odległości) i wrócić do Hubu ze
    statusem "W podróży do...". Kliknij **Koniec tury** kilka razy, aż
-   status zmieni się na "Jesteś w: [miasto]" — teraz przycisk **Plantacje**
-   powinien przestać być wyszarzony.
+   status zmieni się na "Jesteś w: [miasto]" — teraz na liście przycisków
+   powinien pojawić się **Plantacje** (widoczny tylko w miastach
+   plantacyjnych, tak jak w oryginale — poza nimi w ogóle go nie ma na
+   liście, nie jest tylko wyszarzony).
 4. **Plantacje:** wejdź, kup kilka pól (klikaj "+" w siatce; pola z "~" to
    rzeka, nie da się ich kupić — pola tuż obok rzeki oznaczone "✓+" po
    zakupie dają podwójny plon), wybierz uprawę (np. Tytoń), ustaw
@@ -86,9 +88,10 @@ się wywaliło, bardzo ułatwi mi naprawę).
   współrzędne w `scripts/autoload/Cities.gd` (`MAP_POSITION`) są
   policzone matematycznie, nie sprawdzone wizualnie. Podaj, o ile trzeba
   przesunąć (np. "Ankara wypada za wysoko, o jakieś 5%"), poprawię.
-- **Przycisk cały czas wyszarzony** (np. "Plantacje") = sprawdź, czy
-  jesteś w mieście właściwego typu — te przyciski działają tylko w
-  konkretnych miastach (plantacyjnych/aukcyjnych), patrz krok 3 wyżej.
+- **Brak przycisku "Plantacje" albo "Dom aukcyjny" na liście** = to
+  zamierzone, nie błąd — tak jak w oryginale, te przyciski są widoczne
+  tylko w mieście właściwego typu (plantacyjnym/aukcyjnym), w innych
+  miastach w ogóle się nie pokazują (patrz krok 3 wyżej).
 
 ## 4. Testy automatyczne (bez klikania)
 

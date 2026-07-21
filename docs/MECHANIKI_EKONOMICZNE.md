@@ -250,7 +250,14 @@ projektowaniu balansu remake'u:
 ## 12. Sterowanie oryginału (tylko jako kontekst historyczny)
 
 W pełni menu, joystick/klawiatura, wybór cyfra-po-cyfrze przy wpisywaniu
-liczb, zablokowane opcje menu oznaczone strzałką. **Nie przenosimy tego 1:1**
-— na Androidzie zastępujemy: przyciski dotykowe, suwaki/steppery do liczb,
-wyszarzone przyciski dla zablokowanych opcji. Zachowujemy tylko *ideę*
-czytelnego stanu (podświetlenie wybranej opcji, wyraźny stan "zablokowane").
+liczb. **Nie przenosimy tego 1:1** — na Androidzie zastępujemy: przyciski
+dotykowe, suwaki/steppery do liczb.
+
+Menu główne (zrzuty ekranu od użytkownika) wcale nie pokazuje opcji
+niedostępnych w danym mieście, zamiast je wyszarzać: Londyn (miasto
+aukcyjne) ma TRAVEL/BANK/MARK./AUCTION/COLLECT./OVERVIEW, a St. Louis
+(miasto plantacyjne) ma TRAVEL/BANK/MARK./PLANTAT./WORKERS/OVERVIEW —
+AUCTION i COLLECT. znikają całkiem, nie są tylko zablokowane. Hub.gd
+odtwarza to 1:1 dla Plantacji i Domu aukcyjnego: przycisk jest całkiem
+ukryty (`visible = false`), gdy miasto nie pasuje do wymaganego typu, a
+nie tylko wyszarzony.
