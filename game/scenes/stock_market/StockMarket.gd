@@ -6,17 +6,22 @@ extends Control
 var rows_container: VBoxContainer
 var crop_rows_container: VBoxContainer
 var contracts_label: Label
-var info_label: Label
+var location_label: Label
+var money_label: Label
 
 
+## Skrzynki lokalizacja/data (lewy górny róg) i gotówka (prawy górny róg)
+## nawiązują do układu oryginału (patrz zrzuty ekranu użytkownika: "LONDON
+## DEN 1.1.1918" / "50000 M") — ten sam trik co Hub.gd _build_top_row,
+## współdzielony przez ScreenHelpers.make_corner_status_row.
 func _ready() -> void:
+	var corner := ScreenHelpers.make_corner_status_row(self, "", "")
+	location_label = corner["left"]
+	money_label = corner["right"]
+
 	var root := ScreenHelpers.make_root(self)
 	ScreenHelpers.make_title(root, "Giełda")
 	ScreenHelpers.make_turn_indicator(root)
-
-	info_label = Label.new()
-	info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	root.add_child(info_label)
 
 	rows_container = VBoxContainer.new()
 	root.add_child(rows_container)
@@ -57,9 +62,7 @@ func _rebuild_rows() -> void:
 	for child in rows_container.get_children():
 		child.queue_free()
 	for company_id in ShippingCompanies.COMPANIES.keys():
-		var row := HBoxContainer.new()
-		row.alignment = BoxContainer.ALIGNMENT_CENTER
-		rows_container.add_child(row)
+		var row := ScreenHelpers.make_boxed_row(rows_container)
 
 		var company_name: String = ShippingCompanies.COMPANIES[company_id]["name"]
 		var price := ShippingCompanies.get_price(company_id)
@@ -68,6 +71,7 @@ func _rebuild_rows() -> void:
 		var label := Label.new()
 		label.text = "%s: %.1f M (masz: %d)" % [company_name, price, owned]
 		label.custom_minimum_size = Vector2(220, 0)
+		label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
 		row.add_child(label)
 
 		var buy_btn := Button.new()
@@ -109,7 +113,8 @@ func _on_propose_contract_pressed(crop: String) -> void:
 
 
 func _update_info() -> void:
-	info_label.text = "Gotówka: %.0f M | Data: %s" % [Economy.player_money, Calendar.get_date_string()]
+	location_label.text = "%s\n%s" % [Cities.get_city_name(Travel.current_city), Calendar.get_date_string()]
+	money_label.text = "%.0f M" % Economy.player_money
 	_rebuild_crop_rows()
 
 	var lines: Array[String] = []

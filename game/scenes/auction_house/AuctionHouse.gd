@@ -9,20 +9,33 @@ var current_bid: float = 0.0
 var current_leader: String = ""  ## "" = nikt, "player", albo id rywala
 var current_forgery_warning: bool = false  ## losowane raz na aukcję w _start_new_auction
 
+var auction_number_label: Label
 var painting_label: Label
 var bid_label: Label
+var money_label: Label
 var warning_label: Label
 var status_label: Label
 
 
+## Układ pudełek nawiązuje do oryginału (patrz screeny użytkownika):
+## "AUCTION NUMBER: X" jako osobna skrzynka u góry, "UP FOR AUCTION IS: ..."
+## jako zwykła linia, a oferta + gotówka gracza jako dwie skrzynki obok
+## siebie (tam odpowiednik to "BID BY VICO 75000 M" + nazwisko gracza).
 func _ready() -> void:
 	var root := ScreenHelpers.make_root(self)
 	ScreenHelpers.make_title(root, "Dom aukcyjny")
 	ScreenHelpers.make_turn_indicator(root)
 
+	auction_number_label = ScreenHelpers.make_info_box(root, "")
 	painting_label = ScreenHelpers.make_label(root, "")
 	warning_label = ScreenHelpers.make_label(root, "")
-	bid_label = ScreenHelpers.make_label(root, "")
+
+	var bid_row := HBoxContainer.new()
+	bid_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	bid_row.add_theme_constant_override("separation", 14)
+	root.add_child(bid_row)
+	bid_label = ScreenHelpers.make_info_box(bid_row, "")
+	money_label = ScreenHelpers.make_info_box(bid_row, "")
 
 	var action_row := HBoxContainer.new()
 	action_row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -111,9 +124,11 @@ func _resolve_auction() -> void:
 
 
 func _update_labels() -> void:
+	auction_number_label.text = "Aukcja nr %d" % current_number
+
 	var category: String = Paintings.get_category(current_number)
 	var category_name: String = Paintings.CATEGORY_NAMES.get(category, category)
-	painting_label.text = "Obraz nr %d (%s) — szacunkowa wartość: %.0f M" % [
+	painting_label.text = "Na sprzedaż: obraz nr %d (%s) — szac. wartość %.0f M" % [
 		current_number, category_name, Paintings.get_estimated_value(current_number),
 	]
 
@@ -127,6 +142,5 @@ func _update_labels() -> void:
 		leader_text = "Ty"
 	elif current_leader != "":
 		leader_text = AIPlayers.get_rival(current_leader)["name"]
-	bid_label.text = "Aktualna oferta: %.0f M (prowadzi: %s) | Gotówka: %.0f M" % [
-		current_bid, leader_text, Economy.player_money,
-	]
+	bid_label.text = "Oferta: %.0f M\n(prowadzi: %s)" % [current_bid, leader_text]
+	money_label.text = "Gotówka: %.0f M" % Economy.player_money

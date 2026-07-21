@@ -290,6 +290,63 @@ static func make_info_box(root: Container, text: String, min_width: float = 0.0,
 	return label
 
 
+## Dwie skrzynki w przeciwległych górnych rogach (lewy: krótszy tekst typu
+## lokalizacja/data, prawy: gotówka) — ten sam układ co Hub.gd _build_top_row,
+## współdzielony tu, bo tego samego rozkładu (patrz zrzuty ekranu oryginału
+## dostarczone przez użytkownika) potrzebują też inne ekrany (np.
+## StockMarket.gd). SIZE_SHRINK_BEGIN na kolumnach + spacer z
+## SIZE_EXPAND_FILL — te same triki co w Hub.gd, patrz komentarz tam.
+static func make_corner_status_row(parent: Control, left_text: String, right_text: String) -> Dictionary:
+	var row := HBoxContainer.new()
+	row.set_anchors_preset(Control.PRESET_FULL_RECT)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(row)
+
+	var left_column := VBoxContainer.new()
+	left_column.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	row.add_child(left_column)
+	var left_label := make_info_box(left_column, left_text)
+
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(spacer)
+
+	var right_column := VBoxContainer.new()
+	right_column.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	row.add_child(right_column)
+	var right_label := make_info_box(right_column, right_text)
+
+	return {"left": left_label, "right": right_label}
+
+
+## Jak make_info_box, ale dla całego WIERSZA (kilka dzieci obok siebie —
+## etykieta + przyciski), nie pojedynczej etykiety — potrzebne tam, gdzie
+## cała pozycja (np. spółka żeglugowa: nazwa, cena, przyciski kup/sprzedaj)
+## ma być w jednej oprawionej "skrzynce", tak jak w oryginale (patrz
+## StockMarket.gd).
+static func make_boxed_row(root: Container) -> HBoxContainer:
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(COLOR_BURGUNDY_DARK.r, COLOR_BURGUNDY_DARK.g, COLOR_BURGUNDY_DARK.b, 0.85)
+	box.border_color = COLOR_GOLD
+	box.set_border_width_all(2)
+	box.set_corner_radius_all(4)
+	box.content_margin_left = 12
+	box.content_margin_right = 12
+	box.content_margin_top = 6
+	box.content_margin_bottom = 6
+
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", box)
+	root.add_child(panel)
+
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 10)
+	panel.add_child(row)
+	return row
+
+
 ## Przyciski w stylu art déco (ciemny burgund + złota ramka) zamiast
 ## domyślnego szarego wyglądu Godota — jeden wspólny styl dla całej gry.
 static func _style_button(btn: Button) -> void:
