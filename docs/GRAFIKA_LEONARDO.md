@@ -661,23 +661,13 @@ art, Art Deco 1920s illustration style, warm sepia and gold palette with deep gr
 - Przyciski, ramki paneli, ikony waluty, ikony statystyk (kapitał, ekspertyza,
   data), pasek postępu aukcji
 
-**Prompt (ramka menu Huba — priorytet, patrz Plan produkcji wiersz 7):**
-```
-Art Deco ornamental vertical frame border, tall narrow portrait rectangle, elegant gold geometric border ornamentation running along all four edges, symmetrical repeating pattern top and bottom, empty flat transparent center (no text, no scene, no illustration inside — just the border), isolated game UI frame asset, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
-```
-
-Format: 3:4 albo 9:16 (wąski, pionowy — pasuje do panelu menu w prawym
-dolnym rogu Huba), transparent PNG. **Ten sam rodzaj ryzyka co pinezki**
-(mały/wyizolowany element UI) — jeśli Leonardo znowu uparcie zrobi pełną
-scenę zamiast samej ramki mimo poprawionego promptu (`isolated`, `empty
-transparent center`, `no scene, no illustration`), daj znać — dorobimy to
-prościej w kodzie jak MapPin.gd/TravelVehicle.gd (rysowana natywnie
-ramka ze `StyleBoxFlat`/`_draw()`, bez grafiki).
-
-Po wygenerowaniu: użyjemy tego jako `NinePatchRect` (9-slice) za listą
-przycisków w `Hub.gd` — ornamentyka narożników zostaje ostra, a środek
-ramki rozciąga się do dowolnej liczby przycisków (różne miasta pokazują
-różną liczbę opcji menu), bez rozciągania/zniekształcania wzoru.
+**Ramka menu Huba — ⚠ NIE GENERUJ**, patrz Plan produkcji wiersz 7:
+próba z gotową grafiką (NinePatchRect na rozciąganym obrazku 896×896)
+wyglądała źle — pojedyncze motywy zdobne przy krawędziach (diamenciki,
+narożne łuki) zniekształcały się przy rozciąganiu do wąskiego, wysokiego
+panelu menu. Rozwiązane bez grafiki, natywnie w `MenuFrame.gd`
+(analogicznie do `MapPin.gd`) — rysowana na bieżąco ramka skaluje się
+bez artefaktów do dowolnej wysokości panelu.
 
 **Prompt (ogólny, na inne elementy UI — ikony statystyk, pasek postępu):**
 ```
@@ -753,7 +743,7 @@ Leonardo, żeby mieć z czego wybrać).
 | 4b | 2 | Unikalne tła **per miasto** (`Cities.gd` `CITY_BACKGROUNDS`, ma priorytet nad tłem regionu) | 18 | 16:9, 1920×1080 | §2.2 | ✅ zrobione — wszystkie 18 miast: Berlin, Paryż, Amsterdam, Lizbona, Londyn, Ankara, Bombaj, Colombo, Mombasa, Duala, Abidżan, Rio, Bogota, Gwatemala, Meksyk, Nowy Jork, Richmond, St. Louis |
 | 5 | — | ~~Ikony pinezek mapy~~ | — | — | §2 | ✅ **rozwiązane w kodzie**, nie generować — Leonardo uparcie robiło pełne sceny zamiast ikon, więc pinezki są teraz rysowane natywnie w Godocie (`MapPin.gd`), bez grafiki |
 | 6 | 3 | Ramka obrazu (do aukcji/galerii) | 1 | 1:1, transparent | §6 | ⬜ do zrobienia |
-| 7 | 3 | Ramka menu Huba (`game/art/ui/menu_frame.jpg`, `Hub.gd`) | 1 | 1:1 (896×896), NinePatchRect | §10 | ✅ zrobione — nie transparent (płaskie kremowe tło w środku), ale wystarczyło jako NinePatchRect z marginesem 200px, rozciąga się bez psucia ornamentyki narożników |
+| 7 | — | ~~Ramka menu Huba (grafika z Leonardo)~~ | — | — | §10 | ✅ **rozwiązane w kodzie**, nie generować — NinePatchRect na rozciąganym obrazku wyglądał źle (pojedyncze motywy zdobne przy krawędziach zniekształcały się przy rozciąganiu do wąskiego, wysokiego panelu). Ramka rysowana natywnie w `MenuFrame.gd`, tak jak pinezki (`MapPin.gd`) — bez grafiki, skaluje się bez artefaktów do dowolnej wysokości |
 | 7b | 3 | Pozostałe elementy UI ogólne (ikony statystyk, pasek postępu aukcji) | ~5 | 1:1, transparent | §10 | ⬜ do zrobienia — **uwaga**, ten sam typ zadania co pinezki/ramka menu (mały, wyizolowany element), może mieć ten sam problem ze "sceną" zamiast czystej ikony |
 | 8 | 4 | Portrety rywali AI (w tym Vico, 2–3 warianty mimiki) | ~7 | 3:4, transparent lub jednolite tło | §6 | ⬜ do zrobienia — portrety zwykle nie mają problemu ze "sceną" |
 | 9 | 4 | Fazy wzrostu roślin (4 uprawy × 3 fazy) | 12 | 1:1, 512×512, transparent | §3 | ⬜ do zrobienia — **uwaga**, jak pinezki: mały wyizolowany obiekt, ryzyko tego samego problemu |

@@ -46,15 +46,7 @@ static func make_root(parent: Control) -> VBoxContainer:
 
 
 const SIDE_PANEL_WIDTH := 320.0
-
-## Ozdobna ramka menu (docs/GRAFIKA_LEONARDO.md §10) — kwadratowa grafika
-## 896×896 z płaskim środkiem zaczynającym się ok. 200px od każdej
-## krawędzi (zmierzone bezpośrednio na pliku). NinePatchRect z tymi
-## marginesami rozciąga tylko płaski środek, ostre narożniki/ornamentyka
-## zostają nietknięte niezależnie od wysokości panelu (różne miasta mają
-## różną liczbę pozycji w menu).
-const MENU_FRAME_TEXTURE := "res://art/ui/menu_frame.jpg"
-const MENU_FRAME_PATCH_MARGIN := 200
+const MenuFrameScript := preload("res://scripts/ui/MenuFrame.gd")
 
 ## Wąski panel przy krawędzi ekranu (stała szerokość, pełna wysokość) z
 ## tłem pod przyciskami — dla ekranów, gdzie reszta ekranu (np. mapa z
@@ -68,19 +60,16 @@ const MENU_FRAME_PATCH_MARGIN := 200
 ## stałym pikselowym offsetem nie mają tego problemu.
 ##
 ## use_menu_frame=true podmienia zwykłe półprzezroczyste tło na ozdobną
-## ramkę (MENU_FRAME_TEXTURE) — na razie tylko Hub.gd (menu nawigacyjne),
-## inne ekrany korzystające z make_root_side (TravelMap/TravelAnimation)
-## nadal dostają domyślne proste tło, żeby nie zmieniać ich wyglądu bez
-## potrzeby.
+## ramkę rysowaną natywnie (MenuFrame.gd) — próba z gotową grafiką z
+## Leonardo (NinePatchRect na rozciąganym obrazku) wyglądała źle: pojedyncze
+## motywy zdobne przy krawędziach zniekształcały się przy rozciąganiu do
+## wąskiego, wysokiego panelu. Rysowana w kodzie ramka skaluje się
+## bez artefaktów do dowolnej wysokości (różne miasta mają różną liczbę
+## pozycji w menu). Na razie tylko Hub.gd — TravelMap/TravelAnimation
+## nadal dostają domyślne proste tło.
 static func make_root_side(parent: Control, on_right: bool = true, use_menu_frame: bool = false) -> VBoxContainer:
 	if use_menu_frame:
-		var frame := NinePatchRect.new()
-		frame.texture = load(MENU_FRAME_TEXTURE)
-		frame.patch_margin_left = MENU_FRAME_PATCH_MARGIN
-		frame.patch_margin_top = MENU_FRAME_PATCH_MARGIN
-		frame.patch_margin_right = MENU_FRAME_PATCH_MARGIN
-		frame.patch_margin_bottom = MENU_FRAME_PATCH_MARGIN
-		frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var frame: Control = MenuFrameScript.new()
 		_anchor_side_strip(frame, on_right)
 		parent.add_child(frame)
 	else:
