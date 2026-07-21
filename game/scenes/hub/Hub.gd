@@ -25,9 +25,11 @@ const FREE_DESTINATIONS := {
 const MapPinScript := preload("res://scripts/ui/MapPin.gd")
 const ZOOM_OUT_DURATION := 0.9
 
-var status_label: Label
-var turn_label: Label
-var travel_status_label: Label
+var location_label: Label
+var money_label: Label
+var date_label: Label
+var paintings_label: Label
+var warning_label: Label
 var travel_button: Button
 var root_panel: VBoxContainer
 var hub_bg: TextureRect
@@ -46,11 +48,15 @@ func _ready() -> void:
 	root_panel = ScreenHelpers.make_root_side(self)
 	ScreenHelpers.make_title(root_panel, "VERMEER")
 
-	turn_label = ScreenHelpers.make_label(root_panel, "")
-	status_label = ScreenHelpers.make_label(root_panel, "")
-	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	travel_status_label = ScreenHelpers.make_label(root_panel, "")
-	travel_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	## Osobne skrzynki zamiast jednego zbitego tekstu — tak jak w oryginale
+	## (imię gracza + lokalizacja, gotówka, data to osobne oprawione pola).
+	location_label = ScreenHelpers.make_info_box(root_panel, "")
+	money_label = ScreenHelpers.make_info_box(root_panel, "")
+	date_label = ScreenHelpers.make_info_box(root_panel, "")
+	paintings_label = ScreenHelpers.make_info_box(root_panel, "")
+	warning_label = ScreenHelpers.make_label(root_panel, "")
+	warning_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	warning_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
 
 	travel_button = ScreenHelpers.make_button(root_panel, "Jedź »", _on_travel_pressed)
 
@@ -136,29 +142,24 @@ func _on_end_turn_pressed() -> void:
 
 
 func _update_status() -> void:
-	if Players.is_multiplayer():
-		turn_label.text = "Tura: %s (gracz %d/%d)" % [
-			Players.active_name(), Players.active_index + 1, Players.player_count,
-		]
-
-	var text := "Gotówka: %.0f M | Data: %s | Obrazy: %d/%d" % [
-		Economy.player_money,
-		Calendar.get_date_string(),
-		Paintings.owned_count(),
-		Paintings.win_threshold,
-	]
-	if Economy.is_reform_imminent():
-		text += "\n⚠ Kurs dolara wysoki — zbliża się reforma walutowa!"
-	status_label.text = text
-
+	## Jedna skrzynka "imię gracza w mieście" (tak jak oryginalne "JASONJ IN
+	## LISBON") — w multiplayer dodatkowo numer gracza, bo wtedy ważne jest,
+	## kto trzyma telefon.
 	if Travel.is_traveling():
-		travel_status_label.text = "W podróży do %s — pozostało %.1f dnia (trasa: %s)" % [
-			Cities.get_city_name(Travel.get_destination()),
-			Travel.days_remaining,
-			", ".join(Travel.route.map(func(c): return Cities.get_city_name(c))),
+		location_label.text = "%s\nw podróży do %s (%.1f dnia)" % [
+			Players.active_name(), Cities.get_city_name(Travel.get_destination()), Travel.days_remaining,
 		]
 	else:
-		travel_status_label.text = "Jesteś w: %s" % Cities.get_city_name(Travel.current_city)
+		location_label.text = "%s\nw: %s" % [Players.active_name(), Cities.get_city_name(Travel.current_city)]
+	if Players.is_multiplayer():
+		location_label.text += "\n(gracz %d/%d)" % [Players.active_index + 1, Players.player_count]
+
+	money_label.text = "%.0f M" % Economy.player_money
+	date_label.text = Calendar.get_date_string()
+	paintings_label.text = "Obrazy: %d/%d" % [Paintings.owned_count(), Paintings.win_threshold]
+
+	warning_label.visible = Economy.is_reform_imminent()
+	warning_label.text = "⚠ Kurs dolara wysoki — zbliża się reforma walutowa!" if warning_label.visible else ""
 
 	travel_button.visible = not Travel.is_traveling()
 

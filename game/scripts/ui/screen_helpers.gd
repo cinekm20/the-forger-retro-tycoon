@@ -122,6 +122,33 @@ static func make_label(root: VBoxContainer, text: String) -> Label:
 	return label
 
 
+## Etykieta w osobnej oprawionej "skrzynce" (złota ramka + ciemne tło) —
+## tak jak w oryginale pasek stanu to kilka osobnych skrzynek (imię gracza +
+## lokalizacja, gotówka, data), nie jeden zbity ciąg tekstu. Używać dla
+## pojedynczych, krótkich informacji statusu (patrz Hub.gd).
+static func make_info_box(root: Container, text: String) -> Label:
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(COLOR_BURGUNDY_DARK.r, COLOR_BURGUNDY_DARK.g, COLOR_BURGUNDY_DARK.b, 0.85)
+	box.border_color = COLOR_GOLD
+	box.set_border_width_all(2)
+	box.set_corner_radius_all(4)
+	box.content_margin_left = 12
+	box.content_margin_right = 12
+	box.content_margin_top = 6
+	box.content_margin_bottom = 6
+
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", box)
+	root.add_child(panel)
+
+	var label := Label.new()
+	label.text = text
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_color_override("font_color", COLOR_CREAM)
+	panel.add_child(label)
+	return label
+
+
 ## Przyciski w stylu art déco (ciemny burgund + złota ramka) zamiast
 ## domyślnego szarego wyglądu Godota — jeden wspólny styl dla całej gry.
 static func _style_button(btn: Button) -> void:
