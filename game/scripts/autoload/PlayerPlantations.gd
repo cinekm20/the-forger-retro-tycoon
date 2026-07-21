@@ -55,12 +55,12 @@ func is_river_tile(tile_index: int) -> bool:
 func is_adjacent_to_river(tile_index: int) -> bool:
 	var x := tile_index % GRID_SIZE
 	var y := tile_index / GRID_SIZE
-	for dx in [-1, 0, 1]:
-		for dy in [-1, 0, 1]:
+	for dx: int in [-1, 0, 1]:
+		for dy: int in [-1, 0, 1]:
 			if dx == 0 and dy == 0:
 				continue
-			var nx := x + dx
-			var ny := y + dy
+			var nx: int = x + dx
+			var ny: int = y + dy
 			if nx == RIVER_COLUMN and ny >= 0 and ny < GRID_SIZE:
 				return true
 	return false
