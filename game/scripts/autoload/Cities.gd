@@ -96,32 +96,33 @@ func get_auction_cities() -> Array:
 	return CITIES.keys().filter(func(id): return CITIES[id]["type"] == "auction")
 
 
-## Przybliżone pozycje pinezek na mapie świata — ułamek szerokości/wysokości
-## ekranu (0,0 = lewy górny róg), z grubsza odpowiadające realnej
-## długości/szerokości geograficznej miast, skalibrowane pod
-## game/art/backgrounds/hub_map.jpg. To orientacyjne wartości — nie mam tu
-## podglądu graficznego, więc realnie będą wymagać ręcznej korekty o kilka
-## % po zobaczeniu na żywo w grze (przesuń liczby niżej, jeśli pinezka
-## wypada obok, nie na mieście).
+## Pozycje pinezek na mapie świata — ułamek szerokości/wysokości ekranu
+## (0,0 = lewy górny róg). Skalibrowane bezpośrednio na pikselach
+## game/art/backgrounds/hub_map.jpg (1368×768) — dla każdego miasta
+## znaleziono piksel leżący na właściwym lądzie na TYM konkretnym obrazku
+## (analiza kolorów: ląd = odcienie niebiesko-turkusowe, morze = beż/sepia),
+## nie na czystej geografii w oderwaniu od grafiki. Poprzednie wartości były
+## szacowane "na ślepo" bez podglądu grafiki i wypadały w oceanie/złym
+## miejscu (zgłoszone przez użytkownika na zrzucie ekranu).
 const MAP_POSITION := {
-	"berlin": Vector2(0.54, 0.22),
-	"paris": Vector2(0.50, 0.24),
-	"amsterdam": Vector2(0.51, 0.22),
-	"lisbon": Vector2(0.46, 0.29),
-	"london": Vector2(0.49, 0.22),
-	"ankara": Vector2(0.58, 0.28),
-	"bombay": Vector2(0.68, 0.39),
-	"colombo": Vector2(0.70, 0.45),
-	"mombasa": Vector2(0.59, 0.50),
-	"duala": Vector2(0.52, 0.47),
-	"abidjan": Vector2(0.48, 0.46),
-	"rio": Vector2(0.38, 0.60),
-	"bogota": Vector2(0.30, 0.47),
-	"guatemala": Vector2(0.26, 0.42),
-	"mexico": Vector2(0.24, 0.39),
-	"new_york": Vector2(0.29, 0.28),
-	"richmond": Vector2(0.28, 0.29),
-	"st_louis": Vector2(0.25, 0.29),
+	"berlin": Vector2(0.55, 0.27),
+	"paris": Vector2(0.52, 0.29),
+	"amsterdam": Vector2(0.52, 0.26),
+	"lisbon": Vector2(0.48, 0.42),
+	"london": Vector2(0.51, 0.27),
+	"ankara": Vector2(0.60, 0.31),
+	"bombay": Vector2(0.66, 0.49),
+	"colombo": Vector2(0.67, 0.53),
+	"mombasa": Vector2(0.59, 0.58),
+	"duala": Vector2(0.52, 0.54),
+	"abidjan": Vector2(0.48, 0.52),
+	"rio": Vector2(0.41, 0.68),
+	"bogota": Vector2(0.36, 0.55),
+	"guatemala": Vector2(0.33, 0.51),
+	"mexico": Vector2(0.29, 0.46),
+	"new_york": Vector2(0.37, 0.25),
+	"richmond": Vector2(0.36, 0.31),
+	"st_louis": Vector2(0.31, 0.30),
 }
 
 

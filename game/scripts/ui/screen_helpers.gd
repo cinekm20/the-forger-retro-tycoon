@@ -65,8 +65,9 @@ const MenuFrameScript := preload("res://scripts/ui/MenuFrame.gd")
 ## motywy zdobne przy krawędziach zniekształcały się przy rozciąganiu do
 ## wąskiego, wysokiego panelu. Rysowana w kodzie ramka skaluje się
 ## bez artefaktów do dowolnej wysokości (różne miasta mają różną liczbę
-## pozycji w menu). Na razie tylko Hub.gd — TravelMap/TravelAnimation
-## nadal dostają domyślne proste tło.
+## pozycji w menu). Używane przez Hub.gd — TravelMap ma analogiczną ramkę,
+## ale w poziomym pasku u dołu ekranu (patrz make_root_bottom niżej);
+## TravelAnimation nadal dostaje domyślne proste tło.
 ##
 ## Z ramką (use_menu_frame=true) pasek jest dodatkowo wcięty od góry o
 ## TOP_OFFSET_WITH_FRAME — bez tego pełnowysokościowa ramka renderowała się
@@ -115,6 +116,60 @@ static func _anchor_side_strip(control: Control, on_right: bool, top_offset: flo
 		control.anchor_right = 0.0
 		control.offset_left = inset
 		control.offset_right = SIDE_PANEL_WIDTH - inset
+
+
+## Poziomy pasek wyśrodkowany u dołu ekranu (zamiast pełnowysokościowego
+## paska przy krawędzi z make_root_side) — dla ekranów typu TravelMap, gdzie
+## pinezki rozrzucone są po całej mapie i boczny pasek zasłaniał część z
+## nich. Wysokość dopasowuje się automatycznie do treści: content to
+## PanelContainer, który (inaczej niż zwykły Control) liczy swój rozmiar
+## jako maksimum rozmiarów dzieci — więc tło/ramka (dodane jako pierwsze
+## dziecko) i lista przycisków (drugie, we własnym MarginContainer dla
+## odstępu od krawędzi ramki) automatycznie dostają tę samą, właściwą
+## wysokość, bez ręcznego liczenia jak w _anchor_side_strip.
+static func make_root_bottom(parent: Control, use_menu_frame: bool = false, width: float = 420.0) -> VBoxContainer:
+	var wrapper := VBoxContainer.new()
+	wrapper.set_anchors_preset(Control.PRESET_FULL_RECT)
+	wrapper.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(wrapper)
+
+	var top_spacer := Control.new()
+	top_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	top_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	wrapper.add_child(top_spacer)
+
+	var content := PanelContainer.new()
+	content.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	content.custom_minimum_size = Vector2(width, 0)
+	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	wrapper.add_child(content)
+
+	if use_menu_frame:
+		var frame: Control = MenuFrameScript.new()
+		content.add_child(frame)
+	else:
+		var panel_bg := ColorRect.new()
+		panel_bg.color = Color(COLOR_BURGUNDY_DARK.r, COLOR_BURGUNDY_DARK.g, COLOR_BURGUNDY_DARK.b, 0.8)
+		panel_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.add_child(panel_bg)
+
+	var margin := MarginContainer.new()
+	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if use_menu_frame:
+		var m := int(CONTENT_INSET_WITH_FRAME)
+		margin.add_theme_constant_override("margin_left", m)
+		margin.add_theme_constant_override("margin_right", m)
+		margin.add_theme_constant_override("margin_top", m)
+		margin.add_theme_constant_override("margin_bottom", m)
+	content.add_child(margin)
+
+	var root := VBoxContainer.new()
+	root.alignment = BoxContainer.ALIGNMENT_CENTER
+	root.add_theme_constant_override("separation", 14)
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	margin.add_child(root)
+	return root
 
 
 ## Paleta art déco (docs/GRAFIKA_LEONARDO.md — złoto/burgund/sepia).

@@ -76,8 +76,8 @@ func _ready() -> void:
 
 ## Pełnoekranowy, przezroczysty HBoxContainer (PRESET_FULL_RECT — bezpieczny,
 ## zawsze dynamicznie dopasowuje się do rozmiaru ekranu, w przeciwieństwie do
-## presetów typu TOP_WIDE, które liczą wysokość raz, w momencie wywołania,
-## patrz pułapka opisana przy dawnym make_root_bottom w screen_helpers.gd).
+## presetów typu TOP_WIDE, które liczą wysokość raz, w momencie wywołania —
+## pułapka opisana przy make_root_side w screen_helpers.gd).
 ## Lewa kolumna (location/data/obrazy) i skrzynka gotówki mają
 ## size_flags_vertical = SIZE_SHRINK_BEGIN, więc "przyklejają się" do góry
 ## zamiast rozciągać na całą wysokość ekranu; spacer między nimi ma
