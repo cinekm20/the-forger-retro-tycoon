@@ -58,12 +58,18 @@ jobs:
             exit 1
           fi
 
-      # Runs game/tests/run_tests.gd — real assertions against the actual
-      # autoloads (not just "does it boot"), see the file for what's covered.
-      - name: Run test suite (tests/run_tests.gd)
+      # Runs game/tests/run_tests.tscn — real assertions against the actual
+      # autoloads (not just "does it boot"), see run_tests.gd for what's
+      # covered. Passing the scene as a plain positional argument (not
+      # --script) makes Godot boot the project normally — autoloads and
+      # all — before running it, same as booting the real game; --script
+      # is documented as "run a script without needing a project" and
+      # skips that boot, so autoloads (Cities, Calendar, ...) aren't
+      # available as global identifiers under it.
+      - name: Run test suite (tests/run_tests.tscn)
         working-directory: game
         run: |
-          timeout 60 godot --headless --script res://tests/run_tests.gd --path . 2>&1 | tee tests_output.log
+          timeout 60 godot --headless --path . res://tests/run_tests.tscn 2>&1 | tee tests_output.log
           exit_code=${PIPESTATUS[0]}
           if [ "$exit_code" -ne 0 ]; then
             echo "Test suite reported failures above (exit code $exit_code)."

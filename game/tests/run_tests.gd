@@ -1,9 +1,17 @@
-extends SceneTree
+extends Node
 ## Lekki zestaw testów uruchamiany bez edytora, prosto na tym samym kodzie
 ## co gra (nie na kopii formuł, jak tools/balance_simulation.py w Pythonie).
 ##
+## `extends Node` + scena tests/run_tests.tscn, NIE `extends SceneTree` +
+## `--script` — ten drugi wariant wyglądał prościej, ale Godot dokumentuje
+## `--script` jako "uruchom skrypt bez potrzeby projektu": świadomie pomija
+## pełny boot projektu (czyli też autoloady), więc każde użycie autoloadu
+## (Cities, Calendar, ...) failowało z "Identifier not found" mimo że
+## dokładnie ten sam kod działa normalnie w grze. Scena + pełny boot
+## projektu = autoloady dostępne tak samo jak wszędzie indziej.
+##
 ## Uruchomienie lokalnie (gdy będzie już Godot pod ręką):
-##   godot --headless --script res://tests/run_tests.gd --path game
+##   godot --headless --path . res://tests/run_tests.tscn
 ##
 ## W CI odpalane automatycznie przez .github/workflows/godot-check.yml.
 ## Kod wyjścia 1, jeśli którykolwiek test nie przejdzie.
@@ -12,7 +20,7 @@ var failures: int = 0
 var total: int = 0
 
 
-func _initialize() -> void:
+func _ready() -> void:
 	print("=== Vermeer — testy autoloadów ===")
 
 	_test_cities_direct_travel()
@@ -28,7 +36,7 @@ func _initialize() -> void:
 	_test_travel_vehicle_choice()
 
 	print("\n=== Wynik: %d/%d testów przeszło ===" % [total - failures, total])
-	quit(1 if failures > 0 else 0)
+	get_tree().quit(1 if failures > 0 else 0)
 
 
 func _assert(condition: bool, description: String) -> void:

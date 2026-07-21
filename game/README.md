@@ -114,7 +114,7 @@ się wywaliło, bardzo ułatwi mi naprawę).
 
 W terminalu, z poziomu folderu `game/`:
 ```
-godot --headless --script res://tests/run_tests.gd --path .
+godot --headless --path . res://tests/run_tests.tscn
 ```
 Powinno wypisać listę `OK`/`FAIL` dla ok. 30 asercji i zakończyć się kodem
 wyjścia 0. To samo odpala się automatycznie w GitHub Actions przy każdym
@@ -147,7 +147,7 @@ scripts/autoload/  — globalny stan gry: Calendar, Cities, Travel, Crops,
                      Security, Players, GameState, SaveGame, SceneRouter
 scripts/ui/        — wspólne budowniczowie prostego UI (ScreenHelpers,
                      MapPin — pinezki rysowane natywnie, bez grafiki)
-tests/             — run_tests.gd, testy autoloadów uruchamiane w CI
+tests/             — run_tests.tscn/.gd, testy autoloadów uruchamiane w CI
 ```
 
 ## Co dalej
