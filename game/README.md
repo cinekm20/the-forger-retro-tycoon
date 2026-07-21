@@ -66,8 +66,11 @@ się wywaliło, bardzo ułatwi mi naprawę).
 7. **Szkoła sztuki i wyścigi:** kup kurs w Szkole Sztuki (eksperckość
    powinna wzrosnąć), postaw zakład w Wyścigach (gotówka się zmienia po
    rozstrzygnięciu).
-8. **Galeria:** sprawdź podział kolekcji na 8 kategorii, sekcję "Ochrona"
-   (zatrudnienie ochroniarza) i "Rywale" (ich postęp w zbieraniu obrazów).
+8. **Galeria:** dostępna tylko w miastach aukcyjnych (tak jak Dom
+   aukcyjny — w oryginale to jedna grupa opcji menu), więc rób ten krok
+   od razu po poprzednim, bez podróży. Sprawdź podział kolekcji na 8
+   kategorii, sekcję "Ochrona" (zatrudnienie ochroniarza) i "Rywale" (ich
+   postęp w zbieraniu obrazów).
 9. **Zapis/odczyt:** z Hubu kliknij **Zapisz i wyjdź do menu**, potem w
    menu głównym **Wczytaj grę** — stan powinien się zgadzać z tym, co
    zostawiłeś.

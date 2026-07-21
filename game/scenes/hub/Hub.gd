@@ -14,12 +14,12 @@ extends Control
 const LOCATION_GATED_DESTINATIONS := {
 	"Plantacje": {"path": "res://scenes/plantation/Plantation.tscn", "requires_type": "plantation"},
 	"Dom aukcyjny": {"path": "res://scenes/auction_house/AuctionHouse.tscn", "requires_type": "auction"},
+	"Galeria": {"path": "res://scenes/gallery/Gallery.tscn", "requires_type": "auction"},
 }
 const FREE_DESTINATIONS := {
 	"Giełda": "res://scenes/stock_market/StockMarket.tscn",
 	"Wyścigi konne": "res://scenes/races/Races.tscn",
 	"Szkoła sztuki": "res://scenes/art_school/ArtSchool.tscn",
-	"Galeria": "res://scenes/gallery/Gallery.tscn",
 }
 
 ## Tła wg regionu aktualnej lokalizacji (docs/GRAFIKA_LEONARDO.md §2.1).
