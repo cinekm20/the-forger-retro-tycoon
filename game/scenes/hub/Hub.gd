@@ -22,64 +22,91 @@ const FREE_DESTINATIONS := {
 	"Szkoła sztuki": "res://scenes/art_school/ArtSchool.tscn",
 }
 
-## Tła wg regionu aktualnej lokalizacji (docs/GRAFIKA_LEONARDO.md §2.1).
-## south_america i central_america dzielą jeden szablon "tropikalny port"
-## (Rio/Bogota/Gwatemala/Meksyk w oryginalnym planie to jedna grupa
-## stylistyczna, mimo że w Cities.gd mają dwa różne klucze region). Wszystkie
-## 6 regionów z Cities.gd ma już własne tło — FALLBACK_BACKGROUND niżej to
-## czysta rezerwa na wypadek nowego/nieznanego klucza region.
-const REGION_BACKGROUNDS := {
-	"europe": "res://art/backgrounds/region_europe.jpg",
-	"south_america": "res://art/backgrounds/region_tropical_port.jpg",
-	"central_america": "res://art/backgrounds/region_tropical_port.jpg",
-	"africa": "res://art/backgrounds/region_africa.jpg",
-	"asia": "res://art/backgrounds/region_asia.jpg",
-	"north_america": "res://art/backgrounds/region_north_america.jpg",
-}
-const FALLBACK_BACKGROUND := "res://art/backgrounds/hub_map.jpg"
+const MapPinScript := preload("res://scripts/ui/MapPin.gd")
+const ZOOM_OUT_DURATION := 0.9
 
 var status_label: Label
 var turn_label: Label
 var travel_status_label: Label
 var travel_button: Button
+var root_panel: VBoxContainer
+var hub_bg: TextureRect
+var hub_overlay: ColorRect
 
 
 func _ready() -> void:
-	ScreenHelpers.make_background(self, _get_current_background())
+	var bg_layers := ScreenHelpers.make_background_with_overlay(self, Cities.get_region_background(Travel.current_city))
+	hub_bg = bg_layers["background"]
+	hub_overlay = bg_layers["overlay"]
+
 	## Panel boczny zamiast pełnoekranowego — w oryginale menu i pasek stanu
 	## to małe skrzynki w rogach ekranu, nie zasłaniają całego widoku
 	## (patrz zrzuty ekranu z oryginału). make_root_side() daje ten sam
 	## efekt: wąska kolumna z prawej, reszta tła regionu zostaje odsłonięta.
-	var root := ScreenHelpers.make_root_side(self)
-	ScreenHelpers.make_title(root, "VERMEER")
+	root_panel = ScreenHelpers.make_root_side(self)
+	ScreenHelpers.make_title(root_panel, "VERMEER")
 
-	turn_label = ScreenHelpers.make_label(root, "")
-	status_label = ScreenHelpers.make_label(root, "")
+	turn_label = ScreenHelpers.make_label(root_panel, "")
+	status_label = ScreenHelpers.make_label(root_panel, "")
 	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	travel_status_label = ScreenHelpers.make_label(root, "")
+	travel_status_label = ScreenHelpers.make_label(root_panel, "")
 	travel_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 
-	travel_button = ScreenHelpers.make_button(root, "Jedź »", func(): SceneRouter.goto_scene(SceneRouter.TRAVEL_MAP))
+	travel_button = ScreenHelpers.make_button(root_panel, "Jedź »", _on_travel_pressed)
 
 	for destination_name in LOCATION_GATED_DESTINATIONS.keys():
 		var info: Dictionary = LOCATION_GATED_DESTINATIONS[destination_name]
 		var path: String = info["path"]
-		var btn := ScreenHelpers.make_button(root, destination_name, func(): SceneRouter.goto_scene(path))
+		var btn := ScreenHelpers.make_button(root_panel, destination_name, func(): SceneRouter.goto_scene(path))
 		btn.set_meta("requires_type", info["requires_type"])
 
 	for destination_name in FREE_DESTINATIONS.keys():
 		var path: String = FREE_DESTINATIONS[destination_name]
-		ScreenHelpers.make_button(root, destination_name, func(): SceneRouter.goto_scene(path))
+		ScreenHelpers.make_button(root_panel, destination_name, func(): SceneRouter.goto_scene(path))
 
-	ScreenHelpers.make_button(root, "Koniec tury »", _on_end_turn_pressed)
-	ScreenHelpers.make_button(root, "Zapisz i wyjdź do menu", _on_save_and_exit_pressed)
+	ScreenHelpers.make_button(root_panel, "Koniec tury »", _on_end_turn_pressed)
+	ScreenHelpers.make_button(root_panel, "Zapisz i wyjdź do menu", _on_save_and_exit_pressed)
 
 	_update_status()
 
 
-func _get_current_background() -> String:
-	var region: String = Cities.CITIES.get(Travel.current_city, {}).get("region", "")
-	return REGION_BACKGROUNDS.get(region, FALLBACK_BACKGROUND)
+## Zamiast od razu przełączać scenę, tło Huba "kurczy się" do pozycji
+## pinezki aktualnego miasta na mapie świata, a mapa pojawia się pod spodem
+## — dopiero potem ładuje się TravelMap.tscn (który ma dokładnie tę samą
+## pinezkę w tym samym miejscu, patrz Cities.get_map_position — ciągłość
+## wizualna między ekranami). Odwrotność tego dzieje się w
+## TravelAnimation.gd po dotarciu do celu (zoom-in z pinezki w nowy Hub).
+func _on_travel_pressed() -> void:
+	_set_buttons_disabled(true)
+
+	var viewport_size := get_viewport_rect().size
+	var target_pos := Cities.get_map_position(Travel.current_city) * viewport_size
+
+	var map_bg := TextureRect.new()
+	map_bg.texture = load(Cities.MAP_BACKGROUND_PATH)
+	map_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	map_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	map_bg.stretch_mode = TextureRect.STRETCH_SCALE
+	map_bg.modulate.a = 0.0
+	add_child(map_bg)
+	move_child(map_bg, 0)  # pod hub_bg, który się kurczy i odsłania mapę
+
+	hub_bg.pivot_offset = target_pos
+	var pin_scale := MapPinScript.PIN_SIZE / viewport_size
+
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(map_bg, "modulate:a", 1.0, ZOOM_OUT_DURATION)
+	tween.tween_property(hub_overlay, "modulate:a", 0.0, ZOOM_OUT_DURATION)
+	tween.tween_property(hub_bg, "scale", pin_scale, ZOOM_OUT_DURATION)
+	tween.tween_property(root_panel, "modulate:a", 0.0, ZOOM_OUT_DURATION * 0.5)
+	tween.chain().tween_callback(func(): SceneRouter.goto_scene(SceneRouter.TRAVEL_MAP))
+
+
+func _set_buttons_disabled(disabled: bool) -> void:
+	for child in root_panel.get_children():
+		if child is Button:
+			child.disabled = disabled
 
 
 func _on_save_and_exit_pressed() -> void:

@@ -129,6 +129,29 @@ func get_map_position(city_id: String) -> Vector2:
 	return MAP_POSITION.get(city_id, Vector2(0.5, 0.5))
 
 
+const MAP_BACKGROUND_PATH := "res://art/backgrounds/hub_map.jpg"
+
+## Tła wg regionu (docs/GRAFIKA_LEONARDO.md §2.1). south_america i
+## central_america dzielą jeden szablon "tropikalny port" (Rio/Bogota/
+## Gwatemala/Meksyk w oryginalnym planie to jedna grupa stylistyczna, mimo
+## dwóch różnych kluczy region). Współdzielone przez Hub.gd (tło aktualnej
+## lokalizacji) i TravelAnimation.gd (zoom-in na tło miasta docelowego).
+const REGION_BACKGROUNDS := {
+	"europe": "res://art/backgrounds/region_europe.jpg",
+	"south_america": "res://art/backgrounds/region_tropical_port.jpg",
+	"central_america": "res://art/backgrounds/region_tropical_port.jpg",
+	"africa": "res://art/backgrounds/region_africa.jpg",
+	"asia": "res://art/backgrounds/region_asia.jpg",
+	"north_america": "res://art/backgrounds/region_north_america.jpg",
+}
+const FALLBACK_BACKGROUND := "res://art/backgrounds/hub_map.jpg"
+
+
+func get_region_background(city_id: String) -> String:
+	var region: String = CITIES.get(city_id, {}).get("region", "")
+	return REGION_BACKGROUNDS.get(region, FALLBACK_BACKGROUND)
+
+
 ## Wszyscy sąsiedzi miasta z bezpośrednią trasą (w obie strony macierzy).
 func get_direct_neighbors(city_id: String) -> Dictionary:
 	var neighbors := {}

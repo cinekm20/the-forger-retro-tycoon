@@ -22,7 +22,7 @@ var selected_city: String = ""
 
 
 func _ready() -> void:
-	ScreenHelpers.make_background(self, "res://art/backgrounds/hub_map.jpg")
+	ScreenHelpers.make_background(self, Cities.MAP_BACKGROUND_PATH)
 	_build_pins()
 
 	var root := ScreenHelpers.make_root_side(self)

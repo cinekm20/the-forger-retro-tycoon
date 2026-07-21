@@ -7,6 +7,14 @@ class_name ScreenHelpers
 ## bogatej w szczegóły grafice). Wywoływać PRZED make_root, żeby tło zostało
 ## dodane jako pierwsze dziecko (czyli renderuje się pod resztą UI).
 static func make_background(parent: Control, texture_path: String) -> TextureRect:
+	return make_background_with_overlay(parent, texture_path)["background"]
+
+
+## Jak make_background(), ale zwraca też nakładkę — potrzebne tam, gdzie
+## tło animuje się osobno od reszty ekranu (np. zoom-out/zoom-in między
+## Hub.gd a TravelAnimation.gd) i trzeba wygasić nakładkę razem z nim,
+## zamiast zostawiać ją jako samotny ciemny prostokąt na wierzchu.
+static func make_background_with_overlay(parent: Control, texture_path: String) -> Dictionary:
 	var bg := TextureRect.new()
 	bg.texture = load(texture_path)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -19,7 +27,7 @@ static func make_background(parent: Control, texture_path: String) -> TextureRec
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(overlay)
-	return bg
+	return {"background": bg, "overlay": overlay}
 
 
 ## mouse_filter = IGNORE na kontenerze jest ważne: bez tego niewidzialne tło

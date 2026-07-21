@@ -2,11 +2,14 @@
 
 Wszystkie ekrany mają już działającą logikę (nie tylko nawigację) —
 plantacje, giełda, dom aukcyjny, szkoła sztuki, wyścigi, galeria. Hub
-pokazuje tylko pasek stanu i nawigację (tło zależne od regionu, gdzie
-aktualnie jesteś); mapa świata z klikalnymi pinezkami żyje na osobnym
-ekranie, otwieranym przyciskiem "Jedź »" — po wybraniu celu leci krótka
+pokazuje tylko pasek stanu i nawigację w wąskim panelu bocznym (tło
+zależne od regionu, gdzie aktualnie jesteś); mapa świata z klikalnymi
+pinezkami żyje na osobnym ekranie, otwieranym przyciskiem "Jedź »" — tło
+Huba zwęża się (zoom-out) do pinezki na mapie, a po wybraniu celu leci
 animacja podróży (pociąg w obrębie tego samego regionu, samolot między
-regionami/przez ocean). Menu główne i mapa mają już prawdziwe tło
+regionami/przez ocean) lecąca dokładnie między pinezką startową a
+docelową, po czym tło nowego miasta "wjeżdża" (zoom-in) z tej pinezki z
+powrotem na cały ekran. Menu główne i mapa mają już prawdziwe tło
 graficzne, reszta ekranów wciąż na surowym UI Godota (przyciski, etykiety,
 listy). Zapis/odczyt gry, hot-seat multiplayer (1-4 graczy) i pętla
 wygrana/przegrana (kompletna kolekcja / bankructwo / rywal wygrywa
@@ -35,21 +38,30 @@ się wywaliło, bardzo ułatwi mi naprawę).
    prawej (nie na całą szerokość, tak jak w oryginale) z paskiem stanu
    (gotówka 50000 M, data 01.01.1918, obrazy 0/40) i listą przycisków, w
    tym **Jedź »**.
-3. **Podróż:** kliknij **Jedź »** — powinna otworzyć się mapa świata z ok.
-   18 kolorowymi pinezkami: jedna **biała** (Twoja aktualna lokalizacja,
-   Londyn), reszta złota (miasta plantacyjne) i burgundowa (miasta
-   aukcyjne). Po prawej krawędzi ekranu wąski panel z przyciskiem
-   **« Powrót** — reszta mapy zostaje odsłonięta. Kliknij dowolną
-   **złotą** pinezkę (np. Richmond albo St. Louis — najbliżej) — w panelu
-   powinna pojawić się informacja, ile dni potrwa podróż i jakim środkiem
-   transportu, oraz przyciski **Jedź »** i **Anuluj**. Kliknij **Jedź »**
-   — powinna polecieć krótka animacja
-   (pociąg albo samolot, w zależności od odległości) i wrócić do Hubu ze
-   statusem "W podróży do...". Kliknij **Koniec tury** kilka razy, aż
-   status zmieni się na "Jesteś w: [miasto]" — teraz na liście przycisków
-   powinien pojawić się **Plantacje** (widoczny tylko w miastach
-   plantacyjnych, tak jak w oryginale — poza nimi w ogóle go nie ma na
-   liście, nie jest tylko wyszarzony).
+3. **Podróż:** kliknij **Jedź »** — tło Huba powinno skurczyć się i
+   "wjechać" w pinezkę na mapie świata, która pojawia się pod spodem (ok.
+   1 sekundy animacji), a dopiero potem powinna otworzyć się mapa z ok. 18
+   kolorowymi pinezkami: jedna **biała** dokładnie w miejscu, gdzie
+   skurczyło się tło (Twoja aktualna lokalizacja, Londyn), reszta złota
+   (miasta plantacyjne) i burgundowa (miasta aukcyjne). Po prawej
+   krawędzi ekranu wąski panel z przyciskiem **« Powrót** — reszta mapy
+   zostaje odsłonięta. Kliknij dowolną **złotą** pinezkę (np. Richmond
+   albo St. Louis — najbliżej) — w panelu powinna pojawić się informacja,
+   ile dni potrwa podróż i jakim środkiem transportu, oraz przyciski
+   **Jedź »** i **Anuluj**. Kliknij **Jedź »** — powinna polecieć
+   animacja pociągu albo samolotu (w zależności od odległości), lecącego
+   po mapie DOKŁADNIE między pinezką startową a docelową — mały tuż po
+   starcie, rośnie w połowie drogi, znowu mały tuż przy dotarciu. Zaraz
+   potem tło miasta docelowego powinno "wyjechać" z tej samej pinezki na
+   cały ekran (odwrotność animacji z kroku wcześniej) i dopiero wtedy
+   wrócić do Hubu ze statusem "Jesteś w: [nowe miasto]". To duża, nowa
+   animacja — jeśli coś tu wygląda źle (skok, migotanie, zły punkt
+   startowy/końcowy), koniecznie daj znać dokładnie na którym etapie.
+   Kliknij **Koniec tury** kilka razy, aż status zmieni się na "Jesteś w:
+   [miasto]" — teraz na liście przycisków powinien pojawić się
+   **Plantacje** (widoczny tylko w miastach plantacyjnych, tak jak w
+   oryginale — poza nimi w ogóle go nie ma na liście, nie jest tylko
+   wyszarzony).
 4. **Plantacje:** wejdź, kup kilka pól (klikaj "+" w siatce; pola z "~" to
    rzeka, nie da się ich kupić — pola tuż obok rzeki oznaczone "✓+" po
    zakupie dają podwójny plon), wybierz uprawę (np. Tytoń), ustaw
