@@ -36,12 +36,12 @@ się wywaliło, bardzo ułatwi mi naprawę).
 3. **Podróż:** kliknij **Jedź »** — powinna otworzyć się mapa świata z ok.
    18 kolorowymi pinezkami: jedna **biała** (Twoja aktualna lokalizacja,
    Londyn), reszta złota (miasta plantacyjne) i burgundowa (miasta
-   aukcyjne), a na samym dole ekranu przycisk **« Powrót** (nie zasłania
-   pinezek). Kliknij dowolną **złotą** pinezkę (np. Richmond albo St.
-   Louis — najbliżej) — nad przyciskiem powrotu powinna pojawić się
-   informacja, ile dni potrwa podróż i jakim środkiem transportu, oraz
-   przyciski **Jedź »** i **Anuluj**. Kliknij **Jedź »** — powinna polecieć
-   krótka animacja
+   aukcyjne). Po prawej krawędzi ekranu wąski panel z przyciskiem
+   **« Powrót** — reszta mapy zostaje odsłonięta. Kliknij dowolną
+   **złotą** pinezkę (np. Richmond albo St. Louis — najbliżej) — w panelu
+   powinna pojawić się informacja, ile dni potrwa podróż i jakim środkiem
+   transportu, oraz przyciski **Jedź »** i **Anuluj**. Kliknij **Jedź »**
+   — powinna polecieć krótka animacja
    (pociąg albo samolot, w zależności od odległości) i wrócić do Hubu ze
    statusem "W podróży do...". Kliknij **Koniec tury** kilka razy, aż
    status zmieni się na "Jesteś w: [miasto]" — teraz przycisk **Plantacje**

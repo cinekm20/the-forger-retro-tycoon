@@ -1,7 +1,10 @@
 extends Control
 ## Mapa świata z klikalnymi pinezkami — osobny ekran, wywoływany z Hubu
 ## przyciskiem "Jedź »" (patrz GDD.md pkt. 4.9). Wybór celu podróży = tap na
-## pinezkę, potem animacja podróży (scenes/travel_animation).
+## pinezkę, potem animacja podróży (scenes/travel_animation). UI (tytuł,
+## info o podróży, przyciski) w wąskim panelu z prawej krawędzi
+## (make_root_side), nie na całą szerokość — żeby mapa pod spodem
+## pozostała widoczna.
 
 const TYPE_PIN_COLORS := {
 	"plantation": Color(0.85, 0.65, 0.2),
@@ -22,7 +25,7 @@ func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/hub_map.jpg")
 	_build_pins()
 
-	var root := ScreenHelpers.make_root_bottom(self)
+	var root := ScreenHelpers.make_root_side(self)
 	ScreenHelpers.make_title(root, "Dokąd jedziemy?")
 	info_label = ScreenHelpers.make_label(root, _default_info_text())
 	confirm_button = ScreenHelpers.make_button(root, "Jedź »", _on_confirm_pressed)

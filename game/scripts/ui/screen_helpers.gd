@@ -37,24 +37,49 @@ static func make_root(parent: Control) -> VBoxContainer:
 	return root
 
 
-## Wariant zakotwiczony na dole ekranu zamiast wyśrodkowany na całej
-## wysokości — dla ekranów, gdzie góra/środek musi zostać odsłonięty
-## (np. mapa z klikalnymi pinezkami pod spodem). CELOWO pełnoekranowy
-## (PRESET_FULL_RECT), tak jak make_root(), tylko z inną osią wyrównania —
-## PRESET_BOTTOM_WIDE tu NIE działa: set_anchors_preset() liczy offsety na
-## podstawie rozmiaru kontenera W MOMENCIE WYWOŁANIA, czyli zanim dojdą
-## jakiekolwiek dzieci (rozmiar 0×0) — kontener zostaje trwale spłaszczony
-## do zerowej wysokości, więc cała jego zawartość renderuje się poza
-## ekranem. ALIGNMENT_END na pełnoekranowym kontenerze daje ten sam efekt
-## wizualny (treść przy dolnej krawędzi) bez tej pułapki.
-static func make_root_bottom(parent: Control) -> VBoxContainer:
+const SIDE_PANEL_WIDTH := 320.0
+
+## Wąski panel przy krawędzi ekranu (stała szerokość, pełna wysokość) z
+## półprzezroczystym tłem pod przyciskami — dla ekranów, gdzie reszta
+## ekranu (np. mapa z klikalnymi pinezkami) musi zostać odsłonięta, a nie
+## tylko odsłonięta w pionie jak przy make_root() (ten pełną szerokością
+## i tak zasłaniał grafikę pod spodem). Anchory/offsety ustawiane RĘCZNIE,
+## nie przez set_anchors_preset() — ten liczy offsety na podstawie
+## rozmiaru kontenera W MOMENCIE WYWOŁANIA (czyli 0×0, zanim dojdą
+## jakiekolwiek dzieci), więc dla non-pełnoekranowych presetów zostaje
+## trwale zablokowany na zerowym rozmiarze. Ręczne anchory z ułamkowym
+## anchor + stałym pikselowym offsetem nie mają tego problemu.
+static func make_root_side(parent: Control, on_right: bool = true) -> VBoxContainer:
+	var panel_bg := ColorRect.new()
+	panel_bg.color = Color(COLOR_BURGUNDY_DARK.r, COLOR_BURGUNDY_DARK.g, COLOR_BURGUNDY_DARK.b, 0.8)
+	panel_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_anchor_side_strip(panel_bg, on_right)
+	parent.add_child(panel_bg)
+
 	var root := VBoxContainer.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root.alignment = BoxContainer.ALIGNMENT_END
-	root.add_theme_constant_override("separation", 10)
+	root.alignment = BoxContainer.ALIGNMENT_CENTER
+	root.add_theme_constant_override("separation", 14)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_anchor_side_strip(root, on_right)
 	parent.add_child(root)
 	return root
+
+
+static func _anchor_side_strip(control: Control, on_right: bool) -> void:
+	control.anchor_top = 0.0
+	control.anchor_bottom = 1.0
+	control.offset_top = 0.0
+	control.offset_bottom = 0.0
+	if on_right:
+		control.anchor_left = 1.0
+		control.anchor_right = 1.0
+		control.offset_left = -SIDE_PANEL_WIDTH
+		control.offset_right = 0.0
+	else:
+		control.anchor_left = 0.0
+		control.anchor_right = 0.0
+		control.offset_left = 0.0
+		control.offset_right = SIDE_PANEL_WIDTH
 
 
 ## Paleta art déco (docs/GRAFIKA_LEONARDO.md — złoto/burgund/sepia).
