@@ -19,7 +19,7 @@ func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/hub_map.jpg")
 	_build_pins()
 
-	var root := ScreenHelpers.make_root(self)
+	var root := ScreenHelpers.make_root_bottom(self)
 	ScreenHelpers.make_title(root, "Dokąd jedziemy?")
 	info_label = ScreenHelpers.make_label(root, "Jesteś w: %s — dotknij pinezkę celu podróży" % Cities.get_city_name(Travel.current_city))
 	ScreenHelpers.make_button(root, "« Powrót", func(): SceneRouter.goto_hub())

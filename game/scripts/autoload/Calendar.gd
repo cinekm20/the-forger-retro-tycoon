@@ -28,11 +28,13 @@ func advance_days(n: int) -> void:
 
 
 func get_year() -> int:
-	return START_YEAR + int(current_day / (DAYS_PER_MONTH * 12))
+	@warning_ignore("integer_division")  ## celowe: liczymy pełne lata z dni
+	return START_YEAR + current_day / (DAYS_PER_MONTH * 12)
 
 
 func get_month() -> int:
-	return 1 + int((current_day / DAYS_PER_MONTH)) % 12
+	@warning_ignore("integer_division")  ## celowe: liczymy pełne miesiące z dni
+	return 1 + (current_day / DAYS_PER_MONTH) % 12
 
 
 func get_day_of_month() -> int:

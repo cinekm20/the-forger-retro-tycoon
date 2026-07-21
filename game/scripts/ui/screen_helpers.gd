@@ -22,11 +22,30 @@ static func make_background(parent: Control, texture_path: String) -> TextureRec
 	return bg
 
 
+## mouse_filter = IGNORE na kontenerze jest ważne: bez tego niewidzialne tło
+## pełnoekranowego VBoxContainer przechwytuje kliknięcia na CAŁYM ekranie
+## (nawet w miejscach bez żadnego widocznego elementu UI), blokując np.
+## pinezki mapy leżące pod spodem. Same przyciski/etykiety w środku mają
+## własny filtr i nadal reagują na dotyk normalnie.
 static func make_root(parent: Control) -> VBoxContainer:
 	var root := VBoxContainer.new()
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.alignment = BoxContainer.ALIGNMENT_CENTER
 	root.add_theme_constant_override("separation", 16)
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(root)
+	return root
+
+
+## Wariant zakotwiczony na dole ekranu zamiast wyśrodkowany na całej
+## wysokości — dla ekranów, gdzie góra/środek musi zostać odsłonięty
+## (np. mapa z klikalnymi pinezkami pod spodem).
+static func make_root_bottom(parent: Control) -> VBoxContainer:
+	var root := VBoxContainer.new()
+	root.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	root.alignment = BoxContainer.ALIGNMENT_END
+	root.add_theme_constant_override("separation", 10)
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(root)
 	return root
 
