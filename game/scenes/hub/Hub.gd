@@ -21,13 +21,16 @@ const FREE_DESTINATIONS := {
 ## Tła wg regionu aktualnej lokalizacji (docs/GRAFIKA_LEONARDO.md §2.1).
 ## south_america i central_america dzielą jeden szablon "tropikalny port"
 ## (Rio/Bogota/Gwatemala/Meksyk w oryginalnym planie to jedna grupa
-## stylistyczna, mimo że w Cities.gd mają dwa różne klucze region).
-## Brakujące regiony (asia, africa, north_america) używają na razie
-## FALLBACK_BACKGROUND, dopóki nie powstaną kolejne szablony.
+## stylistyczna, mimo że w Cities.gd mają dwa różne klucze region). Wszystkie
+## 6 regionów z Cities.gd ma już własne tło — FALLBACK_BACKGROUND niżej to
+## czysta rezerwa na wypadek nowego/nieznanego klucza region.
 const REGION_BACKGROUNDS := {
 	"europe": "res://art/backgrounds/region_europe.jpg",
 	"south_america": "res://art/backgrounds/region_tropical_port.jpg",
 	"central_america": "res://art/backgrounds/region_tropical_port.jpg",
+	"africa": "res://art/backgrounds/region_africa.jpg",
+	"asia": "res://art/backgrounds/region_asia.jpg",
+	"north_america": "res://art/backgrounds/region_north_america.jpg",
 }
 const FALLBACK_BACKGROUND := "res://art/backgrounds/hub_map.jpg"
 

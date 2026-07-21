@@ -696,7 +696,7 @@ Leonardo, żeby mieć z czego wybrać).
 | 3e | 2 | Tło Szkoły sztuki | 1 | 16:9, 1920×1080 | §8 | ⬜ do zrobienia |
 | 3f | 2 | Tło Galerii | 1 | 16:9, 1920×1080 | §9 | ⬜ do zrobienia |
 | — | — | Tło Mapy świata (Hub) | 1 | 16:9, 1920×1080 | §2 | ✅ zrobione (`hub_map.jpg`) |
-| 4 | 3 | Szablony regionalne teł miast (tło Huba zależne od aktualnej lokalizacji, `Hub.gd` `REGION_BACKGROUNDS`) | 5 | 16:9, 1920×1080 | §2.1 | 🟡 2/5 zrobione: Europejska stolica (`region_europe.jpg`, kryje region `europe`) i Port tropikalny (`region_tropical_port.jpg`, kryje `south_america` + `central_america`). Brakuje: port zachodnioafrykański (`africa`), port azjatycki (`asia`), amerykańskie miasteczko śródlądowe (`north_america`) |
+| 4 | 3 | Szablony regionalne teł miast (tło Huba zależne od aktualnej lokalizacji, `Hub.gd` `REGION_BACKGROUNDS`) | 5 | 16:9, 1920×1080 | §2.1 | ✅ zrobione — wszystkie 6 regionów z `Cities.gd` mają tło: Europa (`region_europe.jpg`), Ameryka Płd./Środk. (`region_tropical_port.jpg`, jeden plik dla obu), Afryka (`region_africa.jpg`), Azja (`region_asia.jpg`), Ameryka Płn. (`region_north_america.jpg`) |
 | 5 | — | ~~Ikony pinezek mapy~~ | — | — | §2 | ✅ **rozwiązane w kodzie**, nie generować — Leonardo uparcie robiło pełne sceny zamiast ikon, więc pinezki są teraz rysowane natywnie w Godocie (`MapPin.gd`), bez grafiki |
 | 6 | 3 | Ramka obrazu (do aukcji/galerii) | 1 | 1:1, transparent | §6 | ⬜ do zrobienia |
 | 7 | 3 | Elementy UI ogólne (panel, ramka, ikony statystyk) | ~6 | 1:1, transparent | §10 | ⬜ do zrobienia — **uwaga**, ten sam typ zadania co pinezki (mały, wyizolowany element), może mieć ten sam problem ze "sceną" |
