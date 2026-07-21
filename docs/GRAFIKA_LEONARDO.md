@@ -334,6 +334,52 @@ center for text, transparent background, mobile game UI element,
 [Base style tag]
 ```
 
+## Gotowe prompty do wklejenia — priorytet 2 (tła 6 pozostałych ekranów)
+
+Poniżej **pełne, złożone prompty** (base style tag już doklejony na końcu) —
+kopiuj-wklej całość bezpośrednio do pola "Prompt" w Leonardo, nic więcej nie
+trzeba dopisywać. Do pola "Negative Prompt" wklej treść z sekcji "Negative
+prompt" na samej górze dokumentu — ta sama dla wszystkich sześciu. Format:
+16:9, generuj, wybierz najlepszy z 4 wyników, upscaluj do 1920×1080.
+
+Dla spójności z już gotowymi grafikami dodaj `main_menu_title.jpg` (albo
+`hub_map.jpg`) jako Style Reference / Image Guidance przy wadze ok. 30–50%
+(patrz "Workflow zachowania spójności" wyżej) — to ten sam styl co reszta gry.
+
+**1. Plantacje** (docelowo `game/art/backgrounds/plantation.jpg`)
+```
+Isometric plantation field background, 1920s tropical farmland, rows of crops, small worker huts, warm afternoon light, game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**2. Dom aukcyjny** (`auction_house.jpg`)
+```
+Elegant 1920s auction house interior, Art Deco wood paneling, podium, gathered silhouette crowd, single spotlighted empty easel in center, game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**3. Giełda** (`stock_market.jpg`)
+```
+1920s stock exchange trading floor, Art Deco architecture, chalkboard with numbers, bustling brokers in background (silhouettes only, no detailed faces), game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**4. Wyścigi konne** (`races.jpg`)
+```
+1920s horse racetrack, grandstands with spectators (silhouettes), starting gate, side-view racing background for 2D game, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**5. Szkoła sztuki** (`art_school.jpg`)
+```
+Art academy studio interior, easels, reference paintings on walls, warm natural window light, 1920s art school, game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**6. Galeria** (`gallery.jpg`)
+```
+Art Deco private gallery hall interior, marble floor, empty wall space for hanging paintings, soft gallery lighting, elegant benches, game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+Jak wygenerujesz i wybierzesz najlepsze — wyślij mi je (tak jak menu główne i
+mapę), a podepnę je w kodzie tych sześciu ekranów tym samym sposobem, co przy
+menu głównym/Hubie.
+
 ## Plan produkcji — pełna lista do odhaczania
 
 Kolejność = priorytet (1 = rób najpierw). "Szt." to liczba **unikalnych**
