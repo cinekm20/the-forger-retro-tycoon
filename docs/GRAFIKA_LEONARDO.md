@@ -107,12 +107,10 @@ Stylized vintage world map game board, Art Deco cartography, sepia ocean,
 gold coastlines, decorative compass rose, empty pins slots for cities,
 top-down board game map, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
-**Prompt (ikony pinezek, generować osobno per typ):**
-```
-Small game map pin icon of a [coffee plantation / stock exchange building /
-horse racetrack / auction house / art academy], simple flat icon, transparent
-background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
-```
+**Prompt (ikony pinezek) — ⚠ NIE GENERUJ:** patrz Plan produkcji niżej,
+wiersz 5 — pinezki są już rozwiązane natywnie w kodzie (`MapPin.gd`),
+Leonardo uparcie robiło pełne sceny zamiast wyizolowanych ikon. Zostawione
+tu tylko jako zapis, dlaczego zrezygnowaliśmy z tego assetu.
 
 ### 2.1 Tła miast (lokacje na mapie — ~18 sztuk, patrz `MECHANIKI_EKONOMICZNE.md`)
 
@@ -129,12 +127,32 @@ osobnych scen od zera:
 5. **Europejska stolica** (Londyn, Lizbona, Amsterdam, Paryż, Berlin, Nowy Jork
    jako wariant "wielka metropolia")
 
-**Prompt (szablon regionalny, podmieniać nawias):**
+**Prompty (5 szablonów regionalnych, gotowe do wklejenia — po jednym na
+region z listy wyżej):**
+
+**1. Port tropikalny — Ameryka**
 ```
-1920s [tropical Latin American port town / West African colonial port /
-South Asian trading port / American heartland riverside town / grand
-European capital street], establishing shot game background, warm afternoon
-light, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+1920s tropical Latin American port town, establishing shot game background, warm afternoon light, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**2. Port zachodnioafrykański**
+```
+1920s West African colonial port, establishing shot game background, warm afternoon light, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**3. Port południowo/wschodnioazjatycki**
+```
+1920s South Asian trading port, establishing shot game background, warm afternoon light, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**4. Amerykańskie miasteczko śródlądowe**
+```
+1920s American heartland riverside town, establishing shot game background, warm afternoon light, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**5. Europejska stolica**
+```
+1920s grand European capital street, establishing shot game background, warm afternoon light, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 ### 3. Plantacje
@@ -149,11 +167,66 @@ Isometric plantation field background, 1920s tropical farmland, rows of crops,
 small worker huts, warm afternoon light, game background art,
 Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
-**Prompt (etap rośliny):**
+**Prompty (12 = 4 uprawy × 3 fazy wzrostu, gotowe do wklejenia):**
+
+**Kawa — zasiew**
 ```
-[coffee / tobacco / tea / cocoa] plant, [seedling / growing / ready to
-harvest] stage, isolated game sprite, simple flat illustration, transparent
-background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+Coffee plant, seedling stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Kawa — wzrost**
+```
+Coffee plant, growing stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Kawa — zbiory**
+```
+Coffee plant, ready to harvest stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Tytoń — zasiew**
+```
+Tobacco plant, seedling stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Tytoń — wzrost**
+```
+Tobacco plant, growing stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Tytoń — zbiory**
+```
+Tobacco plant, ready to harvest stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Herbata — zasiew**
+```
+Tea plant, seedling stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Herbata — wzrost**
+```
+Tea plant, growing stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Herbata — zbiory**
+```
+Tea plant, ready to harvest stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Kakao — zasiew**
+```
+Cocoa plant, seedling stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Kakao — wzrost**
+```
+Cocoa plant, growing stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Kakao — zbiory**
+```
+Cocoa plant, ready to harvest stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 ### 4. Giełda
@@ -167,11 +240,21 @@ background, Art Deco 1920s illustration style, warm sepia and gold palette with 
 numbers, bustling brokers in background (silhouettes only, no detailed faces),
 game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
-**Prompt (karta zdarzenia gospodarczego):**
+**Prompty (3 karty zdarzeń gospodarczych, gotowe do wklejenia):**
+
+**Krach**
 ```
-Vintage newspaper front page illustration, headline about stock market
-[crash / boom / currency reform], Art Deco newspaper layout, game event card
-art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+Vintage newspaper front page illustration, headline about stock market crash, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Hossa**
+```
+Vintage newspaper front page illustration, headline about stock market boom, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Reforma walutowa**
+```
+Vintage newspaper front page illustration, headline about stock market currency reform, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 ### 5. Tor wyścigów konnych
@@ -183,11 +266,36 @@ art, Art Deco 1920s illustration style, warm sepia and gold palette with deep gr
 1920s horse racetrack, grandstands with spectators (silhouettes), starting
 gate, side-view racing background for 2D game, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
-**Prompt (koń + dżokej):**
+**Prompty (6 koni + dżokejów, różne barwy jeźdźców, gotowe do wklejenia):**
+
+**Czerwone jedwabie**
 ```
-Side-view horse and jockey sprite in [color] racing silks, running pose,
-isolated on transparent background, simple flat game sprite,
-Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+Side-view horse and jockey sprite in red racing silks, running pose, isolated on transparent background, simple flat game sprite, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Niebieskie jedwabie**
+```
+Side-view horse and jockey sprite in blue racing silks, running pose, isolated on transparent background, simple flat game sprite, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Zielone jedwabie**
+```
+Side-view horse and jockey sprite in green racing silks, running pose, isolated on transparent background, simple flat game sprite, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Złote jedwabie**
+```
+Side-view horse and jockey sprite in gold racing silks, running pose, isolated on transparent background, simple flat game sprite, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Fioletowe jedwabie**
+```
+Side-view horse and jockey sprite in purple racing silks, running pose, isolated on transparent background, simple flat game sprite, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Czarno-białe jedwabie w paski**
+```
+Side-view horse and jockey sprite in black-and-white striped racing silks, running pose, isolated on transparent background, simple flat game sprite, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 ### 6. Dom aukcyjny
@@ -202,11 +310,37 @@ Elegant 1920s auction house interior, Art Deco wood paneling, podium, gathered
 silhouette crowd, single spotlighted empty easel in center, game background
 art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
-**Prompt (portret rywala):**
+**Prompty (6 portretów rywali, 2 płcie × 3 dodatki, gotowe do wklejenia —
+razem z Vico niżej daje docelowe ~7 rywali AI):**
+
+**Mężczyzna, cylinder**
 ```
-1920s art collector character portrait, [male/female], distinctive [top hat /
-monocle / feather boa] accessory, bust portrait, game character icon,
-Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+1920s art collector character portrait, male, distinctive top hat accessory, bust portrait, game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Mężczyzna, monokl**
+```
+1920s art collector character portrait, male, distinctive monocle accessory, bust portrait, game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Mężczyzna, boa z piór**
+```
+1920s art collector character portrait, male, distinctive feather boa accessory, bust portrait, game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Kobieta, cylinder**
+```
+1920s art collector character portrait, female, distinctive top hat accessory, bust portrait, game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Kobieta, monokl**
+```
+1920s art collector character portrait, female, distinctive monocle accessory, bust portrait, game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Kobieta, boa z piór**
+```
+1920s art collector character portrait, female, distinctive feather boa accessory, bust portrait, game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Prompt (Vico Vermeer — nazwany rywal-fałszerz, patrz `MECHANIKI_EKONOMICZNE.md`
@@ -226,82 +360,245 @@ background, game UI asset, Art Deco 1920s illustration style, warm sepia and gol
 
 ### 7. 40 obrazów kolekcji (8 kategorii × 5 obrazów)
 
-Pełna lista i numeracja: `docs/ZRODLA_C64_WIKI.md`. Zamiast jednego ogólnego
-szablonu — **osobny prompt-szablon na każdą z 8 kategorii stylistycznych**,
-tak żeby galeria realnie wyglądała jak przekrój historii sztuki (co jest
-sensem tej mechaniki w oryginale). Nazwiska konkretnych malarzy z tabeli
-źródłowej służą tylko jako **wewnętrzna wskazówka stylu dla nas** (część z
-nich, np. Picasso czy Braque, wciąż podlega prawom autorskim w wielu krajach
-— w promptach do Leonardo opisujemy więc **styl/okres**, nie generujemy
-bezpośrednio "w stylu [nazwisko]").
+Pełna lista i numeracja: `docs/ZRODLA_C64_WIKI.md`. Osobny prompt-szablon na
+każdą z 8 kategorii stylistycznych, tak żeby galeria realnie wyglądała jak
+przekrój historii sztuki (co jest sensem tej mechaniki w oryginale).
+Nazwiska konkretnych malarzy z tabeli źródłowej służą tylko jako
+**wewnętrzna wskazówka stylu dla nas**, do dopasowania numeru katalogowego —
+część z nich, np. Picasso czy Braque, wciąż podlega prawom autorskim w wielu
+krajach, więc w promptach do Leonardo opisujemy **styl/okres**, nie
+generujemy bezpośrednio "w stylu [nazwisko]". Temat (subject) każdego obrazu
+dobrany z rotującej puli 6 tematów, żeby żadne dwa obrazy obok siebie nie
+wyglądały identycznie.
 
 Każda z 40 grafik NIE dostaje "Base style tag" gry — mają wyglądać jak
 prawdziwe malarstwo muzealne, nie jak ikony gry, żeby kontrastowały z resztą
 UI.
 
-**1) Vermeer (obrazy 1–5)** — malarstwo holenderskie złotego wieku:
+Poniżej **wszystkich 40 gotowych promptów**, po jednym na obraz — kopiuj-wklej
+bez żadnych zmian. Numeracja zgodna z katalogiem w `docs/ZRODLA_C64_WIKI.md`.
+
+**1) Vermeer (obrazy 1–5)** — malarstwo holenderskie złotego wieku
+
+Obraz 1 — portret kobiety
 ```
-17th century Dutch Golden Age genre painting, domestic interior scene, soft
-window light, muted earthy palette, oil painting texture, intimate
-composition, museum piece, square canvas, no frame
+17th century Dutch Golden Age genre painting, domestic interior scene, soft window light, muted earthy palette, oil painting texture, intimate composition, museum piece, square canvas, no frame, subject: portrait of a woman
 ```
 
-**2) Barok (6–10):**
+Obraz 2 — wiejski krajobraz
 ```
-Baroque oil painting, dramatic chiaroscuro lighting, rich dark background,
-opulent fabric and gesture, portrait or group scene, oil painting texture,
-museum piece, square canvas, no frame
+17th century Dutch Golden Age genre painting, domestic interior scene, soft window light, muted earthy palette, oil painting texture, intimate composition, museum piece, square canvas, no frame, subject: countryside landscape
 ```
 
-**3) Klasycyzm (11–15):**
+Obraz 3 — misa z owocami
 ```
-Neoclassical oil painting, balanced formal composition, clean idealized
-figures, restrained noble color palette, historical or genre subject, oil
-painting texture, museum piece, square canvas, no frame
+17th century Dutch Golden Age genre painting, domestic interior scene, soft window light, muted earthy palette, oil painting texture, intimate composition, museum piece, square canvas, no frame, subject: bowl of fruit
 ```
 
-**4) Romantyzm (16–20):**
+Obraz 4 — scena portowa
 ```
-Romantic era oil painting, dramatic sky and landscape, sublime nature,
-emotional atmosphere, sweeping brushwork, oil painting texture, museum piece,
-square canvas, no frame
+17th century Dutch Golden Age genre painting, domestic interior scene, soft window light, muted earthy palette, oil painting texture, intimate composition, museum piece, square canvas, no frame, subject: harbor scene
 ```
 
-**5) Impresjonizm (21–25):**
+Obraz 5 — autoportret
 ```
-Impressionist oil painting, loose visible brushstrokes, dappled natural
-light, outdoor or garden scene, vibrant pastel palette, oil painting texture,
-museum piece, square canvas, no frame
+17th century Dutch Golden Age genre painting, domestic interior scene, soft window light, muted earthy palette, oil painting texture, intimate composition, museum piece, square canvas, no frame, subject: self-portrait
 ```
 
-**6) Symbolizm (26–30):**
+**2) Barok (obrazy 6–10)**
+
+Obraz 6 — wiejski krajobraz
 ```
-Symbolist oil painting, dreamlike mysterious mood, decorative ornamental
-detail, muted jewel-tone palette, allegorical figure or landscape, oil
-painting texture, museum piece, square canvas, no frame
+Baroque oil painting, dramatic chiaroscuro lighting, rich dark background, opulent fabric and gesture, portrait or group scene, oil painting texture, museum piece, square canvas, no frame, subject: countryside landscape
 ```
 
-**7) Ekspresjonizm (31–35):**
+Obraz 7 — misa z owocami
 ```
-Expressionist oil painting, bold distorted forms, intense unnatural color
-contrasts, emotional raw brushwork, early 20th century avant-garde, oil
-painting texture, museum piece, square canvas, no frame
+Baroque oil painting, dramatic chiaroscuro lighting, rich dark background, opulent fabric and gesture, portrait or group scene, oil painting texture, museum piece, square canvas, no frame, subject: bowl of fruit
 ```
 
-**8) Moderna (36–40):**
+Obraz 8 — scena portowa
 ```
-Early modernist oil painting, simplified geometric forms, flattened
-perspective, bold unconventional color blocks, early 20th century avant-garde
-composition, oil painting texture, museum piece, square canvas, no frame
+Baroque oil painting, dramatic chiaroscuro lighting, rich dark background, opulent fabric and gesture, portrait or group scene, oil painting texture, museum piece, square canvas, no frame, subject: harbor scene
 ```
 
-Do konkretnego obrazu dopisz temat z zamiennika: `subject: [portrait of a
-woman / countryside landscape / bowl of fruit / harbor scene / self-portrait
-/ still life with flowers]`.
+Obraz 9 — autoportret
+```
+Baroque oil painting, dramatic chiaroscuro lighting, rich dark background, opulent fabric and gesture, portrait or group scene, oil painting texture, museum piece, square canvas, no frame, subject: self-portrait
+```
 
-Do wariantu "podróbka" tego samego obrazu: powtórz prompt z tym samym seedem,
-dopisując `slightly different brushwork, subtle color mismatch, forged
-reproduction` — przyda się do mechaniki rozpoznawania fałszywek.
+Obraz 10 — martwa natura z kwiatami
+```
+Baroque oil painting, dramatic chiaroscuro lighting, rich dark background, opulent fabric and gesture, portrait or group scene, oil painting texture, museum piece, square canvas, no frame, subject: still life with flowers
+```
+
+**3) Klasycyzm (obrazy 11–15)**
+
+Obraz 11 — misa z owocami
+```
+Neoclassical oil painting, balanced formal composition, clean idealized figures, restrained noble color palette, historical or genre subject, oil painting texture, museum piece, square canvas, no frame, subject: bowl of fruit
+```
+
+Obraz 12 — scena portowa
+```
+Neoclassical oil painting, balanced formal composition, clean idealized figures, restrained noble color palette, historical or genre subject, oil painting texture, museum piece, square canvas, no frame, subject: harbor scene
+```
+
+Obraz 13 — autoportret
+```
+Neoclassical oil painting, balanced formal composition, clean idealized figures, restrained noble color palette, historical or genre subject, oil painting texture, museum piece, square canvas, no frame, subject: self-portrait
+```
+
+Obraz 14 — martwa natura z kwiatami
+```
+Neoclassical oil painting, balanced formal composition, clean idealized figures, restrained noble color palette, historical or genre subject, oil painting texture, museum piece, square canvas, no frame, subject: still life with flowers
+```
+
+Obraz 15 — portret kobiety
+```
+Neoclassical oil painting, balanced formal composition, clean idealized figures, restrained noble color palette, historical or genre subject, oil painting texture, museum piece, square canvas, no frame, subject: portrait of a woman
+```
+
+**4) Romantyzm (obrazy 16–20)**
+
+Obraz 16 — scena portowa
+```
+Romantic era oil painting, dramatic sky and landscape, sublime nature, emotional atmosphere, sweeping brushwork, oil painting texture, museum piece, square canvas, no frame, subject: harbor scene
+```
+
+Obraz 17 — autoportret
+```
+Romantic era oil painting, dramatic sky and landscape, sublime nature, emotional atmosphere, sweeping brushwork, oil painting texture, museum piece, square canvas, no frame, subject: self-portrait
+```
+
+Obraz 18 — martwa natura z kwiatami
+```
+Romantic era oil painting, dramatic sky and landscape, sublime nature, emotional atmosphere, sweeping brushwork, oil painting texture, museum piece, square canvas, no frame, subject: still life with flowers
+```
+
+Obraz 19 — portret kobiety
+```
+Romantic era oil painting, dramatic sky and landscape, sublime nature, emotional atmosphere, sweeping brushwork, oil painting texture, museum piece, square canvas, no frame, subject: portrait of a woman
+```
+
+Obraz 20 — wiejski krajobraz
+```
+Romantic era oil painting, dramatic sky and landscape, sublime nature, emotional atmosphere, sweeping brushwork, oil painting texture, museum piece, square canvas, no frame, subject: countryside landscape
+```
+
+**5) Impresjonizm (obrazy 21–25)**
+
+Obraz 21 — autoportret
+```
+Impressionist oil painting, loose visible brushstrokes, dappled natural light, outdoor or garden scene, vibrant pastel palette, oil painting texture, museum piece, square canvas, no frame, subject: self-portrait
+```
+
+Obraz 22 — martwa natura z kwiatami
+```
+Impressionist oil painting, loose visible brushstrokes, dappled natural light, outdoor or garden scene, vibrant pastel palette, oil painting texture, museum piece, square canvas, no frame, subject: still life with flowers
+```
+
+Obraz 23 — portret kobiety
+```
+Impressionist oil painting, loose visible brushstrokes, dappled natural light, outdoor or garden scene, vibrant pastel palette, oil painting texture, museum piece, square canvas, no frame, subject: portrait of a woman
+```
+
+Obraz 24 — wiejski krajobraz
+```
+Impressionist oil painting, loose visible brushstrokes, dappled natural light, outdoor or garden scene, vibrant pastel palette, oil painting texture, museum piece, square canvas, no frame, subject: countryside landscape
+```
+
+Obraz 25 — misa z owocami
+```
+Impressionist oil painting, loose visible brushstrokes, dappled natural light, outdoor or garden scene, vibrant pastel palette, oil painting texture, museum piece, square canvas, no frame, subject: bowl of fruit
+```
+
+**6) Symbolizm (obrazy 26–30)**
+
+Obraz 26 — martwa natura z kwiatami
+```
+Symbolist oil painting, dreamlike mysterious mood, decorative ornamental detail, muted jewel-tone palette, allegorical figure or landscape, oil painting texture, museum piece, square canvas, no frame, subject: still life with flowers
+```
+
+Obraz 27 — portret kobiety
+```
+Symbolist oil painting, dreamlike mysterious mood, decorative ornamental detail, muted jewel-tone palette, allegorical figure or landscape, oil painting texture, museum piece, square canvas, no frame, subject: portrait of a woman
+```
+
+Obraz 28 — wiejski krajobraz
+```
+Symbolist oil painting, dreamlike mysterious mood, decorative ornamental detail, muted jewel-tone palette, allegorical figure or landscape, oil painting texture, museum piece, square canvas, no frame, subject: countryside landscape
+```
+
+Obraz 29 — misa z owocami
+```
+Symbolist oil painting, dreamlike mysterious mood, decorative ornamental detail, muted jewel-tone palette, allegorical figure or landscape, oil painting texture, museum piece, square canvas, no frame, subject: bowl of fruit
+```
+
+Obraz 30 — scena portowa
+```
+Symbolist oil painting, dreamlike mysterious mood, decorative ornamental detail, muted jewel-tone palette, allegorical figure or landscape, oil painting texture, museum piece, square canvas, no frame, subject: harbor scene
+```
+
+**7) Ekspresjonizm (obrazy 31–35)**
+
+Obraz 31 — portret kobiety
+```
+Expressionist oil painting, bold distorted forms, intense unnatural color contrasts, emotional raw brushwork, early 20th century avant-garde, oil painting texture, museum piece, square canvas, no frame, subject: portrait of a woman
+```
+
+Obraz 32 — wiejski krajobraz
+```
+Expressionist oil painting, bold distorted forms, intense unnatural color contrasts, emotional raw brushwork, early 20th century avant-garde, oil painting texture, museum piece, square canvas, no frame, subject: countryside landscape
+```
+
+Obraz 33 — misa z owocami
+```
+Expressionist oil painting, bold distorted forms, intense unnatural color contrasts, emotional raw brushwork, early 20th century avant-garde, oil painting texture, museum piece, square canvas, no frame, subject: bowl of fruit
+```
+
+Obraz 34 — scena portowa
+```
+Expressionist oil painting, bold distorted forms, intense unnatural color contrasts, emotional raw brushwork, early 20th century avant-garde, oil painting texture, museum piece, square canvas, no frame, subject: harbor scene
+```
+
+Obraz 35 — autoportret
+```
+Expressionist oil painting, bold distorted forms, intense unnatural color contrasts, emotional raw brushwork, early 20th century avant-garde, oil painting texture, museum piece, square canvas, no frame, subject: self-portrait
+```
+
+**8) Moderna (obrazy 36–40)**
+
+Obraz 36 — wiejski krajobraz
+```
+Early modernist oil painting, simplified geometric forms, flattened perspective, bold unconventional color blocks, early 20th century avant-garde composition, oil painting texture, museum piece, square canvas, no frame, subject: countryside landscape
+```
+
+Obraz 37 — misa z owocami
+```
+Early modernist oil painting, simplified geometric forms, flattened perspective, bold unconventional color blocks, early 20th century avant-garde composition, oil painting texture, museum piece, square canvas, no frame, subject: bowl of fruit
+```
+
+Obraz 38 — scena portowa
+```
+Early modernist oil painting, simplified geometric forms, flattened perspective, bold unconventional color blocks, early 20th century avant-garde composition, oil painting texture, museum piece, square canvas, no frame, subject: harbor scene
+```
+
+Obraz 39 — autoportret
+```
+Early modernist oil painting, simplified geometric forms, flattened perspective, bold unconventional color blocks, early 20th century avant-garde composition, oil painting texture, museum piece, square canvas, no frame, subject: self-portrait
+```
+
+Obraz 40 — martwa natura z kwiatami
+```
+Early modernist oil painting, simplified geometric forms, flattened perspective, bold unconventional color blocks, early 20th century avant-garde composition, oil painting texture, museum piece, square canvas, no frame, subject: still life with flowers
+```
+
+Do wariantu "podróbka" tego samego obrazu (opcjonalne, ~8–10 sztuk, patrz
+Plan produkcji wiersz 12): powtórz dokładnie ten sam prompt z tym samym
+seedem, dopisując na końcu `, slightly different brushwork, subtle color
+mismatch, forged reproduction` — przyda się do mechaniki rozpoznawania
+fałszywek (Szkoła sztuki).
 
 ### 8. Szkoła sztuki (mini-gra autentykacji)
 - Tło: pracownia/atelier
