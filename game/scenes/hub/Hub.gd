@@ -153,6 +153,17 @@ func _on_travel_pressed() -> void:
 	hub_bg.pivot_offset = target_pos
 	var pin_scale := MapPinScript.PIN_SIZE / viewport_size
 
+	## Płynne wygaszenie do czerni w ostatniej jednej trzeciej animacji,
+	## zsynchronizowane tak, żeby dojść do pełnej czerni DOKŁADNIE w
+	## momencie zakończenia reszty animacji — maskuje klatkę przerwy, którą
+	## silnik potrafi wyrenderować przy change_scene_to_file() (patrz
+	## SceneRouter.goto_scene_after_fade). Nagłe, natychmiastowe przykrycie
+	## tuż przed przełączeniem (bez tego płynnego tweena) samo wygląda jak
+	## mrugnięcie — dlatego to musi być część TEJ SAMEJ animacji zoom, a nie
+	## osobny krok po niej.
+	var fade_cover := SceneRouter.get_fade_cover()
+	fade_cover.color.a = 0.0
+
 	var tween := create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(map_bg, "modulate:a", 1.0, ZOOM_OUT_DURATION)
@@ -160,7 +171,8 @@ func _on_travel_pressed() -> void:
 	tween.tween_property(hub_bg, "scale", pin_scale, ZOOM_OUT_DURATION)
 	tween.tween_property(root_panel, "modulate:a", 0.0, ZOOM_OUT_DURATION * 0.5)
 	tween.tween_property(top_row, "modulate:a", 0.0, ZOOM_OUT_DURATION * 0.5)
-	tween.chain().tween_callback(func(): SceneRouter.goto_scene_masked(SceneRouter.TRAVEL_MAP))
+	tween.tween_property(fade_cover, "color:a", 1.0, ZOOM_OUT_DURATION * 0.35).set_delay(ZOOM_OUT_DURATION * 0.65)
+	tween.chain().tween_callback(func(): SceneRouter.goto_scene_after_fade(SceneRouter.TRAVEL_MAP))
 
 
 func _set_buttons_disabled(disabled: bool) -> void:

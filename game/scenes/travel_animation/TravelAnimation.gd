@@ -37,7 +37,7 @@ func _ready() -> void:
 	var bg_layers := ScreenHelpers.make_background_with_overlay(self, Cities.MAP_BACKGROUND_PATH)
 	map_overlay = bg_layers["overlay"]
 
-	root_panel = ScreenHelpers.make_root_side(self)
+	root_panel = ScreenHelpers.make_root_side(self, true, true, 0.0)
 	ScreenHelpers.make_title(root_panel, "Podróż")
 	ScreenHelpers.make_label(root_panel, "%s → %s" % [
 		Cities.get_city_name(Travel.last_travel_from), Cities.get_city_name(Travel.last_travel_to),
@@ -114,9 +114,16 @@ func _play_arrival_zoom_in() -> void:
 	arrival_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	arrival_bg.add_child(arrival_overlay)
 
+	## Patrz analogiczny komentarz w Hub.gd _on_travel_pressed — przyciemnienie
+	## musi być częścią TEJ SAMEJ animacji zoom (zsynchronizowane z jej
+	## końcem), nie osobnym, nagłym krokiem po niej.
+	var fade_cover := SceneRouter.get_fade_cover()
+	fade_cover.color.a = 0.0
+
 	var tween := create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(arrival_bg, "scale", Vector2.ONE, ARRIVAL_ZOOM_DURATION)
 	tween.tween_property(map_overlay, "modulate:a", 0.0, ARRIVAL_ZOOM_DURATION)
 	tween.tween_property(root_panel, "modulate:a", 0.0, ARRIVAL_ZOOM_DURATION * 0.5)
-	tween.chain().tween_callback(func(): SceneRouter.goto_scene_masked(SceneRouter.HUB))
+	tween.tween_property(fade_cover, "color:a", 1.0, ARRIVAL_ZOOM_DURATION * 0.35).set_delay(ARRIVAL_ZOOM_DURATION * 0.65)
+	tween.chain().tween_callback(func(): SceneRouter.goto_scene_after_fade(SceneRouter.HUB))

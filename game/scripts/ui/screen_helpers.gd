@@ -106,22 +106,29 @@ static func make_root(parent: Control, use_menu_frame: bool = true) -> VBoxConta
 ## motywy zdobne przy krawędziach zniekształcały się przy rozciąganiu do
 ## wąskiego, wysokiego panelu. Rysowana w kodzie ramka skaluje się
 ## bez artefaktów do dowolnej wysokości (różne miasta mają różną liczbę
-## pozycji w menu). Używane przez Hub.gd — TravelMap ma analogiczną ramkę,
-## ale w poziomym pasku u dołu ekranu (patrz make_root_bottom niżej);
-## TravelAnimation nadal dostaje domyślne proste tło.
+## pozycji w menu). Używane przez Hub.gd i TravelAnimation.gd — TravelMap
+## ma analogiczną ramkę, ale w poziomym pasku u dołu ekranu (patrz
+## make_root_bottom niżej).
 ##
-## Z ramką (use_menu_frame=true) pasek jest dodatkowo wcięty od góry o
-## TOP_OFFSET_WITH_FRAME — bez tego pełnowysokościowa ramka renderowała się
-## NAD skrzynką gotówki z Hub.gd _build_top_row (obie leżą w tej samej,
-## prawej kolumnie ekranu, a ramka jest dodawana do drzewa później, więc
-## rysuje się na wierzchu). Same przyciski (root) dostają dodatkowo
-## CONTENT_INSET_WITH_FRAME z każdej strony, żeby nie nachodziły na
-## narysowaną krawędź ramki (MenuFrame.INNER_MARGIN = 13px). CONTENT_INSET_WITH_FRAME
-## zdefiniowany wyżej, przy make_root().
+## Z ramką pasek jest domyślnie dodatkowo wcięty od góry o
+## TOP_OFFSET_WITH_FRAME — bez tego pełnowysokościowa ramka w Hub.gd
+## renderowała się NAD skrzynką gotówki z _build_top_row (obie leżą w tej
+## samej, prawej kolumnie ekranu, a ramka jest dodawana do drzewa później,
+## więc rysuje się na wierzchu). top_offset_override pozwala to wyłączyć
+## (np. TravelAnimation.gd, który nie ma żadnego top_row) — wartość < 0.0
+## (domyślna) oznacza "użyj TOP_OFFSET_WITH_FRAME, jeśli use_menu_frame".
+## Same przyciski (root) dostają dodatkowo CONTENT_INSET_WITH_FRAME z każdej
+## strony, żeby nie nachodziły na narysowaną krawędź ramki
+## (MenuFrame.INNER_MARGIN = 13px). CONTENT_INSET_WITH_FRAME zdefiniowany
+## wyżej, przy make_root().
 const TOP_OFFSET_WITH_FRAME := 190.0
 
-static func make_root_side(parent: Control, on_right: bool = true, use_menu_frame: bool = false) -> VBoxContainer:
-	var top_offset := TOP_OFFSET_WITH_FRAME if use_menu_frame else 0.0
+static func make_root_side(
+	parent: Control, on_right: bool = true, use_menu_frame: bool = false, top_offset_override: float = -1.0
+) -> VBoxContainer:
+	var top_offset := top_offset_override
+	if top_offset < 0.0:
+		top_offset = TOP_OFFSET_WITH_FRAME if use_menu_frame else 0.0
 	if use_menu_frame:
 		var frame: Control = MenuFrameScript.new()
 		_anchor_side_strip(frame, on_right, top_offset)
