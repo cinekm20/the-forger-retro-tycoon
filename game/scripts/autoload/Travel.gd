@@ -80,11 +80,20 @@ func get_destination() -> String:
 	return route[-1] if is_traveling() else ""
 
 
+## Tolerancja liczb zmiennoprzecinkowych przy sprawdzaniu "czy dotarliśmy" —
+## przy trasach z kilkoma przesiadkami days_remaining to wynik łańcucha
+## odejmowań wartości typu 15.4/3.1 (niereprezentowalnych dokładnie w
+## float), więc zamiast równego zeru na ostatnim etapie potrafi wyjść np.
+## 1e-14 zamiast 0.0 — bez tolerancji pętla kończyła się jeden przystanek
+## za wcześnie, zostawiając gracza "utkniętego" w mieście przesiadkowym.
+const ARRIVAL_EPSILON := 0.0001
+
+
 func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
 	if not is_traveling():
 		return
 	days_remaining -= days_elapsed
-	while is_traveling() and days_remaining <= 0.0:
+	while is_traveling() and days_remaining <= ARRIVAL_EPSILON:
 		var leftover_days: float = -days_remaining
 		current_city = route.pop_front()
 		arrived.emit(current_city)
