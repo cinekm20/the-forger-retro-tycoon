@@ -54,6 +54,7 @@ func is_river_tile(tile_index: int) -> bool:
 
 func is_adjacent_to_river(tile_index: int) -> bool:
 	var x := tile_index % GRID_SIZE
+	@warning_ignore("integer_division")  ## celowe: y to indeks wiersza w siatce
 	var y := tile_index / GRID_SIZE
 	for dx: int in [-1, 0, 1]:
 		for dy: int in [-1, 0, 1]:

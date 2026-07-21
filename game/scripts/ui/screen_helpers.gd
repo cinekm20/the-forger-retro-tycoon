@@ -130,7 +130,7 @@ static func make_button(root: VBoxContainer, text: String, on_pressed: Callable)
 
 
 static func make_back_button(root: VBoxContainer) -> Button:
-	return make_button(root, "« Powrót do mapy", func(): SceneRouter.goto_hub())
+	return make_button(root, "« Powrót", func(): SceneRouter.goto_hub())
 
 
 ## W hot-seat multiplayer pokazuje, czyja jest tura — ważne, żeby osoba

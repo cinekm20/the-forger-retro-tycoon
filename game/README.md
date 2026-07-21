@@ -37,11 +37,13 @@ się wywaliło, bardzo ułatwi mi naprawę).
    18 kolorowymi pinezkami: jedna **biała** (Twoja aktualna lokalizacja,
    Londyn), reszta złota (miasta plantacyjne) i burgundowa (miasta
    aukcyjne). Kliknij dowolną **złotą** pinezkę (np. Richmond albo St.
-   Louis — najbliżej) — powinna polecieć krótka animacja (pociąg albo
-   samolot, w zależności od odległości) i wrócić do Hubu ze statusem "W
-   podróży do...". Kliknij **Koniec tury** kilka razy, aż status zmieni
-   się na "Jesteś w: [miasto]" — teraz przycisk **Plantacje** powinien
-   przestać być wyszarzony.
+   Louis — najbliżej) — na dole ekranu powinna pojawić się informacja, ile
+   dni potrwa podróż i jakim środkiem transportu, oraz przyciski **Jedź »**
+   i **Anuluj**. Kliknij **Jedź »** — powinna polecieć krótka animacja
+   (pociąg albo samolot, w zależności od odległości) i wrócić do Hubu ze
+   statusem "W podróży do...". Kliknij **Koniec tury** kilka razy, aż
+   status zmieni się na "Jesteś w: [miasto]" — teraz przycisk **Plantacje**
+   powinien przestać być wyszarzony.
 4. **Plantacje:** wejdź, kup kilka pól (klikaj "+" w siatce; pola z "~" to
    rzeka, nie da się ich kupić — pola tuż obok rzeki oznaczone "✓+" po
    zakupie dają podwójny plon), wybierz uprawę (np. Tytoń), ustaw
