@@ -2,7 +2,7 @@ extends Control
 ## Mapa świata z klikalnymi pinezkami — osobny ekran, wywoływany z Hubu
 ## przyciskiem "Jedź »" (patrz GDD.md pkt. 4.9). Wybór celu podróży = tap na
 ## pinezkę, potem animacja podróży (scenes/travel_animation). UI (tytuł,
-## info o podróży, przyciski) w wyśrodkowanym pasku u DOŁU ekranu
+## info o podróży, przyciski) w pasku przyklejonym do PRAWEGO DOLNEGO rogu
 ## (make_root_bottom, ta sama ozdobna ramka co w Hub.gd) — pełnowysokościowy
 ## pasek z prawej krawędzi (dawne make_root_side) zasłaniał pinezki
 ## rozrzucone po całej mapie, w tym te blisko prawej krawędzi.

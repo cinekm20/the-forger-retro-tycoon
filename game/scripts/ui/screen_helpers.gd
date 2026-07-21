@@ -118,16 +118,20 @@ static func _anchor_side_strip(control: Control, on_right: bool, top_offset: flo
 		control.offset_right = SIDE_PANEL_WIDTH - inset
 
 
-## Poziomy pasek wyśrodkowany u dołu ekranu (zamiast pełnowysokościowego
-## paska przy krawędzi z make_root_side) — dla ekranów typu TravelMap, gdzie
-## pinezki rozrzucone są po całej mapie i boczny pasek zasłaniał część z
-## nich. Wysokość dopasowuje się automatycznie do treści: content to
-## PanelContainer, który (inaczej niż zwykły Control) liczy swój rozmiar
-## jako maksimum rozmiarów dzieci — więc tło/ramka (dodane jako pierwsze
-## dziecko) i lista przycisków (drugie, we własnym MarginContainer dla
-## odstępu od krawędzi ramki) automatycznie dostają tę samą, właściwą
-## wysokość, bez ręcznego liczenia jak w _anchor_side_strip.
-static func make_root_bottom(parent: Control, use_menu_frame: bool = false, width: float = 420.0) -> VBoxContainer:
+## Poziomy pasek u dołu ekranu, przyklejony do rogu (domyślnie prawego, tak
+## jak w oryginale i w Hub.gd) — dla ekranów typu TravelMap, gdzie pinezki
+## rozrzucone są po całej mapie i pełnowysokościowy boczny pasek
+## (make_root_side) zasłaniał część z nich. Róg zamiast wyśrodkowania: żadna
+## pinezka w Cities.MAP_POSITION nie wypada dalej niż x≈0.67, więc pasek
+## przy prawej krawędzi ich nie zasłania (wyśrodkowany zasłaniałby środek
+## mapy, gdzie akurat kilka miast wypada). Wysokość dopasowuje się
+## automatycznie do treści: content to PanelContainer, który (inaczej niż
+## zwykły Control) liczy swój rozmiar jako maksimum rozmiarów dzieci — więc
+## tło/ramka (dodane jako pierwsze dziecko) i lista przycisków (drugie, we
+## własnym MarginContainer dla odstępu od krawędzi ramki) automatycznie
+## dostają tę samą, właściwą wysokość, bez ręcznego liczenia jak w
+## _anchor_side_strip.
+static func make_root_bottom(parent: Control, use_menu_frame: bool = false, width: float = 420.0, on_right: bool = true) -> VBoxContainer:
 	var wrapper := VBoxContainer.new()
 	wrapper.set_anchors_preset(Control.PRESET_FULL_RECT)
 	wrapper.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -139,7 +143,7 @@ static func make_root_bottom(parent: Control, use_menu_frame: bool = false, widt
 	wrapper.add_child(top_spacer)
 
 	var content := PanelContainer.new()
-	content.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	content.size_flags_horizontal = Control.SIZE_SHRINK_END if on_right else Control.SIZE_SHRINK_BEGIN
 	content.custom_minimum_size = Vector2(width, 0)
 	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	content.add_theme_stylebox_override("panel", StyleBoxEmpty.new())

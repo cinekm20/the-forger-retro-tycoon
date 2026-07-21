@@ -120,7 +120,7 @@ const MAP_POSITION := {
 	"bogota": Vector2(0.36, 0.55),
 	"guatemala": Vector2(0.33, 0.51),
 	"mexico": Vector2(0.29, 0.46),
-	"new_york": Vector2(0.37, 0.25),
+	"new_york": Vector2(0.38, 0.33),
 	"richmond": Vector2(0.36, 0.31),
 	"st_louis": Vector2(0.31, 0.30),
 }
