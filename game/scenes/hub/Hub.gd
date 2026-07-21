@@ -18,12 +18,17 @@ const FREE_DESTINATIONS := {
 	"Galeria": "res://scenes/gallery/Gallery.tscn",
 }
 
-## Tła wg regionu aktualnej lokalizacji — na razie puste (czekamy na
-## wygenerowanie 5 szablonów regionalnych, docs/GRAFIKA_LEONARDO.md §2.1),
-## FALLBACK_BACKGROUND używane, dopóki dany region nie ma własnej grafiki.
-## Uzupełnij np. REGION_BACKGROUNDS["europe"] = "res://art/backgrounds/region_europe.jpg"
-## gdy grafika będzie gotowa — nic więcej nie trzeba zmieniać w kodzie.
-const REGION_BACKGROUNDS := {}
+## Tła wg regionu aktualnej lokalizacji (docs/GRAFIKA_LEONARDO.md §2.1).
+## south_america i central_america dzielą jeden szablon "tropikalny port"
+## (Rio/Bogota/Gwatemala/Meksyk w oryginalnym planie to jedna grupa
+## stylistyczna, mimo że w Cities.gd mają dwa różne klucze region).
+## Brakujące regiony (asia, africa, north_america) używają na razie
+## FALLBACK_BACKGROUND, dopóki nie powstaną kolejne szablony.
+const REGION_BACKGROUNDS := {
+	"europe": "res://art/backgrounds/region_europe.jpg",
+	"south_america": "res://art/backgrounds/region_tropical_port.jpg",
+	"central_america": "res://art/backgrounds/region_tropical_port.jpg",
+}
 const FALLBACK_BACKGROUND := "res://art/backgrounds/hub_map.jpg"
 
 var status_label: Label
