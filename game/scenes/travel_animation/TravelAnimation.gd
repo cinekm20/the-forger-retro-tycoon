@@ -119,4 +119,4 @@ func _play_arrival_zoom_in() -> void:
 	tween.tween_property(arrival_bg, "scale", Vector2.ONE, ARRIVAL_ZOOM_DURATION)
 	tween.tween_property(map_overlay, "modulate:a", 0.0, ARRIVAL_ZOOM_DURATION)
 	tween.tween_property(root_panel, "modulate:a", 0.0, ARRIVAL_ZOOM_DURATION * 0.5)
-	tween.chain().tween_callback(func(): SceneRouter.goto_hub())
+	tween.chain().tween_callback(func(): SceneRouter.goto_scene_masked(SceneRouter.HUB))

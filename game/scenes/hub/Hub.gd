@@ -160,7 +160,7 @@ func _on_travel_pressed() -> void:
 	tween.tween_property(hub_bg, "scale", pin_scale, ZOOM_OUT_DURATION)
 	tween.tween_property(root_panel, "modulate:a", 0.0, ZOOM_OUT_DURATION * 0.5)
 	tween.tween_property(top_row, "modulate:a", 0.0, ZOOM_OUT_DURATION * 0.5)
-	tween.chain().tween_callback(func(): SceneRouter.goto_scene(SceneRouter.TRAVEL_MAP))
+	tween.chain().tween_callback(func(): SceneRouter.goto_scene_masked(SceneRouter.TRAVEL_MAP))
 
 
 func _set_buttons_disabled(disabled: bool) -> void:
