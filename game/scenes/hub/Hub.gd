@@ -91,6 +91,19 @@ func _on_travel_pressed() -> void:
 	add_child(map_bg)
 	move_child(map_bg, 0)  # pod hub_bg, który się kurczy i odsłania mapę
 
+	## Ta sama przyciemniająca nakładka co docelowy TravelMap.tscn (alpha
+	## 0.45, patrz ScreenHelpers.make_background_with_overlay) — bez niej
+	## pojawiająca się mapa była jaśniejsza niż finalny ekran mapy, widoczny
+	## skok jasności przy przełączeniu scen (ten sam problem co przy
+	## zoom-inie w TravelAnimation.gd). Dziecko map_bg — jego modulate:a
+	## (fade-in mapy) cascaduje na dzieci, więc nakładka ciemnieje w tym
+	## samym tempie co pojawia się mapa, bez osobnego tweena.
+	var map_overlay := ColorRect.new()
+	map_overlay.color = Color(0, 0, 0, 0.45)
+	map_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	map_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	map_bg.add_child(map_overlay)
+
 	hub_bg.pivot_offset = target_pos
 	var pin_scale := MapPinScript.PIN_SIZE / viewport_size
 

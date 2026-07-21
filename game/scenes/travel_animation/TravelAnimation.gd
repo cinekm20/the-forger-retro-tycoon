@@ -78,6 +78,17 @@ func _play_arrival_zoom_in() -> void:
 	arrival_bg.scale = MapPinScript.PIN_SIZE / viewport_size
 	add_child(arrival_bg)
 
+	## Ta sama przyciemniająca nakładka co w Hub.gd (make_background_with_overlay,
+	## alpha 0.45) — bez niej rosnący obrazek był jaśniejszy niż docelowy Hub,
+	## widoczny skok jasności w momencie przełączenia scen. Dziecko arrival_bg,
+	## nie osobny węzeł na scenie — dzięki temu dziedziczy dokładnie tę samą
+	## transformację skali/pivotu bez osobnego tweena, gwarantowana synchronizacja.
+	var arrival_overlay := ColorRect.new()
+	arrival_overlay.color = Color(0, 0, 0, 0.45)
+	arrival_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	arrival_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	arrival_bg.add_child(arrival_overlay)
+
 	var tween := create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(arrival_bg, "scale", Vector2.ONE, ARRIVAL_ZOOM_DURATION)

@@ -31,6 +31,19 @@ jobs:
           chmod +x Godot_v4.3-stable_linux.x86_64
           sudo mv Godot_v4.3-stable_linux.x86_64 /usr/local/bin/godot
 
+      # On a completely fresh checkout, .godot/ (gitignored) doesn't exist yet,
+      # so Godot hasn't built global_script_class_cache.cfg — the index of
+      # every `class_name X` script in the project. Without it, ordinary
+      # scripts referencing a global class (e.g. ScreenHelpers) by name fail
+      # to parse with "Identifier not declared in the current scope", even
+      # though the exact same project boots fine in the editor (which builds
+      # this cache automatically the first time you open it). --import does
+      # a full project scan/import and exits, building that cache, without
+      # actually running anything — must run before any other headless step.
+      - name: Import project (builds class_name cache for a fresh checkout)
+        working-directory: game
+        run: timeout 60 godot --headless --import --path .
+
       # Booting the project headless forces Godot to parse project.godot,
       # every autoload, and the main scene. GDScript parse errors, missing
       # autoload paths, or broken scene/script references surface here as
