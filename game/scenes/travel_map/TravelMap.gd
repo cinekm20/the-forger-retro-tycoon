@@ -17,10 +17,7 @@ var confirm_button: Button
 var cancel_button: Button
 var selected_city: String = ""
 
-## Wejście na mapę jest tylko przez "Jedź »" na Hubie i kończy się albo
-## wyborem celu, albo "Anuluj" — świadomie bez stałego przycisku "Powrót",
-## żeby nie zasłaniał pinezek i nie dublował się z "Anuluj" (patrz też
-## screen_helpers.make_back_button, który teraz wraca do Huba, a nie mapy).
+
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/hub_map.jpg")
 	_build_pins()
@@ -32,6 +29,7 @@ func _ready() -> void:
 	cancel_button = ScreenHelpers.make_button(root, "Anuluj", _on_cancel_pressed)
 	confirm_button.visible = false
 	cancel_button.visible = false
+	ScreenHelpers.make_button(root, "« Powrót", func(): SceneRouter.goto_hub())
 
 
 func _default_info_text() -> String:

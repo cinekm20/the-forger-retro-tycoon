@@ -39,10 +39,17 @@ static func make_root(parent: Control) -> VBoxContainer:
 
 ## Wariant zakotwiczony na dole ekranu zamiast wyśrodkowany na całej
 ## wysokości — dla ekranów, gdzie góra/środek musi zostać odsłonięty
-## (np. mapa z klikalnymi pinezkami pod spodem).
+## (np. mapa z klikalnymi pinezkami pod spodem). CELOWO pełnoekranowy
+## (PRESET_FULL_RECT), tak jak make_root(), tylko z inną osią wyrównania —
+## PRESET_BOTTOM_WIDE tu NIE działa: set_anchors_preset() liczy offsety na
+## podstawie rozmiaru kontenera W MOMENCIE WYWOŁANIA, czyli zanim dojdą
+## jakiekolwiek dzieci (rozmiar 0×0) — kontener zostaje trwale spłaszczony
+## do zerowej wysokości, więc cała jego zawartość renderuje się poza
+## ekranem. ALIGNMENT_END na pełnoekranowym kontenerze daje ten sam efekt
+## wizualny (treść przy dolnej krawędzi) bez tej pułapki.
 static func make_root_bottom(parent: Control) -> VBoxContainer:
 	var root := VBoxContainer.new()
-	root.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.alignment = BoxContainer.ALIGNMENT_END
 	root.add_theme_constant_override("separation", 10)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
