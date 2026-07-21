@@ -94,7 +94,7 @@ func _build_top_row() -> HBoxContainer:
 	left_column.add_theme_constant_override("separation", 8)
 	row.add_child(left_column)
 
-	location_label = ScreenHelpers.make_info_box(left_column, "")
+	location_label = ScreenHelpers.make_info_box(left_column, "", 280.0, 22)
 	date_label = ScreenHelpers.make_info_box(left_column, "")
 	paintings_label = ScreenHelpers.make_info_box(left_column, "")
 

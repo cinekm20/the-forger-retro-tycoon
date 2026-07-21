@@ -67,42 +67,54 @@ const MenuFrameScript := preload("res://scripts/ui/MenuFrame.gd")
 ## bez artefaktów do dowolnej wysokości (różne miasta mają różną liczbę
 ## pozycji w menu). Na razie tylko Hub.gd — TravelMap/TravelAnimation
 ## nadal dostają domyślne proste tło.
+##
+## Z ramką (use_menu_frame=true) pasek jest dodatkowo wcięty od góry o
+## TOP_OFFSET_WITH_FRAME — bez tego pełnowysokościowa ramka renderowała się
+## NAD skrzynką gotówki z Hub.gd _build_top_row (obie leżą w tej samej,
+## prawej kolumnie ekranu, a ramka jest dodawana do drzewa później, więc
+## rysuje się na wierzchu). Same przyciski (root) dostają dodatkowo
+## CONTENT_INSET_WITH_FRAME z każdej strony, żeby nie nachodziły na
+## narysowaną krawędź ramki (MenuFrame.INNER_MARGIN = 13px).
+const TOP_OFFSET_WITH_FRAME := 190.0
+const CONTENT_INSET_WITH_FRAME := 26.0
+
 static func make_root_side(parent: Control, on_right: bool = true, use_menu_frame: bool = false) -> VBoxContainer:
+	var top_offset := TOP_OFFSET_WITH_FRAME if use_menu_frame else 0.0
 	if use_menu_frame:
 		var frame: Control = MenuFrameScript.new()
-		_anchor_side_strip(frame, on_right)
+		_anchor_side_strip(frame, on_right, top_offset)
 		parent.add_child(frame)
 	else:
 		var panel_bg := ColorRect.new()
 		panel_bg.color = Color(COLOR_BURGUNDY_DARK.r, COLOR_BURGUNDY_DARK.g, COLOR_BURGUNDY_DARK.b, 0.8)
 		panel_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_anchor_side_strip(panel_bg, on_right)
+		_anchor_side_strip(panel_bg, on_right, top_offset)
 		parent.add_child(panel_bg)
 
 	var root := VBoxContainer.new()
 	root.alignment = BoxContainer.ALIGNMENT_CENTER
 	root.add_theme_constant_override("separation", 14)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_anchor_side_strip(root, on_right)
+	_anchor_side_strip(root, on_right, top_offset, CONTENT_INSET_WITH_FRAME if use_menu_frame else 0.0)
 	parent.add_child(root)
 	return root
 
 
-static func _anchor_side_strip(control: Control, on_right: bool) -> void:
+static func _anchor_side_strip(control: Control, on_right: bool, top_offset: float = 0.0, inset: float = 0.0) -> void:
 	control.anchor_top = 0.0
 	control.anchor_bottom = 1.0
-	control.offset_top = 0.0
-	control.offset_bottom = 0.0
+	control.offset_top = top_offset + inset
+	control.offset_bottom = -inset
 	if on_right:
 		control.anchor_left = 1.0
 		control.anchor_right = 1.0
-		control.offset_left = -SIDE_PANEL_WIDTH
-		control.offset_right = 0.0
+		control.offset_left = -SIDE_PANEL_WIDTH + inset
+		control.offset_right = -inset
 	else:
 		control.anchor_left = 0.0
 		control.anchor_right = 0.0
-		control.offset_left = 0.0
-		control.offset_right = SIDE_PANEL_WIDTH
+		control.offset_left = inset
+		control.offset_right = SIDE_PANEL_WIDTH - inset
 
 
 ## Paleta art déco (docs/GRAFIKA_LEONARDO.md — złoto/burgund/sepia).
@@ -141,7 +153,10 @@ static func make_label(root: VBoxContainer, text: String) -> Label:
 ## tak jak w oryginale pasek stanu to kilka osobnych skrzynek (imię gracza +
 ## lokalizacja, gotówka, data), nie jeden zbity ciąg tekstu. Używać dla
 ## pojedynczych, krótkich informacji statusu (patrz Hub.gd).
-static func make_info_box(root: Container, text: String) -> Label:
+## min_width/font_size opcjonalne (0 = nie nadpisuj) — potrzebne dla
+## skrzynki "gracz w mieście", która ma więcej tekstu niż data/obrazy i
+## powinna być wyraźnie większa (patrz Hub.gd _build_top_row).
+static func make_info_box(root: Container, text: String, min_width: float = 0.0, font_size: int = 0) -> Label:
 	var box := StyleBoxFlat.new()
 	box.bg_color = Color(COLOR_BURGUNDY_DARK.r, COLOR_BURGUNDY_DARK.g, COLOR_BURGUNDY_DARK.b, 0.85)
 	box.border_color = COLOR_GOLD
@@ -154,12 +169,16 @@ static func make_info_box(root: Container, text: String) -> Label:
 
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", box)
+	if min_width > 0.0:
+		panel.custom_minimum_size = Vector2(min_width, 0)
 	root.add_child(panel)
 
 	var label := Label.new()
 	label.text = text
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.add_theme_color_override("font_color", COLOR_CREAM)
+	if font_size > 0:
+		label.add_theme_font_size_override("font_size", font_size)
 	panel.add_child(label)
 	return label
 
