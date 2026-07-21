@@ -32,6 +32,7 @@ var paintings_label: Label
 var warning_label: Label
 var travel_button: Button
 var root_panel: VBoxContainer
+var top_row: HBoxContainer
 var hub_bg: TextureRect
 var hub_overlay: ColorRect
 
@@ -41,22 +42,18 @@ func _ready() -> void:
 	hub_bg = bg_layers["background"]
 	hub_overlay = bg_layers["overlay"]
 
-	## Panel boczny zamiast pełnoekranowego — w oryginale menu i pasek stanu
-	## to małe skrzynki w rogach ekranu, nie zasłaniają całego widoku
-	## (patrz zrzuty ekranu z oryginału). make_root_side() daje ten sam
-	## efekt: wąska kolumna z prawej, reszta tła regionu zostaje odsłonięta.
-	root_panel = ScreenHelpers.make_root_side(self)
-	ScreenHelpers.make_title(root_panel, "VERMEER")
+	## W oryginale skrzynki statusu leżą rozrzucone w rogach ekranu (imię
+	## gracza + lokalizacja i data w lewym górnym rogu, gotówka w prawym),
+	## a menu to osobna skrzynka w prawym dolnym rogu — NIE wszystko razem
+	## w jednym bocznym pasku. top_row (pełnoekranowy, niewidoczny poziomy
+	## kontener) trzyma lewą kolumnę (location/date/obrazy) i skrzynkę
+	## gotówki po przeciwnych stronach — patrz komentarz przy _build_top_row.
+	top_row = _build_top_row()
 
-	## Osobne skrzynki zamiast jednego zbitego tekstu — tak jak w oryginale
-	## (imię gracza + lokalizacja, gotówka, data to osobne oprawione pola).
-	location_label = ScreenHelpers.make_info_box(root_panel, "")
-	money_label = ScreenHelpers.make_info_box(root_panel, "")
-	date_label = ScreenHelpers.make_info_box(root_panel, "")
-	paintings_label = ScreenHelpers.make_info_box(root_panel, "")
-	warning_label = ScreenHelpers.make_label(root_panel, "")
-	warning_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	warning_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
+	## Panel boczny na menu nawigacyjne — zostaje w prawym dolnym rogu,
+	## zgodnie z oryginałem, ale bez informacji statusu (te są teraz w
+	## top_row powyżej).
+	root_panel = ScreenHelpers.make_root_side(self)
 
 	travel_button = ScreenHelpers.make_button(root_panel, "Jedź »", _on_travel_pressed)
 
@@ -74,6 +71,48 @@ func _ready() -> void:
 	ScreenHelpers.make_button(root_panel, "Zapisz i wyjdź do menu", _on_save_and_exit_pressed)
 
 	_update_status()
+
+
+## Pełnoekranowy, przezroczysty HBoxContainer (PRESET_FULL_RECT — bezpieczny,
+## zawsze dynamicznie dopasowuje się do rozmiaru ekranu, w przeciwieństwie do
+## presetów typu TOP_WIDE, które liczą wysokość raz, w momencie wywołania,
+## patrz pułapka opisana przy dawnym make_root_bottom w screen_helpers.gd).
+## Lewa kolumna (location/data/obrazy) i skrzynka gotówki mają
+## size_flags_vertical = SIZE_SHRINK_BEGIN, więc "przyklejają się" do góry
+## zamiast rozciągać na całą wysokość ekranu; spacer między nimi ma
+## SIZE_EXPAND_FILL i pcha skrzynkę gotówki do prawej krawędzi.
+func _build_top_row() -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.set_anchors_preset(Control.PRESET_FULL_RECT)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", 16)
+	add_child(row)
+
+	var left_column := VBoxContainer.new()
+	left_column.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	left_column.add_theme_constant_override("separation", 8)
+	row.add_child(left_column)
+
+	location_label = ScreenHelpers.make_info_box(left_column, "")
+	date_label = ScreenHelpers.make_info_box(left_column, "")
+	paintings_label = ScreenHelpers.make_info_box(left_column, "")
+
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(spacer)
+
+	var right_column := VBoxContainer.new()
+	right_column.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	row.add_child(right_column)
+
+	money_label = ScreenHelpers.make_info_box(right_column, "")
+	warning_label = ScreenHelpers.make_label(right_column, "")
+	warning_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	warning_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
+	warning_label.custom_minimum_size = Vector2(220, 0)
+
+	return row
 
 
 ## Zamiast od razu przełączać scenę, tło Huba "kurczy się" do pozycji
@@ -119,6 +158,7 @@ func _on_travel_pressed() -> void:
 	tween.tween_property(hub_overlay, "modulate:a", 0.0, ZOOM_OUT_DURATION)
 	tween.tween_property(hub_bg, "scale", pin_scale, ZOOM_OUT_DURATION)
 	tween.tween_property(root_panel, "modulate:a", 0.0, ZOOM_OUT_DURATION * 0.5)
+	tween.tween_property(top_row, "modulate:a", 0.0, ZOOM_OUT_DURATION * 0.5)
 	tween.chain().tween_callback(func(): SceneRouter.goto_scene(SceneRouter.TRAVEL_MAP))
 
 

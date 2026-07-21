@@ -37,11 +37,12 @@ się wywaliło, bardzo ułatwi mi naprawę).
 1. **Start:** po F5 powinno pojawić się menu główne z tłem (kobieta przy
    sztaludze i globusem). Zostaw "Liczba graczy" na 1, tryb łatwy
    odznaczony, kliknij **Nowa gra**.
-2. **Hub:** powinieneś trafić na ekran z tłem Londynu (Big Ben) i wąskim
-   panelem po prawej (nie na całą szerokość, tak jak w oryginale), a w nim
-   osobne oprawione skrzynki (nie jeden zbity tekst, tak jak w oryginale):
-   "Gracz 1 / w: Londyn", "50000 M", "01.01.1918", "Obrazy: 0/40" — i
-   listą przycisków, w tym **Jedź »**.
+2. **Hub:** powinieneś trafić na ekran z tłem Londynu (Big Ben) i
+   oprawionymi w złotą ramkę skrzynkami rozrzuconymi po rogach, tak jak w
+   oryginale: **lewy górny róg** — "Gracz 1 / w: Londyn", pod tym data
+   "01.01.1918" i "Obrazy: 0/40"; **prawy górny róg** — gotówka "50000 M".
+   Menu (lista przycisków, w tym **Jedź »**) zostaje w wąskim panelu w
+   **prawym dolnym rogu** (nie na całą szerokość).
 3. **Podróż:** kliknij **Jedź »** — tło Huba powinno skurczyć się i
    "wjechać" w pinezkę na mapie świata, która pojawia się pod spodem (ok.
    1 sekundy animacji), a dopiero potem powinna otworzyć się mapa z ok. 18
