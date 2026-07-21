@@ -30,23 +30,64 @@ static func make_background_with_overlay(parent: Control, texture_path: String) 
 	return {"background": bg, "overlay": overlay}
 
 
+const MenuFrameScript := preload("res://scripts/ui/MenuFrame.gd")
+const SIDE_PANEL_WIDTH := 320.0
+## Odstęp treści od narysowanej krawędzi MenuFrame — patrz make_root_side.
+const CONTENT_INSET_WITH_FRAME := 26.0
+
 ## mouse_filter = IGNORE na kontenerze jest ważne: bez tego niewidzialne tło
 ## pełnoekranowego VBoxContainer przechwytuje kliknięcia na CAŁYM ekranie
 ## (nawet w miejscach bez żadnego widocznego elementu UI), blokując np.
 ## pinezki mapy leżące pod spodem. Same przyciski/etykiety w środku mają
 ## własny filtr i nadal reagują na dotyk normalnie.
-static func make_root(parent: Control) -> VBoxContainer:
+##
+## use_menu_frame=true (domyślne) wyśrodkowuje treść w tej samej ozdobnej
+## ramce co Hub.gd/TravelMap.gd (MenuFrame) — dla spójności wizualnej na
+## WSZYSTKICH ekranach placeholderowych (Galeria, Dom aukcyjny, Szkoła
+## sztuki, Plantacje, Giełda, Wyścigi, Ending, MainMenu), nie tylko w menu
+## nawigacyjnym Huba. CenterContainer sam wylicza rozmiar potrzebny na
+## treść (PanelContainer wewnątrz bierze maksimum z rozmiarów swoich dzieci,
+## patrz make_root_bottom) i centruje go na całym ekranie — różne ekrany
+## mają różną ilość treści, więc ramka za każdym razem dostaje inny,
+## dopasowany rozmiar bez ręcznego liczenia.
+static func make_root(parent: Control, use_menu_frame: bool = true) -> VBoxContainer:
+	if not use_menu_frame:
+		var plain_root := VBoxContainer.new()
+		plain_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+		plain_root.alignment = BoxContainer.ALIGNMENT_CENTER
+		plain_root.add_theme_constant_override("separation", 16)
+		plain_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		parent.add_child(plain_root)
+		return plain_root
+
+	var wrapper := CenterContainer.new()
+	wrapper.set_anchors_preset(Control.PRESET_FULL_RECT)
+	wrapper.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(wrapper)
+
+	var content := PanelContainer.new()
+	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	wrapper.add_child(content)
+
+	var frame: Control = MenuFrameScript.new()
+	content.add_child(frame)
+
+	var margin := MarginContainer.new()
+	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var m := int(CONTENT_INSET_WITH_FRAME)
+	margin.add_theme_constant_override("margin_left", m)
+	margin.add_theme_constant_override("margin_right", m)
+	margin.add_theme_constant_override("margin_top", m)
+	margin.add_theme_constant_override("margin_bottom", m)
+	content.add_child(margin)
+
 	var root := VBoxContainer.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.alignment = BoxContainer.ALIGNMENT_CENTER
 	root.add_theme_constant_override("separation", 16)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	parent.add_child(root)
+	margin.add_child(root)
 	return root
-
-
-const SIDE_PANEL_WIDTH := 320.0
-const MenuFrameScript := preload("res://scripts/ui/MenuFrame.gd")
 
 ## Wąski panel przy krawędzi ekranu (stała szerokość, pełna wysokość) z
 ## tłem pod przyciskami — dla ekranów, gdzie reszta ekranu (np. mapa z
@@ -75,9 +116,9 @@ const MenuFrameScript := preload("res://scripts/ui/MenuFrame.gd")
 ## prawej kolumnie ekranu, a ramka jest dodawana do drzewa później, więc
 ## rysuje się na wierzchu). Same przyciski (root) dostają dodatkowo
 ## CONTENT_INSET_WITH_FRAME z każdej strony, żeby nie nachodziły na
-## narysowaną krawędź ramki (MenuFrame.INNER_MARGIN = 13px).
+## narysowaną krawędź ramki (MenuFrame.INNER_MARGIN = 13px). CONTENT_INSET_WITH_FRAME
+## zdefiniowany wyżej, przy make_root().
 const TOP_OFFSET_WITH_FRAME := 190.0
-const CONTENT_INSET_WITH_FRAME := 26.0
 
 static func make_root_side(parent: Control, on_right: bool = true, use_menu_frame: bool = false) -> VBoxContainer:
 	var top_offset := TOP_OFFSET_WITH_FRAME if use_menu_frame else 0.0
