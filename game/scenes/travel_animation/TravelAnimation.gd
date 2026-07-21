@@ -114,16 +114,13 @@ func _play_arrival_zoom_in() -> void:
 	arrival_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	arrival_bg.add_child(arrival_overlay)
 
-	## Patrz analogiczny komentarz w Hub.gd _on_travel_pressed — przyciemnienie
-	## musi być częścią TEJ SAMEJ animacji zoom (zsynchronizowane z jej
-	## końcem), nie osobnym, nagłym krokiem po niej.
-	var fade_cover := SceneRouter.get_fade_cover()
-	fade_cover.color.a = 0.0
-
 	var tween := create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(arrival_bg, "scale", Vector2.ONE, ARRIVAL_ZOOM_DURATION)
 	tween.tween_property(map_overlay, "modulate:a", 0.0, ARRIVAL_ZOOM_DURATION)
 	tween.tween_property(root_panel, "modulate:a", 0.0, ARRIVAL_ZOOM_DURATION * 0.5)
-	tween.tween_property(fade_cover, "color:a", 1.0, ARRIVAL_ZOOM_DURATION * 0.35).set_delay(ARRIVAL_ZOOM_DURATION * 0.65)
-	tween.chain().tween_callback(func(): SceneRouter.goto_scene_after_fade(SceneRouter.HUB))
+	## goto_scene_crossfade zamiast goto_scene: robi zrzut ostatniej klatki
+	## zoomu i płynnie z niego wygasza do Huba pod spodem, zamiast nagłego
+	## cięcia (patrz SceneRouter.gd) — bez tego widać mrugnięcie dokładnie
+	## w momencie przełączenia scen.
+	tween.chain().tween_callback(func(): SceneRouter.goto_scene_crossfade(SceneRouter.HUB))

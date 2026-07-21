@@ -22,39 +22,50 @@ func goto_hub() -> void:
 	goto_scene(HUB)
 
 
-var _fade_cover: ColorRect
-
-## Leniwie tworzy (raz, na cały czas gry) pełnoekranowy czarny prostokąt w
-## CanvasLayer należącym do tego autoloadu — dzięki temu przetrwa
-## change_scene_to_file() (usuwa tylko drzewo AKTUALNEJ sceny, nie dzieci
-## autoloadów). Zwrócony węzeł ma animować SAM wywołujący kod, jako część
-## WŁASNEGO tweena zoom (patrz Hub._on_travel_pressed/
-## TravelAnimation._play_arrival_zoom_in) — nagłe cover.color.a = 1 tuż przed
-## przełączeniem sceny dawałoby dokładnie to samo mrugnięcie/"blink", którego
-## unikamy; przyciemnienie musi być płynne i zsynchronizowane z KOŃCEM
-## animacji, nie osobnym, nagłym cięciem.
-func get_fade_cover() -> ColorRect:
-	if _fade_cover == null:
-		var layer := CanvasLayer.new()
-		layer.layer = 100
-		add_child(layer)
-		_fade_cover = ColorRect.new()
-		_fade_cover.color = Color(0, 0, 0, 0)
-		_fade_cover.set_anchors_preset(Control.PRESET_FULL_RECT)
-		_fade_cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		layer.add_child(_fade_cover)
-	return _fade_cover
+var _snapshot_layer: CanvasLayer
+var _snapshot_rect: TextureRect
 
 
-## Wołać, gdy ekran jest już w pełni przykryty przez get_fade_cover()
-## (color:a == 1). change_scene_to_file() usuwa starą scenę i buduje nową
-## (Hub.gd/TravelMap.gd tworzą sporo UI programistycznie w _ready()), więc
-## silnik potrafi wyrenderować klatkę pustego tła między starą a nową sceną
-## — stąd dwie klatki odczekane PRZED wygaszeniem przykrycia, żeby dać
-## nowej scenie czas na pierwszy pełny _ready() + narysowaną klatkę.
-func goto_scene_after_fade(path: String) -> void:
+func _get_snapshot_rect() -> TextureRect:
+	if _snapshot_layer == null:
+		_snapshot_layer = CanvasLayer.new()
+		_snapshot_layer.layer = 100
+		add_child(_snapshot_layer)
+		_snapshot_rect = TextureRect.new()
+		_snapshot_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+		_snapshot_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		_snapshot_rect.stretch_mode = TextureRect.STRETCH_SCALE
+		_snapshot_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_snapshot_rect.visible = false
+		_snapshot_layer.add_child(_snapshot_rect)
+	return _snapshot_rect
+
+
+## Jak goto_scene(), ale bez mrugnięcia/czerni: zamiast przyciemniać ekran,
+## robi zrzut DOKŁADNIE tej klatki, którą właśnie widać (czyli ostatniej
+## klatki animacji zoom w Hub.gd/TravelAnimation.gd) i pokazuje go jako
+## nieruchomy obrazek NAD wszystkim, w CanvasLayer należącym do tego
+## autoloadu (więc przetrwa change_scene_to_file(), który usuwa tylko
+## drzewo aktualnej sceny). Pod tym zamrożonym zrzutem silnik w spokoju
+## usuwa starą scenę i buduje nową (Hub.gd/TravelMap.gd tworzą sporo UI
+## programistycznie w _ready(), stąd dwie klatki odczekane na pierwszy
+## pełny _ready() + narysowaną klatkę) — dopiero potem zrzut płynnie
+## znika, odsłaniając nową scenę. Koniec animacji zoom i początek kolejnej
+## sceny z założenia wyglądają niemal identycznie (to samo tło, ta sama
+## nakładka), więc przejście wychodzi jako płynne pojawienie się, a nie
+## cięcie do czerni.
+func goto_scene_crossfade(path: String) -> void:
+	var snapshot := _get_snapshot_rect()
+	var img := get_viewport().get_texture().get_image()
+	snapshot.texture = ImageTexture.create_from_image(img)
+	snapshot.modulate.a = 1.0
+	snapshot.visible = true
+
 	get_tree().change_scene_to_file(path)
 	await get_tree().process_frame
 	await get_tree().process_frame
+
 	var tween := create_tween()
-	tween.tween_property(_fade_cover, "color:a", 0.0, 0.3)
+	tween.tween_property(snapshot, "modulate:a", 0.0, 0.3)
+	await tween.finished
+	snapshot.visible = false
