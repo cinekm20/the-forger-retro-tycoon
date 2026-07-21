@@ -47,22 +47,48 @@ static func make_root(parent: Control) -> VBoxContainer:
 
 const SIDE_PANEL_WIDTH := 320.0
 
+## Ozdobna ramka menu (docs/GRAFIKA_LEONARDO.md §10) — kwadratowa grafika
+## 896×896 z płaskim środkiem zaczynającym się ok. 200px od każdej
+## krawędzi (zmierzone bezpośrednio na pliku). NinePatchRect z tymi
+## marginesami rozciąga tylko płaski środek, ostre narożniki/ornamentyka
+## zostają nietknięte niezależnie od wysokości panelu (różne miasta mają
+## różną liczbę pozycji w menu).
+const MENU_FRAME_TEXTURE := "res://art/ui/menu_frame.jpg"
+const MENU_FRAME_PATCH_MARGIN := 200
+
 ## Wąski panel przy krawędzi ekranu (stała szerokość, pełna wysokość) z
-## półprzezroczystym tłem pod przyciskami — dla ekranów, gdzie reszta
-## ekranu (np. mapa z klikalnymi pinezkami) musi zostać odsłonięta, a nie
-## tylko odsłonięta w pionie jak przy make_root() (ten pełną szerokością
-## i tak zasłaniał grafikę pod spodem). Anchory/offsety ustawiane RĘCZNIE,
-## nie przez set_anchors_preset() — ten liczy offsety na podstawie
-## rozmiaru kontenera W MOMENCIE WYWOŁANIA (czyli 0×0, zanim dojdą
-## jakiekolwiek dzieci), więc dla non-pełnoekranowych presetów zostaje
-## trwale zablokowany na zerowym rozmiarze. Ręczne anchory z ułamkowym
-## anchor + stałym pikselowym offsetem nie mają tego problemu.
-static func make_root_side(parent: Control, on_right: bool = true) -> VBoxContainer:
-	var panel_bg := ColorRect.new()
-	panel_bg.color = Color(COLOR_BURGUNDY_DARK.r, COLOR_BURGUNDY_DARK.g, COLOR_BURGUNDY_DARK.b, 0.8)
-	panel_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_anchor_side_strip(panel_bg, on_right)
-	parent.add_child(panel_bg)
+## tłem pod przyciskami — dla ekranów, gdzie reszta ekranu (np. mapa z
+## klikalnymi pinezkami) musi zostać odsłonięta, a nie tylko odsłonięta w
+## pionie jak przy make_root() (ten pełną szerokością i tak zasłaniał
+## grafikę pod spodem). Anchory/offsety ustawiane RĘCZNIE, nie przez
+## set_anchors_preset() — ten liczy offsety na podstawie rozmiaru
+## kontenera W MOMENCIE WYWOŁANIA (czyli 0×0, zanim dojdą jakiekolwiek
+## dzieci), więc dla non-pełnoekranowych presetów zostaje trwale
+## zablokowany na zerowym rozmiarze. Ręczne anchory z ułamkowym anchor +
+## stałym pikselowym offsetem nie mają tego problemu.
+##
+## use_menu_frame=true podmienia zwykłe półprzezroczyste tło na ozdobną
+## ramkę (MENU_FRAME_TEXTURE) — na razie tylko Hub.gd (menu nawigacyjne),
+## inne ekrany korzystające z make_root_side (TravelMap/TravelAnimation)
+## nadal dostają domyślne proste tło, żeby nie zmieniać ich wyglądu bez
+## potrzeby.
+static func make_root_side(parent: Control, on_right: bool = true, use_menu_frame: bool = false) -> VBoxContainer:
+	if use_menu_frame:
+		var frame := NinePatchRect.new()
+		frame.texture = load(MENU_FRAME_TEXTURE)
+		frame.patch_margin_left = MENU_FRAME_PATCH_MARGIN
+		frame.patch_margin_top = MENU_FRAME_PATCH_MARGIN
+		frame.patch_margin_right = MENU_FRAME_PATCH_MARGIN
+		frame.patch_margin_bottom = MENU_FRAME_PATCH_MARGIN
+		frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_anchor_side_strip(frame, on_right)
+		parent.add_child(frame)
+	else:
+		var panel_bg := ColorRect.new()
+		panel_bg.color = Color(COLOR_BURGUNDY_DARK.r, COLOR_BURGUNDY_DARK.g, COLOR_BURGUNDY_DARK.b, 0.8)
+		panel_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_anchor_side_strip(panel_bg, on_right)
+		parent.add_child(panel_bg)
 
 	var root := VBoxContainer.new()
 	root.alignment = BoxContainer.ALIGNMENT_CENTER

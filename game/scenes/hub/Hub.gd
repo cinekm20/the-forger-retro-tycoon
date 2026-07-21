@@ -52,8 +52,9 @@ func _ready() -> void:
 
 	## Panel boczny na menu nawigacyjne — zostaje w prawym dolnym rogu,
 	## zgodnie z oryginałem, ale bez informacji statusu (te są teraz w
-	## top_row powyżej).
-	root_panel = ScreenHelpers.make_root_side(self)
+	## top_row powyżej). use_menu_frame=true: ozdobna ramka Art Deco
+	## zamiast zwykłego półprzezroczystego tła (docs/GRAFIKA_LEONARDO.md §10).
+	root_panel = ScreenHelpers.make_root_side(self, true, true)
 
 	travel_button = ScreenHelpers.make_button(root_panel, "Jedź »", _on_travel_pressed)
 
