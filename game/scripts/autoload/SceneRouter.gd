@@ -10,6 +10,8 @@ const AUCTION_HOUSE := "res://scenes/auction_house/AuctionHouse.tscn"
 const ART_SCHOOL := "res://scenes/art_school/ArtSchool.tscn"
 const GALLERY := "res://scenes/gallery/Gallery.tscn"
 const ENDING := "res://scenes/ending/Ending.tscn"
+const TRAVEL_MAP := "res://scenes/travel_map/TravelMap.tscn"
+const TRAVEL_ANIMATION := "res://scenes/travel_animation/TravelAnimation.tscn"
 
 
 func goto_scene(path: String) -> void:

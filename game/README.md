@@ -1,12 +1,16 @@
 # Vermeer — szkielet gry (Godot 4)
 
-Wszystkie 7 ekranów ma już działającą logikę (nie tylko nawigację) —
-plantacje, giełda, dom aukcyjny, szkoła sztuki, wyścigi, galeria, mapa
-świata z podróżami i klikalnymi pinezkami. Menu główne i mapa świata mają
-już prawdziwe tło graficzne, reszta ekranów wciąż na surowym UI Godota
-(przyciski, etykiety, listy). Zapis/odczyt gry, hot-seat multiplayer (1-4
-graczy) i pętla wygrana/przegrana (kompletna kolekcja / bankructwo / rywal
-wygrywa pierwszy) działają.
+Wszystkie ekrany mają już działającą logikę (nie tylko nawigację) —
+plantacje, giełda, dom aukcyjny, szkoła sztuki, wyścigi, galeria. Hub
+pokazuje tylko pasek stanu i nawigację (tło zależne od regionu, gdzie
+aktualnie jesteś); mapa świata z klikalnymi pinezkami żyje na osobnym
+ekranie, otwieranym przyciskiem "Jedź »" — po wybraniu celu leci krótka
+animacja podróży (pociąg w obrębie tego samego regionu, samolot między
+regionami/przez ocean). Menu główne i mapa mają już prawdziwe tło
+graficzne, reszta ekranów wciąż na surowym UI Godota (przyciski, etykiety,
+listy). Zapis/odczyt gry, hot-seat multiplayer (1-4 graczy) i pętla
+wygrana/przegrana (kompletna kolekcja / bankructwo / rywal wygrywa
+pierwszy) działają.
 
 ## 1. Instalacja i otwarcie
 
@@ -27,15 +31,16 @@ się wywaliło, bardzo ułatwi mi naprawę).
 1. **Start:** po F5 powinno pojawić się menu główne z tłem (kobieta przy
    sztaludze i globusem). Zostaw "Liczba graczy" na 1, tryb łatwy
    odznaczony, kliknij **Nowa gra**.
-2. **Hub:** powinieneś trafić na mapę świata z tłem-mapą i ok. 18
-   kolorowymi pinezkami rozrzuconymi po niej — jedna **biała** (Twoja
-   aktualna lokalizacja, Londyn), reszta złota (miasta plantacyjne) i
-   burgundowa (miasta aukcyjne). Pasek stanu: gotówka 50000 M, data
-   01.01.1918, obrazy 0/40.
-3. **Podróż:** kliknij dowolną **złotą** pinezkę (miasto plantacyjne, np.
-   Richmond albo St. Louis — najbliżej). Status powinien zmienić się na "W
-   podróży do...". Kliknij **Koniec tury** kilka razy, aż status zmieni się
-   na "Jesteś w: [miasto]" — teraz przycisk **Plantacje** powinien
+2. **Hub:** powinieneś trafić na ekran z paskiem stanu (gotówka 50000 M,
+   data 01.01.1918, obrazy 0/40) i listą przycisków, w tym **Jedź »**.
+3. **Podróż:** kliknij **Jedź »** — powinna otworzyć się mapa świata z ok.
+   18 kolorowymi pinezkami: jedna **biała** (Twoja aktualna lokalizacja,
+   Londyn), reszta złota (miasta plantacyjne) i burgundowa (miasta
+   aukcyjne). Kliknij dowolną **złotą** pinezkę (np. Richmond albo St.
+   Louis — najbliżej) — powinna polecieć krótka animacja (pociąg albo
+   samolot, w zależności od odległości) i wrócić do Hubu ze statusem "W
+   podróży do...". Kliknij **Koniec tury** kilka razy, aż status zmieni
+   się na "Jesteś w: [miasto]" — teraz przycisk **Plantacje** powinien
    przestać być wyszarzony.
 4. **Plantacje:** wejdź, kup kilka pól (klikaj "+" w siatce; pola z "~" to
    rzeka, nie da się ich kupić — pola tuż obok rzeki oznaczone "✓+" po

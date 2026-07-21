@@ -1,7 +1,8 @@
 extends Control
-## Mapa świata / hub — tło art/backgrounds/hub_map.jpg (docs/GRAFIKA_LEONARDO.md
-## pkt. 2), reszta ekranu wciąż na surowym UI Godota: pasek stanu, podróże
-## między miastami i nawigacja do wszystkich ekranów.
+## Hub — pasek stanu i nawigacja do wszystkich ekranów. Tło zależy od
+## aktualnej lokalizacji (regionu), nie jest już mapą świata — mapa z
+## klikalnymi pinezkami żyje teraz na osobnym ekranie (scenes/travel_map),
+## otwieranym przyciskiem "Jedź »" (patrz GDD.md pkt. 4.9).
 
 ## Ekrany, które wymagają bycia w mieście danego typu (patrz Cities.CITIES),
 ## na wzór "zablokowanych" opcji menu z oryginału (docs/ZRODLA_C64_WIKI.md,
@@ -17,50 +18,30 @@ const FREE_DESTINATIONS := {
 	"Galeria": "res://scenes/gallery/Gallery.tscn",
 }
 
-## Kolory pinezek wg typu miasta (Cities.CITIES[id]["type"]) — nasza paleta
-## złoto/burgund/turkus. Aktualne miasto gracza dostaje osobny, biały kolor.
-const TYPE_PIN_COLORS := {
-	"plantation": Color(0.85, 0.65, 0.2),
-	"auction": Color(0.55, 0.1, 0.15),
-	"hub": Color(0.1, 0.55, 0.55),
-}
-const CURRENT_CITY_PIN_COLOR := Color(1.0, 1.0, 1.0)
-
-const MapPinScript := preload("res://scripts/ui/MapPin.gd")
+## Tła wg regionu aktualnej lokalizacji — na razie puste (czekamy na
+## wygenerowanie 5 szablonów regionalnych, docs/GRAFIKA_LEONARDO.md §2.1),
+## FALLBACK_BACKGROUND używane, dopóki dany region nie ma własnej grafiki.
+## Uzupełnij np. REGION_BACKGROUNDS["europe"] = "res://art/backgrounds/region_europe.jpg"
+## gdy grafika będzie gotowa — nic więcej nie trzeba zmieniać w kodzie.
+const REGION_BACKGROUNDS := {}
+const FALLBACK_BACKGROUND := "res://art/backgrounds/hub_map.jpg"
 
 var status_label: Label
 var turn_label: Label
 var travel_status_label: Label
-var destination_option: OptionButton
 var travel_button: Button
 
 
 func _ready() -> void:
-	ScreenHelpers.make_background(self, "res://art/backgrounds/hub_map.jpg")
-	_build_pins()
+	ScreenHelpers.make_background(self, _get_current_background())
 	var root := ScreenHelpers.make_root(self)
-	ScreenHelpers.make_title(root, "VERMEER — Mapa świata")
+	ScreenHelpers.make_title(root, "VERMEER")
 
 	turn_label = ScreenHelpers.make_label(root, "")
 	status_label = ScreenHelpers.make_label(root, "")
 	travel_status_label = ScreenHelpers.make_label(root, "")
 
-	var travel_row := HBoxContainer.new()
-	travel_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	root.add_child(travel_row)
-
-	destination_option = OptionButton.new()
-	for city_id in Cities.CITIES.keys():
-		if city_id == Travel.current_city:
-			continue
-		destination_option.add_item(Cities.get_city_name(city_id))
-		destination_option.set_item_metadata(destination_option.item_count - 1, city_id)
-	travel_row.add_child(destination_option)
-
-	travel_button = Button.new()
-	travel_button.text = "Jedź »"
-	travel_button.pressed.connect(_on_travel_pressed)
-	travel_row.add_child(travel_button)
+	travel_button = ScreenHelpers.make_button(root, "Jedź »", func(): SceneRouter.goto_scene(SceneRouter.TRAVEL_MAP))
 
 	for destination_name in LOCATION_GATED_DESTINATIONS.keys():
 		var info: Dictionary = LOCATION_GATED_DESTINATIONS[destination_name]
@@ -78,40 +59,9 @@ func _ready() -> void:
 	_update_status()
 
 
-## Rozmieszcza klikalne pinezki nad mapą wg Cities.MAP_POSITION — dotknięcie
-## pinezki innego miasta niż aktualne od razu rozpoczyna podróż (to samo, co
-## wybór z listy rozwijanej + "Jedź »" niżej, tylko szybciej).
-func _build_pins() -> void:
-	var pins_layer := Control.new()
-	pins_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	pins_layer.mouse_filter = Control.MOUSE_FILTER_PASS
-	add_child(pins_layer)
-
-	var viewport_size := get_viewport_rect().size
-	for city_id in Cities.CITIES.keys():
-		var pin: Button = MapPinScript.new()
-		var city_type: String = Cities.CITIES[city_id]["type"]
-		pin.pin_color = CURRENT_CITY_PIN_COLOR if city_id == Travel.current_city else TYPE_PIN_COLORS.get(city_type, Color.GRAY)
-		var frac: Vector2 = Cities.get_map_position(city_id)
-		pin.position = frac * viewport_size - MapPinScript.PIN_SIZE / 2.0
-		pin.tooltip_text = Cities.get_city_name(city_id)
-		pin.pressed.connect(_on_pin_pressed.bind(city_id))
-		pins_layer.add_child(pin)
-
-
-func _on_pin_pressed(city_id: String) -> void:
-	if city_id == Travel.current_city:
-		return
-	Travel.start_travel(city_id)
-	_update_status()
-
-
-func _on_travel_pressed() -> void:
-	if destination_option.selected < 0:
-		return
-	var destination: String = destination_option.get_item_metadata(destination_option.selected)
-	Travel.start_travel(destination)
-	_update_status()
+func _get_current_background() -> String:
+	var region: String = Cities.CITIES.get(Travel.current_city, {}).get("region", "")
+	return REGION_BACKGROUNDS.get(region, FALLBACK_BACKGROUND)
 
 
 func _on_save_and_exit_pressed() -> void:
@@ -124,7 +74,7 @@ func _on_end_turn_pressed() -> void:
 	if GameState.check_game_over():
 		SceneRouter.goto_scene(SceneRouter.ENDING)
 	else:
-		SceneRouter.goto_hub()  # przeładuj scenę — nowy aktywny gracz ma inną mapę/plantacje
+		SceneRouter.goto_hub()  # przeładuj scenę — nowy aktywny gracz ma inny stan/lokalizację
 
 
 func _update_status() -> void:
@@ -152,7 +102,6 @@ func _update_status() -> void:
 	else:
 		travel_status_label.text = "Jesteś w: %s" % Cities.get_city_name(Travel.current_city)
 
-	destination_option.visible = not Travel.is_traveling()
 	travel_button.visible = not Travel.is_traveling()
 
 	for child in get_children():

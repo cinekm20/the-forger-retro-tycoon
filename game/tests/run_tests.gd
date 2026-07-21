@@ -25,6 +25,7 @@ func _initialize() -> void:
 	_test_forward_contract_penalty_on_failure()
 	_test_players_hotseat_swap()
 	_test_security_bodyguard_and_gangster()
+	_test_travel_vehicle_choice()
 
 	print("\n=== Wynik: %d/%d testów przeszło ===" % [total - failures, total])
 	quit(1 if failures > 0 else 0)
@@ -208,3 +209,20 @@ func _test_security_bodyguard_and_gangster() -> void:
 	Economy.player_money = 100000.0
 	var stolen := Security.send_gangster(rival_id)
 	_assert(not stolen, "gangster nie może ukraść obrazu, którego rywal nie posiada")
+
+
+func _test_travel_vehicle_choice() -> void:
+	print("-- Travel: wybór pociąg vs samolot wg regionu --")
+	Travel.reset_new_game()
+
+	# Richmond i St. Louis są w tym samym regionie (north_america) -> pociąg.
+	Travel.current_city = "richmond"
+	Travel.route.clear()
+	Travel.start_travel("st_louis")
+	_assert(Travel.last_travel_vehicle == Travel.Vehicle.TRAIN, "Richmond -> St. Louis (ten sam region) = pociąg")
+
+	# Londyn (europe) i Nowy Jork (north_america) są w różnych regionach -> samolot.
+	Travel.reset_new_game()
+	Travel.current_city = "london"
+	Travel.start_travel("new_york")
+	_assert(Travel.last_travel_vehicle == Travel.Vehicle.PLANE, "Londyn -> Nowy Jork (inny region) = samolot")

@@ -10,9 +10,16 @@ signal arrived(city_id: String)
 
 const START_CITY := "london"  ## zgodnie z realiami startu gry (1 stycznia 1918)
 
+enum Vehicle { TRAIN, PLANE }
+
 var current_city: String = START_CITY
 var route: Array[String] = []  ## pozostałe przystanki do odwiedzenia (bez aktualnego miasta)
 var days_remaining: float = 0.0
+
+## Do animacji podróży (scenes/travel_animation) — ustawiane w start_travel().
+var last_travel_from: String = ""
+var last_travel_to: String = ""
+var last_travel_vehicle: Vehicle = Vehicle.TRAIN
 
 
 func _ready() -> void:
@@ -30,7 +37,9 @@ func is_traveling() -> bool:
 
 
 ## Rozpoczyna podróż do destination_city (może obejmować kilka przesiadek).
-## Zwraca false, jeśli już w podróży albo miasto nieosiągalne.
+## Zwraca false, jeśli już w podróży albo miasto nieosiągalne. Pociąg vs
+## samolot: ta sama "region" w Cities.CITIES = pociąg (podróż lądowa),
+## inna = samolot (dalej, zwykle przez ocean).
 func start_travel(destination_city: String) -> bool:
 	if is_traveling() or destination_city == current_city:
 		return false
@@ -38,6 +47,12 @@ func start_travel(destination_city: String) -> bool:
 	var path: Array = result["path"]
 	if path.is_empty():
 		return false
+
+	last_travel_from = current_city
+	last_travel_to = destination_city
+	var from_region: String = Cities.CITIES.get(current_city, {}).get("region", "")
+	var to_region: String = Cities.CITIES.get(destination_city, {}).get("region", "")
+	last_travel_vehicle = Vehicle.TRAIN if from_region == to_region else Vehicle.PLANE
 
 	route.clear()
 	for i in range(1, path.size()):
