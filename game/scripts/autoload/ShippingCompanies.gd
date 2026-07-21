@@ -32,7 +32,7 @@ func reset_new_game() -> void:
 func boost_from_region_activity(region: String, amount: float) -> void:
 	for company_id in COMPANIES.keys():
 		if COMPANIES[company_id]["region"] == region:
-			stock_price[company_id] += amount
+			stock_price[company_id] = get_price(company_id) + amount
 
 
 func get_price(company_id: String) -> float:
@@ -64,4 +64,4 @@ func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
 	var weeks: float = float(days_elapsed) / 7.0
 	for company_id in COMPANIES.keys():
 		var change_percent := randf_range(-DAILY_DRIFT_RANGE, DAILY_DRIFT_RANGE) * weeks
-		stock_price[company_id] = max(1.0, stock_price[company_id] * (1.0 + change_percent))
+		stock_price[company_id] = max(1.0, get_price(company_id) * (1.0 + change_percent))

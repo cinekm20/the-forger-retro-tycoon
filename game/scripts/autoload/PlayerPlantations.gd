@@ -52,7 +52,15 @@ func is_river_tile(tile_index: int) -> bool:
 	return tile_index % GRID_SIZE == RIVER_COLUMN
 
 
+## Pole rzeki samo nie jest "sąsiadem rzeki" — bez tego wczesnego wyjścia
+## dowolne pole rzeki wypadało jako sąsiadujące z inną, sąsiednią komórką
+## tej samej rzeki (ta sama kolumna, wiersz wyżej/niżej), co nie ma sensu
+## semantycznie. W realnej rozgrywce i tak nieistotne (rzeki nie da się
+## kupić, więc funkcja nigdy nie dostaje indeksu pola rzeki jako owned
+## tile), ale wynik dla dowolnego inputu powinien być poprawny.
 func is_adjacent_to_river(tile_index: int) -> bool:
+	if is_river_tile(tile_index):
+		return false
 	var x := tile_index % GRID_SIZE
 	@warning_ignore("integer_division")  ## celowe: y to indeks wiersza w siatce
 	var y := tile_index / GRID_SIZE
