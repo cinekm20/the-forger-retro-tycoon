@@ -54,8 +54,10 @@ photo, realistic skin texture
 Leonardo.ai generuje różne obrazy za każdym razem, więc żeby cała gra nie
 wyglądała jak zbiór przypadkowych grafik:
 
-1. **Zdefiniuj jeden "kotwiczący" prompt stylu** i doklejaj go do każdego
-   promptu (patrz niżej: *Base style tag*).
+1. **Zdefiniuj jeden "kotwiczący" prompt stylu** (patrz niżej: *Base style
+   tag*) — w tym dokumencie każdy gotowy prompt ma go już doklejonego na
+   końcu, więc kopiujesz tylko jeden blok kodu, nic nie trzeba doklejać
+   ręcznie z innego miejsca.
 2. Użyj tego samego **modelu** przez cały projekt (polecane: Leonardo Phoenix
    lub Leonardo Anime XL / PhotoReal — do ilustracji 2D najlepiej sprawdzi się
    model nastawiony na "illustration"/"concept art", nie fotorealizm).
@@ -68,7 +70,7 @@ wyglądała jak zbiór przypadkowych grafik:
    opcję "transparent background" / PNG z usuniętym tłem) albo generuj na
    jednolitym tle i usuwaj je narzędziem do usuwania tła.
 
-### Base style tag (dokleić na końcu każdego promptu)
+### Base style tag (już doklejony na końcu każdego gotowego promptu niżej — ta sekcja to tylko podgląd, do czego wraca każdy prompt w dokumencie)
 
 ```
 Art Deco 1920s illustration style, warm sepia and gold palette with deep
@@ -91,7 +93,7 @@ silhouette, no photorealism
 ```
 Art Deco game logo title screen, elegant gold typography reading "VERMEER",
 1920s art collector silhouette standing before an easel, world map background,
-[Base style tag]
+Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 ### 2. Mapa świata (Hub)
@@ -103,13 +105,13 @@ Art Deco game logo title screen, elegant gold typography reading "VERMEER",
 ```
 Stylized vintage world map game board, Art Deco cartography, sepia ocean,
 gold coastlines, decorative compass rose, empty pins slots for cities,
-top-down board game map, [Base style tag]
+top-down board game map, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 **Prompt (ikony pinezek, generować osobno per typ):**
 ```
 Small game map pin icon of a [coffee plantation / stock exchange building /
 horse racetrack / auction house / art academy], simple flat icon, transparent
-background, [Base style tag]
+background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 ### 2.1 Tła miast (lokacje na mapie — ~18 sztuk, patrz `MECHANIKI_EKONOMICZNE.md`)
@@ -132,7 +134,7 @@ osobnych scen od zera:
 1920s [tropical Latin American port town / West African colonial port /
 South Asian trading port / American heartland riverside town / grand
 European capital street], establishing shot game background, warm afternoon
-light, [Base style tag]
+light, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 ### 3. Plantacje
@@ -145,13 +147,13 @@ light, [Base style tag]
 ```
 Isometric plantation field background, 1920s tropical farmland, rows of crops,
 small worker huts, warm afternoon light, game background art,
-[Base style tag]
+Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 **Prompt (etap rośliny):**
 ```
 [coffee / tobacco / tea / cocoa] plant, [seedling / growing / ready to
 harvest] stage, isolated game sprite, simple flat illustration, transparent
-background, [Base style tag]
+background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 ### 4. Giełda
@@ -163,13 +165,13 @@ background, [Base style tag]
 ```
 1920s stock exchange trading floor, Art Deco architecture, chalkboard with
 numbers, bustling brokers in background (silhouettes only, no detailed faces),
-game background art, [Base style tag]
+game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 **Prompt (karta zdarzenia gospodarczego):**
 ```
 Vintage newspaper front page illustration, headline about stock market
 [crash / boom / currency reform], Art Deco newspaper layout, game event card
-art, [Base style tag]
+art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 ### 5. Tor wyścigów konnych
@@ -179,13 +181,13 @@ art, [Base style tag]
 **Prompt (tło):**
 ```
 1920s horse racetrack, grandstands with spectators (silhouettes), starting
-gate, side-view racing background for 2D game, [Base style tag]
+gate, side-view racing background for 2D game, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 **Prompt (koń + dżokej):**
 ```
 Side-view horse and jockey sprite in [color] racing silks, running pose,
 isolated on transparent background, simple flat game sprite,
-[Base style tag]
+Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 ### 6. Dom aukcyjny
@@ -198,13 +200,13 @@ isolated on transparent background, simple flat game sprite,
 ```
 Elegant 1920s auction house interior, Art Deco wood paneling, podium, gathered
 silhouette crowd, single spotlighted empty easel in center, game background
-art, [Base style tag]
+art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 **Prompt (portret rywala):**
 ```
 1920s art collector character portrait, [male/female], distinctive [top hat /
 monocle / feather boa] accessory, bust portrait, game character icon,
-[Base style tag]
+Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Prompt (Vico Vermeer — nazwany rywal-fałszerz, patrz `MECHANIKI_EKONOMICZNE.md`
@@ -213,13 +215,13 @@ podejrzliwy, do scenek "Meanwhile"):**
 ```
 1920s dapper art forger character portrait, sly confident smirk, slicked
 hair, pencil moustache, fine tailored suit with pocket square, bust portrait,
-game character icon, [Base style tag]
+game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Prompt (rama):**
 ```
 Ornate gold Art Deco picture frame, empty center, isolated on transparent
-background, game UI asset, [Base style tag]
+background, game UI asset, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 ### 7. 40 obrazów kolekcji (8 kategorii × 5 obrazów)
@@ -309,7 +311,7 @@ reproduction` — przyda się do mechaniki rozpoznawania fałszywek.
 ```
 Art academy studio interior, easels, reference paintings on walls, warm
 natural window light, 1920s art school, game background art,
-[Base style tag]
+Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 ### 9. Galeria (kolekcja gracza)
@@ -320,7 +322,7 @@ natural window light, 1920s art school, game background art,
 ```
 Art Deco private gallery hall interior, marble floor, empty wall space for
 hanging paintings, soft gallery lighting, elegant benches, game background
-art, [Base style tag]
+art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 ### 10. UI ogólne
@@ -331,7 +333,7 @@ art, [Base style tag]
 ```
 Art Deco UI panel frame with geometric gold border ornamentation, empty
 center for text, transparent background, mobile game UI element,
-[Base style tag]
+Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 ## Gotowe prompty do wklejenia — priorytet 2 (tła 6 pozostałych ekranów)
