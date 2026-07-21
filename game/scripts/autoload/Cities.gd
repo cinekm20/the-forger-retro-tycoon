@@ -147,15 +147,29 @@ const REGION_BACKGROUNDS := {
 const FALLBACK_BACKGROUND := "res://art/backgrounds/hub_map.jpg"
 
 ## Tła unikalne dla konkretnego miasta (docs/GRAFIKA_LEONARDO.md §2.2) —
-## docelowo każde z 18 miast dostaje własną, rozpoznawalną grafikę
-## (charakterystyczny zabytek/ulica), zamiast dzielenia jednego szablonu
-## regionalnego z kilkoma innymi miastami. Uzupełniaj stopniowo w miarę
-## generowania — miasto bez wpisu tutaj po prostu spada do
-## get_region_background(), więc nic nie trzeba zmieniać w kodzie.
-## PUSTE na razie — dopisuj wpisy dopiero, gdy plik grafiki faktycznie
-## istnieje w art/backgrounds/ (wpis wskazujący na nieistniejący plik
-## wywali load() przy pierwszej wizycie w tym mieście).
-const CITY_BACKGROUNDS := {}
+## każde z 18 miast ma własną, rozpoznawalną grafikę (charakterystyczny
+## zabytek/ulica) zamiast dzielenia jednego szablonu regionalnego z kilkoma
+## innymi miastami. Miasto bez wpisu tutaj spadłoby do get_region_background().
+const CITY_BACKGROUNDS := {
+	"berlin": "res://art/backgrounds/city_berlin.jpg",
+	"paris": "res://art/backgrounds/city_paris.jpg",
+	"amsterdam": "res://art/backgrounds/city_amsterdam.jpg",
+	"lisbon": "res://art/backgrounds/city_lisbon.jpg",
+	"london": "res://art/backgrounds/city_london.jpg",
+	"ankara": "res://art/backgrounds/city_ankara.jpg",
+	"bombay": "res://art/backgrounds/city_bombay.jpg",
+	"colombo": "res://art/backgrounds/city_colombo.jpg",
+	"mombasa": "res://art/backgrounds/city_mombasa.jpg",
+	"duala": "res://art/backgrounds/city_duala.jpg",
+	"abidjan": "res://art/backgrounds/city_abidjan.jpg",
+	"rio": "res://art/backgrounds/city_rio.jpg",
+	"bogota": "res://art/backgrounds/city_bogota.jpg",
+	"guatemala": "res://art/backgrounds/city_guatemala.jpg",
+	"mexico": "res://art/backgrounds/city_mexico.jpg",
+	"new_york": "res://art/backgrounds/city_new_york.jpg",
+	"richmond": "res://art/backgrounds/city_richmond.jpg",
+	"st_louis": "res://art/backgrounds/city_st_louis.jpg",
+}
 
 
 func get_region_background(city_id: String) -> String:

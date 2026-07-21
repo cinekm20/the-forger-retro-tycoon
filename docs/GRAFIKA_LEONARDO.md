@@ -155,6 +155,41 @@ region z listy wyżej):**
 1920s grand European capital street, establishing shot game background, warm afternoon light, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
+### 2.2 Tła miast — unikalne per miasto (zastępuje §2.1)
+
+Mimo przewidywanego dużego nakładu pracy, ostatecznie wygenerowano **osobne,
+w pełni unikalne tło dla każdego z 18 miast** zamiast 5 współdzielonych
+szablonów regionalnych — każde z rozpoznawalnym, charakterystycznym
+zabytkiem/motywem: Big Ben (Londyn), wieża Eiffla (Paryż), Brama
+Brandenburska (Berlin), kanały (Amsterdam), tramwaj i katedra (Lizbona),
+Kocatepe Mosque (Ankara), Statua Wolności (Nowy Jork), Chrystus Odkupiciel
+(Rio), piramida aztecka (Meksyk), wulkan (Gwatemala), itd. `Cities.gd`
+`CITY_BACKGROUNDS` mapuje każde miasto na plik w `game/art/backgrounds/`
+(`city_<id>.jpg`) i ma pierwszeństwo przed `REGION_BACKGROUNDS` z §2.1 —
+te zostają jako czysty fallback, gdyby kiedyś doszło nowe miasto bez
+własnej grafiki.
+
+| Miasto | Plik |
+|---|---|
+| Berlin | `city_berlin.jpg` |
+| Paryż | `city_paris.jpg` |
+| Amsterdam | `city_amsterdam.jpg` |
+| Lizbona | `city_lisbon.jpg` |
+| Londyn | `city_london.jpg` |
+| Ankara | `city_ankara.jpg` |
+| Bombaj | `city_bombay.jpg` |
+| Colombo | `city_colombo.jpg` |
+| Mombasa | `city_mombasa.jpg` |
+| Duala | `city_duala.jpg` |
+| Abidżan | `city_abidjan.jpg` |
+| Rio de Janeiro | `city_rio.jpg` |
+| Bogota | `city_bogota.jpg` |
+| Gwatemala | `city_guatemala.jpg` |
+| Meksyk | `city_mexico.jpg` |
+| Nowy Jork | `city_new_york.jpg` |
+| Richmond | `city_richmond.jpg` |
+| St. Louis | `city_st_louis.jpg` |
+
 ### 3. Plantacje
 - Tło plantacji (pola uprawne, rzut izometryczny/z góry)
 - 3 fazy wzrostu rośliny (kawa, tytoń, herbata, kakao) — po 3 grafiki na
@@ -696,7 +731,8 @@ Leonardo, żeby mieć z czego wybrać).
 | 3e | 2 | Tło Szkoły sztuki | 1 | 16:9, 1920×1080 | §8 | ⬜ do zrobienia |
 | 3f | 2 | Tło Galerii | 1 | 16:9, 1920×1080 | §9 | ⬜ do zrobienia |
 | — | — | Tło Mapy świata (Hub) | 1 | 16:9, 1920×1080 | §2 | ✅ zrobione (`hub_map.jpg`) |
-| 4 | 3 | Szablony regionalne teł miast (tło Huba zależne od aktualnej lokalizacji, `Hub.gd` `REGION_BACKGROUNDS`) | 5 | 16:9, 1920×1080 | §2.1 | ✅ zrobione — wszystkie 6 regionów z `Cities.gd` mają tło: Europa (`region_europe.jpg`), Ameryka Płd./Środk. (`region_tropical_port.jpg`, jeden plik dla obu), Afryka (`region_africa.jpg`), Azja (`region_asia.jpg`), Ameryka Płn. (`region_north_america.jpg`) |
+| 4 | 3 | Szablony regionalne teł miast (`Cities.gd` `REGION_BACKGROUNDS`) | 5 | 16:9, 1920×1080 | §2.1 | ✅ zrobione — zastąpione przez unikalne tła per miasto (wiersz niżej), zostają jako czysty fallback na wypadek nowego miasta bez własnej grafiki: Europa (`region_europe.jpg`), Ameryka Płd./Środk. (`region_tropical_port.jpg`, jeden plik dla obu), Afryka (`region_africa.jpg`), Azja (`region_asia.jpg`), Ameryka Płn. (`region_north_america.jpg`) |
+| 4b | 2 | Unikalne tła **per miasto** (`Cities.gd` `CITY_BACKGROUNDS`, ma priorytet nad tłem regionu) | 18 | 16:9, 1920×1080 | §2.2 | ✅ zrobione — wszystkie 18 miast: Berlin, Paryż, Amsterdam, Lizbona, Londyn, Ankara, Bombaj, Colombo, Mombasa, Duala, Abidżan, Rio, Bogota, Gwatemala, Meksyk, Nowy Jork, Richmond, St. Louis |
 | 5 | — | ~~Ikony pinezek mapy~~ | — | — | §2 | ✅ **rozwiązane w kodzie**, nie generować — Leonardo uparcie robiło pełne sceny zamiast ikon, więc pinezki są teraz rysowane natywnie w Godocie (`MapPin.gd`), bez grafiki |
 | 6 | 3 | Ramka obrazu (do aukcji/galerii) | 1 | 1:1, transparent | §6 | ⬜ do zrobienia |
 | 7 | 3 | Elementy UI ogólne (panel, ramka, ikony statystyk) | ~6 | 1:1, transparent | §10 | ⬜ do zrobienia — **uwaga**, ten sam typ zadania co pinezki (mały, wyizolowany element), może mieć ten sam problem ze "sceną" |

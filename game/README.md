@@ -3,7 +3,8 @@
 Wszystkie ekrany mają już działającą logikę (nie tylko nawigację) —
 plantacje, giełda, dom aukcyjny, szkoła sztuki, wyścigi, galeria. Hub
 pokazuje tylko pasek stanu i nawigację w wąskim panelu bocznym (tło
-zależne od regionu, gdzie aktualnie jesteś); mapa świata z klikalnymi
+unikalne dla każdego z 18 miast — rozpoznawalny zabytek/motyw, np. Big
+Ben w Londynie czy wieża Eiffla w Paryżu); mapa świata z klikalnymi
 pinezkami żyje na osobnym ekranie, otwieranym przyciskiem "Jedź »" — tło
 Huba zwęża się (zoom-out) do pinezki na mapie, a po wybraniu celu leci
 animacja podróży (pociąg w obrębie tego samego regionu, samolot między
@@ -36,10 +37,10 @@ się wywaliło, bardzo ułatwi mi naprawę).
 1. **Start:** po F5 powinno pojawić się menu główne z tłem (kobieta przy
    sztaludze i globusem). Zostaw "Liczba graczy" na 1, tryb łatwy
    odznaczony, kliknij **Nowa gra**.
-2. **Hub:** powinieneś trafić na ekran z tłem regionu i wąskim panelem po
-   prawej (nie na całą szerokość, tak jak w oryginale) z paskiem stanu
-   (gotówka 50000 M, data 01.01.1918, obrazy 0/40) i listą przycisków, w
-   tym **Jedź »**.
+2. **Hub:** powinieneś trafić na ekran z tłem Londynu (Big Ben) i wąskim
+   panelem po prawej (nie na całą szerokość, tak jak w oryginale) z
+   paskiem stanu (gotówka 50000 M, data 01.01.1918, obrazy 0/40) i listą
+   przycisków, w tym **Jedź »**.
 3. **Podróż:** kliknij **Jedź »** — tło Huba powinno skurczyć się i
    "wjechać" w pinezkę na mapie świata, która pojawia się pod spodem (ok.
    1 sekundy animacji), a dopiero potem powinna otworzyć się mapa z ok. 18
