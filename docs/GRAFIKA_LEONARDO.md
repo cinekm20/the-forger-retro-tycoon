@@ -661,7 +661,25 @@ art, Art Deco 1920s illustration style, warm sepia and gold palette with deep gr
 - Przyciski, ramki paneli, ikony waluty, ikony statystyk (kapitał, ekspertyza,
   data), pasek postępu aukcji
 
-**Prompt:**
+**Prompt (ramka menu Huba — priorytet, patrz Plan produkcji wiersz 7):**
+```
+Art Deco ornamental vertical frame border, tall narrow portrait rectangle, elegant gold geometric border ornamentation running along all four edges, symmetrical repeating pattern top and bottom, empty flat transparent center (no text, no scene, no illustration inside — just the border), isolated game UI frame asset, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+Format: 3:4 albo 9:16 (wąski, pionowy — pasuje do panelu menu w prawym
+dolnym rogu Huba), transparent PNG. **Ten sam rodzaj ryzyka co pinezki**
+(mały/wyizolowany element UI) — jeśli Leonardo znowu uparcie zrobi pełną
+scenę zamiast samej ramki mimo poprawionego promptu (`isolated`, `empty
+transparent center`, `no scene, no illustration`), daj znać — dorobimy to
+prościej w kodzie jak MapPin.gd/TravelVehicle.gd (rysowana natywnie
+ramka ze `StyleBoxFlat`/`_draw()`, bez grafiki).
+
+Po wygenerowaniu: użyjemy tego jako `NinePatchRect` (9-slice) za listą
+przycisków w `Hub.gd` — ornamentyka narożników zostaje ostra, a środek
+ramki rozciąga się do dowolnej liczby przycisków (różne miasta pokazują
+różną liczbę opcji menu), bez rozciągania/zniekształcania wzoru.
+
+**Prompt (ogólny, na inne elementy UI — ikony statystyk, pasek postępu):**
 ```
 Art Deco UI panel frame with geometric gold border ornamentation, empty
 center for text, transparent background, mobile game UI element,
