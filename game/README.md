@@ -31,8 +31,10 @@ się wywaliło, bardzo ułatwi mi naprawę).
 1. **Start:** po F5 powinno pojawić się menu główne z tłem (kobieta przy
    sztaludze i globusem). Zostaw "Liczba graczy" na 1, tryb łatwy
    odznaczony, kliknij **Nowa gra**.
-2. **Hub:** powinieneś trafić na ekran z paskiem stanu (gotówka 50000 M,
-   data 01.01.1918, obrazy 0/40) i listą przycisków, w tym **Jedź »**.
+2. **Hub:** powinieneś trafić na ekran z tłem regionu i wąskim panelem po
+   prawej (nie na całą szerokość, tak jak w oryginale) z paskiem stanu
+   (gotówka 50000 M, data 01.01.1918, obrazy 0/40) i listą przycisków, w
+   tym **Jedź »**.
 3. **Podróż:** kliknij **Jedź »** — powinna otworzyć się mapa świata z ok.
    18 kolorowymi pinezkami: jedna **biała** (Twoja aktualna lokalizacja,
    Londyn), reszta złota (miasta plantacyjne) i burgundowa (miasta

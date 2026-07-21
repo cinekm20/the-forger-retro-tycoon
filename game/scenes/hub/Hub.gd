@@ -46,12 +46,18 @@ var travel_button: Button
 
 func _ready() -> void:
 	ScreenHelpers.make_background(self, _get_current_background())
-	var root := ScreenHelpers.make_root(self)
+	## Panel boczny zamiast pełnoekranowego — w oryginale menu i pasek stanu
+	## to małe skrzynki w rogach ekranu, nie zasłaniają całego widoku
+	## (patrz zrzuty ekranu z oryginału). make_root_side() daje ten sam
+	## efekt: wąska kolumna z prawej, reszta tła regionu zostaje odsłonięta.
+	var root := ScreenHelpers.make_root_side(self)
 	ScreenHelpers.make_title(root, "VERMEER")
 
 	turn_label = ScreenHelpers.make_label(root, "")
 	status_label = ScreenHelpers.make_label(root, "")
+	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	travel_status_label = ScreenHelpers.make_label(root, "")
+	travel_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 
 	travel_button = ScreenHelpers.make_button(root, "Jedź »", func(): SceneRouter.goto_scene(SceneRouter.TRAVEL_MAP))
 
