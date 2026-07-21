@@ -34,6 +34,7 @@ func _ready() -> void:
 	_test_players_hotseat_swap()
 	_test_security_bodyguard_and_gangster()
 	_test_travel_vehicle_choice()
+	_test_travel_completes_in_one_animation()
 
 	print("\n=== Wynik: %d/%d testów przeszło ===" % [total - failures, total])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -234,3 +235,30 @@ func _test_travel_vehicle_choice() -> void:
 	Travel.current_city = "london"
 	Travel.start_travel("new_york")
 	_assert(Travel.last_travel_vehicle == Travel.Vehicle.PLANE, "Londyn -> Nowy Jork (inny region) = samolot")
+
+
+## Regresja: TravelAnimation.gd dogrywa Calendar.advance_days() na całą
+## trasę od razu po animacji (patrz komentarz w TravelAnimation.gd) —
+## sprawdza, że to faktycznie kończy podróż, także przy trasie z
+## przesiadką (gdzie Travel._on_day_advanced musi poprawnie rozliczyć
+## "nadmiarowe" dni między etapami).
+func _test_travel_completes_in_one_animation() -> void:
+	print("-- Travel: cała podróż kończy się po jednym Calendar.advance_days --")
+	Travel.reset_new_game()
+	Calendar.reset_new_game()
+	Travel.current_city = "richmond"
+	Travel.route.clear()
+	Travel.start_travel("st_louis")
+	Calendar.advance_days(int(ceil(Travel.last_travel_total_days)))
+	_assert(not Travel.is_traveling(), "Richmond -> St. Louis: podróż zakończona po jednym advance_days")
+	_assert(Travel.current_city == "st_louis", "Travel.current_city zaktualizowany na miasto docelowe")
+
+	# Trasa z przesiadką (Berlin -> St. Louis, patrz _test_cities_route_via_transfer).
+	Travel.reset_new_game()
+	Calendar.reset_new_game()
+	Travel.current_city = "berlin"
+	Travel.route.clear()
+	Travel.start_travel("st_louis")
+	Calendar.advance_days(int(ceil(Travel.last_travel_total_days)))
+	_assert(not Travel.is_traveling(), "Berlin -> St. Louis (z przesiadką): podróż zakończona po jednym advance_days")
+	_assert(Travel.current_city == "st_louis", "Travel.current_city zaktualizowany na miasto docelowe mimo przesiadki")

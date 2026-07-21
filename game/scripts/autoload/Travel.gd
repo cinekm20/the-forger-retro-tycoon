@@ -20,6 +20,7 @@ var days_remaining: float = 0.0
 var last_travel_from: String = ""
 var last_travel_to: String = ""
 var last_travel_vehicle: Vehicle = Vehicle.TRAIN
+var last_travel_total_days: float = 0.0
 
 
 func _ready() -> void:
@@ -64,6 +65,7 @@ func start_travel(destination_city: String) -> bool:
 	last_travel_from = current_city
 	last_travel_to = destination_city
 	last_travel_vehicle = preview["vehicle"]
+	last_travel_total_days = preview["days"]
 
 	var path: Array = preview["path"]
 	route.clear()

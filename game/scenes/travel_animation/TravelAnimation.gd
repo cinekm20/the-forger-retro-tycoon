@@ -8,6 +8,15 @@ extends Control
 ## (albo po "Pomiń") tło miasta docelowego "wchodzi" (zoom-in) z pozycji
 ## pinezki na cały ekran, zanim gra przełączy się na Hub — symetryczne
 ## odbicie zoom-outu z Hub.gd _on_travel_pressed().
+##
+## Animacja = cała podróż: w momencie zakończenia lotu/jazdy dogrywamy
+## Calendar.advance_days() na całą pozostałą długość trasy, więc
+## Travel.current_city zdąży się zaktualizować na miasto docelowe PRZED
+## zoom-inem (inaczej Hub.gd po przełączeniu scen pokazywał tło poprzedniej
+## lokalizacji, bo formalnie gracz jeszcze tam "był" — realny bug zgłoszony
+## przez użytkownika). Dni podróży nadal w pełni naliczają płace/wzrost
+## upraw/kursy akcji jak zwykłe tury — tylko naliczone w jednym momencie
+## zamiast rozbite na kilka kliknięć "Koniec tury".
 
 const ANIMATION_DURATION := 1.8
 const ARRIVAL_ZOOM_DURATION := 0.8
@@ -62,6 +71,22 @@ func _on_finished() -> void:
 	if finished:
 		return
 	finished = true
+
+	## ceil, nie round/floor: Calendar.advance_days() przyjmuje tylko pełne
+	## dni, więc zaokrąglamy w górę, żeby na pewno pokryć całą (często
+	## ułamkową) długość trasy — Travel._on_day_advanced() sam poprawnie
+	## rozlicza nadmiarowe dni przy wieloetapowych trasach z przesiadką.
+	var days_to_advance := int(ceil(Travel.last_travel_total_days))
+	if days_to_advance > 0:
+		Calendar.advance_days(days_to_advance)
+
+	## Ominięcie animacji przy bankructwie/wygranej w trakcie podróży —
+	## normalnie ten check robi Hub.gd po "Koniec tury", ale tu przełączamy
+	## kalendarz sami, więc też sami musimy sprawdzić koniec gry.
+	if GameState.check_game_over():
+		SceneRouter.goto_scene(SceneRouter.ENDING)
+		return
+
 	_play_arrival_zoom_in()
 
 

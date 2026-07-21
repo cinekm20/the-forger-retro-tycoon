@@ -9,7 +9,9 @@ Huba zwęża się (zoom-out) do pinezki na mapie, a po wybraniu celu leci
 animacja podróży (pociąg w obrębie tego samego regionu, samolot między
 regionami/przez ocean) lecąca dokładnie między pinezką startową a
 docelową, po czym tło nowego miasta "wjeżdża" (zoom-in) z tej pinezki z
-powrotem na cały ekran. Menu główne i mapa mają już prawdziwe tło
+powrotem na cały ekran — cała podróż kończy się w trakcie animacji (dni
+naliczają się od razu w całości), nie trzeba klikać "Koniec tury", żeby
+dotrzeć na miejsce. Menu główne i mapa mają już prawdziwe tło
 graficzne, reszta ekranów wciąż na surowym UI Godota (przyciski, etykiety,
 listy). Zapis/odczyt gry, hot-seat multiplayer (1-4 graczy) i pętla
 wygrana/przegrana (kompletna kolekcja / bankructwo / rywal wygrywa
@@ -54,14 +56,16 @@ się wywaliło, bardzo ułatwi mi naprawę).
    starcie, rośnie w połowie drogi, znowu mały tuż przy dotarciu. Zaraz
    potem tło miasta docelowego powinno "wyjechać" z tej samej pinezki na
    cały ekran (odwrotność animacji z kroku wcześniej) i dopiero wtedy
-   wrócić do Hubu ze statusem "Jesteś w: [nowe miasto]". To duża, nowa
-   animacja — jeśli coś tu wygląda źle (skok, migotanie, zły punkt
-   startowy/końcowy), koniecznie daj znać dokładnie na którym etapie.
-   Kliknij **Koniec tury** kilka razy, aż status zmieni się na "Jesteś w:
-   [miasto]" — teraz na liście przycisków powinien pojawić się
-   **Plantacje** (widoczny tylko w miastach plantacyjnych, tak jak w
-   oryginale — poza nimi w ogóle go nie ma na liście, nie jest tylko
-   wyszarzony).
+   wrócić do Hubu — **od razu** ze statusem "Jesteś w: [nowe miasto]" (cała
+   podróż liczy się w trakcie animacji, nie trzeba klikać "Koniec tury",
+   żeby dotrzeć na miejsce — dni podróży i tak w pełni naliczają płace/
+   wzrost upraw/kursy akcji, tylko naliczone w jednym momencie zamiast
+   rozbite na kilka kliknięć) — i przycisk **Plantacje** widoczny na
+   liście (tylko w miastach plantacyjnych, tak jak w oryginale — poza
+   nimi w ogóle go nie ma na liście, nie jest tylko wyszarzony). To duża,
+   nowa animacja — jeśli coś tu wygląda źle (skok, migotanie, zły punkt
+   startowy/końcowy, złe tło po przełączeniu), koniecznie daj znać
+   dokładnie na którym etapie.
 4. **Plantacje:** wejdź, kup kilka pól (klikaj "+" w siatce; pola z "~" to
    rzeka, nie da się ich kupić — pola tuż obok rzeki oznaczone "✓+" po
    zakupie dają podwójny plon), wybierz uprawę (np. Tytoń), ustaw
