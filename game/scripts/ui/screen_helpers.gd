@@ -31,11 +31,22 @@ static func make_root(parent: Control) -> VBoxContainer:
 	return root
 
 
+## Paleta art déco (docs/GRAFIKA_LEONARDO.md — złoto/burgund/sepia).
+const COLOR_GOLD := Color(0.85, 0.65, 0.2)
+const COLOR_GOLD_BRIGHT := Color(1.0, 0.83, 0.4)
+const COLOR_CREAM := Color(0.95, 0.88, 0.72)
+const COLOR_BURGUNDY_DARK := Color(0.13, 0.04, 0.06)
+
+
 static func make_title(root: VBoxContainer, text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", 32)
+	label.add_theme_font_size_override("font_size", 34)
+	label.add_theme_color_override("font_color", COLOR_GOLD_BRIGHT)
+	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
+	label.add_theme_constant_override("shadow_offset_x", 2)
+	label.add_theme_constant_override("shadow_offset_y", 2)
 	root.add_child(label)
 	return label
 
@@ -44,15 +55,57 @@ static func make_label(root: VBoxContainer, text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_color_override("font_color", COLOR_CREAM)
+	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
+	label.add_theme_constant_override("shadow_offset_x", 1)
+	label.add_theme_constant_override("shadow_offset_y", 1)
 	root.add_child(label)
 	return label
+
+
+## Przyciski w stylu art déco (ciemny burgund + złota ramka) zamiast
+## domyślnego szarego wyglądu Godota — jeden wspólny styl dla całej gry.
+static func _style_button(btn: Button) -> void:
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(COLOR_BURGUNDY_DARK.r, COLOR_BURGUNDY_DARK.g, COLOR_BURGUNDY_DARK.b, 0.88)
+	normal.border_color = COLOR_GOLD
+	normal.set_border_width_all(2)
+	normal.set_corner_radius_all(6)
+	normal.content_margin_left = 16
+	normal.content_margin_right = 16
+	normal.content_margin_top = 10
+	normal.content_margin_bottom = 10
+
+	var hover := normal.duplicate()
+	hover.bg_color = Color(0.28, 0.09, 0.13, 0.92)
+	hover.border_color = COLOR_GOLD_BRIGHT
+
+	var pressed := normal.duplicate()
+	pressed.bg_color = Color(0.06, 0.02, 0.03, 0.95)
+	pressed.border_color = COLOR_GOLD_BRIGHT
+
+	var disabled := normal.duplicate()
+	disabled.bg_color = Color(0.2, 0.2, 0.2, 0.55)
+	disabled.border_color = Color(0.45, 0.45, 0.45)
+
+	btn.add_theme_stylebox_override("normal", normal)
+	btn.add_theme_stylebox_override("hover", hover)
+	btn.add_theme_stylebox_override("pressed", pressed)
+	btn.add_theme_stylebox_override("focus", hover)
+	btn.add_theme_stylebox_override("disabled", disabled)
+	btn.add_theme_color_override("font_color", COLOR_CREAM)
+	btn.add_theme_color_override("font_hover_color", COLOR_GOLD_BRIGHT)
+	btn.add_theme_color_override("font_pressed_color", COLOR_GOLD_BRIGHT)
+	btn.add_theme_color_override("font_disabled_color", Color(0.6, 0.6, 0.6))
+	btn.add_theme_font_size_override("font_size", 18)
 
 
 static func make_button(root: VBoxContainer, text: String, on_pressed: Callable) -> Button:
 	var btn := Button.new()
 	btn.text = text
-	btn.custom_minimum_size = Vector2(280, 44)
+	btn.custom_minimum_size = Vector2(280, 46)
 	btn.pressed.connect(on_pressed)
+	_style_button(btn)
 	root.add_child(btn)
 	return btn
 
