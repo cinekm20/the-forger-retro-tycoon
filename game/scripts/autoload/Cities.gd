@@ -146,10 +146,29 @@ const REGION_BACKGROUNDS := {
 }
 const FALLBACK_BACKGROUND := "res://art/backgrounds/hub_map.jpg"
 
+## Tła unikalne dla konkretnego miasta (docs/GRAFIKA_LEONARDO.md §2.2) —
+## docelowo każde z 18 miast dostaje własną, rozpoznawalną grafikę
+## (charakterystyczny zabytek/ulica), zamiast dzielenia jednego szablonu
+## regionalnego z kilkoma innymi miastami. Uzupełniaj stopniowo w miarę
+## generowania — miasto bez wpisu tutaj po prostu spada do
+## get_region_background(), więc nic nie trzeba zmieniać w kodzie.
+## PUSTE na razie — dopisuj wpisy dopiero, gdy plik grafiki faktycznie
+## istnieje w art/backgrounds/ (wpis wskazujący na nieistniejący plik
+## wywali load() przy pierwszej wizycie w tym mieście).
+const CITY_BACKGROUNDS := {}
+
 
 func get_region_background(city_id: String) -> String:
 	var region: String = CITIES.get(city_id, {}).get("region", "")
 	return REGION_BACKGROUNDS.get(region, FALLBACK_BACKGROUND)
+
+
+## Preferuje tło konkretnego miasta (CITY_BACKGROUNDS), spada do tła
+## regionalnego, jeśli to miasto nie ma jeszcze własnej grafiki. To
+## docelowa funkcja do wywoływania z Hub.gd/TravelAnimation.gd — zastępuje
+## get_region_background() jako główne źródło tła lokalizacji.
+func get_city_background(city_id: String) -> String:
+	return CITY_BACKGROUNDS.get(city_id, get_region_background(city_id))
 
 
 ## Wszyscy sąsiedzi miasta z bezpośrednią trasą (w obie strony macierzy).

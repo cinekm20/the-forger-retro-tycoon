@@ -95,7 +95,7 @@ func _play_arrival_zoom_in() -> void:
 	var viewport_size := get_viewport_rect().size
 
 	var arrival_bg := TextureRect.new()
-	arrival_bg.texture = load(Cities.get_region_background(Travel.last_travel_to))
+	arrival_bg.texture = load(Cities.get_city_background(Travel.last_travel_to))
 	arrival_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	arrival_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	arrival_bg.stretch_mode = TextureRect.STRETCH_SCALE

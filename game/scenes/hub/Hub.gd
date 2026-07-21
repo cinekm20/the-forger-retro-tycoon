@@ -35,7 +35,7 @@ var hub_overlay: ColorRect
 
 
 func _ready() -> void:
-	var bg_layers := ScreenHelpers.make_background_with_overlay(self, Cities.get_region_background(Travel.current_city))
+	var bg_layers := ScreenHelpers.make_background_with_overlay(self, Cities.get_city_background(Travel.current_city))
 	hub_bg = bg_layers["background"]
 	hub_overlay = bg_layers["overlay"]
 
