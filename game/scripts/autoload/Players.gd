@@ -41,6 +41,14 @@ func is_multiplayer() -> bool:
 	return player_count > 1
 
 
+func set_player_name(index: int, player_name: String) -> void:
+	if index < 0 or index >= player_names.size():
+		return
+	var trimmed := player_name.strip_edges()
+	if trimmed != "":
+		player_names[index] = trimmed
+
+
 func active_name() -> String:
 	return player_names[active_index] if active_index < player_names.size() else "Gracz"
 
