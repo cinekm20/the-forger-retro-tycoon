@@ -33,17 +33,22 @@ var painting_texture_rect: TextureRect
 var bid_btn: Button
 var resolve_btn: Button
 
-## Większy niż poprzednio (220) — użytkownik zgłosił, że obraz musi być
-## "super widoczny". Bez oprawionej ramki dookoła (patrz _build_active_auction_ui)
-## nie trzeba już odejmować miejsca na gruby border/padding, więc może być
-## jeszcze większy niż przy poprzedniej, oprawionej wersji.
-const PAINTING_DISPLAY_SIZE := Vector2(380, 380)
+## Większy niż pierwotne 220 — użytkownik zgłosił, że obraz musi być "super
+## widoczny". Nie większy niż 300: ekran nie ma już ramki+ScrollContainer
+## (użytkownik: "nie ma być ramki na cały ekran"), więc treść musi zmieścić
+## się w jednym, niescrollowanym widoku bez przycinania dolnych przycisków.
+const PAINTING_DISPLAY_SIZE := Vector2(300, 300)
 
 
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/auction_house.jpg")
 
-	var root := ScreenHelpers.make_root(self)
+	## use_menu_frame=false: użytkownik zgłosił, że ozdobna ramka na cały
+	## ekran (ta sama co w Hub/TravelMap) tu tylko przeszkadzała — ma zostać
+	## WYŁĄCZNIE oprawiona skrzynka do podbijania oferty w prawym dolnym rogu
+	## (make_root_bottom w _build_active_auction_ui, osobny wywołanie, dalej
+	## z use_menu_frame=true), reszta ekranu leży bezpośrednio na tle.
+	var root := ScreenHelpers.make_root(self, false)
 	ScreenHelpers.make_title(root, "Dom aukcyjny")
 	ScreenHelpers.make_turn_indicator(root)
 
@@ -242,10 +247,12 @@ func _update_labels() -> void:
 	var texture_path := Paintings.get_texture_path(current_number)
 	painting_texture_rect.texture = load(texture_path) if ResourceLoader.exists(texture_path) else null
 
+	## visible = false (nie tylko pusty tekst) — bez ramki+ScrollContainer ten
+	## ekran ma ograniczoną wysokość, więc pusty wiersz niepotrzebnie zabierałby
+	## miejsce (separacja VBoxContainer nadal by się liczyła).
+	warning_label.visible = current_forgery_warning
 	if current_forgery_warning:
 		warning_label.text = "⚠ Szkoła Sztuki ostrzega: ten numer już masz w kolekcji — to może być podróbka!"
-	else:
-		warning_label.text = ""
 
 	var leader_text := "nikt"
 	if current_leader == "player":
