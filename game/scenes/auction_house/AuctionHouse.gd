@@ -28,13 +28,16 @@ var money_label: Label
 var warning_label: Label
 var status_label: Label
 var timer_label: Label
+var timer_bar: ProgressBar
 var painting_texture_rect: TextureRect
 var bid_btn: Button
 var resolve_btn: Button
 
 ## Większy niż poprzednio (220) — użytkownik zgłosił, że obraz musi być
-## "super widoczny", nie tylko odznaczony małą ramką wśród opisów.
-const PAINTING_DISPLAY_SIZE := Vector2(320, 320)
+## "super widoczny". Bez oprawionej ramki dookoła (patrz _build_active_auction_ui)
+## nie trzeba już odejmować miejsca na gruby border/padding, więc może być
+## jeszcze większy niż przy poprzedniej, oprawionej wersji.
+const PAINTING_DISPLAY_SIZE := Vector2(380, 380)
 
 
 func _ready() -> void:
@@ -56,34 +59,30 @@ func _ready() -> void:
 	_start_new_auction()
 
 
-## Buduje UI aktywnej licytacji: duży obraz w oprawionej ramce w głównej
-## karcie, a przyciski podbijania + malejący licznik czasu w OSOBNYM pasku
-## przyklejonym do prawego dolnego rogu ekranu (make_root_bottom) — zgodnie
-## z prośbą użytkownika, żeby akcje licytacji nie leżały wymieszane w
-## pionowej liście opisów, tylko osobno "na dole albo z boku".
+## Buduje UI aktywnej licytacji. Nazwa/opis obrazu to oprawiona skrzynka
+## PRZY GÓRZE ekranu (obok skrzynki terminu aukcji) — użytkownik zgłosił, że
+## nieoprawiony tekst pod obrazem nachodził na pasek akcji w prawym dolnym
+## rogu. Sam obraz NIE ma już grubej złotej ramki wokół (użytkownik: "nie
+## powinna być taka ogromna rama") — leży bezpośrednio na tle karty, żeby
+## wyglądał jak wstawiony w scenę, a nie zamknięty w osobnym pudełku. Malejący
+## czas na podbicie + przyciski są w OSOBNYM pasku przyklejonym do prawego
+## dolnego rogu ekranu (make_root_bottom) — zgodnie z prośbą użytkownika, żeby
+## akcje licytacji nie leżały wymieszane w pionowej liście opisów.
 func _build_active_auction_ui(root: VBoxContainer) -> void:
-	var painting_box := StyleBoxFlat.new()
-	painting_box.bg_color = Color(ScreenHelpers.COLOR_BURGUNDY_DARK.r, ScreenHelpers.COLOR_BURGUNDY_DARK.g, ScreenHelpers.COLOR_BURGUNDY_DARK.b, 0.85)
-	painting_box.border_color = ScreenHelpers.COLOR_GOLD
-	painting_box.set_border_width_all(4)
-	painting_box.set_corner_radius_all(4)
-	painting_box.content_margin_left = 10
-	painting_box.content_margin_right = 10
-	painting_box.content_margin_top = 10
-	painting_box.content_margin_bottom = 10
-	var painting_panel := PanelContainer.new()
-	painting_panel.add_theme_stylebox_override("panel", painting_box)
-	painting_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	root.add_child(painting_panel)
+	painting_label = ScreenHelpers.make_info_box(root, "")
+	painting_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	painting_label.custom_minimum_size = Vector2(760, 0)
+
+	var painting_center := CenterContainer.new()
+	root.add_child(painting_center)
 
 	painting_texture_rect = TextureRect.new()
 	painting_texture_rect.custom_minimum_size = PAINTING_DISPLAY_SIZE
 	painting_texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	painting_texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	painting_texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	painting_panel.add_child(painting_texture_rect)
+	painting_center.add_child(painting_texture_rect)
 
-	painting_label = ScreenHelpers.make_label(root, "")
 	warning_label = ScreenHelpers.make_label(root, "")
 
 	var bid_row := HBoxContainer.new()
@@ -99,6 +98,25 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	var action_root := ScreenHelpers.make_root_bottom(self, true, 340.0, true)
 	timer_label = ScreenHelpers.make_label(action_root, "")
 	timer_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
+
+	timer_bar = ProgressBar.new()
+	timer_bar.custom_minimum_size = Vector2(280, 20)
+	timer_bar.show_percentage = false
+	timer_bar.min_value = 0.0
+	timer_bar.max_value = BID_TIME_LIMIT
+	timer_bar.step = 0.01
+	var bar_bg := StyleBoxFlat.new()
+	bar_bg.bg_color = Color(ScreenHelpers.COLOR_BURGUNDY_DARK.r, ScreenHelpers.COLOR_BURGUNDY_DARK.g, ScreenHelpers.COLOR_BURGUNDY_DARK.b, 0.9)
+	bar_bg.border_color = ScreenHelpers.COLOR_GOLD
+	bar_bg.set_border_width_all(2)
+	bar_bg.set_corner_radius_all(4)
+	var bar_fill := StyleBoxFlat.new()
+	bar_fill.bg_color = ScreenHelpers.COLOR_GOLD_BRIGHT
+	bar_fill.set_corner_radius_all(4)
+	timer_bar.add_theme_stylebox_override("background", bar_bg)
+	timer_bar.add_theme_stylebox_override("fill", bar_fill)
+	action_root.add_child(timer_bar)
+
 	bid_btn = ScreenHelpers.make_button(action_root, "Podbij (+10%)", _on_bid_pressed)
 	resolve_btn = ScreenHelpers.make_button(action_root, "Zakończ rundę", _on_resolve_round_pressed)
 
@@ -111,14 +129,17 @@ func _process(delta: float) -> void:
 		bid_time_remaining = 0.0
 		auction_active = false
 		timer_label.text = "Czas minął!"
+		timer_bar.value = 0.0
 		_on_time_expired()
 	else:
 		timer_label.text = "Czas na podbicie: %d s" % int(ceil(bid_time_remaining))
+		timer_bar.value = bid_time_remaining
 
 
 func _start_bid_timer() -> void:
 	bid_time_remaining = BID_TIME_LIMIT
 	auction_active = true
+	timer_bar.value = BID_TIME_LIMIT
 
 
 func _on_time_expired() -> void:
@@ -174,6 +195,7 @@ func _resolve_auction() -> void:
 	bid_btn.disabled = true
 	resolve_btn.disabled = true
 	timer_label.text = ""
+	timer_bar.value = 0.0
 
 	if current_leader == "player":
 		Economy.spend(current_bid)
