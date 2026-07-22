@@ -18,6 +18,7 @@ var trade_status_label: Label
 ## DEN 1.1.1918" / "50000 M") — ten sam trik co Hub.gd _build_top_row,
 ## współdzielony przez ScreenHelpers.make_corner_status_row.
 func _ready() -> void:
+	ScreenHelpers.make_background(self, "res://art/backgrounds/stock_market.jpg")
 	var corner := ScreenHelpers.make_corner_status_row(self, "", "")
 	location_label = corner["left"]
 	money_label = corner["right"]

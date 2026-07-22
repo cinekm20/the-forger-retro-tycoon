@@ -700,6 +700,11 @@ Art Deco 1920s illustration style, warm sepia and gold palette with deep green, 
 
 ## Gotowe prompty do wklejenia — priorytet 2 (tła 6 pozostałych ekranów)
 
+✅ **Wszystkie 6 gotowe i podpięte w kodzie** (Plantacje, Dom aukcyjny, Giełda,
+Wyścigi, Szkoła sztuki, Galeria) — patrz status w tabeli "Plan produkcji"
+niżej. Prompty zostają tu jako zapis/punkt odniesienia na wypadek potrzeby
+regeneracji.
+
 Poniżej **pełne, złożone prompty** (base style tag już doklejony na końcu) —
 kopiuj-wklej całość bezpośrednio do pola "Prompt" w Leonardo, nic więcej nie
 trzeba dopisywać. Do pola "Negative Prompt" wklej treść z sekcji "Negative
@@ -745,9 +750,27 @@ Art academy studio interior, easels, reference paintings on walls, warm natural 
 Art Deco private gallery hall interior, marble floor, empty wall space for hanging paintings, soft gallery lighting, elegant benches, game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
+### 7. Spichlerz (magazyn zebranych plonów) — NOWY ekran, brak grafiki
+
+Zbiorczy widok zapasów ze wszystkich plantacji gracza (4 "silosy":
+kawa/tytoń/herbata/kakao), patrz zrzut ekranu oryginału podesłany przez
+użytkownika ("KAFFEE/TABAK/TEE/KAKAO" + menu ANKAUF/TRANSPORT/TERMINE/
+AUSGANG). Na razie bez tła (`scenes/warehouse/Warehouse.gd`) — same silosy
+(poziom wypełnienia zapasami) są już rozwiązane natywnie w kodzie
+(kolorowe `ColorRect` w ramce, patrz `Warehouse.gd`), więc generować trzeba
+tylko TŁO sceny, nie same silosy.
+
+**Prompt (tło):**
+```
+1920s colonial trading warehouse interior, wooden crop storage silos and sacks along the walls, tall arched windows, warm afternoon light, game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+Docelowa nazwa pliku: `game/art/backgrounds/warehouse.jpg` — po podesłaniu
+podepnę tak samo jak resztę (`ScreenHelpers.make_background` na początku
+`Warehouse.gd::_ready()`).
+
 Jak wygenerujesz i wybierzesz najlepsze — wyślij mi je (tak jak menu główne i
-mapę), a podepnę je w kodzie tych sześciu ekranów tym samym sposobem, co przy
-menu głównym/Hubie.
+mapę), a podepnę je w kodzie.
 
 ## Plan produkcji — pełna lista do odhaczania
 
@@ -759,12 +782,13 @@ Leonardo, żeby mieć z czego wybrać).
 |---|---|---|---|---|---|---|
 | 1 | 1 | Obraz referencyjny stylu / tło menu głównego | 1 | 16:9, docelowo 1920×1080 | §1 | ✅ zrobione (`main_menu_title.jpg`) |
 | 2 | 1 | Logo "VERMEER" | 1 | dowolne, PNG transparent | §1 | ⏸ zastąpione na razie tekstem w kodzie (Label), nie pilne |
-| 3a | **2 (następne)** | Tło Plantacji | 1 | 16:9, 1920×1080 | §3 | ⬜ do zrobienia |
-| 3b | **2 (następne)** | Tło Domu aukcyjnego | 1 | 16:9, 1920×1080 | §6 | ⬜ do zrobienia |
-| 3c | 2 | Tło Giełdy | 1 | 16:9, 1920×1080 | §4 | ⬜ do zrobienia |
-| 3d | 2 | Tło Wyścigów | 1 | 16:9, 1920×1080 | §5 | ⬜ do zrobienia |
-| 3e | 2 | Tło Szkoły sztuki | 1 | 16:9, 1920×1080 | §8 | ⬜ do zrobienia |
-| 3f | 2 | Tło Galerii | 1 | 16:9, 1920×1080 | §9 | ⬜ do zrobienia |
+| 3a | 2 | Tło Plantacji | 1 | 16:9, 1920×1080 | §3 | ✅ zrobione i podpięte (`plantation.jpg`) |
+| 3b | 2 | Tło Domu aukcyjnego | 1 | 16:9, 1920×1080 | §6 | ✅ zrobione i podpięte (`auction_house.jpg`) |
+| 3c | 2 | Tło Giełdy | 1 | 16:9, 1920×1080 | §4 | ✅ zrobione i podpięte (`stock_market.jpg`) |
+| 3d | 2 | Tło Wyścigów | 1 | 16:9, 1920×1080 | §5 | ✅ zrobione i podpięte (`races.jpg`) |
+| 3e | 2 | Tło Szkoły sztuki | 1 | 16:9, 1920×1080 | §8 | ✅ zrobione i podpięte (`art_school.jpg`) |
+| 3f | 2 | Tło Galerii | 1 | 16:9, 1920×1080 | §9 | ✅ zrobione i podpięte (`gallery.jpg`) |
+| 3g | **2 (następne)** | Tło Spichlerza (nowy ekran, patrz §7 w sekcji priorytet 2) | 1 | 16:9, 1920×1080 | §7 | ⬜ do zrobienia (`warehouse.jpg`) |
 | — | — | Tło Mapy świata (Hub) | 1 | 16:9, 1920×1080 | §2 | ✅ zrobione (`hub_map.jpg`) |
 | 4 | 3 | Szablony regionalne teł miast (`Cities.gd` `REGION_BACKGROUNDS`) | 5 | 16:9, 1920×1080 | §2.1 | ✅ zrobione — zastąpione przez unikalne tła per miasto (wiersz niżej), zostają jako czysty fallback na wypadek nowego miasta bez własnej grafiki: Europa (`region_europe.jpg`), Ameryka Płd./Środk. (`region_tropical_port.jpg`, jeden plik dla obu), Afryka (`region_africa.jpg`), Azja (`region_asia.jpg`), Ameryka Płn. (`region_north_america.jpg`) |
 | 4b | 2 | Unikalne tła **per miasto** (`Cities.gd` `CITY_BACKGROUNDS`, ma priorytet nad tłem regionu) | 18 | 16:9, 1920×1080 | §2.2 | ✅ zrobione — wszystkie 18 miast: Berlin, Paryż, Amsterdam, Lizbona, Londyn, Ankara, Bombaj, Colombo, Mombasa, Duala, Abidżan, Rio, Bogota, Gwatemala, Meksyk, Nowy Jork, Richmond, St. Louis |

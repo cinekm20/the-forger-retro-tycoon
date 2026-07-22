@@ -16,6 +16,7 @@ var worker_spin: SpinBox
 
 
 func _ready() -> void:
+	ScreenHelpers.make_background(self, "res://art/backgrounds/plantation.jpg")
 	var root := ScreenHelpers.make_root(self)
 
 	## Siatka (16x16) po LEWEJ, wszystkie guziki/informacje po PRAWEJ, jeden

@@ -17,6 +17,7 @@ var info_label: Label
 
 
 func _ready() -> void:
+	ScreenHelpers.make_background(self, "res://art/backgrounds/races.jpg")
 	var root := ScreenHelpers.make_root(self)
 	ScreenHelpers.make_title(root, "Wyścigi konne")
 	ScreenHelpers.make_turn_indicator(root)
