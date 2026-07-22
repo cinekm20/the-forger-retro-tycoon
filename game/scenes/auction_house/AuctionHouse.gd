@@ -118,7 +118,7 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	status_label = ScreenHelpers.make_label(root, "")
 	ScreenHelpers.make_back_button(root)
 
-	var action_root := ScreenHelpers.make_root_bottom(self, true, 340.0, true)
+	var action_root := ScreenHelpers.make_root_bottom(self, true, 380.0, true)
 	timer_label = ScreenHelpers.make_label(action_root, "")
 	timer_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
 
@@ -303,4 +303,11 @@ func _update_labels() -> void:
 	elif current_leader != "":
 		leader_text = AIPlayers.get_rival(current_leader)["name"]
 	bid_label.text = "Oferta: %.0f M\n(prowadzi: %s)" % [current_bid, leader_text]
+
+	## Jawna zapowiedź, co się stanie, gdy licznik dobiegnie końca — tester
+	## zgłosił, że wygrana po prostu "sama się" pojawiła bez ostrzeżenia, gdy
+	## tylko czekał (mechanika była zamierzona — czas, który mija bez reakcji
+	## rywali, oznacza wygraną — ale bez zapowiedzi wyglądała na błąd).
+	if current_leader == "player":
+		bid_label.text += "\nJeśli nikt Cię nie przebije do końca czasu — wygrywasz!"
 	money_label.text = "Gotówka: %.0f M" % Economy.player_money

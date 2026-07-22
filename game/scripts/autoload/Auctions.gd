@@ -10,6 +10,14 @@ extends Node
 const MIN_DAYS_AHEAD := 4
 const MAX_DAYS_AHEAD := 12
 
+## Ile dni po terminie aukcja jeszcze "czeka" (gdyby gracz akurat dojeżdżał),
+## zanim uznajemy ją za przegapioną i losujemy nowy termin automatycznie —
+## bez tego, jeśli gracz po prostu stał w miejscu i nie odwiedził miasta
+## aukcji, wyświetlana data następnej aukcji zostawała na zawsze w przeszłości
+## (zgłoszone przez testera: "aktualną datę mam np. 27 stycznia, a poniżej
+## informacja, że następna aukcja to 20 stycznia").
+const MISSED_GRACE_DAYS := 3
+
 var next_auction_city: String = ""
 var next_auction_day: int = 0
 
@@ -21,9 +29,19 @@ var next_auction_day: int = 0
 var current_painting_number: int = -1
 
 
+func _ready() -> void:
+	Calendar.day_advanced.connect(_on_day_advanced)
+
+
 func reset_new_game() -> void:
 	current_painting_number = -1
 	_pick_new_schedule(0)
+
+
+func _on_day_advanced(_days_elapsed: int, current_day: int) -> void:
+	if next_auction_city != "" and current_day > next_auction_day + MISSED_GRACE_DAYS:
+		current_painting_number = -1
+		_pick_new_schedule(current_day)
 
 
 func _pick_new_schedule(from_day: int) -> void:

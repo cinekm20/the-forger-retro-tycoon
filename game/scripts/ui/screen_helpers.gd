@@ -31,7 +31,10 @@ static func make_background_with_overlay(parent: Control, texture_path: String) 
 
 
 const MenuFrameScript := preload("res://scripts/ui/MenuFrame.gd")
-const SIDE_PANEL_WIDTH := 320.0
+## 380 (nie 320) — dopasowane do większych przycisków z make_button (320px
+## min. szerokości) + CONTENT_INSET_WITH_FRAME z obu stron, żeby przyciski
+## boczne (Hub.gd) mieściły się w panelu zamiast go rozpychać.
+const SIDE_PANEL_WIDTH := 380.0
 ## Odstęp treści od narysowanej krawędzi MenuFrame — patrz make_root_side.
 const CONTENT_INSET_WITH_FRAME := 26.0
 
@@ -313,6 +316,12 @@ static func make_info_box(root: Container, text: String, min_width: float = 0.0,
 static func make_corner_status_row(parent: Control, left_text: String, right_text: String) -> Dictionary:
 	var row := HBoxContainer.new()
 	row.set_anchors_preset(Control.PRESET_FULL_RECT)
+	## Margines od krawędzi ekranu — patrz ten sam fix w Hub.gd _build_top_row
+	## (bez niego skrzynka w prawym rogu ucinała się na telefonach z
+	## zaokrąglonymi rogami/notchem).
+	row.offset_left = 16
+	row.offset_right = -16
+	row.offset_top = 12
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(row)
 
@@ -369,10 +378,10 @@ static func _style_button(btn: Button) -> void:
 	normal.border_color = COLOR_GOLD
 	normal.set_border_width_all(2)
 	normal.set_corner_radius_all(6)
-	normal.content_margin_left = 16
-	normal.content_margin_right = 16
-	normal.content_margin_top = 10
-	normal.content_margin_bottom = 10
+	normal.content_margin_left = 20
+	normal.content_margin_right = 20
+	normal.content_margin_top = 14
+	normal.content_margin_bottom = 14
 
 	var hover := normal.duplicate()
 	hover.bg_color = Color(0.28, 0.09, 0.13, 0.92)
@@ -395,13 +404,16 @@ static func _style_button(btn: Button) -> void:
 	btn.add_theme_color_override("font_hover_color", COLOR_GOLD_BRIGHT)
 	btn.add_theme_color_override("font_pressed_color", COLOR_GOLD_BRIGHT)
 	btn.add_theme_color_override("font_disabled_color", Color(0.6, 0.6, 0.6))
-	btn.add_theme_font_size_override("font_size", 18)
+	btn.add_theme_font_size_override("font_size", 21)
 
 
+## Rozmiar/czcionka podniesione z (280, 46)/18px — tester zgłosił, że
+## przyciski były za małe, mimo że na większości ekranów było sporo wolnego
+## miejsca dookoła nich.
 static func make_button(root: VBoxContainer, text: String, on_pressed: Callable) -> Button:
 	var btn := Button.new()
 	btn.text = text
-	btn.custom_minimum_size = Vector2(280, 46)
+	btn.custom_minimum_size = Vector2(320, 58)
 	btn.pressed.connect(on_pressed)
 	_style_button(btn)
 	root.add_child(btn)

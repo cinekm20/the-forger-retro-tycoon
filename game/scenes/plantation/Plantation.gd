@@ -8,6 +8,7 @@ var plantation_index: int = -1
 
 var grid_container: GridContainer
 var info_label: Label
+var harvest_status_label: Label
 var crop_option: OptionButton
 var worker_spin: SpinBox
 
@@ -16,6 +17,14 @@ func _ready() -> void:
 	var root := ScreenHelpers.make_root(self)
 	ScreenHelpers.make_title(root, "Plantacje")
 	ScreenHelpers.make_turn_indicator(root)
+
+	## Krótka legenda — bez tego nie było jasne, co robią pola siatki ani
+	## przyciski (zgłoszone przez testera: "nie bardzo wiadomo co tam robić").
+	ScreenHelpers.make_label(
+		root,
+		"~ rzeka (niedostępna) · + wolne pole (dotknij, by kupić) · ✓ Twoje pole (✓+ = przy rzece, większy plon)\n" +
+		"Wybierz uprawę i liczbę robotników, potem \"Zbierz plony\" (raz na jakiś czas) i wyślij do sprzedaży.",
+	)
 
 	var city_option := OptionButton.new()
 	for city_id in Cities.get_plantation_cities():
@@ -66,6 +75,8 @@ func _ready() -> void:
 	sell_btn.pressed.connect(_on_sell_pressed)
 	action_row.add_child(sell_btn)
 
+	harvest_status_label = ScreenHelpers.make_label(root, "")
+
 	ScreenHelpers.make_back_button(root)
 
 	if Cities.get_plantation_cities().size() > 0:
@@ -81,6 +92,21 @@ func _on_city_selected(index: int) -> void:
 			break
 	if plantation_index == -1:
 		plantation_index = PlayerPlantations.found_plantation(selected_city)
+
+	## Bez tego pola "Robotnicy"/"Uprawa" zawsze pokazywały wartość domyślną
+	## (0 / pierwsza uprawa) przy wejściu na ten ekran, niezależnie od tego,
+	## co faktycznie zapisano dla tej plantacji — tester zgłosił, że po
+	## powrocie z Hub liczba robotników "znowu wynosi 0", mimo że w danych
+	## gry nadal była zapamiętana poprawnie. set_value_no_signal/select() nie
+	## wywołują value_changed/item_selected, więc nie nadpisują tego, co
+	## właśnie odczytaliśmy.
+	var plantation: Dictionary = PlayerPlantations.plantations[plantation_index]
+	worker_spin.set_value_no_signal(plantation["workers"])
+	var crop_index: int = Crops.CROPS.find(plantation["crop"])
+	if crop_index != -1:
+		crop_option.select(crop_index)
+
+	harvest_status_label.text = ""
 	_rebuild_grid()
 	_update_info()
 
@@ -121,7 +147,15 @@ func _on_workers_changed(value: float) -> void:
 
 
 func _on_harvest_pressed() -> void:
-	PlayerPlantations.harvest(plantation_index)
+	## Widoczna informacja o wyniku — wcześniej przycisk nic nie pokazywał,
+	## więc kliknięcie wyglądało, jakby nic się nie działo (zgłoszone przez
+	## testera), nawet gdy zbiory faktycznie się liczyły (albo świadomie
+	## wynosiły 0, bo od poprzednich zbiorów nie minął jeszcze żaden dzień).
+	var amount := PlayerPlantations.harvest(plantation_index)
+	if amount > 0:
+		harvest_status_label.text = "Zebrano: %d jednostek." % amount
+	else:
+		harvest_status_label.text = "Nic do zebrania — brak uprawy, robotników albo nie minął jeszcze czas od ostatnich zbiorów."
 	_update_info()
 
 
@@ -132,8 +166,12 @@ func _on_sell_pressed() -> void:
 
 func _update_info() -> void:
 	var plantation: Dictionary = PlayerPlantations.plantations[plantation_index]
-	info_label.text = "Gotówka: %.0f M | Pola: %d | Zboże w magazynie: %d" % [
+	var crop: String = plantation["crop"]
+	var crop_name: String = Crops.CROP_NAMES.get(crop, "brak") if crop != "" else "brak"
+	info_label.text = "Gotówka: %.0f M | Pola: %d | Uprawa: %s | Robotnicy: %d | Zboże w magazynie: %d" % [
 		Economy.player_money,
 		PlayerPlantations.get_owned_tile_count(plantation_index),
+		crop_name,
+		int(plantation["workers"]),
 		plantation["stored_goods"],
 	]

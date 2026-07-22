@@ -86,6 +86,13 @@ func _ready() -> void:
 func _build_top_row() -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.set_anchors_preset(Control.PRESET_FULL_RECT)
+	## Margines od krawędzi ekranu — bez niego skrzynka gotówki (prawy górny
+	## róg) leżała dosłownie na samej krawędzi viewportu, więc na telefonie
+	## z zaokrąglonymi rogami/notchem część liczby wypadała poza widoczny
+	## obszar (zgłoszone przez testera: "nie widać całej liczby").
+	row.offset_left = 16
+	row.offset_right = -16
+	row.offset_top = 12
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_theme_constant_override("separation", 16)
 	add_child(row)

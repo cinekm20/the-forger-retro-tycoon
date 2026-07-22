@@ -39,6 +39,9 @@ func _on_train_pressed() -> void:
 
 
 func _update_info() -> void:
-	info_label.text = "Eksperckość: %.0f%% | Gotówka: %.0f M | Data: %s" % [
+	## Jawnie wypisane, co eksperckość robi (a czego NIE robi) — tester
+	## zgłosił, że spodziewał się dokładniejszej szacowanej wartości obrazu
+	## podczas aukcji i nie widział różnicy, bo to nie jest jej działanie.
+	info_label.text = "Eksperckość: %.0f%% — zwiększa szansę na wczesne ostrzeżenie o podróbce w Domu aukcyjnym (NIE wpływa na szacowaną wartość obrazu)\nGotówka: %.0f M | Data: %s" % [
 		Paintings.expertise * 100.0, Economy.player_money, Calendar.get_date_string(),
 	]

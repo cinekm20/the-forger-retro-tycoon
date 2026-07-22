@@ -10,6 +10,7 @@ var crop_rows_container: VBoxContainer
 var contracts_label: Label
 var location_label: Label
 var money_label: Label
+var trade_status_label: Label
 
 
 ## Skrzynki lokalizacja/data (lewy górny róg) i gotówka (prawy górny róg)
@@ -34,6 +35,8 @@ func _ready() -> void:
 	rows_container.add_theme_constant_override("h_separation", 20)
 	rows_container.add_theme_constant_override("v_separation", 16)
 	root.add_child(rows_container)
+
+	trade_status_label = ScreenHelpers.make_label(root, "")
 
 	ScreenHelpers.make_label(root, "TODO: wykres cen w czasie")
 
@@ -114,14 +117,26 @@ func _rebuild_rows() -> void:
 		btn_row.add_child(sell_btn)
 
 
+## Widoczna informacja o wyniku transakcji — wcześniej przycisk nic nie
+## pokazywał przy nieudanym zakupie (np. za mało gotówki), więc wyglądało to,
+## jakby stan gotówki "się nie aktualizował" (zgłoszone przez testera),
+## mimo że transakcja po prostu nie doszła do skutku.
 func _on_buy_pressed(company_id: String) -> void:
-	ShippingCompanies.buy_shares(company_id, 10)
+	var company_name: String = ShippingCompanies.COMPANIES[company_id]["name"]
+	if ShippingCompanies.buy_shares(company_id, 10):
+		trade_status_label.text = "Kupiono 10 akcji: %s." % company_name
+	else:
+		trade_status_label.text = "Za mało gotówki, żeby kupić 10 akcji: %s." % company_name
 	_rebuild_rows()
 	_update_info()
 
 
 func _on_sell_pressed(company_id: String) -> void:
-	ShippingCompanies.sell_shares(company_id, 10)
+	var company_name: String = ShippingCompanies.COMPANIES[company_id]["name"]
+	if ShippingCompanies.sell_shares(company_id, 10):
+		trade_status_label.text = "Sprzedano 10 akcji: %s." % company_name
+	else:
+		trade_status_label.text = "Nie masz 10 akcji, żeby sprzedać: %s." % company_name
 	_rebuild_rows()
 	_update_info()
 
