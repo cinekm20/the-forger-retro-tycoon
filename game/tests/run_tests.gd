@@ -286,7 +286,7 @@ func _test_auctions_schedule() -> void:
 	_assert(Auctions.next_auction_day > Calendar.current_day, "termin aukcji jest w przyszłości względem startu gry")
 	_assert(not Auctions.is_open(Auctions.next_auction_city), "aukcja jeszcze nieotwarta przed nadejściem terminu")
 
-	var other_city := Cities.get_auction_cities().filter(func(c): return c != Auctions.next_auction_city)[0]
+	var other_city: String = Cities.get_auction_cities().filter(func(c): return c != Auctions.next_auction_city)[0]
 	Calendar.advance_days(Auctions.next_auction_day - Calendar.current_day)
 	_assert(not Auctions.is_open(other_city), "inne miasto aukcyjne pozostaje zamknięte, nawet gdy termin nadszedł")
 	_assert(Auctions.is_open(Auctions.next_auction_city), "właściwe miasto otwiera aukcję dokładnie w zaplanowanym dniu")
