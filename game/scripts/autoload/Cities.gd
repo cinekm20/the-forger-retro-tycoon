@@ -116,17 +116,19 @@ func get_auction_cities() -> Array:
 ## Kolejna poprawka: berlin/paryż/amsterdam/londyn (region "europe") leżały
 ## wszystkie na wąskim, wysuniętym na północ półwyspie przypominającym
 ## Norwegię/Skandynawię (zgłoszone przez użytkownika: "londyn, paryż i
-## amsterdam lądują w norwegii") zamiast na szerokim, głównym lądzie
-## kontynentu niżej — przesunięte w dół na tę szerszą, jednoznacznie lądową
-## część (zweryfikowane wymogiem "głębokiego lądu": margines koloru ląd/morze
-## musi być dodatni w całym promieniu ~7px wokół punktu, nie tylko w jednym
-## pikselu, żeby uniknąć wąskich przesmyków/zatoczek).
+## amsterdam lądują w norwegii") — przesunięte wtedy w dół, ale za daleko: na
+## szeroki ląd, który jest wizualnie Afryką (zgłoszone: "a teraz są w
+## Afryce"). Finalnie przesunięte na wąski pas lądu POMIĘDZY tymi dwoma
+## skrajnościami — nadal wymagając "głębokiego lądu" (margines koloru
+## ląd/morze dodatni w całym promieniu ~6px wokół punktu, nie tylko w jednym
+## pikselu), żeby nie trafić na wąski przesmyk/zatoczkę widoczny dokładnie w
+## tym pasie.
 const MAP_POSITION := {
-	"berlin": Vector2(0.544, 0.471),
-	"paris": Vector2(0.515, 0.497),
-	"amsterdam": Vector2(0.515, 0.449),
+	"berlin": Vector2(0.548, 0.372),
+	"paris": Vector2(0.51, 0.439),
+	"amsterdam": Vector2(0.515, 0.371),
 	"lisbon": Vector2(0.48, 0.42),
-	"london": Vector2(0.49, 0.475),
+	"london": Vector2(0.502, 0.374),
 	"ankara": Vector2(0.60, 0.31),
 	"bombay": Vector2(0.66, 0.49),
 	"colombo": Vector2(0.67, 0.53),
