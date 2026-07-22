@@ -73,12 +73,22 @@ func _test_cities_route_via_transfer() -> void:
 
 func _test_river_adjacency_detection() -> void:
 	print("-- PlayerPlantations: wykrywanie sąsiedztwa z rzeką --")
-	# RIVER_COLUMN = 2, GRID_SIZE = 6 -> tile_index = y*6+x
-	_assert(PlayerPlantations.is_river_tile(2), "pole (2,0) to sama rzeka")
-	_assert(not PlayerPlantations.is_adjacent_to_river(2), "rzeka nie jest 'sąsiadem samej siebie' (nieistotne w grze — rzeka i tak nie do kupienia)")
-	_assert(PlayerPlantations.is_adjacent_to_river(1), "pole (1,0), tuż obok rzeki -> sąsiaduje")
-	_assert(PlayerPlantations.is_adjacent_to_river(3), "pole (3,0), po drugiej stronie rzeki -> też sąsiaduje")
-	_assert(not PlayerPlantations.is_adjacent_to_river(5), "pole (5,0), daleko od rzeki -> nie sąsiaduje")
+	PlayerPlantations.reset_new_game()
+	var idx := PlayerPlantations.found_plantation("richmond")
+	# Rzeka jest teraz losowa (patrz _generate_river) — dla deterministycznego
+	# testu logiki sąsiedztwa nadpisujemy ją ręcznie: prosta kolumna x=2,
+	# GRID_SIZE = 16 -> tile_index = y*16+x.
+	var river: Array[bool] = []
+	river.resize(PlayerPlantations.GRID_SIZE * PlayerPlantations.GRID_SIZE)
+	river.fill(false)
+	river[2] = true  # pole (2,0)
+	PlayerPlantations.plantations[idx]["river"] = river
+
+	_assert(PlayerPlantations.is_river_tile(idx, 2), "pole (2,0) to sama rzeka")
+	_assert(not PlayerPlantations.is_adjacent_to_river(idx, 2), "rzeka nie jest 'sąsiadem samej siebie' (nieistotne w grze — rzeka i tak nie do kupienia)")
+	_assert(PlayerPlantations.is_adjacent_to_river(idx, 1), "pole (1,0), tuż obok rzeki -> sąsiaduje")
+	_assert(PlayerPlantations.is_adjacent_to_river(idx, 3), "pole (3,0), po drugiej stronie rzeki -> też sąsiaduje")
+	_assert(not PlayerPlantations.is_adjacent_to_river(idx, 5), "pole (5,0), daleko od rzeki -> nie sąsiaduje")
 
 
 func _test_harvest_requires_elapsed_time() -> void:
@@ -86,6 +96,7 @@ func _test_harvest_requires_elapsed_time() -> void:
 	PlayerPlantations.reset_new_game()
 	Calendar.reset_new_game()
 	var idx := PlayerPlantations.found_plantation("richmond")
+	PlayerPlantations.plantations[idx]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
 	PlayerPlantations.set_crop(idx, "tobacco")
 	PlayerPlantations.hire_workers(idx, 500)
 	Economy.reset_new_game()
@@ -106,6 +117,7 @@ func _test_harvest_scales_with_time() -> void:
 	PlayerPlantations.reset_new_game()
 	Calendar.reset_new_game()
 	var idx := PlayerPlantations.found_plantation("richmond")
+	PlayerPlantations.plantations[idx]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
 	PlayerPlantations.set_crop(idx, "tobacco")
 	PlayerPlantations.hire_workers(idx, 500)
 	Economy.reset_new_game()
@@ -116,6 +128,7 @@ func _test_harvest_scales_with_time() -> void:
 	PlayerPlantations.reset_new_game()
 	Calendar.reset_new_game()
 	idx = PlayerPlantations.found_plantation("richmond")
+	PlayerPlantations.plantations[idx]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
 	PlayerPlantations.set_crop(idx, "tobacco")
 	PlayerPlantations.hire_workers(idx, 500)
 	Economy.reset_new_game()

@@ -5,8 +5,7 @@ extends Node
 ## wielu nieudokumentowanych czynników), więc formuła niżej jest świadomie
 ## uproszczonym, tunowalnym placeholderem do dalszego balansowania.
 
-const GRID_SIZE := 6
-const RIVER_COLUMN := 2  ## rzeka biegnie pionowo przez tę kolumnę (pola niedostępne pod uprawę)
+const GRID_SIZE := 16
 const TILE_COST := 500.0
 const WORKER_DAILY_WAGE := 1.0
 const MAX_WORKERS := 500
@@ -40,6 +39,7 @@ func found_plantation(city_id: String) -> int:
 	plantations.append({
 		"city": city_id,
 		"grid": grid,
+		"river": _generate_river(),
 		"crop": "",
 		"workers": 0,
 		"stored_goods": 0,
@@ -48,19 +48,35 @@ func found_plantation(city_id: String) -> int:
 	return plantations.size() - 1
 
 
-func is_river_tile(tile_index: int) -> bool:
-	return tile_index % GRID_SIZE == RIVER_COLUMN
+## Rzeka jako losowy, wijący się pas (a nie prosta kolumna, patrz zrzut
+## ekranu oryginału) — "błądzenie losowe" po kolumnach: startuje w losowej
+## kolumnie i w każdym kolejnym wierszu przesuwa się o -1/0/+1, przycięte do
+## granic siatki, więc zawsze tworzy ciągłą, pionowo płynącą, ale krętą rzekę.
+func _generate_river() -> Array[bool]:
+	var river: Array[bool] = []
+	river.resize(GRID_SIZE * GRID_SIZE)
+	river.fill(false)
+	var col := randi() % GRID_SIZE
+	for row in GRID_SIZE:
+		river[row * GRID_SIZE + col] = true
+		col = clampi(col + (randi() % 3 - 1), 0, GRID_SIZE - 1)
+	return river
+
+
+func is_river_tile(plantation_index: int, tile_index: int) -> bool:
+	return plantations[plantation_index]["river"][tile_index]
 
 
 ## Pole rzeki samo nie jest "sąsiadem rzeki" — bez tego wczesnego wyjścia
 ## dowolne pole rzeki wypadało jako sąsiadujące z inną, sąsiednią komórką
-## tej samej rzeki (ta sama kolumna, wiersz wyżej/niżej), co nie ma sensu
-## semantycznie. W realnej rozgrywce i tak nieistotne (rzeki nie da się
-## kupić, więc funkcja nigdy nie dostaje indeksu pola rzeki jako owned
-## tile), ale wynik dla dowolnego inputu powinien być poprawny.
-func is_adjacent_to_river(tile_index: int) -> bool:
-	if is_river_tile(tile_index):
+## tej samej rzeki, co nie ma sensu semantycznie. W realnej rozgrywce i tak
+## nieistotne (rzeki nie da się kupić, więc funkcja nigdy nie dostaje
+## indeksu pola rzeki jako owned tile), ale wynik dla dowolnego inputu
+## powinien być poprawny.
+func is_adjacent_to_river(plantation_index: int, tile_index: int) -> bool:
+	if is_river_tile(plantation_index, tile_index):
 		return false
+	var river: Array = plantations[plantation_index]["river"]
 	var x := tile_index % GRID_SIZE
 	@warning_ignore("integer_division")  ## celowe: y to indeks wiersza w siatce
 	var y := tile_index / GRID_SIZE
@@ -70,14 +86,14 @@ func is_adjacent_to_river(tile_index: int) -> bool:
 				continue
 			var nx: int = x + dx
 			var ny: int = y + dy
-			if nx == RIVER_COLUMN and ny >= 0 and ny < GRID_SIZE:
+			if nx >= 0 and nx < GRID_SIZE and ny >= 0 and ny < GRID_SIZE and river[ny * GRID_SIZE + nx]:
 				return true
 	return false
 
 
 func buy_tile(plantation_index: int, tile_index: int) -> bool:
 	var plantation: Dictionary = plantations[plantation_index]
-	if is_river_tile(tile_index) or plantation["grid"][tile_index]:
+	if is_river_tile(plantation_index, tile_index) or plantation["grid"][tile_index]:
 		return false
 	if not Economy.spend(TILE_COST):
 		return false
@@ -112,7 +128,7 @@ func get_river_adjacent_owned_count(plantation_index: int) -> int:
 	var plantation: Dictionary = plantations[plantation_index]
 	var count := 0
 	for i in plantation["grid"].size():
-		if plantation["grid"][i] and is_adjacent_to_river(i):
+		if plantation["grid"][i] and is_adjacent_to_river(plantation_index, i):
 			count += 1
 	return count
 

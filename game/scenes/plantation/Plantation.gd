@@ -36,9 +36,31 @@ func _ready() -> void:
 	info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	root.add_child(info_label)
 
+	## Siatka 16x16 (256 pól) w oprawionej ramce, jak w oryginale (zrzut
+	## ekranu użytkownika: zielone pole z rzeką w niebieskiej ramce) — widok
+	## płaski od góry, NIE izometryczny. Przy tylu polach przyciski 36x36 z
+	## poprzedniej, mniejszej siatki (6x6) w ogóle by się nie zmieściły, więc
+	## kafelki są teraz małe (22x22 + 2px odstępu = 16*24-2 ≈ 382px szerokości
+	## całej siatki) — mieści się w ramce bez potrzeby przewijania.
+	var grid_frame := PanelContainer.new()
+	var frame_style := StyleBoxFlat.new()
+	frame_style.bg_color = Color(0.05, 0.15, 0.05, 0.6)
+	frame_style.border_color = ScreenHelpers.COLOR_GOLD
+	frame_style.set_border_width_all(3)
+	frame_style.set_corner_radius_all(4)
+	frame_style.content_margin_left = 8
+	frame_style.content_margin_right = 8
+	frame_style.content_margin_top = 8
+	frame_style.content_margin_bottom = 8
+	grid_frame.add_theme_stylebox_override("panel", frame_style)
+	grid_frame.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	root.add_child(grid_frame)
+
 	grid_container = GridContainer.new()
 	grid_container.columns = PlayerPlantations.GRID_SIZE
-	root.add_child(grid_container)
+	grid_container.add_theme_constant_override("h_separation", 2)
+	grid_container.add_theme_constant_override("v_separation", 2)
+	grid_frame.add_child(grid_container)
 
 	var crop_row := HBoxContainer.new()
 	crop_row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -116,12 +138,13 @@ func _rebuild_grid() -> void:
 	var plantation: Dictionary = PlayerPlantations.plantations[plantation_index]
 	for tile_index in plantation["grid"].size():
 		var btn := Button.new()
-		btn.custom_minimum_size = Vector2(36, 36)
-		if PlayerPlantations.is_river_tile(tile_index):
+		btn.custom_minimum_size = Vector2(22, 22)
+		btn.add_theme_font_size_override("font_size", 12)
+		if PlayerPlantations.is_river_tile(plantation_index, tile_index):
 			btn.text = "~"
 			btn.disabled = true
 		elif plantation["grid"][tile_index]:
-			btn.text = "✓" if not PlayerPlantations.is_adjacent_to_river(tile_index) else "✓+"
+			btn.text = "✓" if not PlayerPlantations.is_adjacent_to_river(plantation_index, tile_index) else "✓+"
 			btn.disabled = true
 		else:
 			btn.text = "+"
