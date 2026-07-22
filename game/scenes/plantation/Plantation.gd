@@ -15,13 +15,35 @@ var worker_spin: SpinBox
 
 func _ready() -> void:
 	var root := ScreenHelpers.make_root(self)
-	ScreenHelpers.make_title(root, "Plantacje")
-	ScreenHelpers.make_turn_indicator(root)
+
+	## Siatka (16x16) po LEWEJ, wszystkie guziki/informacje po PRAWEJ, jeden
+	## obok drugiego w jednym rzędzie — zamiast wszystkiego w jednej pionowej
+	## kolumnie (poprzedni układ), który przy tylu elementach (legenda,
+	## wybór miasta, siatka, uprawa, robotnicy, akcje, status) wymagał
+	## przewijania, a przewijanie dotykiem na telefonie zawodzi (zgłoszone
+	## przez użytkownika). Obie kolumny razem mieszczą się w ramce ekranu
+	## bez potrzeby scrolla.
+	var main_row := HBoxContainer.new()
+	main_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	main_row.add_theme_constant_override("separation", 24)
+	root.add_child(main_row)
+
+	var left_column := VBoxContainer.new()
+	left_column.alignment = BoxContainer.ALIGNMENT_CENTER
+	main_row.add_child(left_column)
+
+	var right_column := VBoxContainer.new()
+	right_column.alignment = BoxContainer.ALIGNMENT_CENTER
+	right_column.add_theme_constant_override("separation", 8)
+	main_row.add_child(right_column)
+
+	ScreenHelpers.make_title(right_column, "Plantacje")
+	ScreenHelpers.make_turn_indicator(right_column)
 
 	## Krótka legenda — bez tego nie było jasne, co robią pola siatki ani
 	## przyciski (zgłoszone przez testera: "nie bardzo wiadomo co tam robić").
 	ScreenHelpers.make_label(
-		root,
+		right_column,
 		tr("~ rzeka (niedostępna) · + wolne pole (dotknij, by kupić) · ✓ Twoje pole (✓+ = przy rzece, większy plon)\nWybierz uprawę i liczbę robotników, potem \"Zbierz plony\" (raz na jakiś czas) i wyślij do sprzedaży."),
 	)
 
@@ -30,11 +52,12 @@ func _ready() -> void:
 		city_option.add_item(Cities.get_city_name(city_id))
 		city_option.set_item_metadata(city_option.item_count - 1, city_id)
 	city_option.item_selected.connect(_on_city_selected)
-	root.add_child(city_option)
+	right_column.add_child(city_option)
 
 	info_label = Label.new()
 	info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	root.add_child(info_label)
+	info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	right_column.add_child(info_label)
 
 	## Siatka 16x16 (256 pól) w oprawionej ramce, jak w oryginale (zrzut
 	## ekranu użytkownika: zielone pole z rzeką w niebieskiej ramce) — widok
@@ -54,7 +77,7 @@ func _ready() -> void:
 	frame_style.content_margin_bottom = 8
 	grid_frame.add_theme_stylebox_override("panel", frame_style)
 	grid_frame.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	root.add_child(grid_frame)
+	left_column.add_child(grid_frame)
 
 	grid_container = GridContainer.new()
 	grid_container.columns = PlayerPlantations.GRID_SIZE
@@ -64,7 +87,7 @@ func _ready() -> void:
 
 	var crop_row := HBoxContainer.new()
 	crop_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	root.add_child(crop_row)
+	right_column.add_child(crop_row)
 	crop_option = OptionButton.new()
 	for crop in Crops.CROPS:
 		crop_option.add_item(Crops.CROP_NAMES[crop])
@@ -73,7 +96,7 @@ func _ready() -> void:
 
 	var worker_row := HBoxContainer.new()
 	worker_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	root.add_child(worker_row)
+	right_column.add_child(worker_row)
 	var worker_caption := Label.new()
 	worker_caption.text = tr("Robotnicy:")
 	worker_row.add_child(worker_caption)
@@ -86,7 +109,7 @@ func _ready() -> void:
 
 	var action_row := HBoxContainer.new()
 	action_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	root.add_child(action_row)
+	right_column.add_child(action_row)
 	var harvest_btn := Button.new()
 	harvest_btn.text = "Zbierz plony"
 	harvest_btn.pressed.connect(_on_harvest_pressed)
@@ -96,10 +119,10 @@ func _ready() -> void:
 	sell_btn.pressed.connect(_on_sell_pressed)
 	action_row.add_child(sell_btn)
 
-	harvest_status_label = ScreenHelpers.make_label(root, "")
+	harvest_status_label = ScreenHelpers.make_label(right_column, "")
 
-	ScreenHelpers.make_button(root, "Spichlerz »", func(): SceneRouter.goto_scene(SceneRouter.WAREHOUSE))
-	ScreenHelpers.make_back_button(root)
+	ScreenHelpers.make_button(right_column, "Spichlerz »", func(): SceneRouter.goto_scene(SceneRouter.WAREHOUSE))
+	ScreenHelpers.make_back_button(right_column)
 
 	if Cities.get_plantation_cities().size() > 0:
 		_on_city_selected(0)
