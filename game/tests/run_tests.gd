@@ -132,7 +132,7 @@ func _test_forgery_by_duplicate_number() -> void:
 	Paintings.catalogue(6)
 	_assert(Paintings.owned_count() == 1, "po katalogowaniu: 1 obraz w kolekcji")
 	_assert(Paintings.is_forgery_by_duplicate(6), "próba zdobycia drugiego obrazu nr 6 = wykryta fałszywka")
-	_assert(Paintings.get_category(6) == "baroque", "obraz nr 6 należy do kategorii 'baroque' (docs/ZRODLA_C64_WIKI.md)")
+	_assert(Paintings.get_category(6) == "vermeer", "obraz nr 6 należy do kategorii 'vermeer' (docs/ZRODLA_C64_WIKI.md)")
 
 
 func _test_win_threshold_easy_mode() -> void:

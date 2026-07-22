@@ -1,6 +1,8 @@
 extends Node
 ## Katalog 40 obrazów w 8 kategoriach stylistycznych + system autentykacji
-## oparty na numerze katalogowym. Źródło: docs/ZRODLA_C64_WIKI.md.
+## oparty na numerze katalogowym. Źródło: docs/ZRODLA_C64_WIKI.md (w tym
+## prawdziwe tytuły/autorzy/lata/muzea z rewersów oryginalnych kart gry —
+## PAINTING_INFO niżej).
 
 const CATEGORIES := [
 	"vermeer", "baroque", "classicism", "romanticism",
@@ -18,18 +20,76 @@ const CATEGORY_NAMES := {
 	"modern": "Moderna",
 }
 
-## number -> {category, era_note}. Nazwiska malarzy z tabeli źródłowej są tu
-## tylko jako wewnętrzna wskazówka stylu (patrz GRAFIKA_LEONARDO.md pkt. 7 —
-## w promptach do generowania grafik opisujemy styl/epokę, nie nazwisko).
+## number -> kategoria. Zweryfikowane wg prawdziwych opisów z rewersów 40
+## kart obrazów dołączonych do oryginalnej gry (Ariolasoft, patrz
+## docs/ZRODLA_C64_WIKI.md, fragment "Gemäldekarten") — wcześniejsza wersja
+## tego słownika (bloki 1–5/6–10/…) była szacunkiem sprzed dostępu do tych
+## danych i NIE zgadzała się z prawdziwym przypisaniem numerów katalogowych
+## do konkretnych obrazów. Każdy numer przypisany do kategorii wg
+## faktycznego stylu/epoki malarza z karty, zbalansowane do 5 na kategorię.
+## Nazwiska malarzy z tabeli źródłowej służą tylko jako wewnętrzna wskazówka
+## stylu (patrz GRAFIKA_LEONARDO.md pkt. 7 — w promptach do generowania
+## grafik opisujemy styl/epokę, nie nazwisko/nie kopiujemy oryginalnych
+## reprodukcji, część obrazów np. Picassa/Braque'a wciąż podlega prawom
+## autorskim w części krajów).
 const CATALOG := {
-	1: "vermeer", 2: "vermeer", 3: "vermeer", 4: "vermeer", 5: "vermeer",
-	6: "baroque", 7: "baroque", 8: "baroque", 9: "baroque", 10: "baroque",
-	11: "classicism", 12: "classicism", 13: "classicism", 14: "classicism", 15: "classicism",
-	16: "romanticism", 17: "romanticism", 18: "romanticism", 19: "romanticism", 20: "romanticism",
-	21: "impressionism", 22: "impressionism", 23: "impressionism", 24: "impressionism", 25: "impressionism",
-	26: "symbolism", 27: "symbolism", 28: "symbolism", 29: "symbolism", 30: "symbolism",
-	31: "expressionism", 32: "expressionism", 33: "expressionism", 34: "expressionism", 35: "expressionism",
-	36: "modern", 37: "modern", 38: "modern", 39: "modern", 40: "modern",
+	1: "baroque", 2: "baroque", 3: "vermeer", 4: "vermeer", 5: "baroque",
+	6: "vermeer", 7: "impressionism", 8: "impressionism", 9: "vermeer", 10: "vermeer",
+	11: "impressionism", 12: "impressionism", 13: "impressionism", 14: "symbolism", 15: "romanticism",
+	16: "romanticism", 17: "symbolism", 18: "symbolism", 19: "romanticism", 20: "romanticism",
+	21: "symbolism", 22: "symbolism", 23: "romanticism", 24: "classicism", 25: "modern",
+	26: "expressionism", 27: "classicism", 28: "classicism", 29: "modern", 30: "modern",
+	31: "classicism", 32: "classicism", 33: "expressionism", 34: "modern", 35: "baroque",
+	36: "baroque", 37: "expressionism", 38: "expressionism", 39: "expressionism", 40: "modern",
+}
+
+## number -> {title, artist, year, museum}. Prawdziwe dane z rewersów kart
+## (docs/ZRODLA_C64_WIKI.md) — pokazywane graczowi jako oprawa tematyczna
+## podczas licytacji (AuctionHouse.gd). Same fakty (tytuł/autor/rok/muzeum)
+## nie podlegają prawom autorskim, w odróżnieniu od reprodukcji samego
+## obrazu — dlatego GRAFIKA jest naszą własną reinterpretacją stylu
+## (GRAFIKA_LEONARDO.md §7), a nie zeskanowaną kartą.
+const PAINTING_INFO := {
+	1: {"title": "Salwa armatnia", "artist": "Willem van de Velde", "year": "ok. 1670", "museum": "Amsterdam, Rijksmuseum"},
+	2: {"title": "Porwanie córek Leukipposa", "artist": "Rubens", "year": "ok. 1619", "museum": "Monachium, Alte Pinakothek"},
+	3: {"title": "Pracownia malarska", "artist": "Vermeer", "year": "1666", "museum": "Wiedeń, Kunsthistorisches Museum"},
+	4: {"title": "Koronczarka", "artist": "Vermeer", "year": "1665", "museum": "Paryż, Luwr"},
+	5: {"title": "Starzec w fotelu", "artist": "Rembrandt", "year": "1652", "museum": "Londyn, National Gallery"},
+	6: {"title": "Czytająca list kobieta w błękicie", "artist": "Vermeer", "year": "1662–1663", "museum": "Amsterdam, Rijksmuseum"},
+	7: {"title": "Wanna", "artist": "Degas", "year": "1886", "museum": "Paryż, Luwr"},
+	8: {"title": "Portret malarza Waltera Leistikowa", "artist": "Corinth", "year": "1900", "museum": "Berlin, Muzea Państwowe"},
+	9: {"title": "Astronom", "artist": "Vermeer", "year": "1668", "museum": "Paryż, kolekcja prywatna"},
+	10: {"title": "Dziewczyna z perłą", "artist": "Vermeer", "year": "1665", "museum": "Haga, Mauritshuis"},
+	11: {"title": "Gabrielle w rozpiętej bluzce", "artist": "Renoir", "year": "ok. 1907", "museum": "Paryż, kolekcja Durand-Ruel"},
+	12: {"title": "Klify pod Pourville", "artist": "Monet", "year": "1882", "museum": "kolekcja prywatna"},
+	13: {"title": "Grający w karty", "artist": "Cézanne", "year": "1890–1892", "museum": "Paryż, Luwr"},
+	14: {"title": "Symfonia w bieli", "artist": "Whistler", "year": "1864", "museum": "Londyn, Tate Gallery"},
+	15: {"title": "Morze lodu (Rozbite nadzieje)", "artist": "Friedrich", "year": "1823–1824", "museum": "Hamburg, Kunsthalle"},
+	16: {"title": "Latarnia morska w Harwich", "artist": "Constable", "year": "ok. 1820", "museum": "Londyn, Tate Gallery"},
+	17: {"title": "Kobieta jedząca ostrygi", "artist": "Ensor", "year": "1882", "museum": "Antwerpia, Musée des Beaux-Arts"},
+	18: {"title": "Portret Emilie Flöge", "artist": "Klimt", "year": "1902", "museum": "Wiedeń, Muzeum Historyczne Miasta Wiednia"},
+	19: {"title": "Pożar Izb Parlamentu w Londynie, 16 października 1834", "artist": "Turner", "year": "1835", "museum": "Cleveland Museum of Art"},
+	20: {"title": "Grecja na ruinach Missolungi", "artist": "Delacroix", "year": "ok. 1826–1827", "museum": "Bordeaux, Musée des Beaux-Arts"},
+	21: {"title": "Tryton i Nereida", "artist": "Böcklin", "year": "1895", "museum": "Florencja, Villa Roma"},
+	22: {"title": "Zamykam się w sobie", "artist": "Khnopff", "year": "1891", "museum": "Monachium, Neue Pinakothek"},
+	23: {"title": "Autoportret", "artist": "Runge", "year": "1802", "museum": "Hamburg, Kunsthalle"},
+	24: {"title": "Dziedziniec zamku Warwick", "artist": "Canaletto", "year": "1751", "museum": "Warwick, kolekcja Księcia Warwick"},
+	25: {"title": "Dwie Tahitanki", "artist": "Gauguin", "year": "1899", "museum": "Nowy Jork, Metropolitan Museum of Art"},
+	26: {"title": "Zwodzony most", "artist": "Van Gogh", "year": "1888", "museum": "Kolonia, Wallraf-Richartz-Museum"},
+	27: {"title": "Autoportret", "artist": "Chardin", "year": "1775", "museum": "Paryż, Luwr"},
+	28: {"title": "Kąpiąca się z Valpinçon", "artist": "Ingres", "year": "1808", "museum": "Paryż, Luwr"},
+	29: {"title": "Złote rybki i rzeźba", "artist": "Matisse", "year": "1911", "museum": "Nowy Jork, MoMA"},
+	30: {"title": "Tancerka", "artist": "Derain", "year": "1906", "museum": "Kopenhaga, Statens Museum for Kunst"},
+	31: {"title": "Skruszony święty Piotr", "artist": "Goya", "year": "1823–1825", "museum": "Waszyngton, The Phillips Collection"},
+	32: {"title": "Śmierć Marata", "artist": "David", "year": "1793", "museum": "Bruksela, Musées royaux des Beaux-Arts"},
+	33: {"title": "Madonna", "artist": "Munch", "year": "1893–1894", "museum": "Oslo, Munch Museet"},
+	34: {"title": "Fryzura", "artist": "Picasso", "year": "1906", "museum": "Nowy Jork, Metropolitan Museum of Art"},
+	35: {"title": "Żniwa", "artist": "Brueghel", "year": "1565", "museum": "Nowy Jork, Metropolitan Museum"},
+	36: {"title": "Młodzieniec trzymający czaszkę", "artist": "Hals", "year": "ok. 1626", "museum": "Londyn, National Gallery"},
+	37: {"title": "Kościół wiejski", "artist": "Kandinsky", "year": "1908", "museum": "Wuppertal, Von der Heydt-Museum"},
+	38: {"title": "Koń w krajobrazie", "artist": "Marc", "year": "1910", "museum": "Essen, Museum Folkwang"},
+	39: {"title": "Targ w Tunisie", "artist": "Macke", "year": "1914", "museum": "Bielefeld, Kunsthalle"},
+	40: {"title": "Wiadukt w L'Estaque", "artist": "Braque", "year": "1908", "museum": "kolekcja prywatna"},
 }
 
 ## Szacunkowa wartość bazowa wg kategorii — nasza własna wycena do
@@ -104,6 +164,12 @@ func has_all_paintings() -> bool:
 
 func get_category(number: int) -> String:
 	return CATALOG.get(number, "")
+
+
+## Tytuł/autor/rok/muzeum obrazu nr `number` (patrz PAINTING_INFO wyżej) —
+## pusty słownik, jeśli numer spoza katalogu.
+func get_painting_info(number: int) -> Dictionary:
+	return PAINTING_INFO.get(number, {})
 
 
 ## Ścieżka do grafiki obrazu nr `number` (docs/GRAFIKA_LEONARDO.md §7) —

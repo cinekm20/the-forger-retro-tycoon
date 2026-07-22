@@ -93,3 +93,70 @@ czysto techniczna ciekawostka związana z emulacją C64, nie wpływa na design.
 **Jeśli masz więcej fragmentów strony (zasady gry krok po kroku, opis miast,
 opis interfejsu/menu, początkowy kapitał, ceny plantacji) — wklejaj dalej,
 dopiszę je tutaj i zaktualizuję GDD.**
+
+## Fragment 5: prawdziwe opisy 40 obrazów (rewersy kart z pudełka gry)
+
+Użytkownik podesłał skany fizycznych "Gemäldekarten" dołączonych do
+oryginalnego wydania Ariolasoft (1987) — 40 kart z reprodukcją obrazu na
+przodzie i opisem (tytuł/malarz/rok/muzeum) na rewersie. **Same skany
+(fotograficzne reprodukcje obrazów) NIE są używane jako grafika w naszej
+grze** — część przedstawionych dzieł (np. Picasso 1906, Braque 1908,
+Matisse 1911) może wciąż podlegać prawom autorskim w niektórych krajach, a
+poza tym cały projekt konsekwentnie używa własnych, wygenerowanych
+reinterpretacji stylu zamiast kopiować oryginalne assety (patrz
+GRAFIKA_LEONARDO.md). Same FAKTY (tytuł/autor/rok/muzeum) nie podlegają
+prawom autorskim i **są** wykorzystane — jako `Paintings.PAINTING_INFO` w
+kodzie, pokazywane graczowi podczas licytacji (AuctionHouse.gd).
+
+Ten materiał **koryguje** tabelę z Fragmentu 1 wyżej — tamta była
+przybliżoną rekonstrukcją sprzed dostępu do prawdziwych danych i nie
+zgadzała się z faktycznym przypisaniem numerów katalogowych do konkretnych
+obrazów (np. numer 6 to nie Rembrandt tylko Vermeer). Poprawiony
+`Paintings.CATALOG` (numer → kategoria) w kodzie jest zbalansowany do 5 na
+kategorię wg prawdziwego stylu/epoki malarza z każdej karty.
+
+Pełna lista (numer / malarz / tytuł / rok / muzeum), tłumaczenie własne z
+niemieckich rewersów kart:
+
+| # | Malarz | Tytuł | Rok | Muzeum |
+|---|--------|-------|-----|--------|
+| 01 | Willem van de Velde | Salwa armatnia | ok. 1670 | Amsterdam, Rijksmuseum |
+| 02 | Rubens | Porwanie córek Leukipposa | ok. 1619 | Monachium, Alte Pinakothek |
+| 03 | Vermeer | Pracownia malarska | 1666 | Wiedeń, Kunsthistorisches Museum |
+| 04 | Vermeer | Koronczarka | 1665 | Paryż, Luwr |
+| 05 | Rembrandt | Starzec w fotelu | 1652 | Londyn, National Gallery |
+| 06 | Vermeer | Czytająca list kobieta w błękicie | 1662–1663 | Amsterdam, Rijksmuseum |
+| 07 | Degas | Wanna | 1886 | Paryż, Luwr |
+| 08 | Corinth | Portret malarza Waltera Leistikowa | 1900 | Berlin, Muzea Państwowe |
+| 09 | Vermeer | Astronom | 1668 | Paryż, kolekcja prywatna |
+| 10 | Vermeer | Dziewczyna z perłą | 1665 | Haga, Mauritshuis |
+| 11 | Renoir | Gabrielle w rozpiętej bluzce | ok. 1907 | Paryż, kolekcja Durand-Ruel |
+| 12 | Monet | Klify pod Pourville | 1882 | kolekcja prywatna |
+| 13 | Cézanne | Grający w karty | 1890–1892 | Paryż, Luwr |
+| 14 | Whistler | Symfonia w bieli | 1864 | Londyn, Tate Gallery |
+| 15 | Friedrich | Morze lodu (Rozbite nadzieje) | 1823–1824 | Hamburg, Kunsthalle |
+| 16 | Constable | Latarnia morska w Harwich | ok. 1820 | Londyn, Tate Gallery |
+| 17 | Ensor | Kobieta jedząca ostrygi | 1882 | Antwerpia, Musée des Beaux-Arts |
+| 18 | Klimt | Portret Emilie Flöge | 1902 | Wiedeń, Muzeum Historyczne Miasta Wiednia |
+| 19 | Turner | Pożar Izb Parlamentu w Londynie, 16 października 1834 | 1835 | Cleveland Museum of Art |
+| 20 | Delacroix | Grecja na ruinach Missolungi | ok. 1826–1827 | Bordeaux, Musée des Beaux-Arts |
+| 21 | Böcklin | Tryton i Nereida | 1895 | Florencja, Villa Roma |
+| 22 | Khnopff | Zamykam się w sobie | 1891 | Monachium, Neue Pinakothek |
+| 23 | Runge | Autoportret | 1802 | Hamburg, Kunsthalle |
+| 24 | Canaletto | Dziedziniec zamku Warwick | 1751 | Warwick, kolekcja Księcia Warwick |
+| 25 | Gauguin | Dwie Tahitanki | 1899 | Nowy Jork, Metropolitan Museum of Art |
+| 26 | Van Gogh | Zwodzony most | 1888 | Kolonia, Wallraf-Richartz-Museum |
+| 27 | Chardin | Autoportret | 1775 | Paryż, Luwr |
+| 28 | Ingres | Kąpiąca się z Valpinçon | 1808 | Paryż, Luwr |
+| 29 | Matisse | Złote rybki i rzeźba | 1911 | Nowy Jork, MoMA |
+| 30 | Derain | Tancerka | 1906 | Kopenhaga, Statens Museum for Kunst |
+| 31 | Goya | Skruszony święty Piotr | 1823–1825 | Waszyngton, The Phillips Collection |
+| 32 | David | Śmierć Marata | 1793 | Bruksela, Musées royaux des Beaux-Arts |
+| 33 | Munch | Madonna | 1893–1894 | Oslo, Munch Museet |
+| 34 | Picasso | Fryzura | 1906 | Nowy Jork, Metropolitan Museum of Art |
+| 35 | Brueghel | Żniwa | 1565 | Nowy Jork, Metropolitan Museum |
+| 36 | Hals | Młodzieniec trzymający czaszkę | ok. 1626 | Londyn, National Gallery |
+| 37 | Kandinsky | Kościół wiejski | 1908 | Wuppertal, Von der Heydt-Museum |
+| 38 | Marc | Koń w krajobrazie | 1910 | Essen, Museum Folkwang |
+| 39 | Macke | Targ w Tunisie | 1914 | Bielefeld, Kunsthalle |
+| 40 | Braque | Wiadukt w L'Estaque | 1908 | kolekcja prywatna |

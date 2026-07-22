@@ -15,6 +15,13 @@ var bid_label: Label
 var money_label: Label
 var warning_label: Label
 var status_label: Label
+var painting_texture_rect: TextureRect
+
+## Prostokąt czystego płótna na sztaludze w art/backgrounds/auction_house.jpg
+## (1472×832), skalibrowany ręcznie na pikselach — ułamki, nie piksele, żeby
+## nakładka skalowała się razem z tłem niezależnie od rozdzielczości ekranu
+## (ten sam trik co pozycje pinezek w Cities.MAP_POSITION).
+const CANVAS_RECT := Rect2(674.0 / 1472.0, 342.0 / 832.0, 124.0 / 1472.0, 124.0 / 832.0)
 
 
 ## Układ pudełek nawiązuje do oryginału (patrz screeny użytkownika):
@@ -22,6 +29,18 @@ var status_label: Label
 ## jako zwykła linia, a oferta + gotówka gracza jako dwie skrzynki obok
 ## siebie (tam odpowiednik to "BID BY VICO 75000 M" + nazwisko gracza).
 func _ready() -> void:
+	ScreenHelpers.make_background(self, "res://art/backgrounds/auction_house.jpg")
+
+	painting_texture_rect = TextureRect.new()
+	painting_texture_rect.anchor_left = CANVAS_RECT.position.x
+	painting_texture_rect.anchor_top = CANVAS_RECT.position.y
+	painting_texture_rect.anchor_right = CANVAS_RECT.position.x + CANVAS_RECT.size.x
+	painting_texture_rect.anchor_bottom = CANVAS_RECT.position.y + CANVAS_RECT.size.y
+	painting_texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	painting_texture_rect.stretch_mode = TextureRect.STRETCH_SCALE
+	painting_texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(painting_texture_rect)
+
 	var root := ScreenHelpers.make_root(self)
 	ScreenHelpers.make_title(root, "Dom aukcyjny")
 	ScreenHelpers.make_turn_indicator(root)
@@ -128,9 +147,21 @@ func _update_labels() -> void:
 
 	var category: String = Paintings.get_category(current_number)
 	var category_name: String = Paintings.CATEGORY_NAMES.get(category, category)
-	painting_label.text = "Na sprzedaż: obraz nr %d (%s) — szac. wartość %.0f M" % [
-		current_number, category_name, Paintings.get_estimated_value(current_number),
-	]
+	var info := Paintings.get_painting_info(current_number)
+	if not info.is_empty():
+		painting_label.text = "Na sprzedaż: „%s” — %s, %s (%s) — szac. wartość %.0f M" % [
+			info["title"], info["artist"], info["year"], category_name, Paintings.get_estimated_value(current_number),
+		]
+	else:
+		painting_label.text = "Na sprzedaż: obraz nr %d (%s) — szac. wartość %.0f M" % [
+			current_number, category_name, Paintings.get_estimated_value(current_number),
+		]
+
+	## Grafika obrazu opcjonalna — dopóki nie wszystkie 40 numerów mają
+	## własny plik (docs/GRAFIKA_LEONARDO.md §7), płótno na sztaludze
+	## zostaje puste zamiast crashować na load() brakującego pliku.
+	var texture_path := Paintings.get_texture_path(current_number)
+	painting_texture_rect.texture = load(texture_path) if ResourceLoader.exists(texture_path) else null
 
 	if current_forgery_warning:
 		warning_label.text = "⚠ Szkoła Sztuki ostrzega: ten numer już masz w kolekcji — to może być podróbka!"
