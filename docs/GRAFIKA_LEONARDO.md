@@ -693,9 +693,11 @@ Dla spójności z już gotowymi grafikami dodaj `main_menu_title.jpg` (albo
 Isometric plantation field background, 1920s tropical farmland, rows of crops, small worker huts, warm afternoon light, game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
-**2. Dom aukcyjny** (`auction_house.jpg`)
+**2. Dom aukcyjny** (`auction_house.jpg`) — dopracowane pod zrzut ekranu
+oryginału podesłany przez użytkownika: świeczniki na ścianach, oprawiony
+sztych na lewej ścianie, ozdobne lustro na prawej, aukcjoner przy mównicy
 ```
-Elegant 1920s auction house interior, Art Deco wood paneling, podium, gathered silhouette crowd, single spotlighted empty easel in center, game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+Elegant 1920s auction house interior, Art Deco wood paneling, wall sconces with lit candles on either side, a small ornately framed print on the left wall, an ornate gilded mirror on the right wall, an auctioneer figure standing at a podium gesturing mid-sale, gathered silhouette crowd, single spotlighted empty easel in the center for the artwork on sale, game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **3. Giełda** (`stock_market.jpg`)
