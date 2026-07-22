@@ -6,6 +6,7 @@ var security_label: Label
 
 
 func _ready() -> void:
+	ScreenHelpers.make_background(self, "res://art/backgrounds/private_gallery.jpg")
 	var root := ScreenHelpers.make_root(self)
 	ScreenHelpers.make_title(root, "Galeria (placeholder)")
 	ScreenHelpers.make_turn_indicator(root)
