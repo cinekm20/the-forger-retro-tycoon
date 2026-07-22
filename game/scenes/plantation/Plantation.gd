@@ -42,10 +42,18 @@ func _ready() -> void:
 
 	## Krótka legenda — bez tego nie było jasne, co robią pola siatki ani
 	## przyciski (zgłoszone przez testera: "nie bardzo wiadomo co tam robić").
-	ScreenHelpers.make_label(
+	## autowrap + custom_minimum_size.x: bez tego Label bez zawijania zgłasza
+	## jako swój minimalny rozmiar całą, jednowierszową szerokość tekstu
+	## (dwa pełne zdania — grubo ponad 1000px), co rozpychało cały wiersz
+	## (siatka + prawa kolumna) szerzej niż ramka ekranu (zgłoszone przez
+	## użytkownika: "plantacja jest za szeroka"), a poziome przewijanie jest
+	## celowo wyłączone w make_root (horizontal_scroll_mode = DISABLED).
+	var legend_label := ScreenHelpers.make_label(
 		right_column,
 		tr("~ rzeka (niedostępna) · + wolne pole (dotknij, by kupić) · ✓ Twoje pole (✓+ = przy rzece, większy plon)\nWybierz uprawę i liczbę robotników, potem \"Zbierz plony\" (raz na jakiś czas) i wyślij do sprzedaży."),
 	)
+	legend_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	legend_label.custom_minimum_size = Vector2(340, 0)
 
 	var city_option := OptionButton.new()
 	for city_id in Cities.get_plantation_cities():
@@ -57,6 +65,7 @@ func _ready() -> void:
 	info_label = Label.new()
 	info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	info_label.custom_minimum_size = Vector2(340, 0)
 	right_column.add_child(info_label)
 
 	## Siatka 16x16 (256 pól) w oprawionej ramce, jak w oryginale (zrzut
@@ -120,6 +129,8 @@ func _ready() -> void:
 	action_row.add_child(sell_btn)
 
 	harvest_status_label = ScreenHelpers.make_label(right_column, "")
+	harvest_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	harvest_status_label.custom_minimum_size = Vector2(340, 0)
 
 	ScreenHelpers.make_button(right_column, "Spichlerz »", func(): SceneRouter.goto_scene(SceneRouter.WAREHOUSE))
 	ScreenHelpers.make_back_button(right_column)
