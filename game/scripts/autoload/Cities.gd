@@ -104,8 +104,16 @@ func get_auction_cities() -> Array:
 ## nie na czystej geografii w oderwaniu od grafiki. Poprzednie wartości były
 ## szacowane "na ślepo" bez podglądu grafiki i wypadały w oceanie/złym
 ## miejscu (zgłoszone przez użytkownika na zrzucie ekranu).
+##
+## Zweryfikowane ponownie programowo (próbkowanie koloru piksela pod każdą
+## z tych współrzędnych) po kolejnym zgłoszeniu użytkownika — berlin i
+## st_louis faktycznie wypadały na kolorze morza (beż), mimo że reszta miast
+## była poprawna; poprawione na najbliższy ląd w promieniu kilku pikseli od
+## oryginalnej pozycji (patrz też TravelMap.gd — pinezki są teraz zakotwiczone
+## na tych ułamkach przez anchor_left/right/top/bottom, więc RAZ dobrze
+## skalibrowane współrzędne zostają poprawne przy każdej rozdzielczości).
 const MAP_POSITION := {
-	"berlin": Vector2(0.55, 0.27),
+	"berlin": Vector2(0.554, 0.272),
 	"paris": Vector2(0.52, 0.29),
 	"amsterdam": Vector2(0.52, 0.26),
 	"lisbon": Vector2(0.48, 0.42),
@@ -122,7 +130,7 @@ const MAP_POSITION := {
 	"mexico": Vector2(0.29, 0.46),
 	"new_york": Vector2(0.38, 0.33),
 	"richmond": Vector2(0.36, 0.31),
-	"st_louis": Vector2(0.31, 0.30),
+	"st_louis": Vector2(0.307, 0.302),
 }
 
 
