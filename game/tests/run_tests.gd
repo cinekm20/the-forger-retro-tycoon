@@ -36,6 +36,7 @@ func _ready() -> void:
 	_test_travel_vehicle_choice()
 	_test_travel_completes_in_one_animation()
 	_test_auctions_schedule()
+	_test_auctions_cap_turn_advance()
 
 	print("\n=== Wynik: %d/%d testów przeszło ===" % [total - failures, total])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -294,3 +295,39 @@ func _test_auctions_schedule() -> void:
 	var scheduled_day := Auctions.next_auction_day
 	Auctions.resolve_and_reschedule()
 	_assert(Auctions.next_auction_day > scheduled_day, "po rozstrzygnięciu losowany jest nowy termin w przyszłości")
+
+
+## Regresja: "Koniec tury" (Players.DAYS_PER_TURN = 7 dni) potrafił przelecieć
+## od razu przez cały dzień aukcji, mimo że gracz stał akurat w mieście, gdzie
+## miała się odbyć — nigdy nie dało się trafić dokładnie na termin, żeby
+## zdążyć wejść do Domu aukcyjnego (zgłoszone przez użytkownika). Sprawdza,
+## że cap_turn_advance skraca skok do dokładnie dnia aukcji w takiej sytuacji,
+## a w pozostałych przypadkach zwraca żądaną liczbę dni bez zmian.
+func _test_auctions_cap_turn_advance() -> void:
+	print("-- Auctions: cap_turn_advance zatrzymuje koniec tury dokładnie na dniu aukcji --")
+	Calendar.reset_new_game()
+	Auctions.reset_new_game()
+
+	var other_city: String = Cities.get_auction_cities().filter(func(c): return c != Auctions.next_auction_city)[0]
+	_assert(
+		Auctions.cap_turn_advance(7, other_city) == 7,
+		"w innym mieście (nie tym z aukcją) skok dni zostaje bez zmian",
+	)
+
+	var days_to_auction := Auctions.next_auction_day - Calendar.current_day
+	if days_to_auction < 7:
+		_assert(
+			Auctions.cap_turn_advance(7, Auctions.next_auction_city) == days_to_auction,
+			"w mieście aukcji, gdy termin jest bliżej niż 7 dni, skok skraca się dokładnie do dnia aukcji",
+		)
+	else:
+		_assert(
+			Auctions.cap_turn_advance(7, Auctions.next_auction_city) == 7,
+			"w mieście aukcji, gdy termin jest dalej niż 7 dni, skok zostaje bez zmian",
+		)
+
+	Calendar.advance_days(days_to_auction)
+	_assert(
+		Auctions.cap_turn_advance(7, Auctions.next_auction_city) == 7,
+		"gdy termin już nadszedł (gracz jest na miejscu), skok dni nie jest już capowany",
+	)

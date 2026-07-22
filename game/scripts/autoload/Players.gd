@@ -101,8 +101,13 @@ func _apply_snapshot(state: Dictionary) -> void:
 
 ## Kończy turę aktywnego gracza: dolicza tydzień (płace, kontrakty, dług —
 ## patrz nagłówek pliku), a w multiplayerze przełącza na kolejnego gracza.
+## Auctions.cap_turn_advance skraca ten skok, jeśli pełny tydzień przeleciałby
+## od razu przez dzień aukcji w mieście, w którym gracz akurat stoi (patrz
+## komentarz przy tej funkcji) — bez tego nigdy nie dało się trafić dokładnie
+## na termin, żeby zdążyć wejść do Domu aukcyjnego.
 func end_turn() -> void:
-	Calendar.advance_days(DAYS_PER_TURN)
+	var days := Auctions.cap_turn_advance(DAYS_PER_TURN, Travel.current_city)
+	Calendar.advance_days(days)
 	if is_multiplayer():
 		snapshots[active_index] = _capture_active()
 		active_index = (active_index + 1) % player_count

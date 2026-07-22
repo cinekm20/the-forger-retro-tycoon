@@ -322,11 +322,13 @@ static func make_corner_status_row(parent: Control, left_text: String, right_tex
 	row.set_anchors_preset(Control.PRESET_FULL_RECT)
 	## Margines od krawędzi ekranu — patrz ten sam fix w Hub.gd _build_top_row
 	## (bez niego skrzynka w prawym rogu ucinała się na telefonach z
-	## zaokrąglonymi rogami/notchem). offset_top dodatkowo powiększony, żeby
-	## zrobić miejsce na globalny przycisk "☰ Ustawienia" (SettingsMenu.gd).
+	## zaokrąglonymi rogami/notchem). offset_right dodatkowo pomniejszony o
+	## szerokość przycisku "☰ Ustawienia" (SettingsMenu.gd) + margines, żeby
+	## prawa skrzynka stanęła OBOK niego (ta sama wysokość), nie pod nim —
+	## reszta układu (offset_top) zostaje bez zmian.
 	row.offset_left = 16
-	row.offset_right = -16
-	row.offset_top = 90
+	row.offset_right = -(SettingsMenu.BUTTON_SIZE.x + SettingsMenu.BUTTON_MARGIN + 16.0)
+	row.offset_top = 12
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(row)
 

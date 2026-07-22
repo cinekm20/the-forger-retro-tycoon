@@ -75,3 +75,17 @@ func get_schedule_string() -> String:
 	return "Następna aukcja: %s — %s" % [
 		Calendar.format_day(next_auction_day), Cities.get_city_name(next_auction_city),
 	]
+
+
+## Skraca planowany skok dni "Końca tury" (Players.DAYS_PER_TURN = 7 dni na
+## raz), jeśli gracz stoi w mieście, gdzie ma się odbyć następna aukcja, a
+## normalny skok przeleciałby od razu przez cały ten termin bez zatrzymania —
+## użytkownik zgłosił, że stojąc w takim mieście i klikając "Koniec tury",
+## nigdy nie trafiał dokładnie na dzień aukcji, żeby zdążyć wejść i
+## zalicytować. Zwraca requested_days bez zmian, jeśli gracz jest gdzie
+## indziej albo termin już minął (nic nie ma co ciąć).
+func cap_turn_advance(requested_days: int, city_id: String) -> int:
+	if city_id != next_auction_city or Calendar.current_day >= next_auction_day:
+		return requested_days
+	var days_to_auction := next_auction_day - Calendar.current_day
+	return mini(requested_days, days_to_auction)
