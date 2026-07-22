@@ -157,12 +157,23 @@ static func make_root_side(
 		_anchor_side_strip(panel_bg, on_right, top_offset)
 		parent.add_child(panel_bg)
 
+	## ScrollContainer — bez tego lista przycisków (np. Hub.gd: "Jedź »" + do
+	## 3 bramkowane wg miasta + 3 darmowe + "Koniec tury" + "Zapisz i wyjdź" —
+	## do 8 przycisków naraz) mogła przekroczyć wysokość dostępnego paska,
+	## zwłaszcza po powiększeniu przycisków (patrz make_button, 46 -> 58px) —
+	## nadmiarowe przyciski wypadały wtedy poza dolną krawędź ekranu, niewidoczne
+	## i nieklikalne. Zgłoszone przez użytkownika: przyciski muszą być zawsze
+	## widoczne/osiągalne, na każdej rozdzielczości.
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_anchor_side_strip(scroll, on_right, top_offset, CONTENT_INSET_WITH_FRAME if use_menu_frame else 0.0)
+	parent.add_child(scroll)
+
 	var root := VBoxContainer.new()
 	root.alignment = BoxContainer.ALIGNMENT_CENTER
 	root.add_theme_constant_override("separation", 14)
-	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_anchor_side_strip(root, on_right, top_offset, CONTENT_INSET_WITH_FRAME if use_menu_frame else 0.0)
-	parent.add_child(root)
+	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(root)
 	return root
 
 
