@@ -118,17 +118,19 @@ func get_auction_cities() -> Array:
 ## Norwegię/Skandynawię (zgłoszone przez użytkownika: "londyn, paryż i
 ## amsterdam lądują w norwegii") — przesunięte wtedy w dół, ale za daleko: na
 ## szeroki ląd, który jest wizualnie Afryką (zgłoszone: "a teraz są w
-## Afryce"). Finalnie przesunięte na wąski pas lądu POMIĘDZY tymi dwoma
-## skrajnościami — nadal wymagając "głębokiego lądu" (margines koloru
-## ląd/morze dodatni w całym promieniu ~6px wokół punktu, nie tylko w jednym
-## pikselu), żeby nie trafić na wąski przesmyk/zatoczkę widoczny dokładnie w
-## tym pasie.
+## Afryce"). Przesunięte na wąski pas lądu POMIĘDZY tymi dwoma skrajnościami,
+## a potem jeszcze trochę wyżej (bliżej nasady półwyspu, ale wciąż na
+## jednoznacznie kontynentalnym lądzie, nie na samej wąskiej odnodze) —
+## zgłoszone przez użytkownika: "jeszcze trochę wyżej te europejskie". Nadal
+## wymagając "głębokiego lądu" (margines koloru ląd/morze dodatni w całym
+## promieniu ~6px wokół punktu, nie tylko w jednym pikselu), żeby nie trafić
+## na wąski przesmyk/zatoczkę widoczny dokładnie w tym pasie.
 const MAP_POSITION := {
-	"berlin": Vector2(0.548, 0.372),
-	"paris": Vector2(0.51, 0.439),
-	"amsterdam": Vector2(0.515, 0.371),
+	"berlin": Vector2(0.55, 0.327),
+	"paris": Vector2(0.493, 0.405),
+	"amsterdam": Vector2(0.539, 0.361),
 	"lisbon": Vector2(0.48, 0.42),
-	"london": Vector2(0.502, 0.374),
+	"london": Vector2(0.526, 0.367),
 	"ankara": Vector2(0.60, 0.31),
 	"bombay": Vector2(0.66, 0.49),
 	"colombo": Vector2(0.67, 0.53),
