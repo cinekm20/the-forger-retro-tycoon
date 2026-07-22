@@ -1,0 +1,110 @@
+name: Android APK build
+
+# workflow_dispatch (ręczne uruchomienie), nie push — to ciężki, wolny job
+# (pobranie szablonów eksportu Godota + Android SDK), nie ma sensu odpalać
+# go przy każdym commicie tak jak lekki godot-check.yml.
+on:
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: 4.7.1-stable
+  GODOT_TEMPLATES_DIR: 4.7.1.stable
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # Obrazy ubuntu-latest z GitHub Actions mają preinstalowane Android SDK
+      # (ANDROID_HOME wskazuje na gotowy katalog) — dociągamy tylko brakujące
+      # paczki (build-tools/platform), nie cały SDK od zera.
+      - name: Ensure required Android SDK packages
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platform-tools" "build-tools;34.0.0" "platforms;android-34"
+
+      - name: Cache Godot binary
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/godot
+          key: godot-${{ env.GODOT_VERSION }}-linux-x86_64
+
+      - name: Download Godot headless binary
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          curl -sSL -o godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}/Godot_v${{ env.GODOT_VERSION }}_linux.x86_64.zip"
+          unzip -q godot.zip
+          chmod +x Godot_v${{ env.GODOT_VERSION }}_linux.x86_64
+          sudo mv Godot_v${{ env.GODOT_VERSION }}_linux.x86_64 /usr/local/bin/godot
+
+      - name: Cache export templates
+        id: templates-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot/export_templates/${{ env.GODOT_TEMPLATES_DIR }}
+          key: godot-export-templates-${{ env.GODOT_VERSION }}
+
+      - name: Download export templates
+        if: steps.templates-cache.outputs.cache-hit != 'true'
+        run: |
+          curl -sSL -o templates.tpz \
+            "https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}/Godot_v${{ env.GODOT_VERSION }}_export_templates.tpz"
+          mkdir -p ~/.local/share/godot/export_templates/${{ env.GODOT_TEMPLATES_DIR }}
+          unzip -q templates.tpz -d /tmp/templates
+          mv /tmp/templates/templates/* ~/.local/share/godot/export_templates/${{ env.GODOT_TEMPLATES_DIR }}/
+
+      # Debug keystore ze standardowym hasłem "android"/"androiddebugkey" —
+      # dokładnie to, czego Godot używa domyślnie do podpisywania debugowych
+      # APK (nie jest to sekret produkcyjny, sam Android SDK generuje
+      # identyczny domyślny keystore lokalnie na każdym komputerze).
+      - name: Generate debug keystore
+        run: |
+          keytool -genkeypair -v -keystore ~/debug.keystore -storepass android \
+            -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 \
+            -validity 9999 -dname "CN=Android Debug,O=Android,C=US"
+
+      # EditorSettings Godota (ścieżka do Android SDK + keystore) normalnie
+      # ustawia się w edytorze GUI — w CI trzeba podać ten sam plik ręcznie,
+      # w formacie zasobu .tres, PRZED importem/eksportem projektu.
+      - name: Configure Godot editor settings
+        run: |
+          mkdir -p ~/.config/godot
+          cat > ~/.config/godot/editor_settings-4.tres << EOF
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/debug_keystore = "$HOME/debug.keystore"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
+          EOF
+
+      - name: Import project (builds class_name cache)
+        working-directory: game
+        run: timeout 120 godot --headless --import --path .
+
+      - name: Export Android debug APK
+        working-directory: game
+        run: |
+          mkdir -p ../android_build
+          timeout 300 godot --headless --export-debug "Android" ../android_build/vermeer-debug.apk --path . 2>&1 | tee export_output.log
+          exit_code=${PIPESTATUS[0]}
+          if [ "$exit_code" -ne 0 ] || [ ! -f ../android_build/vermeer-debug.apk ]; then
+            echo "Eksport nie powiódł się (kod $exit_code) albo plik .apk nie powstał."
+            exit 1
+          fi
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vermeer-debug-apk
+          path: android_build/vermeer-debug.apk
