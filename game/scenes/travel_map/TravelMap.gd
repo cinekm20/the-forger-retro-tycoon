@@ -40,19 +40,39 @@ func _default_info_text() -> String:
 	return "Jesteś w: %s — dotknij pinezkę celu podróży" % Cities.get_city_name(Travel.current_city)
 
 
+## Pinezki NIE dostają jednorazowo wyliczonej pozycji w pikselach (`position =
+## frac * get_viewport_rect().size`, tak było wcześniej) — to liczy się raz,
+## w momencie budowania ekranu, i później się nie przelicza, więc przy każdej
+## zmianie rozdzielczości/proporcji okna (albo jeśli w momencie _ready()
+## viewport jeszcze nie miał ostatecznego rozmiaru z "stretch/aspect=expand")
+## pinezki zostają w miejscu wyliczonym dla STAREGO rozmiaru, a tło (które
+## skaluje się przez anchory) już nie — stąd pinezki "uciekają" z właściwych
+## miejsc. Zamiast tego każda pinezka dostaje anchor_left=anchor_right=frac.x,
+## anchor_top=anchor_bottom=frac.y (jeden punkt zakotwiczenia) + stały,
+## pikselowy offset na wielkość PIN_SIZE — layout Godota sam przelicza tę
+## pozycję na nowo przy KAŻDEJ zmianie rozmiaru rodzica, tak samo jak robi to
+## tło (ScreenHelpers.make_background, STRETCH_SCALE na całym FULL_RECT), więc
+## oba zawsze poruszają się razem, niezależnie od rozdzielczości czy momentu
+## przeliczenia.
 func _build_pins() -> void:
 	var pins_layer := Control.new()
 	pins_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
 	pins_layer.mouse_filter = Control.MOUSE_FILTER_PASS
 	add_child(pins_layer)
 
-	var viewport_size := get_viewport_rect().size
 	for city_id in Cities.CITIES.keys():
 		var pin: Button = MapPinScript.new()
 		var city_type: String = Cities.CITIES[city_id]["type"]
 		pin.pin_color = CURRENT_CITY_PIN_COLOR if city_id == Travel.current_city else TYPE_PIN_COLORS.get(city_type, Color.GRAY)
 		var frac: Vector2 = Cities.get_map_position(city_id)
-		pin.position = frac * viewport_size - MapPinScript.PIN_SIZE / 2.0
+		pin.anchor_left = frac.x
+		pin.anchor_right = frac.x
+		pin.anchor_top = frac.y
+		pin.anchor_bottom = frac.y
+		pin.offset_left = -MapPinScript.PIN_SIZE.x / 2.0
+		pin.offset_right = MapPinScript.PIN_SIZE.x / 2.0
+		pin.offset_top = -MapPinScript.PIN_SIZE.y / 2.0
+		pin.offset_bottom = MapPinScript.PIN_SIZE.y / 2.0
 		pin.tooltip_text = Cities.get_city_name(city_id)
 		pin.pressed.connect(_on_pin_selected.bind(city_id))
 		pins_layer.add_child(pin)
