@@ -3,6 +3,8 @@ extends Control
 ## zbiory, wysyłka) na placeholderowym UI z podstawowych kontrolek Godota.
 ## Grafikę (docs/GRAFIKA_LEONARDO.md §3) podepniemy później bez zmiany logiki.
 
+const PlantationTileIconScript := preload("res://scripts/ui/PlantationTileIcon.gd")
+
 var selected_city: String = ""
 var plantation_index: int = -1
 
@@ -39,21 +41,6 @@ func _ready() -> void:
 
 	ScreenHelpers.make_title(right_column, "Plantacje")
 	ScreenHelpers.make_turn_indicator(right_column)
-
-	## Krótka legenda — bez tego nie było jasne, co robią pola siatki ani
-	## przyciski (zgłoszone przez testera: "nie bardzo wiadomo co tam robić").
-	## autowrap + custom_minimum_size.x: bez tego Label bez zawijania zgłasza
-	## jako swój minimalny rozmiar całą, jednowierszową szerokość tekstu
-	## (dwa pełne zdania — grubo ponad 1000px), co rozpychało cały wiersz
-	## (siatka + prawa kolumna) szerzej niż ramka ekranu (zgłoszone przez
-	## użytkownika: "plantacja jest za szeroka"), a poziome przewijanie jest
-	## celowo wyłączone w make_root (horizontal_scroll_mode = DISABLED).
-	var legend_label := ScreenHelpers.make_label(
-		right_column,
-		tr("~ rzeka (niedostępna) · + wolne pole (dotknij, by kupić) · ✓ Twoje pole (✓+ = przy rzece, większy plon)\nWybierz uprawę i liczbę robotników, potem \"Zbierz plony\" (raz na jakiś czas) i wyślij do sprzedaży."),
-	)
-	legend_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	legend_label.custom_minimum_size = Vector2(340, 0)
 
 	var city_option := OptionButton.new()
 	for city_id in Cities.get_plantation_cities():
@@ -167,6 +154,10 @@ func _on_city_selected(index: int) -> void:
 	_update_info()
 
 
+## Kafelki rysowane jako ikonki (PlantationTileIcon) zamiast tekstu ~/+/✓/✓+
+## — nie wymaga już osobnej legendy tłumaczącej symbole (zgłoszone przez
+## użytkownika). btn.flat = true: zwykłe tło/ramka przycisku wyłączone,
+## widoczna jest tylko ikonka wypełniająca cały kafelek.
 func _rebuild_grid() -> void:
 	for child in grid_container.get_children():
 		child.queue_free()
@@ -174,16 +165,28 @@ func _rebuild_grid() -> void:
 	for tile_index in plantation["grid"].size():
 		var btn := Button.new()
 		btn.custom_minimum_size = Vector2(22, 22)
-		btn.add_theme_font_size_override("font_size", 12)
+		btn.flat = true
+
+		var icon: Control = PlantationTileIconScript.new()
+		icon.set_anchors_preset(Control.PRESET_FULL_RECT)
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 		if PlayerPlantations.is_river_tile(plantation_index, tile_index):
-			btn.text = "~"
+			icon.kind = PlantationTileIconScript.Kind.RIVER
 			btn.disabled = true
 		elif plantation["grid"][tile_index]:
-			btn.text = "✓" if not PlayerPlantations.is_adjacent_to_river(plantation_index, tile_index) else "✓+"
+			icon.river_adjacent = PlayerPlantations.is_adjacent_to_river(plantation_index, tile_index)
+			if plantation["crop"] != "":
+				icon.kind = PlantationTileIconScript.Kind.CROP
+				icon.crop = plantation["crop"]
+			else:
+				icon.kind = PlantationTileIconScript.Kind.SOIL
 			btn.disabled = true
 		else:
-			btn.text = "+"
+			icon.kind = PlantationTileIconScript.Kind.VACANT
 			btn.pressed.connect(_on_tile_pressed.bind(tile_index))
+
+		btn.add_child(icon)
 		grid_container.add_child(btn)
 
 

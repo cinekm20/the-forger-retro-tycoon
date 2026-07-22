@@ -114,10 +114,6 @@ Sprzedano 10 akcji: %s.,Sold 10 shares: %s.,10 Aktien verkauft: %s.
 %s: %.1f M / jednostkę,%s: %.1f M / unit,%s: %.1f M / Einheit
 "%s: %d szt. po %.1f M, termin dzień %d, kara %.0f M","%s: %d units at %.1f M, due day %d, penalty %.0f M","%s: %d Einheiten zu %.1f M, fällig Tag %d, Strafe %.0f M"
 Brak aktywnych kontraktów.,No active contracts.,Keine aktiven Kontrakte.
-"~ rzeka (niedostępna) · + wolne pole (dotknij, by kupić) · ✓ Twoje pole (✓+ = przy rzece, większy plon)
-Wybierz uprawę i liczbę robotników, potem ""Zbierz plony"" (raz na jakiś czas) i wyślij do sprzedaży.","~ river (unavailable) · + free tile (tap to buy) · ✓ your tile (✓+ = by the river, bigger yield)
-Pick a crop and worker count, then ""Harvest"" (once time has passed) and ship it for sale.","~ Fluss (nicht verfügbar) · + freies Feld (antippen, um zu kaufen) · ✓ dein Feld (✓+ = am Fluss, höherer Ertrag)
-Wähle eine Anbaupflanze und die Anzahl der Arbeiter, dann ""Ernten"" (wenn genug Zeit vergangen ist) und zum Verkauf versenden."
 Robotnicy:,Workers:,Arbeiter:
 Zbierz plony,Harvest,Ernten
 Wyślij i sprzedaj (Nowy Jork),Ship and sell (New York),Versenden und verkaufen (New York)
