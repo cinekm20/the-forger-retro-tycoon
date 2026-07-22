@@ -3,7 +3,9 @@ extends Control
 ## powiązanym z aktywnością gracza na plantacjach (docs/MECHANIKI_EKONOMICZNE.md
 ## pkt. 7) i losowym dziennym dryfem (ShippingCompanies._on_day_advanced).
 
-var rows_container: VBoxContainer
+const VaultIconScript := preload("res://scripts/ui/VaultIcon.gd")
+
+var rows_container: HFlowContainer
 var crop_rows_container: VBoxContainer
 var contracts_label: Label
 var location_label: Label
@@ -23,7 +25,14 @@ func _ready() -> void:
 	ScreenHelpers.make_title(root, "Giełda")
 	ScreenHelpers.make_turn_indicator(root)
 
-	rows_container = VBoxContainer.new()
+	## HFlowContainer zamiast HBoxContainer: na wąskim (portretowym) ekranie
+	## 5 sejfów obok siebie by się nie zmieściło — FlowContainer sam
+	## zawija do kolejnego wiersza, kiedy brakuje miejsca, więc układ
+	## dostosowuje się do szerokości ekranu bez ręcznego liczenia kolumn.
+	rows_container = HFlowContainer.new()
+	rows_container.alignment = FlowContainer.ALIGNMENT_CENTER
+	rows_container.add_theme_constant_override("h_separation", 20)
+	rows_container.add_theme_constant_override("v_separation", 16)
 	root.add_child(rows_container)
 
 	ScreenHelpers.make_label(root, "TODO: wykres cen w czasie")
@@ -58,31 +67,51 @@ func _ready() -> void:
 	_update_info()
 
 
+## Jedna kolumna na spółkę: sejf (VaultIcon) + nazwa pod spodem, tak jak w
+## oryginale (patrz zrzut ekranu użytkownika — 5 sejfów z podpisami LLOYD/
+## STAR/HANSE/ROYAL/US$), z ceną/przyciskami kup-sprzedaj poniżej.
 func _rebuild_rows() -> void:
 	for child in rows_container.get_children():
 		child.queue_free()
 	for company_id in ShippingCompanies.COMPANIES.keys():
-		var row := ScreenHelpers.make_boxed_row(rows_container)
+		var column := VBoxContainer.new()
+		column.alignment = BoxContainer.ALIGNMENT_CENTER
+		column.add_theme_constant_override("separation", 4)
+		rows_container.add_child(column)
+
+		var icon: Control = VaultIconScript.new()
+		icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		column.add_child(icon)
 
 		var company_name: String = ShippingCompanies.COMPANIES[company_id]["name"]
+		var name_label := Label.new()
+		name_label.text = company_name.to_upper()
+		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		name_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
+		name_label.add_theme_font_size_override("font_size", 16)
+		column.add_child(name_label)
+
 		var price := ShippingCompanies.get_price(company_id)
 		var owned := ShippingCompanies.get_shares_owned(company_id)
+		var price_label := Label.new()
+		price_label.text = "%.1f M (masz: %d)" % [price, owned]
+		price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		price_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
+		column.add_child(price_label)
 
-		var label := Label.new()
-		label.text = "%s: %.1f M (masz: %d)" % [company_name, price, owned]
-		label.custom_minimum_size = Vector2(220, 0)
-		label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
-		row.add_child(label)
+		var btn_row := HBoxContainer.new()
+		btn_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		column.add_child(btn_row)
 
 		var buy_btn := Button.new()
 		buy_btn.text = "Kup 10"
 		buy_btn.pressed.connect(_on_buy_pressed.bind(company_id))
-		row.add_child(buy_btn)
+		btn_row.add_child(buy_btn)
 
 		var sell_btn := Button.new()
 		sell_btn.text = "Sprzedaj 10"
 		sell_btn.pressed.connect(_on_sell_pressed.bind(company_id))
-		row.add_child(sell_btn)
+		btn_row.add_child(sell_btn)
 
 
 func _on_buy_pressed(company_id: String) -> void:
