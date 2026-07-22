@@ -11,6 +11,7 @@ var info_label: Label
 
 
 func _ready() -> void:
+	ScreenHelpers.make_background(self, "res://art/backgrounds/art_school.jpg")
 	var root := ScreenHelpers.make_root(self)
 	ScreenHelpers.make_title(root, "Szkoła sztuki")
 	ScreenHelpers.make_turn_indicator(root)
