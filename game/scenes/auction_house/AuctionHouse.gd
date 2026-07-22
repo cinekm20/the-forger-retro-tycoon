@@ -33,11 +33,11 @@ var painting_texture_rect: TextureRect
 var bid_btn: Button
 var resolve_btn: Button
 
-## 225 = 300 pomniejszone o 25% (użytkownik: "obraz trochę mniejszy tak o
-## 25%") — ekran nie ma już ramki+ScrollContainer (użytkownik: "nie ma być
-## ramki na cały ekran"), więc treść musi zmieścić się w jednym,
+## 190 = 225 pomniejszone o kolejne ~15% (użytkownik: najpierw -25% z 300,
+## potem jeszcze -15%) — ekran nie ma już ramki+ScrollContainer (użytkownik:
+## "nie ma być ramki na cały ekran"), więc treść musi zmieścić się w jednym,
 ## niescrollowanym widoku bez przycinania dolnych przycisków.
-const PAINTING_DISPLAY_SIZE := Vector2(225, 225)
+const PAINTING_DISPLAY_SIZE := Vector2(190, 190)
 
 
 func _ready() -> void:
