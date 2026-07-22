@@ -17,35 +17,50 @@ var warning_label: Label
 var status_label: Label
 var painting_texture_rect: TextureRect
 
-## Prostokąt czystego płótna na sztaludze w art/backgrounds/auction_house.jpg
-## (1472×832), skalibrowany ręcznie na pikselach — ułamki, nie piksele, żeby
-## nakładka skalowała się razem z tłem niezależnie od rozdzielczości ekranu
-## (ten sam trik co pozycje pinezek w Cities.MAP_POSITION).
-const CANVAS_RECT := Rect2(674.0 / 1472.0, 342.0 / 832.0, 124.0 / 1472.0, 124.0 / 832.0)
+const PAINTING_DISPLAY_SIZE := Vector2(220, 220)
 
 
 ## Układ pudełek nawiązuje do oryginału (patrz screeny użytkownika):
 ## "AUCTION NUMBER: X" jako osobna skrzynka u góry, "UP FOR AUCTION IS: ..."
 ## jako zwykła linia, a oferta + gotówka gracza jako dwie skrzynki obok
 ## siebie (tam odpowiednik to "BID BY VICO 75000 M" + nazwisko gracza).
+##
+## Obraz aukcji pokazywany jest WEWNĄTRZ karty (root), nie jako nakładka na
+## sztaludze w tle — pierwsza wersja nakładała go na wykalibrowany fragment
+## tła, ale duża, w pełni czytelna karta z make_root() (90% ekranu, patrz
+## ScreenHelpers) i tak leżała NAD tym miejscem, więc obraz był ledwo
+## widoczny (zgłoszone przez użytkownika: "ramka wszystko zasłania").
+## Wewnątrz karty jest gwarantowanie na wierzchu i w pełni widoczny.
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/auction_house.jpg")
-
-	painting_texture_rect = TextureRect.new()
-	painting_texture_rect.anchor_left = CANVAS_RECT.position.x
-	painting_texture_rect.anchor_top = CANVAS_RECT.position.y
-	painting_texture_rect.anchor_right = CANVAS_RECT.position.x + CANVAS_RECT.size.x
-	painting_texture_rect.anchor_bottom = CANVAS_RECT.position.y + CANVAS_RECT.size.y
-	painting_texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	painting_texture_rect.stretch_mode = TextureRect.STRETCH_SCALE
-	painting_texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(painting_texture_rect)
 
 	var root := ScreenHelpers.make_root(self)
 	ScreenHelpers.make_title(root, "Dom aukcyjny")
 	ScreenHelpers.make_turn_indicator(root)
 
 	auction_number_label = ScreenHelpers.make_info_box(root, "")
+
+	var painting_box := StyleBoxFlat.new()
+	painting_box.bg_color = Color(ScreenHelpers.COLOR_BURGUNDY_DARK.r, ScreenHelpers.COLOR_BURGUNDY_DARK.g, ScreenHelpers.COLOR_BURGUNDY_DARK.b, 0.85)
+	painting_box.border_color = ScreenHelpers.COLOR_GOLD
+	painting_box.set_border_width_all(3)
+	painting_box.set_corner_radius_all(4)
+	painting_box.content_margin_left = 8
+	painting_box.content_margin_right = 8
+	painting_box.content_margin_top = 8
+	painting_box.content_margin_bottom = 8
+	var painting_panel := PanelContainer.new()
+	painting_panel.add_theme_stylebox_override("panel", painting_box)
+	painting_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	root.add_child(painting_panel)
+
+	painting_texture_rect = TextureRect.new()
+	painting_texture_rect.custom_minimum_size = PAINTING_DISPLAY_SIZE
+	painting_texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	painting_texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	painting_texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	painting_panel.add_child(painting_texture_rect)
+
 	painting_label = ScreenHelpers.make_label(root, "")
 	warning_label = ScreenHelpers.make_label(root, "")
 
@@ -157,9 +172,9 @@ func _update_labels() -> void:
 			current_number, category_name, Paintings.get_estimated_value(current_number),
 		]
 
-	## Grafika obrazu opcjonalna — dopóki nie wszystkie 40 numerów mają
-	## własny plik (docs/GRAFIKA_LEONARDO.md §7), płótno na sztaludze
-	## zostaje puste zamiast crashować na load() brakującego pliku.
+	## Grafika obrazu opcjonalna — jeśli plik danego numeru jeszcze nie
+	## istnieje (docs/GRAFIKA_LEONARDO.md §7), ramka zostaje pusta zamiast
+	## crashować na load() brakującego pliku.
 	var texture_path := Paintings.get_texture_path(current_number)
 	painting_texture_rect.texture = load(texture_path) if ResourceLoader.exists(texture_path) else null
 
