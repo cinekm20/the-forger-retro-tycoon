@@ -334,10 +334,14 @@ Side-view horse and jockey sprite in black-and-white striped racing silks, runni
 ```
 
 ### 6. Dom aukcyjny
-- Tło sali aukcyjnej
+- Tło sali aukcyjnej — sztaluga ma mieć WYRAŹNIE puste, jednolite płótno
+  (nie tylko "empty easel", bo model czasem i tak coś na nie maluje) — na to
+  miejsce w kodzie nałożymy jeden z 40 obrazów niżej jako osobną warstwę
+  (TextureRect), więc płótno musi być czyste i mieć wyraźne krawędzie do
+  skalibrowania pozycji.
 - Portrety 4–6 rywali (AI) w stylu epoki, do dymków licytacyjnych
-- Rama obrazu (pusta, do wstawienia grafiki obrazu w środku)
-- 40 unikalnych "obrazów" (to największy pakiet — patrz niżej)
+- 40 unikalnych obrazów, po jednym na numer katalogowy (patrz §6b niżej) —
+  wstawiane w kodzie NA WIERZCH pustego płótna z tła, nie wypalone w tle
 
 **Prompt (tło):**
 ```
@@ -695,9 +699,12 @@ Isometric plantation field background, 1920s tropical farmland, rows of crops, s
 
 **2. Dom aukcyjny** (`auction_house.jpg`) — dopracowane pod zrzut ekranu
 oryginału podesłany przez użytkownika: świeczniki na ścianach, oprawiony
-sztych na lewej ścianie, ozdobne lustro na prawej, aukcjoner przy mównicy
+sztych na lewej ścianie, ozdobne lustro na prawej, aukcjoner przy mównicy.
+Płótno na sztaludze ma być jednolite/puste (BEZ żadnego motywu) — w kodzie
+nakładamy na nie jeden z 40 obrazów z §6b jako osobną warstwę, więc model
+nie może nic na nie "domalować".
 ```
-Elegant 1920s auction house interior, Art Deco wood paneling, wall sconces with lit candles on either side, a small ornately framed print on the left wall, an ornate gilded mirror on the right wall, an auctioneer figure standing at a podium gesturing mid-sale, gathered silhouette crowd, single spotlighted empty easel in the center for the artwork on sale, game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+Elegant 1920s auction house interior, Art Deco wood paneling, wall sconces with lit candles on either side, a small ornately framed print on the left wall, an ornate gilded mirror on the right wall, an auctioneer figure standing at a podium gesturing mid-sale, gathered silhouette crowd, an easel in the center holding a blank plain unpainted canvas with a simple wooden frame, flat solid cream canvas surface with no image or texture on it, game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **3. Giełda** (`stock_market.jpg`)
@@ -779,6 +786,12 @@ wizualny na wygenerowaną grafikę.
 Po wygenerowaniu wrzucaj gotowe PNG-i do `game/art/` wg podfolderów z
 `game/README.md` (`ui/`, `characters/`, `paintings/`, `backgrounds/`,
 `icons/`) — nazywaj pliki opisowo i po angielsku, zgodnie z id używanymi w
-kodzie (np. `backgrounds/hub_map.png`, `characters/vico_smirk.png`,
-`paintings/painting_06_rembrandt.png`), żeby łatwo było je później podpiąć
-w skryptach ekranów.
+kodzie (np. `backgrounds/hub_map.png`, `characters/vico_smirk.png`), żeby
+łatwo było je później podpiąć w skryptach ekranów.
+
+**40 obrazów kolekcji — konwencja nazw:** `paintings/painting_NN.jpg`, gdzie
+`NN` to numer katalogowy z dwoma cyframi wiodącym zerem (`painting_01.jpg` …
+`painting_40.jpg`, zgodnie z numeracją z §7 i `docs/ZRODLA_C64_WIKI.md`) —
+`Paintings.get_texture_path(number)` w kodzie liczy tę ścieżkę wprost ze
+wzoru, więc nazwy MUSZĄ się zgadzać co do joty, bez dopisków w rodzaju
+nazwiska malarza.

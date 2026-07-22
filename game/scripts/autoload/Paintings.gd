@@ -104,3 +104,13 @@ func has_all_paintings() -> bool:
 
 func get_category(number: int) -> String:
 	return CATALOG.get(number, "")
+
+
+## Ścieżka do grafiki obrazu nr `number` (docs/GRAFIKA_LEONARDO.md §7) —
+## AuctionHouse.gd/Gallery.gd nakładają ją jako osobną warstwę na puste
+## płótno na sztaludze w tle, więc nazwa pliku musi się zgadzać co do joty
+## z konwencją `painting_NN.jpg` (dwucyfrowy numer katalogowy). Dopóki
+## grafiki nie istnieją, wywołujący musi sam sprawdzić
+## ResourceLoader.exists() przed load() — funkcja tylko liczy ścieżkę.
+func get_texture_path(number: int) -> String:
+	return "res://art/paintings/painting_%02d.jpg" % number
