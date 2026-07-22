@@ -750,7 +750,7 @@ Art academy studio interior, easels, reference paintings on walls, warm natural 
 Art Deco private gallery hall interior, marble floor, empty wall space for hanging paintings, soft gallery lighting, elegant benches, game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
-### 7. Spichlerz (magazyn zebranych plonów) — NOWY ekran, brak grafiki
+### 7. Spichlerz (magazyn zebranych plonów) — ✅ zrobione i podpięte (`warehouse.jpg`)
 
 Zbiorczy widok zapasów ze wszystkich plantacji gracza (4 "silosy":
 kawa/tytoń/herbata/kakao), patrz zrzut ekranu oryginału podesłany przez
@@ -788,7 +788,7 @@ Leonardo, żeby mieć z czego wybrać).
 | 3d | 2 | Tło Wyścigów | 1 | 16:9, 1920×1080 | §5 | ✅ zrobione i podpięte (`races.jpg`) |
 | 3e | 2 | Tło Szkoły sztuki | 1 | 16:9, 1920×1080 | §8 | ✅ zrobione i podpięte (`art_school.jpg`) |
 | 3f | 2 | Tło Galerii | 1 | 16:9, 1920×1080 | §9 | ✅ zrobione i podpięte (`gallery.jpg`) |
-| 3g | **2 (następne)** | Tło Spichlerza (nowy ekran, patrz §7 w sekcji priorytet 2) | 1 | 16:9, 1920×1080 | §7 | ⬜ do zrobienia (`warehouse.jpg`) |
+| 3g | 2 | Tło Spichlerza (nowy ekran, patrz §7 w sekcji priorytet 2) | 1 | 16:9, 1920×1080 | §7 | ✅ zrobione i podpięte (`warehouse.jpg`) |
 | — | — | Tło Mapy świata (Hub) | 1 | 16:9, 1920×1080 | §2 | ✅ zrobione (`hub_map.jpg`) |
 | 4 | 3 | Szablony regionalne teł miast (`Cities.gd` `REGION_BACKGROUNDS`) | 5 | 16:9, 1920×1080 | §2.1 | ✅ zrobione — zastąpione przez unikalne tła per miasto (wiersz niżej), zostają jako czysty fallback na wypadek nowego miasta bez własnej grafiki: Europa (`region_europe.jpg`), Ameryka Płd./Środk. (`region_tropical_port.jpg`, jeden plik dla obu), Afryka (`region_africa.jpg`), Azja (`region_asia.jpg`), Ameryka Płn. (`region_north_america.jpg`) |
 | 4b | 2 | Unikalne tła **per miasto** (`Cities.gd` `CITY_BACKGROUNDS`, ma priorytet nad tłem regionu) | 18 | 16:9, 1920×1080 | §2.2 | ✅ zrobione — wszystkie 18 miast: Berlin, Paryż, Amsterdam, Lizbona, Londyn, Ankara, Bombaj, Colombo, Mombasa, Duala, Abidżan, Rio, Bogota, Gwatemala, Meksyk, Nowy Jork, Richmond, St. Louis |

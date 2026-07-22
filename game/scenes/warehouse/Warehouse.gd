@@ -17,6 +17,7 @@ var status_label: Label
 
 
 func _ready() -> void:
+	ScreenHelpers.make_background(self, "res://art/backgrounds/warehouse.jpg")
 	var corner := ScreenHelpers.make_corner_status_row(self, "", "")
 	var location_label: Label = corner["left"]
 	var money_label: Label = corner["right"]
