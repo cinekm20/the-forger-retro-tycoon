@@ -200,4 +200,5 @@ Sprzedano %d jednostek: %s.,Sold %d units: %s.,%d Einheiten verkauft: %s.
 Brak zapasów do sprzedania: %s.,No stock to sell: %s.,Kein Bestand zum Verkauf: %s.
 %d szt. — %.1f M/szt.,%d units — %.1f M/unit,%d Einheiten — %.1f M/Einheit
 Pola: %d | Uprawa: %s,Fields: %d | Crop: %s,Felder: %d | Anbau: %s
-Robotnicy: %d | Zboże w magazynie: %d,Workers: %d | Stored crop: %d,Arbeiter: %d | Lagerbestand: %d
+Robotnicy: %d,Workers: %d,Arbeiter: %d
+Zboże w magazynie: %d,Stored crop: %d,Lagerbestand: %d

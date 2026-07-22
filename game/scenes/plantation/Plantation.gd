@@ -53,11 +53,11 @@ func _ready() -> void:
 	info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	info_label.add_theme_font_size_override("font_size", 19)
-	## custom_minimum_size.y: rezerwuje miejsce na zawsze DOKŁADNIE 3 wiersze
+	## custom_minimum_size.y: rezerwuje miejsce na zawsze DOKŁADNIE 4 wiersze
 	## (patrz _update_info) — bez tego wysokość zależałaby od aktualnej
 	## treści i przesuwałaby resztę kolumny przy każdej zmianie (patrz
 	## komentarz przy _update_info).
-	info_label.custom_minimum_size = Vector2(340, 75)
+	info_label.custom_minimum_size = Vector2(340, 100)
 	right_column.add_child(info_label)
 
 	## Siatka 16x16 (256 pól) w oprawionej ramce, jak w oryginale (zrzut
@@ -234,20 +234,24 @@ func _on_sell_pressed() -> void:
 	_update_info()
 
 
-## Trzy KRÓTKIE, stałe wiersze (każdy z osobna zawsze mieści się w
-## custom_minimum_size.x bez zawijania) zamiast jednego długiego zdania z
-## autowrap — długość samego tekstu (np. nazwy uprawy: "Kawa" vs "Herbata")
-## zmieniała wtedy liczbę zawiniętych linii, więc wysokość etykiety się
-## zmieniała, a to przesuwało wszystko poniżej niej w tej samej kolumnie
-## (zgłoszone przez użytkownika: "cały czas skacze ekran" przy zmianie
-## uprawy). Przy stałej liczbie wierszy wysokość jest zawsze taka sama,
-## niezależnie od wartości.
+## CZTERY krótkie, stałe wiersze (każdy z osobna, sam jeden, zawsze mieści
+## się w custom_minimum_size.x bez zawijania) zamiast jednego długiego
+## zdania z autowrap — długość samej TREŚCI zmieniała liczbę zawiniętych
+## linii (np. nazwa uprawy: "Kawa" vs "Herbata", albo duża liczba
+## robotników/zapasów), więc wysokość etykiety się zmieniała i przesuwała
+## wszystko poniżej niej w tej samej kolumnie (zgłoszone przez użytkownika:
+## najpierw przy zmianie uprawy, potem — bo "Robotnicy: %d | Zboże w
+## magazynie: %d" połączone w jednej linii i tak potrafiło przekroczyć
+## szerokość przy dużych liczbach — przy zmianie liczby robotników).
+## Robotnicy i zapasy mają teraz OSOBNE wiersze, żeby żadna z tych dwóch
+## rosnących liczb nie musiała dzielić linii z drugą, ryzykując zawinięcie.
 func _update_info() -> void:
 	var plantation: Dictionary = PlayerPlantations.plantations[plantation_index]
 	var crop: String = plantation["crop"]
 	var crop_name: String = Crops.CROP_NAMES.get(crop, tr("brak")) if crop != "" else tr("brak")
-	info_label.text = "%s\n%s\n%s" % [
+	info_label.text = "%s\n%s\n%s\n%s" % [
 		tr("Gotówka: %.0f M") % Economy.player_money,
 		tr("Pola: %d | Uprawa: %s") % [PlayerPlantations.get_owned_tile_count(plantation_index), crop_name],
-		tr("Robotnicy: %d | Zboże w magazynie: %d") % [int(plantation["workers"]), plantation["stored_goods"]],
+		tr("Robotnicy: %d") % int(plantation["workers"]),
+		tr("Zboże w magazynie: %d") % plantation["stored_goods"],
 	]
