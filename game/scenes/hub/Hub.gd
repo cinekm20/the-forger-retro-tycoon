@@ -33,6 +33,8 @@ var auction_schedule_label: Label
 var warning_label: Label
 var travel_button: Button
 var root_panel: VBoxContainer
+var main_menu_section: VBoxContainer
+var places_menu_section: VBoxContainer
 var top_row: HBoxContainer
 var hub_bg: TextureRect
 var hub_overlay: ColorRect
@@ -57,22 +59,50 @@ func _ready() -> void:
 	## zamiast zwykłego półprzezroczystego tła (docs/GRAFIKA_LEONARDO.md §10).
 	root_panel = ScreenHelpers.make_root_side(self, true, true)
 
-	travel_button = ScreenHelpers.make_button(root_panel, "Jedź »", _on_travel_pressed)
+	## Na telefonie przewijanie tego paska dotykiem nie zawsze działa
+	## niezawodnie (zgłoszone przez użytkownika), więc zamiast liczyć na
+	## scrollowanie długiej listy, główny panel trzyma tylko kilka pozycji na
+	## stałe, a ekrany lokacji (bramkowane + darmowe) chowają się w osobnym
+	## podmenu "Miejsca »" — otwieranym/zamykanym przełączeniem visible
+	## między main_menu_section i places_menu_section (ten sam patent co
+	## MainMenu.gd _show_name_entry). ScrollContainer z make_root_side zostaje
+	## jako zabezpieczenie, ale w normalnych warunkach nie powinien być już
+	## potrzebny.
+	main_menu_section = VBoxContainer.new()
+	root_panel.add_child(main_menu_section)
+
+	places_menu_section = VBoxContainer.new()
+	places_menu_section.visible = false
+	root_panel.add_child(places_menu_section)
+
+	travel_button = ScreenHelpers.make_button(main_menu_section, "Jedź »", _on_travel_pressed)
+	ScreenHelpers.make_button(main_menu_section, "Miejsca »", _show_places_menu)
+	ScreenHelpers.make_button(main_menu_section, "Koniec tury »", _on_end_turn_pressed)
+	ScreenHelpers.make_button(main_menu_section, "Zapisz i wyjdź do menu", _on_save_and_exit_pressed)
 
 	for destination_name in LOCATION_GATED_DESTINATIONS.keys():
 		var info: Dictionary = LOCATION_GATED_DESTINATIONS[destination_name]
 		var path: String = info["path"]
-		var btn := ScreenHelpers.make_button(root_panel, destination_name, func(): SceneRouter.goto_scene(path))
+		var btn := ScreenHelpers.make_button(places_menu_section, destination_name, func(): SceneRouter.goto_scene(path))
 		btn.set_meta("requires_type", info["requires_type"])
 
 	for destination_name in FREE_DESTINATIONS.keys():
 		var path: String = FREE_DESTINATIONS[destination_name]
-		ScreenHelpers.make_button(root_panel, destination_name, func(): SceneRouter.goto_scene(path))
+		ScreenHelpers.make_button(places_menu_section, destination_name, func(): SceneRouter.goto_scene(path))
 
-	ScreenHelpers.make_button(root_panel, "Koniec tury »", _on_end_turn_pressed)
-	ScreenHelpers.make_button(root_panel, "Zapisz i wyjdź do menu", _on_save_and_exit_pressed)
+	ScreenHelpers.make_button(places_menu_section, "« Powrót", _hide_places_menu)
 
 	_update_status()
+
+
+func _show_places_menu() -> void:
+	main_menu_section.visible = false
+	places_menu_section.visible = true
+
+
+func _hide_places_menu() -> void:
+	places_menu_section.visible = false
+	main_menu_section.visible = true
 
 
 ## Pełnoekranowy, przezroczysty HBoxContainer (PRESET_FULL_RECT — bezpieczny,
@@ -180,7 +210,7 @@ func _on_travel_pressed() -> void:
 
 
 func _set_buttons_disabled(disabled: bool) -> void:
-	for child in root_panel.get_children():
+	for child in main_menu_section.get_children() + places_menu_section.get_children():
 		if child is Button:
 			child.disabled = disabled
 
