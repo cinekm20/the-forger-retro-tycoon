@@ -71,11 +71,6 @@ func _ready() -> void:
 
 	ScreenHelpers.make_button(root_panel, "Koniec tury »", _on_end_turn_pressed)
 	ScreenHelpers.make_button(root_panel, "Zapisz i wyjdź do menu", _on_save_and_exit_pressed)
-	ScreenHelpers.make_button(root_panel, "Ustawienia", func(): SceneRouter.goto_scene(SceneRouter.SETTINGS))
-	## Inne niż "Zapisz i wyjdź do menu" (który tylko wraca do MainMenu.tscn —
-	## proces gry dalej działa w tle): get_tree().quit() faktycznie kończy
-	## proces aplikacji i zwalnia pamięć.
-	ScreenHelpers.make_button(root_panel, "Wyjdź z gry", func(): get_tree().quit())
 
 	_update_status()
 

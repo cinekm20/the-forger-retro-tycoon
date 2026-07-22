@@ -59,3 +59,6 @@ func _ready() -> void:
 		SceneRouter.goto_hub()
 	)
 	continue_btn.disabled = not SaveGame.has_save()
+
+	ScreenHelpers.make_button(root, "Ustawienia", func(): SceneRouter.goto_scene(SceneRouter.SETTINGS))
+	ScreenHelpers.make_button(root, "Wyjdź z gry", func(): get_tree().quit())

@@ -1,6 +1,6 @@
 extends Control
 ## Ekran ustawień — na razie wybór języka interfejsu (Localization.gd).
-## Miejsce na przyszłe opcje. Dostępny z menu w Hub.gd ("Ustawienia").
+## Miejsce na przyszłe opcje. Dostępny z menu głównego (MainMenu.gd).
 
 
 func _ready() -> void:
@@ -19,4 +19,4 @@ func _ready() -> void:
 	lang_option.item_selected.connect(func(index: int) -> void: Localization.set_language(lang_codes[index]))
 	root.add_child(lang_option)
 
-	ScreenHelpers.make_back_button(root)
+	ScreenHelpers.make_button(root, "« Powrót", func(): SceneRouter.goto_scene(SceneRouter.MAIN_MENU))
