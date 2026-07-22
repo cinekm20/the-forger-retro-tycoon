@@ -252,7 +252,7 @@ static func make_title(root: VBoxContainer, text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", 34)
+	label.add_theme_font_size_override("font_size", 38)
 	label.add_theme_color_override("font_color", COLOR_GOLD_BRIGHT)
 	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
 	label.add_theme_constant_override("shadow_offset_x", 2)
@@ -265,6 +265,9 @@ static func make_label(root: VBoxContainer, text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	## 19 zamiast domyślnych ~16px Godota — tester zgłosił, że teksty w
+	## całej grze mogłyby być trochę większe.
+	label.add_theme_font_size_override("font_size", 19)
 	label.add_theme_color_override("font_color", COLOR_CREAM)
 	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
 	label.add_theme_constant_override("shadow_offset_x", 1)
@@ -301,8 +304,9 @@ static func make_info_box(root: Container, text: String, min_width: float = 0.0,
 	label.text = text
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.add_theme_color_override("font_color", COLOR_CREAM)
-	if font_size > 0:
-		label.add_theme_font_size_override("font_size", font_size)
+	## 19 = domyślny większy rozmiar (patrz make_label), zamiast pozostawiać
+	## niepodbite skrzynki na ciut mniejszym, domyślnym rozmiarze Godota.
+	label.add_theme_font_size_override("font_size", font_size if font_size > 0 else 19)
 	panel.add_child(label)
 	return label
 
@@ -318,10 +322,11 @@ static func make_corner_status_row(parent: Control, left_text: String, right_tex
 	row.set_anchors_preset(Control.PRESET_FULL_RECT)
 	## Margines od krawędzi ekranu — patrz ten sam fix w Hub.gd _build_top_row
 	## (bez niego skrzynka w prawym rogu ucinała się na telefonach z
-	## zaokrąglonymi rogami/notchem).
+	## zaokrąglonymi rogami/notchem). offset_top dodatkowo powiększony, żeby
+	## zrobić miejsce na globalny przycisk "☰ Ustawienia" (SettingsMenu.gd).
 	row.offset_left = 16
 	row.offset_right = -16
-	row.offset_top = 12
+	row.offset_top = 90
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(row)
 

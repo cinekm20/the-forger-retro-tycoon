@@ -28,6 +28,7 @@ Security="*res://scripts/autoload/Security.gd"
 Players="*res://scripts/autoload/Players.gd"
 GameState="*res://scripts/autoload/GameState.gd"
 SaveGame="*res://scripts/autoload/SaveGame.gd"
+SettingsMenu="*res://scripts/autoload/SettingsMenu.gd"
 
 [display]
 
