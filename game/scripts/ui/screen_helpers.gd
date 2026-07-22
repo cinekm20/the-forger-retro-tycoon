@@ -445,4 +445,4 @@ static func make_back_button(root: VBoxContainer) -> Button:
 static func make_turn_indicator(root: VBoxContainer) -> Label:
 	if not Players.is_multiplayer():
 		return null
-	return make_label(root, tr("Tura: %s") % Players.active_name())
+	return make_label(root, TranslationServer.translate("Tura: %s") % Players.active_name())

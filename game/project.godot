@@ -46,4 +46,4 @@ textures/vram_compression/import_etc2_astc=true
 
 [internationalization]
 
-locale/translations=PackedStringArray("res://translations/ui.csv:en", "res://translations/ui.csv:de")
+locale/translations=PackedStringArray("res://translations/ui.en.translation", "res://translations/ui.de.translation")
