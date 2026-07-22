@@ -1,36 +1,42 @@
 extends Control
 ## Dom aukcyjny — działająca licytacja przeciw AI (w tym Vico).
 ## Patrz GDD.md pkt. 4.5, docs/MECHANIKI_EKONOMICZNE.md pkt. 9.
+##
+## Aukcje trzyma harmonogram w Auctions.gd (jedno miasto + jeden dzień na
+## raz, tak jak w oryginale — patrz zrzut ekranu użytkownika z boksem
+## "NEXT AUCTION IS: 17.1.1918 BERLIN"). Ten ekran już NIE pozwala klikać
+## "Nowa aukcja" bez ograniczeń (użytkownik: "aucje powinny być dostępne
+## tylko w wybranym czasie, nie żeby mogę ileś obrazów na raz kupić") —
+## jeśli gracz jest w mieście aukcyjnym poza terminem, widzi tylko
+## informację, kiedy i gdzie jest następna aukcja.
 
 const BID_INCREMENT_RATIO := 0.1  ## gracz podbija o 10% szacunkowej wartości
+const BID_TIME_LIMIT := 20.0  ## sekundy realnego czasu na podbicie oferty
 
 var current_number: int = -1
 var current_bid: float = 0.0
 var current_leader: String = ""  ## "" = nikt, "player", albo id rywala
 var current_forgery_warning: bool = false  ## losowane raz na aukcję w _start_new_auction
 
-var auction_number_label: Label
+var auction_active: bool = false  ## true = odlicza czas na kolejny ruch gracza
+var bid_time_remaining: float = 0.0
+
+var schedule_label: Label
 var painting_label: Label
 var bid_label: Label
 var money_label: Label
 var warning_label: Label
 var status_label: Label
+var timer_label: Label
 var painting_texture_rect: TextureRect
+var bid_btn: Button
+var resolve_btn: Button
 
-const PAINTING_DISPLAY_SIZE := Vector2(220, 220)
+## Większy niż poprzednio (220) — użytkownik zgłosił, że obraz musi być
+## "super widoczny", nie tylko odznaczony małą ramką wśród opisów.
+const PAINTING_DISPLAY_SIZE := Vector2(320, 320)
 
 
-## Układ pudełek nawiązuje do oryginału (patrz screeny użytkownika):
-## "AUCTION NUMBER: X" jako osobna skrzynka u góry, "UP FOR AUCTION IS: ..."
-## jako zwykła linia, a oferta + gotówka gracza jako dwie skrzynki obok
-## siebie (tam odpowiednik to "BID BY VICO 75000 M" + nazwisko gracza).
-##
-## Obraz aukcji pokazywany jest WEWNĄTRZ karty (root), nie jako nakładka na
-## sztaludze w tle — pierwsza wersja nakładała go na wykalibrowany fragment
-## tła, ale duża, w pełni czytelna karta z make_root() (90% ekranu, patrz
-## ScreenHelpers) i tak leżała NAD tym miejscem, więc obraz był ledwo
-## widoczny (zgłoszone przez użytkownika: "ramka wszystko zasłania").
-## Wewnątrz karty jest gwarantowanie na wierzchu i w pełni widoczny.
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/auction_house.jpg")
 
@@ -38,17 +44,33 @@ func _ready() -> void:
 	ScreenHelpers.make_title(root, "Dom aukcyjny")
 	ScreenHelpers.make_turn_indicator(root)
 
-	auction_number_label = ScreenHelpers.make_info_box(root, "")
+	schedule_label = ScreenHelpers.make_info_box(root, "")
 
+	if not Auctions.is_open(Travel.current_city):
+		ScreenHelpers.make_label(root, "W tym mieście nie odbywa się teraz żadna aukcja.\nWróć w podanym terminie.")
+		schedule_label.text = Auctions.get_schedule_string()
+		ScreenHelpers.make_back_button(root)
+		return
+
+	_build_active_auction_ui(root)
+	_start_new_auction()
+
+
+## Buduje UI aktywnej licytacji: duży obraz w oprawionej ramce w głównej
+## karcie, a przyciski podbijania + malejący licznik czasu w OSOBNYM pasku
+## przyklejonym do prawego dolnego rogu ekranu (make_root_bottom) — zgodnie
+## z prośbą użytkownika, żeby akcje licytacji nie leżały wymieszane w
+## pionowej liście opisów, tylko osobno "na dole albo z boku".
+func _build_active_auction_ui(root: VBoxContainer) -> void:
 	var painting_box := StyleBoxFlat.new()
 	painting_box.bg_color = Color(ScreenHelpers.COLOR_BURGUNDY_DARK.r, ScreenHelpers.COLOR_BURGUNDY_DARK.g, ScreenHelpers.COLOR_BURGUNDY_DARK.b, 0.85)
 	painting_box.border_color = ScreenHelpers.COLOR_GOLD
-	painting_box.set_border_width_all(3)
+	painting_box.set_border_width_all(4)
 	painting_box.set_corner_radius_all(4)
-	painting_box.content_margin_left = 8
-	painting_box.content_margin_right = 8
-	painting_box.content_margin_top = 8
-	painting_box.content_margin_bottom = 8
+	painting_box.content_margin_left = 10
+	painting_box.content_margin_right = 10
+	painting_box.content_margin_top = 10
+	painting_box.content_margin_bottom = 10
 	var painting_panel := PanelContainer.new()
 	painting_panel.add_theme_stylebox_override("panel", painting_box)
 	painting_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -71,38 +93,47 @@ func _ready() -> void:
 	bid_label = ScreenHelpers.make_info_box(bid_row, "")
 	money_label = ScreenHelpers.make_info_box(bid_row, "")
 
-	var action_row := HBoxContainer.new()
-	action_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	root.add_child(action_row)
-
-	var bid_btn := Button.new()
-	bid_btn.text = "Podbij"
-	bid_btn.pressed.connect(_on_bid_pressed)
-	action_row.add_child(bid_btn)
-
-	var resolve_btn := Button.new()
-	resolve_btn.text = "Zakończ rundę (odpowiedź rywali)"
-	resolve_btn.pressed.connect(_on_resolve_round_pressed)
-	action_row.add_child(resolve_btn)
-
-	var next_btn := Button.new()
-	next_btn.text = "Nowa aukcja"
-	next_btn.pressed.connect(_start_new_auction)
-	action_row.add_child(next_btn)
-
 	status_label = ScreenHelpers.make_label(root, "")
 	ScreenHelpers.make_back_button(root)
 
-	_start_new_auction()
+	var action_root := ScreenHelpers.make_root_bottom(self, true, 340.0, true)
+	timer_label = ScreenHelpers.make_label(action_root, "")
+	timer_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
+	bid_btn = ScreenHelpers.make_button(action_root, "Podbij (+10%)", _on_bid_pressed)
+	resolve_btn = ScreenHelpers.make_button(action_root, "Zakończ rundę", _on_resolve_round_pressed)
+
+
+func _process(delta: float) -> void:
+	if not auction_active:
+		return
+	bid_time_remaining -= delta
+	if bid_time_remaining <= 0.0:
+		bid_time_remaining = 0.0
+		auction_active = false
+		timer_label.text = "Czas minął!"
+		_on_time_expired()
+	else:
+		timer_label.text = "Czas na podbicie: %d s" % int(ceil(bid_time_remaining))
+
+
+func _start_bid_timer() -> void:
+	bid_time_remaining = BID_TIME_LIMIT
+	auction_active = true
+
+
+func _on_time_expired() -> void:
+	status_label.text = "Zabrakło czasu na podbicie — rywale odpowiadają."
+	_on_resolve_round_pressed()
 
 
 func _start_new_auction() -> void:
-	current_number = 1 + randi() % Paintings.CATALOG.size()
+	current_number = Auctions.get_current_painting_number()
 	var estimated_value := Paintings.get_estimated_value(current_number)
 	current_bid = estimated_value * 0.2
 	current_leader = ""
 	current_forgery_warning = Paintings.warns_about_forgery(current_number)
 	_update_labels()
+	_start_bid_timer()
 
 
 func _on_bid_pressed() -> void:
@@ -114,6 +145,7 @@ func _on_bid_pressed() -> void:
 	current_bid = next_bid
 	current_leader = "player"
 	_update_labels()
+	_start_bid_timer()
 
 
 func _on_resolve_round_pressed() -> void:
@@ -131,12 +163,18 @@ func _on_resolve_round_pressed() -> void:
 		current_leader = best_rival_id
 		status_label.text = "%s podbija ofertę." % AIPlayers.get_rival(best_rival_id)["name"]
 		_update_labels()
+		_start_bid_timer()
 		return
 
 	_resolve_auction()
 
 
 func _resolve_auction() -> void:
+	auction_active = false
+	bid_btn.disabled = true
+	resolve_btn.disabled = true
+	timer_label.text = ""
+
 	if current_leader == "player":
 		Economy.spend(current_bid)
 		if Paintings.is_forgery_by_duplicate(current_number):
@@ -153,12 +191,16 @@ func _resolve_auction() -> void:
 		status_label.text = "%s wygrywa aukcję." % AIPlayers.get_rival(current_leader)["name"]
 	_update_labels()
 
+	Auctions.resolve_and_reschedule()
+	schedule_label.text = Auctions.get_schedule_string()
+	status_label.text += "\n" + Auctions.get_schedule_string()
+
 	if GameState.check_game_over():
 		SceneRouter.goto_scene(SceneRouter.ENDING)
 
 
 func _update_labels() -> void:
-	auction_number_label.text = "Aukcja nr %d" % current_number
+	schedule_label.text = "Aukcja w toku: %s — %s" % [Cities.get_city_name(Travel.current_city), Calendar.get_date_string()]
 
 	var category: String = Paintings.get_category(current_number)
 	var category_name: String = Paintings.CATEGORY_NAMES.get(category, category)

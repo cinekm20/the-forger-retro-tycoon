@@ -35,6 +35,7 @@ func _ready() -> void:
 	_test_security_bodyguard_and_gangster()
 	_test_travel_vehicle_choice()
 	_test_travel_completes_in_one_animation()
+	_test_auctions_schedule()
 
 	print("\n=== Wynik: %d/%d testów przeszło ===" % [total - failures, total])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -269,3 +270,27 @@ func _test_travel_completes_in_one_animation() -> void:
 	Calendar.advance_days(int(ceil(Travel.last_travel_total_days)))
 	_assert(not Travel.is_traveling(), "Berlin -> St. Louis (z przesiadką): podróż zakończona po jednym advance_days")
 	_assert(Travel.current_city == "st_louis", "Travel.current_city zaktualizowany na miasto docelowe mimo przesiadki")
+
+
+## Regresja: przed dodaniem Auctions.gd dom aukcyjny pozwalał kupować
+## dowolną liczbę obrazów na żądanie (przycisk "Nowa aukcja" bez ograniczeń)
+## — użytkownik zgłosił, że w oryginale aukcje odbywają się tylko w
+## konkretnym mieście i dniu (patrz "NEXT AUCTION IS: ..." w oryginalnej
+## grze). Sprawdza, że harmonogram faktycznie ogranicza dostępność.
+func _test_auctions_schedule() -> void:
+	print("-- Auctions: aukcja dostępna tylko we właściwym mieście i terminie --")
+	Calendar.reset_new_game()
+	Auctions.reset_new_game()
+
+	_assert(Cities.get_auction_cities().has(Auctions.next_auction_city), "wylosowane miasto aukcji jest jednym z miast typu 'auction'")
+	_assert(Auctions.next_auction_day > Calendar.current_day, "termin aukcji jest w przyszłości względem startu gry")
+	_assert(not Auctions.is_open(Auctions.next_auction_city), "aukcja jeszcze nieotwarta przed nadejściem terminu")
+
+	var other_city := Cities.get_auction_cities().filter(func(c): return c != Auctions.next_auction_city)[0]
+	Calendar.advance_days(Auctions.next_auction_day - Calendar.current_day)
+	_assert(not Auctions.is_open(other_city), "inne miasto aukcyjne pozostaje zamknięte, nawet gdy termin nadszedł")
+	_assert(Auctions.is_open(Auctions.next_auction_city), "właściwe miasto otwiera aukcję dokładnie w zaplanowanym dniu")
+
+	var scheduled_day := Auctions.next_auction_day
+	Auctions.resolve_and_reschedule()
+	_assert(Auctions.next_auction_day > scheduled_day, "po rozstrzygnięciu losowany jest nowy termin w przyszłości")

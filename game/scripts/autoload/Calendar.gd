@@ -42,4 +42,16 @@ func get_day_of_month() -> int:
 
 
 func get_date_string() -> String:
-	return "%02d.%02d.%d" % [get_day_of_month(), get_month(), get_year()]
+	return format_day(current_day)
+
+
+## Formatuje DOWOLNY dzień (nie tylko current_day) tym samym schematem co
+## get_date_string() — potrzebne dla dat w przyszłości/przeszłości, np.
+## zaplanowanego terminu aukcji w Auctions.gd ("NEXT AUCTION IS: 17.1.1918").
+func format_day(day: int) -> String:
+	@warning_ignore("integer_division")
+	var month_index := (day / DAYS_PER_MONTH) % 12
+	@warning_ignore("integer_division")
+	var year := START_YEAR + day / (DAYS_PER_MONTH * 12)
+	var day_of_month := 1 + day % DAYS_PER_MONTH
+	return "%02d.%02d.%d" % [day_of_month, 1 + month_index, year]

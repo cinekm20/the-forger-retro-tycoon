@@ -29,6 +29,7 @@ var location_label: Label
 var money_label: Label
 var date_label: Label
 var paintings_label: Label
+var auction_schedule_label: Label
 var warning_label: Label
 var travel_button: Button
 var root_panel: VBoxContainer
@@ -97,6 +98,10 @@ func _build_top_row() -> HBoxContainer:
 	location_label = ScreenHelpers.make_info_box(left_column, "", 280.0, 22)
 	date_label = ScreenHelpers.make_info_box(left_column, "")
 	paintings_label = ScreenHelpers.make_info_box(left_column, "")
+	## Skrzynka "NEXT AUCTION IS: ..." z oryginału — widoczna niezależnie od
+	## typu aktualnego miasta, bo termin aukcji dotyczy jednego z 5 miast
+	## aukcyjnych, nie koniecznie tego, w którym gracz akurat jest.
+	auction_schedule_label = ScreenHelpers.make_info_box(left_column, "", 280.0)
 
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -202,6 +207,7 @@ func _update_status() -> void:
 	money_label.text = "%.0f M" % Economy.player_money
 	date_label.text = Calendar.get_date_string()
 	paintings_label.text = "Obrazy: %d/%d" % [Paintings.owned_count(), Paintings.win_threshold]
+	auction_schedule_label.text = Auctions.get_schedule_string()
 
 	warning_label.visible = Economy.is_reform_imminent()
 	warning_label.text = "⚠ Kurs dolara wysoki — zbliża się reforma walutowa!" if warning_label.visible else ""

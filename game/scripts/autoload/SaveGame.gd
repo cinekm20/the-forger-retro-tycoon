@@ -32,6 +32,9 @@ func save_game() -> void:
 		"player_names": Players.player_names,
 		"player_snapshots": Players.snapshots,
 		"has_bodyguard": Security.has_bodyguard,
+		"next_auction_city": Auctions.next_auction_city,
+		"next_auction_day": Auctions.next_auction_day,
+		"current_painting_number": Auctions.current_painting_number,
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	file.store_string(JSON.stringify(data))
@@ -76,3 +79,8 @@ func load_game() -> void:
 	var loaded_snapshots: Array = data.get("player_snapshots", [])
 	Players.snapshots.assign(loaded_snapshots)
 	Security.has_bodyguard = data.get("has_bodyguard", false)
+	Auctions.next_auction_city = data.get("next_auction_city", "")
+	Auctions.next_auction_day = data.get("next_auction_day", 0)
+	Auctions.current_painting_number = data.get("current_painting_number", -1)
+	if Auctions.next_auction_city == "":
+		Auctions.reset_new_game()  # zapis sprzed dodania harmonogramu aukcji
