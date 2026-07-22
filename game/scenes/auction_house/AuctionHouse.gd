@@ -286,8 +286,11 @@ func _update_labels() -> void:
 
 	## Grafika obrazu opcjonalna — jeśli plik danego numeru jeszcze nie
 	## istnieje (docs/GRAFIKA_LEONARDO.md §7), ramka zostaje pusta zamiast
-	## crashować na load() brakującego pliku.
-	var texture_path := Paintings.get_texture_path(current_number)
+	## crashować na load() brakującego pliku. is_fake: prawdziwa fałszywość
+	## (Paintings.is_forgery_by_duplicate), NIEZALEŻNIE od tego, czy
+	## ekspertyza akurat wyświetliła ostrzeżenie (warns_about_forgery) — więc
+	## bystry gracz może rozpoznać podróbkę "na oko", nawet bez ostrzeżenia.
+	var texture_path := Paintings.get_texture_path(current_number, Paintings.is_forgery_by_duplicate(current_number))
 	painting_texture_rect.texture = load(texture_path) if ResourceLoader.exists(texture_path) else null
 
 	## visible = false (nie tylko pusty tekst) — bez ramki+ScrollContainer ten

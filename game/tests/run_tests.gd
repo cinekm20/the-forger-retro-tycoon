@@ -29,6 +29,7 @@ func _ready() -> void:
 	_test_harvest_requires_elapsed_time()
 	_test_harvest_scales_with_time()
 	_test_forgery_by_duplicate_number()
+	_test_forgery_texture_falls_back_when_missing()
 	_test_win_threshold_easy_mode()
 	_test_forward_contract_penalty_on_failure()
 	_test_players_hotseat_swap()
@@ -168,6 +169,21 @@ func _test_forgery_by_duplicate_number() -> void:
 	_assert(Paintings.owned_count() == 1, "po katalogowaniu: 1 obraz w kolekcji")
 	_assert(Paintings.is_forgery_by_duplicate(6), "próba zdobycia drugiego obrazu nr 6 = wykryta fałszywka")
 	_assert(Paintings.get_category(6) == "vermeer", "obraz nr 6 należy do kategorii 'vermeer' (docs/ZRODLA_C64_WIKI.md)")
+
+
+func _test_forgery_texture_falls_back_when_missing() -> void:
+	print("-- Paintings: get_texture_path z is_fake=true --")
+	## Obraz nr 7 ma dedykowany wariant podróbki (painting_07_fake.jpg),
+	## obraz nr 1 (na razie) nie — is_fake=true musi po cichu spaść z
+	## powrotem na zwykłą grafikę zamiast zwracać nieistniejącą ścieżkę.
+	_assert(
+		Paintings.get_texture_path(7, true) == "res://art/paintings/painting_07_fake.jpg",
+		"obraz nr 7 z is_fake=true zwraca dedykowaną grafikę podróbki",
+	)
+	_assert(
+		Paintings.get_texture_path(1, true) == Paintings.get_texture_path(1, false),
+		"obraz nr 1 bez wariantu podróbki: is_fake=true spada z powrotem na zwykłą grafikę",
+	)
 
 
 func _test_win_threshold_easy_mode() -> void:

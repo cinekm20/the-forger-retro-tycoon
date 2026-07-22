@@ -178,5 +178,18 @@ func get_painting_info(number: int) -> Dictionary:
 ## z konwencją `painting_NN.jpg` (dwucyfrowy numer katalogowy). Dopóki
 ## grafiki nie istnieją, wywołujący musi sam sprawdzić
 ## ResourceLoader.exists() przed load() — funkcja tylko liczy ścieżkę.
-func get_texture_path(number: int) -> String:
+##
+## is_fake=true (patrz is_forgery_by_duplicate): dla numerów, które mają
+## dedykowany wariant "podróbka" (`painting_NN_fake.jpg`, na razie tylko
+## część katalogu — patrz docs/GRAFIKA_LEONARDO.md §7), zwraca TĘ grafikę
+## zamiast oryginału — subtelnie inny obraz nawet bez ostrzeżenia z
+## ekspertyzy (warns_about_forgery), tak jak w zrzutach ekranu oryginału.
+## Dla numerów bez wariantu po cichu spada z powrotem na zwykłą grafikę
+## (ten sam obraz co oryginał — brak wizualnej różnicy, dopóki nie
+## dorobimy pozostałych wariantów).
+func get_texture_path(number: int, is_fake: bool = false) -> String:
+	if is_fake:
+		var fake_path := "res://art/paintings/painting_%02d_fake.jpg" % number
+		if ResourceLoader.exists(fake_path):
+			return fake_path
 	return "res://art/paintings/painting_%02d.jpg" % number

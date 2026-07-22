@@ -654,8 +654,14 @@ Early modernist oil painting, simplified geometric or fragmented forms, flattene
 Do wariantu "podróbka" tego samego obrazu (opcjonalne, ~8–10 sztuk, patrz
 Plan produkcji wiersz 12): powtórz dokładnie ten sam prompt z tym samym
 seedem, dopisując na końcu `, slightly different brushwork, subtle color
-mismatch, forged reproduction` — przyda się do mechaniki rozpoznawania
-fałszywek (Szkoła sztuki).
+mismatch, forged reproduction`. **Zapisz jako `painting_NN_fake.jpg`**
+(ta sama konwencja co oryginały, plus `_fake`) — `AuctionHouse.gd` faktycznie
+podmienia grafikę na tę fałszywą wersję, gdy dany numer trafi się drugi raz
+w kolekcji (`Paintings.is_forgery_by_duplicate`), NIEZALEŻNIE od tego, czy
+akurat wyświetliło się ostrzeżenie z ekspertyzy — więc uważny gracz może
+rozpoznać podróbkę "na oko". 7 z ~8–10 gotowe: obrazy 7, 10, 11, 21, 25, 29,
+30. Dla numerów bez wariantu gra po cichu pokazuje zwykłą grafikę (bez
+różnicy wizualnej), więc brakujące warianty nie są pilne.
 
 ### 8. Szkoła sztuki (mini-gra autentykacji)
 - Tło: pracownia/atelier
@@ -800,7 +806,7 @@ Leonardo, żeby mieć z czego wybrać).
 | 9 | 4 | Fazy wzrostu roślin (4 uprawy × 3 fazy) | 12 | 1:1, 512×512, transparent | §3 | ⬜ do zrobienia — **uwaga**, jak pinezki: mały wyizolowany obiekt, ryzyko tego samego problemu |
 | 10 | 5 | Konie + dżokeje (różne barwy jeźdźców) | 4–6 | 1:1 lub 4:3, transparent | §5 | ⬜ do zrobienia |
 | 11 | 6 | 40 obrazów kolekcji (na końcu, seriami po 5 per kategoria) | 40 | 1:1, min. 1024×1024 | §7 | ✅ zrobione i podpięte — wszystkie 40 (`painting_01.jpg`…`painting_40.jpg`, patrz `Paintings.get_texture_path`) |
-| 12 | 7 (opcjonalnie) | Warianty "fałszywka" wybranych obrazów (do szkoły sztuki) | ~8–10 | 1:1, jak oryginał | §7, §8 | ⬜ opcjonalne |
+| 12 | 7 (opcjonalnie) | Warianty "fałszywka" wybranych obrazów (do szkoły sztuki) | ~8–10 | 1:1, jak oryginał | §7, §8 | 🟡 7/~8–10 zrobione i podpięte — obrazy 7, 10, 11, 21, 25, 29, 30 (`painting_NN_fake.jpg`); reszta katalogu dalej pokazuje zwykłą grafikę przy fałszywce (`Paintings.get_texture_path` po cichu spada na oryginał, gdy wariantu brak) |
 
 **Zasada dla wierszy oznaczonych "uwaga" (7 i 9):** jeśli Leonardo znowu
 zacznie robić pełne sceny zamiast wyizolowanych ikon/sprite'ów mimo
