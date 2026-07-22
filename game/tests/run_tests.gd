@@ -177,6 +177,13 @@ func _test_players_hotseat_swap() -> void:
 
 	Economy.player_money = 12345.0
 	Paintings.catalogue(1)
+	## Bez tego Security._on_day_advanced (podłączony pod Calendar.day_advanced,
+	## czyli odpala się przy KAŻDYM end_turn() poniżej) miał ~5% szansy/tydzień
+	## ukraść jedyny obraz gracza 1 — losowa, niezwiązana z tym testem
+	## interakcja z mechaniką kradzieży (patrz Security.gd), która sprawiała,
+	## że test sporadycznie failował. Ten test sprawdza migawki stanu, nie
+	## kradzieże — ochroniarz eliminuje tę przypadkową zależność.
+	Security.has_bodyguard = true
 
 	Players.end_turn()  # gracz 1 -> gracz 2
 
