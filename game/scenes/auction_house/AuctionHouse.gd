@@ -33,11 +33,11 @@ var painting_texture_rect: TextureRect
 var bid_btn: Button
 var resolve_btn: Button
 
-## Większy niż pierwotne 220 — użytkownik zgłosił, że obraz musi być "super
-## widoczny". Nie większy niż 300: ekran nie ma już ramki+ScrollContainer
-## (użytkownik: "nie ma być ramki na cały ekran"), więc treść musi zmieścić
-## się w jednym, niescrollowanym widoku bez przycinania dolnych przycisków.
-const PAINTING_DISPLAY_SIZE := Vector2(300, 300)
+## 225 = 300 pomniejszone o 25% (użytkownik: "obraz trochę mniejszy tak o
+## 25%") — ekran nie ma już ramki+ScrollContainer (użytkownik: "nie ma być
+## ramki na cały ekran"), więc treść musi zmieścić się w jednym,
+## niescrollowanym widoku bez przycinania dolnych przycisków.
+const PAINTING_DISPLAY_SIZE := Vector2(225, 225)
 
 
 func _ready() -> void:
