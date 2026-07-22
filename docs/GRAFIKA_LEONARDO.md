@@ -416,98 +416,230 @@ UI.
 
 Poniżej **wszystkich 40 gotowych promptów**, po jednym na obraz — kopiuj-wklej
 bez żadnych zmian. Numeracja zgodna z `Paintings.CATALOG`/`PAINTING_INFO` w
-kodzie i z `docs/ZRODLA_C64_WIKI.md` Fragment 5.
+kodzie i z `docs/ZRODLA_C64_WIKI.md` Fragment 5. Zapisz jako `painting_NN.jpg`
+(patrz konwencja nazw w sekcji "Gdzie odkładać pliki").
 
 **1) Vermeer — obrazy 3, 4, 6, 9, 10** — malarstwo holenderskie złotego wieku
+
+Obraz 3
 ```
-17th century Dutch Golden Age genre painting, domestic interior scene, soft window light, muted earthy palette, oil painting texture, intimate composition, museum piece, square canvas, no frame, subject: SUBJECT
+17th century Dutch Golden Age genre painting, domestic interior scene, soft window light, muted earthy palette, oil painting texture, intimate composition, museum piece, square canvas, no frame, subject: an artist seen from behind painting a model in historical dress in a studio
 ```
-- Obraz 3 — SUBJECT = `an artist seen from behind painting a model in historical dress in a studio`
-- Obraz 4 — SUBJECT = `a young woman intently making lace with bobbins at a table`
-- Obraz 6 — SUBJECT = `a woman in a blue jacket reading a letter by a window`
-- Obraz 9 — SUBJECT = `a scholar in a robe reaching toward a celestial globe on a table`
-- Obraz 10 — SUBJECT = `a young woman in a turban looking over her shoulder, wearing a pearl earring`
+
+Obraz 4
+```
+17th century Dutch Golden Age genre painting, domestic interior scene, soft window light, muted earthy palette, oil painting texture, intimate composition, museum piece, square canvas, no frame, subject: a young woman intently making lace with bobbins at a table
+```
+
+Obraz 6
+```
+17th century Dutch Golden Age genre painting, domestic interior scene, soft window light, muted earthy palette, oil painting texture, intimate composition, museum piece, square canvas, no frame, subject: a woman in a blue jacket reading a letter by a window
+```
+
+Obraz 9
+```
+17th century Dutch Golden Age genre painting, domestic interior scene, soft window light, muted earthy palette, oil painting texture, intimate composition, museum piece, square canvas, no frame, subject: a scholar in a robe reaching toward a celestial globe on a table
+```
+
+Obraz 10
+```
+17th century Dutch Golden Age genre painting, domestic interior scene, soft window light, muted earthy palette, oil painting texture, intimate composition, museum piece, square canvas, no frame, subject: a young woman in a turban looking over her shoulder, wearing a pearl earring
+```
 
 **2) Barok — obrazy 1, 2, 5, 35, 36**
+
+Obraz 1
 ```
-Baroque oil painting, dramatic chiaroscuro lighting, rich dark background, opulent fabric and gesture, oil painting texture, museum piece, square canvas, no frame, subject: SUBJECT
+Baroque oil painting, dramatic chiaroscuro lighting, rich dark background, opulent fabric and gesture, oil painting texture, museum piece, square canvas, no frame, subject: a dramatic marine scene with sailing ships, one firing a cannon, stormy sky
 ```
-- Obraz 1 — SUBJECT = `a dramatic marine scene with sailing ships, one firing a cannon, stormy sky`
-- Obraz 2 — SUBJECT = `a dynamic mythological scene of horsemen abducting struggling women, swirling drapery`
-- Obraz 5 — SUBJECT = `an elderly man resting in an armchair, hand on his face, deep shadow`
-- Obraz 35 — SUBJECT = `peasants harvesting wheat in a golden summer field, some resting under a tree`
-- Obraz 36 — SUBJECT = `a young man in a wide-brimmed hat holding a skull, memento mori`
+
+Obraz 2
+```
+Baroque oil painting, dramatic chiaroscuro lighting, rich dark background, opulent fabric and gesture, oil painting texture, museum piece, square canvas, no frame, subject: a dynamic mythological scene of horsemen abducting struggling women, swirling drapery
+```
+
+Obraz 5
+```
+Baroque oil painting, dramatic chiaroscuro lighting, rich dark background, opulent fabric and gesture, oil painting texture, museum piece, square canvas, no frame, subject: an elderly man resting in an armchair, hand on his face, deep shadow
+```
+
+Obraz 35
+```
+Baroque oil painting, dramatic chiaroscuro lighting, rich dark background, opulent fabric and gesture, oil painting texture, museum piece, square canvas, no frame, subject: peasants harvesting wheat in a golden summer field, some resting under a tree
+```
+
+Obraz 36
+```
+Baroque oil painting, dramatic chiaroscuro lighting, rich dark background, opulent fabric and gesture, oil painting texture, museum piece, square canvas, no frame, subject: a young man in a wide-brimmed hat holding a skull, memento mori
+```
 
 **3) Klasycyzm — obrazy 24, 27, 28, 31, 32**
+
+Obraz 24
 ```
-Neoclassical oil painting, balanced formal composition, clean idealized figures, restrained noble color palette, oil painting texture, museum piece, square canvas, no frame, subject: SUBJECT
+Neoclassical oil painting, balanced formal composition, clean idealized figures, restrained noble color palette, oil painting texture, museum piece, square canvas, no frame, subject: a precise architectural view of a castle courtyard with small figures for scale
 ```
-- Obraz 24 — SUBJECT = `a precise architectural view of a castle courtyard with small figures for scale`
-- Obraz 27 — SUBJECT = `an elderly artist's self-portrait wearing spectacles and a soft cap`
-- Obraz 28 — SUBJECT = `a nude woman seen from behind seated on draped cloth, smooth idealized form`
-- Obraz 31 — SUBJECT = `an old bearded man in penitent prayer, hands clasped, solemn mood`
-- Obraz 32 — SUBJECT = `a man lifeless in a bathtub, arm hanging, holding a paper, stark composition`
+
+Obraz 27
+```
+Neoclassical oil painting, balanced formal composition, clean idealized figures, restrained noble color palette, oil painting texture, museum piece, square canvas, no frame, subject: an elderly artist's self-portrait wearing spectacles and a soft cap
+```
+
+Obraz 28
+```
+Neoclassical oil painting, balanced formal composition, clean idealized figures, restrained noble color palette, oil painting texture, museum piece, square canvas, no frame, subject: a nude woman seen from behind seated on draped cloth, smooth idealized form
+```
+
+Obraz 31
+```
+Neoclassical oil painting, balanced formal composition, clean idealized figures, restrained noble color palette, oil painting texture, museum piece, square canvas, no frame, subject: an old bearded man in penitent prayer, hands clasped, solemn mood
+```
+
+Obraz 32
+```
+Neoclassical oil painting, balanced formal composition, clean idealized figures, restrained noble color palette, oil painting texture, museum piece, square canvas, no frame, subject: a man lifeless in a bathtub, arm hanging, holding a paper, stark composition
+```
 
 **4) Romantyzm — obrazy 15, 16, 19, 20, 23**
+
+Obraz 15
 ```
-Romantic era oil painting, dramatic sky and landscape or portrait, sublime nature, emotional atmosphere, sweeping brushwork, oil painting texture, museum piece, square canvas, no frame, subject: SUBJECT
+Romantic era oil painting, dramatic sky and landscape or portrait, sublime nature, emotional atmosphere, sweeping brushwork, oil painting texture, museum piece, square canvas, no frame, subject: shattered ice floes piled dramatically under a cold pale sky
 ```
-- Obraz 15 — SUBJECT = `shattered ice floes piled dramatically under a cold pale sky`
-- Obraz 16 — SUBJECT = `a lighthouse on a windswept coast under a cloudy sky`
-- Obraz 19 — SUBJECT = `a burning government building at night reflected over a river, glowing flames`
-- Obraz 20 — SUBJECT = `an allegorical woman in flowing robes standing on rubble with arms open, dramatic ruins behind`
-- Obraz 23 — SUBJECT = `a young man's direct self-portrait bust, sharp gaze, plain background`
+
+Obraz 16
+```
+Romantic era oil painting, dramatic sky and landscape or portrait, sublime nature, emotional atmosphere, sweeping brushwork, oil painting texture, museum piece, square canvas, no frame, subject: a lighthouse on a windswept coast under a cloudy sky
+```
+
+Obraz 19
+```
+Romantic era oil painting, dramatic sky and landscape or portrait, sublime nature, emotional atmosphere, sweeping brushwork, oil painting texture, museum piece, square canvas, no frame, subject: a burning government building at night reflected over a river, glowing flames
+```
+
+Obraz 20
+```
+Romantic era oil painting, dramatic sky and landscape or portrait, sublime nature, emotional atmosphere, sweeping brushwork, oil painting texture, museum piece, square canvas, no frame, subject: an allegorical woman in flowing robes standing on rubble with arms open, dramatic ruins behind
+```
+
+Obraz 23
+```
+Romantic era oil painting, dramatic sky and landscape or portrait, sublime nature, emotional atmosphere, sweeping brushwork, oil painting texture, museum piece, square canvas, no frame, subject: a young man's direct self-portrait bust, sharp gaze, plain background
+```
 
 **5) Impresjonizm — obrazy 7, 8, 11, 12, 13**
+
+Obraz 7
 ```
-Impressionist oil painting, loose visible brushstrokes, dappled natural light, outdoor or intimate interior scene, soft vibrant palette, oil painting texture, museum piece, square canvas, no frame, subject: SUBJECT
+Impressionist oil painting, loose visible brushstrokes, dappled natural light, outdoor or intimate interior scene, soft vibrant palette, oil painting texture, museum piece, square canvas, no frame, subject: a woman crouching and bathing in a low round tub, seen from above
 ```
-- Obraz 7 — SUBJECT = `a woman crouching and bathing in a low round tub, seen from above`
-- Obraz 8 — SUBJECT = `a bust portrait of a bearded painter in a dark coat, confident gaze`
-- Obraz 11 — SUBJECT = `a young woman with dark hair in a loosely open blouse, soft warm lighting`
-- Obraz 12 — SUBJECT = `coastal cliffs above a beach, sea and sky in shimmering light`
-- Obraz 13 — SUBJECT = `two men seated at a table playing cards, still and contemplative`
+
+Obraz 8
+```
+Impressionist oil painting, loose visible brushstrokes, dappled natural light, outdoor or intimate interior scene, soft vibrant palette, oil painting texture, museum piece, square canvas, no frame, subject: a bust portrait of a bearded painter in a dark coat, confident gaze
+```
+
+Obraz 11
+```
+Impressionist oil painting, loose visible brushstrokes, dappled natural light, outdoor or intimate interior scene, soft vibrant palette, oil painting texture, museum piece, square canvas, no frame, subject: a young woman with dark hair in a loosely open blouse, soft warm lighting
+```
+
+Obraz 12
+```
+Impressionist oil painting, loose visible brushstrokes, dappled natural light, outdoor or intimate interior scene, soft vibrant palette, oil painting texture, museum piece, square canvas, no frame, subject: coastal cliffs above a beach, sea and sky in shimmering light
+```
+
+Obraz 13
+```
+Impressionist oil painting, loose visible brushstrokes, dappled natural light, outdoor or intimate interior scene, soft vibrant palette, oil painting texture, museum piece, square canvas, no frame, subject: two men seated at a table playing cards, still and contemplative
+```
 
 **6) Symbolizm — obrazy 14, 17, 18, 21, 22**
+
+Obraz 14
 ```
-Symbolist oil painting, dreamlike mysterious mood, decorative ornamental detail, muted jewel-tone palette, oil painting texture, museum piece, square canvas, no frame, subject: SUBJECT
+Symbolist oil painting, dreamlike mysterious mood, decorative ornamental detail, muted jewel-tone palette, oil painting texture, museum piece, square canvas, no frame, subject: a woman in a flowing white dress standing on a bearskin rug, tonal harmony
 ```
-- Obraz 14 — SUBJECT = `a woman in a flowing white dress standing on a bearskin rug, tonal harmony`
-- Obraz 17 — SUBJECT = `a woman seated at a table eating oysters, expressive loose brushwork`
-- Obraz 18 — SUBJECT = `a stylish woman in an ornate patterned dress with a gold decorative background`
-- Obraz 21 — SUBJECT = `a mythological merman and sea nymph embracing among ocean waves`
-- Obraz 22 — SUBJECT = `a solitary woman with a distant gaze surrounded by sparse symbolic objects`
+
+Obraz 17
+```
+Symbolist oil painting, dreamlike mysterious mood, decorative ornamental detail, muted jewel-tone palette, oil painting texture, museum piece, square canvas, no frame, subject: a woman seated at a table eating oysters, expressive loose brushwork
+```
+
+Obraz 18
+```
+Symbolist oil painting, dreamlike mysterious mood, decorative ornamental detail, muted jewel-tone palette, oil painting texture, museum piece, square canvas, no frame, subject: a stylish woman in an ornate patterned dress with a gold decorative background
+```
+
+Obraz 21
+```
+Symbolist oil painting, dreamlike mysterious mood, decorative ornamental detail, muted jewel-tone palette, oil painting texture, museum piece, square canvas, no frame, subject: a mythological merman and sea nymph embracing among ocean waves
+```
+
+Obraz 22
+```
+Symbolist oil painting, dreamlike mysterious mood, decorative ornamental detail, muted jewel-tone palette, oil painting texture, museum piece, square canvas, no frame, subject: a solitary woman with a distant gaze surrounded by sparse symbolic objects
+```
 
 **7) Ekspresjonizm — obrazy 26, 33, 37, 38, 39**
+
+Obraz 26
 ```
-Expressionist oil painting, bold distorted forms, intense unnatural color contrasts, emotional raw brushwork, early 20th century avant-garde, oil painting texture, museum piece, square canvas, no frame, subject: SUBJECT
+Expressionist oil painting, bold distorted forms, intense unnatural color contrasts, emotional raw brushwork, early 20th century avant-garde, oil painting texture, museum piece, square canvas, no frame, subject: a drawbridge over a canal with a horse-drawn cart, vivid swirling color
 ```
-- Obraz 26 — SUBJECT = `a drawbridge over a canal with a horse-drawn cart, vivid swirling color`
-- Obraz 33 — SUBJECT = `a woman with flowing dark hair in a haunting sensual pose, halo-like border`
-- Obraz 37 — SUBJECT = `a small village church among colorful hills, bold simplified shapes`
-- Obraz 38 — SUBJECT = `a vividly colored horse standing in an abstracted rolling landscape`
-- Obraz 39 — SUBJECT = `a bustling market scene with figures in flowing robes under awnings, warm saturated color`
+
+Obraz 33
+```
+Expressionist oil painting, bold distorted forms, intense unnatural color contrasts, emotional raw brushwork, early 20th century avant-garde, oil painting texture, museum piece, square canvas, no frame, subject: a woman with flowing dark hair in a haunting sensual pose, halo-like border
+```
+
+Obraz 37
+```
+Expressionist oil painting, bold distorted forms, intense unnatural color contrasts, emotional raw brushwork, early 20th century avant-garde, oil painting texture, museum piece, square canvas, no frame, subject: a small village church among colorful hills, bold simplified shapes
+```
+
+Obraz 38
+```
+Expressionist oil painting, bold distorted forms, intense unnatural color contrasts, emotional raw brushwork, early 20th century avant-garde, oil painting texture, museum piece, square canvas, no frame, subject: a vividly colored horse standing in an abstracted rolling landscape
+```
+
+Obraz 39
+```
+Expressionist oil painting, bold distorted forms, intense unnatural color contrasts, emotional raw brushwork, early 20th century avant-garde, oil painting texture, museum piece, square canvas, no frame, subject: a bustling market scene with figures in flowing robes under awnings, warm saturated color
+```
 
 **8) Moderna — obrazy 25, 29, 30, 34, 40**
-```
-Early modernist oil painting, simplified geometric or fragmented forms, flattened perspective, bold unconventional color blocks, early 20th century avant-garde composition, oil painting texture, museum piece, square canvas, no frame, subject: SUBJECT
-```
-- Obraz 25 — SUBJECT = `two women in a tropical setting, one holding a tray of fruit, bold flat color`
-- Obraz 29 — SUBJECT = `a glass bowl of goldfish beside a small sculpture on a table, vivid decorative color`
-- Obraz 30 — SUBJECT = `a dancer in a colorful dress mid-pose, bold flattened color shapes`
-- Obraz 34 — SUBJECT = `a woman having her hair styled by another figure, fragmented cubist forms`
-- Obraz 40 — SUBJECT = `an angular viaduct bridge over a village, faceted cubist landscape`
 
-**Jak używać:** dla każdego obrazu weź prompt-szablon jego kategorii, podmień
-`SUBJECT` na podany tekst — całość wklej do Leonardo (razem z Negative Prompt
-z góry dokumentu). Zapisz jako `painting_NN.jpg` (patrz konwencja nazw w
-sekcji "Gdzie odkładać pliki").
+Obraz 25
+```
+Early modernist oil painting, simplified geometric or fragmented forms, flattened perspective, bold unconventional color blocks, early 20th century avant-garde composition, oil painting texture, museum piece, square canvas, no frame, subject: two women in a tropical setting, one holding a tray of fruit, bold flat color
+```
+
+Obraz 29
+```
+Early modernist oil painting, simplified geometric or fragmented forms, flattened perspective, bold unconventional color blocks, early 20th century avant-garde composition, oil painting texture, museum piece, square canvas, no frame, subject: a glass bowl of goldfish beside a small sculpture on a table, vivid decorative color
+```
+
+Obraz 30
+```
+Early modernist oil painting, simplified geometric or fragmented forms, flattened perspective, bold unconventional color blocks, early 20th century avant-garde composition, oil painting texture, museum piece, square canvas, no frame, subject: a dancer in a colorful dress mid-pose, bold flattened color shapes
+```
+
+Obraz 34
+```
+Early modernist oil painting, simplified geometric or fragmented forms, flattened perspective, bold unconventional color blocks, early 20th century avant-garde composition, oil painting texture, museum piece, square canvas, no frame, subject: a woman having her hair styled by another figure, fragmented cubist forms
+```
+
+Obraz 40
+```
+Early modernist oil painting, simplified geometric or fragmented forms, flattened perspective, bold unconventional color blocks, early 20th century avant-garde composition, oil painting texture, museum piece, square canvas, no frame, subject: an angular viaduct bridge over a village, faceted cubist landscape
+```
 
 Do wariantu "podróbka" tego samego obrazu (opcjonalne, ~8–10 sztuk, patrz
-Plan produkcji wiersz 12): powtórz dokładnie ten sam prompt (z podstawionym
-SUBJECT) z tym samym seedem, dopisując na końcu `, slightly different
-brushwork, subtle color mismatch, forged reproduction` — przyda się do
-mechaniki rozpoznawania fałszywek (Szkoła sztuki).
+Plan produkcji wiersz 12): powtórz dokładnie ten sam prompt z tym samym
+seedem, dopisując na końcu `, slightly different brushwork, subtle color
+mismatch, forged reproduction` — przyda się do mechaniki rozpoznawania
+fałszywek (Szkoła sztuki).
 
 ### 8. Szkoła sztuki (mini-gra autentykacji)
 - Tło: pracownia/atelier
