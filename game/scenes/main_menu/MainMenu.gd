@@ -7,7 +7,19 @@ var player_count_option: OptionButton
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/main_menu_title.jpg")
 	var root := ScreenHelpers.make_root(self)
-	ScreenHelpers.make_title(root, "VERMEER")
+
+	## Logo ma już wpisany napis "VERMEER" w swojej grafice (styl art déco
+	## zgodny z resztą gry) — zastępuje zwykły tekstowy tytuł zamiast leżeć
+	## obok niego.
+	var logo := TextureRect.new()
+	logo.texture = load("res://art/backgrounds/logo.jpg")
+	logo.custom_minimum_size = Vector2(240, 240)
+	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	logo.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(logo)
+
 	ScreenHelpers.make_label(root, "Ekonomiczna gra strategiczna — lata 20. XX wieku")
 
 	var player_row := HBoxContainer.new()
