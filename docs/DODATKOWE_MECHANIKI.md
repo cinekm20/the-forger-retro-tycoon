@@ -35,11 +35,14 @@ grafiki nie jest nam potrzebne jako referencja wizualna.
   macierzą: 7,8 dnia).
 - **Kontrakty terminowe mają karę umowną za niedostarczenie towaru**
   ("Konventionalstrafe") — nie tylko brak zysku, ale realna strata przy
-  niepowodzeniu. Warto to dodać jako jawne ryzyko w UI kontraktu.
+  niepowodzeniu. ✅ **Zaimplementowane:** kara = 20% wartości kontraktu
+  (`ForwardContracts.PENALTY_RATIO`), patrz `MECHANIKI_EKONOMICZNE.md` pkt. 5.
 - **Reforma walutowa powtarza się średnio co ~3 lata**, zapowiadana
   wzrostem inflacji i kursem dolara zbliżającym się do ok. 14 marek —
   konkretna liczba progowa do zasygnalizowania w UI ("kurs dolara > X = uwaga,
-  zbliża się reforma").
+  zbliża się reforma"). ✅ **Zaimplementowane z dokładnie tym progiem**
+  (`Economy.REFORM_WARNING_DOLLAR_RATE = 14.0`), patrz
+  `MECHANIKI_EKONOMICZNE.md` pkt. 6.
 - **Posiadanie kilku plantacji (2–3) jako zabezpieczenie ryzyka** —
   potwierdzona strategia: jeśli jedna zostanie dotknięta strajkiem,
   szkodnikami czy wywłaszczeniem, pozostałe dalej dają dochód. Dobry,
@@ -52,53 +55,61 @@ grafiki nie jest nam potrzebne jako referencja wizualna.
   na koniec gry testament ujawnia, że **wuj Walther von Grünschild i
   fałszerz Vico Vermeer to ta sama osoba** — cały "polowanie na fałszerza"
   było w istocie testem zaaranżowanym przez samego wuja dla przyszłego
-  spadkobiercy. **Rekomendacja:** to świetny, gotowy twist fabularny — warto
-  go świadomie zaadaptować (własnymi słowami/scenariuszem) jako zakończenie
-  naszej wersji, zamiast wymyślać nowe zakończenie od zera.
+  spadkobiercy. ✅ **Zaimplementowane niemal dosłownie** w ekranie zwycięstwa
+  (`scenes/ending/Ending.gd::_build_win`) — nie jest to już tylko rekomendacja
+  do rozważenia.
 
-## Nowe mechaniki z tipów do sequela (1997) — kandydaci na rozszerzenia po MVP
+## Nowe mechaniki z tipów do sequela (1997)
 
 Poniższe pochodzą z notatek do *Vermeer: Die Kunst zu erben* (kontynuacja, nie
-oryginał z 1987) — traktujemy je jako **opcjonalne pomysły na rozszerzenie**,
-nie rdzeń MVP:
+oryginał z 1987). Część z nich od czasu pierwszej wersji tego dokumentu
+**wyszła poza status "kandydata" i została faktycznie zaimplementowana** —
+oznaczone ✅/⬜ przy każdej pozycji, żeby nie trzeba było zgadywać.
 
-- **Sezonowa wydajność zbiorów w ciągu roku** (nie tylko liczba robotników):
+- ✅ **Sezonowa wydajność zbiorów w ciągu roku** (nie tylko liczba
+  robotników) — **zaimplementowane dokładnie wg tej tabeli**
+  (`Crops.SEASONAL_YIELD_FACTOR`, zużywane w
+  `PlayerPlantations.calculate_harvest`):
   | Miesiąc | I | II | III | IV | V | VI | VII | VIII | IX | X | XI | XII |
   |---|---|---|---|---|---|---|---|---|---|---|---|---|
   | Wydajność | 40% | 70% | 100% | 100% | 80% | 60% | 80% | 100% | 100% | 70% | 40% | 30% |
+- ✅ **Pola przy rzece dają podwójny plon** — zaimplementowane
+  (`Crops.RIVER_YIELD_MULTIPLIER = 2.0`).
+- ✅ **Kradzieże obrazów i ochrona (bodyguard)** — wbrew wcześniejszej
+  klasyfikacji "post-MVP, nie rdzeń" w tym dokumencie, **to już pełny,
+  wpięty system**: `Security.gd` (cotygodniowa szansa kradzieży, wynajęcie
+  ochroniarza, akcja "wyślij gangstera" przeciw wybranemu rywalowi), dostępny
+  z ekranu Galerii. Brak jedynie osobnej "wieży strażniczej" jako wizualnego
+  elementu — mechanicznie system działa w całości.
+- ⬜ **Pompy wodne**: inwestycja podnosząca plon i chroniąca przed klęskami
+  (susza/powódź) — wciąż niezaimplementowane, rozszerzenie mechaniki ryzyka
+  pogodowego z GDD 4.2 (która sama w sobie też jeszcze nie istnieje, patrz
+  tam).
+- ⬜ **Towar zalegający na magazynie dłużej niż rok psuje się** — wciąż
+  niezaimplementowane; `stored_goods` w `PlayerPlantations.gd`/Spichlerzu nie
+  ma żadnego mechanizmu starzenia/zepsucia.
+- ⬜ **Akademia Sztuki w konkretnym mieście** (w sequelu: Rzym) z dłuższymi
+  kursami — wciąż niezaimplementowane; `ArtSchool.gd` jest dostępna z
+  dowolnego miasta, nie tylko jednego.
+- ⬜ **Ukryte, "nielegalne" lokalne uprawy** (w sequelu: konopie w Ankarze) —
+  wciąż niezaimplementowane; `PlayerPlantations.gd`/`Crops.gd` nie mają
+  wariantu nielegalnej uprawy ani mechaniki konfiskaty.
+- ⬜ **3 "ulubione obrazy wuja"** — specjalne obrazy bonusowe (poza
+  katalogiem 40), bez fałszywek, dające dodatkową nagrodę/punkty uznania,
+  gdy trafią do kolekcji. W oryginalnym materiale wymienione jako prawdziwe,
+  historyczne (domena publiczna) dzieła: *"Zabawa na lodzie przy fosie
+  miejskiej"* Adriaena van de Velde (1659), *"Canale Grande w Wenecji"*
+  Canaletta (1730), *"Dentysta"* Gerarda van Honthorsta (1622). Wciąż
+  niezaimplementowane — `Paintings.CATALOG`/`PAINTING_INFO` obejmują tylko
+  40 numerów katalogowych, bez osobnej puli bonusowej.
 
-  To ciekawy, gotowy system: wiosna/lato/wczesna jesień = szczyt sezonu,
-  zima = zastój. Dobry kandydat do MVP (nie tylko sequela) — wzmacnia
-  planowanie w czasie bez dużego kosztu implementacyjnego.
-- **Pola przy rzece dają podwójny plon** (potwierdzenie naszej wcześniejszej
-  mechaniki bonusu rzeki z konkretnym mnożnikiem: ×2).
-- **Pompy wodne**: inwestycja podnosząca plon i chroniąca przed klęskami
-  (susza/powódź) — rozszerzenie mechaniki ryzyka pogodowego z GDD 4.2.
-- **Towar zalegający na magazynie dłużej niż rok psuje się** — zachęca do
-  regularnej sprzedaży zamiast czekania na "idealną" cenę w nieskończoność.
-- **Akademia Sztuki w konkretnym mieście** (w sequelu: Rzym) z dłuższymi
-  kursami — dobrze pasuje do naszej mechaniki Szkoły Sztuki (GDD 4.6),
-  możemy przypisać ją do jednej, tematycznej lokacji zamiast rozpraszać po
-  mapie.
-- **Kradzieże obrazów i ochrona (bodyguard/wieża strażnicza)** — ciekawy,
-  ale poważnie rozszerzający zakres systemu ryzyka; kandydat na
-  post-MVP, nie rdzeń.
-- **Ukryte, "nielegalne" lokalne uprawy** (w sequelu: konopie w Ankarze) —
-  wysoki zysk, wysokie ryzyko konfiskaty przy zbyt dużej skali. Fajny
-  smaczek do rozważenia jako opcjonalny, ryzykowny wariant plantacji w
-  jednym mieście — ale też post-MVP, nie rdzeń.
-- **3 "ulubione obrazy wuja"** — specjalne obrazy bonusowe (poza katalogiem
-  40), bez fałszywek, dające dodatkową nagrodę/punkty uznania, gdy trafią do
-  kolekcji. W oryginalnym materiale wymienione jako prawdziwe, historyczne
-  (domena publiczna) dzieła: *"Zabawa na lodzie przy fosie miejskiej"*
-  Adriaena van de Velde (1659), *"Canale Grande w Wenecji"* Canaletta (1730),
-  *"Dentysta"* Gerarda van Honthorsta (1622). Możemy je zachować jako
-  smaczek historyczny albo zastąpić własnym zestawem — mechanika (rzadkie,
-  niepodrabialne, bonusowe obrazy) jest ciekawsza niż konkretny wybór dzieł.
+## Status rekomendacji (zaktualizowane)
 
-## Aktualizacja rekomendacji
-
-W `GDD.md` pkt. 10 (etapy budowy) i pkt. 11 (otwarte pytania) warto dopisać:
-sezonowość zbiorów i kara umowna za niezrealizowany kontrakt terminowy jako
-część MVP; kradzieże/ochrona/nielegalne uprawy jako jawnie odłożone na
-później; twist fabularny (wuj = Vico) jako rekomendowane zakończenie fabuły.
+Zamiast pierwotnej listy "co dopisać do GDD" — te rekomendacje zostały już
+zrealizowane i sam GDD.md (sekcje 4.2, 4.7, 10, 11) je odzwierciedla:
+sezonowość zbiorów, kara umowna za niezrealizowany kontrakt terminowy,
+kradzieże/ochrona (choć jako pełny system, nie tylko "odłożone na później") i
+twist fabularny (wuj = Vico) jako faktyczne zakończenie w `Ending.gd`. Jedyne,
+co realnie zostaje otwarte/odłożone: pompy wodne, psucie się towaru w
+magazynie, Akademia Sztuki przypisana do jednego miasta, nielegalne uprawy i
+3 bonusowe obrazy wuja — patrz oznaczenia ⬜ wyżej.

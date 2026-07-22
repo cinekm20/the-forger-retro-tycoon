@@ -350,7 +350,10 @@ silhouette crowd, single spotlighted empty easel in center, game background
 art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 **Prompty (6 portretów rywali, 2 płcie × 3 dodatki, gotowe do wklejenia —
-razem z Vico niżej daje docelowe ~7 rywali AI):**
+razem z Vico niżej daje docelowe ~7 rywali AI):** ⚠ `AIPlayers.gd`
+instancjonuje na razie tylko **3 rywali łącznie** (Vico + 2 generyczni), nie
+7 — te dodatkowe portrety są zapasem na przyszłe rozszerzenie liczby
+przeciwników, nie czymś, co trzeba już teraz dopasować do kodu.
 
 **Mężczyzna, cylinder**
 ```

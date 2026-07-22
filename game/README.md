@@ -1,22 +1,30 @@
 # Vermeer — szkielet gry (Godot 4)
 
 Wszystkie ekrany mają już działającą logikę (nie tylko nawigację) —
-plantacje, giełda, dom aukcyjny, szkoła sztuki, wyścigi, galeria. Hub
-pokazuje tylko pasek stanu i nawigację w wąskim panelu bocznym (tło
-unikalne dla każdego z 18 miast — rozpoznawalny zabytek/motyw, np. Big
-Ben w Londynie czy wieża Eiffla w Paryżu); mapa świata z klikalnymi
-pinezkami żyje na osobnym ekranie, otwieranym przyciskiem "Jedź »" — tło
-Huba zwęża się (zoom-out) do pinezki na mapie, a po wybraniu celu leci
-animacja podróży (pociąg w obrębie tego samego regionu, samolot między
-regionami/przez ocean) lecąca dokładnie między pinezką startową a
-docelową, po czym tło nowego miasta "wjeżdża" (zoom-in) z tej pinezki z
-powrotem na cały ekran — cała podróż kończy się w trakcie animacji (dni
-naliczają się od razu w całości), nie trzeba klikać "Koniec tury", żeby
-dotrzeć na miejsce. Menu główne i mapa mają już prawdziwe tło
-graficzne, reszta ekranów wciąż na surowym UI Godota (przyciski, etykiety,
-listy). Zapis/odczyt gry, hot-seat multiplayer (1-4 graczy) i pętla
-wygrana/przegrana (kompletna kolekcja / bankructwo / rywal wygrywa
-pierwszy) działają.
+plantacje + spichlerz, giełda, dom aukcyjny, szkoła sztuki, wyścigi,
+galeria (+ ochrona), ustawienia (język). Hub pokazuje pasek stanu (dwie
+skrzynki w przeciwległych górnych rogach) i dwupoziomowe menu w wąskim
+panelu bocznym: górny poziom to "Jedź »", "Miejsca »", "Koniec tury »" i
+"Zapisz i wyjdź do menu"; "Miejsca »" otwiera podmenu z ekranami
+zależnymi od typu miasta (Plantacje, Spichlerz, Dom aukcyjny, Galeria) i
+zawsze dostępnymi (Giełda, Wyścigi, Szkoła sztuki), z przyciskiem
+"« Powrót" — zastąpiło to jedną, długą, przewijaną listę, bo przewijanie
+dotykiem na telefonie okazało się niewiarygodne. Tło Huba unikalne dla
+każdego z 18 miast (rozpoznawalny zabytek/motyw, np. Big Ben w Londynie
+czy wieża Eiffla w Paryżu); mapa świata z klikalnymi pinezkami żyje na
+osobnym ekranie, otwieranym przyciskiem "Jedź »" — tło Huba zwęża się
+(zoom-out) do pinezki na mapie, a po wybraniu celu leci animacja podróży
+(pociąg w obrębie tego samego regionu, samolot między regionami/przez
+ocean) lecąca dokładnie między pinezką startową a docelową, po czym tło
+nowego miasta "wjeżdża" (zoom-in) z tej pinezki z powrotem na cały ekran
+— cała podróż kończy się w trakcie animacji (dni naliczają się od razu w
+całości), nie trzeba klikać "Koniec tury", żeby dotrzeć na miejsce.
+Większość ekranów ma już podpięte docelowe tło graficzne (patrz
+`docs/GRAFIKA_LEONARDO.md` — status w tabeli "Plan produkcji"), nie tylko
+Hub i menu główne. Zapis/odczyt gry, hot-seat multiplayer (1-4 graczy),
+pełny interfejs w 3 językach (polski/angielski/niemiecki, ekran
+Ustawień) i pętla wygrana/przegrana (kompletna kolekcja / bankructwo /
+rywal wygrywa pierwszy) działają.
 
 ## 1. Instalacja i otwarcie
 
@@ -63,20 +71,25 @@ się wywaliło, bardzo ułatwi mi naprawę).
    podróż liczy się w trakcie animacji, nie trzeba klikać "Koniec tury",
    żeby dotrzeć na miejsce — dni podróży i tak w pełni naliczają płace/
    wzrost upraw/kursy akcji, tylko naliczone w jednym momencie zamiast
-   rozbite na kilka kliknięć) — i przycisk **Plantacje** widoczny na
-   liście (tylko w miastach plantacyjnych, tak jak w oryginale — poza
-   nimi w ogóle go nie ma na liście, nie jest tylko wyszarzony). To duża,
-   nowa animacja — jeśli coś tu wygląda źle (skok, migotanie, zły punkt
-   startowy/końcowy, złe tło po przełączeniu), koniecznie daj znać
-   dokładnie na którym etapie.
-4. **Plantacje:** wejdź, kup kilka pól (klikaj "+" w siatce; pola z "~" to
-   rzeka, nie da się ich kupić — pola tuż obok rzeki oznaczone "✓+" po
-   zakupie dają podwójny plon), wybierz uprawę (np. Tytoń), ustaw
-   robotników suwakiem (np. 500), kliknij **Zbierz plony** — na razie 0,
-   bo nie minął żaden czas. Wróć do Hubu, kliknij **Koniec tury** kilka
-   razy (np. 5×), wróć do Plantacji i zbierz ponownie — tym razem plon
-   powinien być > 0. Kliknij **Wyślij i sprzedaj** — gotówka powinna
-   wzrosnąć.
+   rozbite na kilka kliknięć) — i po kliknięciu **Miejsca »** przyciski
+   **Plantacje**/**Spichlerz** widoczne w podmenu (tylko w miastach
+   plantacyjnych, tak jak w oryginale — poza nimi w ogóle ich tam nie ma,
+   nie są tylko wyszarzone). To duża, nowa animacja — jeśli coś tu wygląda
+   źle (skok, migotanie, zły punkt startowy/końcowy, złe tło po
+   przełączeniu), koniecznie daj znać dokładnie na którym etapie.
+4. **Plantacje:** wejdź, kup kilka pól w siatce 16×16 (kafelki to ikonki,
+   nie tekst — jasna "dzika" ziemia = wolne pole do kupienia, niebieska
+   "fala" to rzeka wijąca się losowo, nie da się jej kupić; pole tuż obok
+   rzeki dostaje cienką niebieską obwódkę i po zakupie daje podwójny
+   plon), wybierz uprawę (np. Tytoń) — powinna pojawić się na polu jako
+   kolorowa roślinka, ustaw robotników suwakiem (np. 500), kliknij
+   **Zbierz plony** — na razie 0, bo nie minął
+   żaden czas. Wróć do Hubu, kliknij **Koniec tury** kilka razy (np. 5×),
+   wróć do Plantacji i zbierz ponownie — tym razem plon powinien być > 0.
+   Wejdź w **Spichlerz** (z Hubu: Miejsca » Spichlerz, albo bezpośrednio
+   przyciskiem z ekranu Plantacji) — powinieneś zobaczyć zebrany zapas w
+   odpowiednim "silosie", kliknij **Wyślij i sprzedaj** przy tej uprawie —
+   gotówka powinna wzrosnąć.
 5. **Giełda:** z Hubu wejdź w Giełdę — kup/sprzedaj kilka akcji linii
    żeglugowych, zawrzyj kontrakt terminowy na dowolny towar (sprawdź, czy
    pojawia się na liście aktywnych kontraktów).
@@ -95,11 +108,16 @@ się wywaliło, bardzo ułatwi mi naprawę).
 9. **Zapis/odczyt:** z Hubu kliknij **Zapisz i wyjdź do menu**, potem w
    menu głównym **Wczytaj grę** — stan powinien się zgadzać z tym, co
    zostawiłeś.
-10. **Multiplayer (opcjonalnie):** zacznij nową grę z "Liczba graczy" = 2.
-    Na każdym ekranie powinien pojawić się napis "Tura: Gracz N". Po
-    "Koniec tury" na Hubie gra powinna przełączyć się na Gracza 2 z jego
-    własnym (świeżym) stanem — gotówka/kolekcja Gracza 1 nie powinny być
-    widoczne.
+10. **Multiplayer (opcjonalnie):** zacznij nową grę z "Liczba graczy" = 2 —
+    powinien pojawić się krok z polami na imiona graczy przed startem. Na
+    każdym ekranie powinien pojawić się napis "Tura: Gracz N". Po "Koniec
+    tury" na Hubie gra powinna przełączyć się na Gracza 2 z jego własnym
+    (świeżym) stanem — gotówka/kolekcja Gracza 1 nie powinny być widoczne.
+11. **Ustawienia/język:** w menu głównym kliknij **Ustawienia** (obok "Nowa
+    gra"/"Wczytaj grę"), zmień język na English albo Deutsch — cały
+    interfejs powinien się natychmiast przetłumaczyć, wybór powinien
+    przetrwać restart gry. **Wyjdź z gry** powinno całkiem zakończyć
+    proces aplikacji (zwolnić pamięć), nie tylko wrócić do menu.
 
 ## 3. Czego szukać, jeśli coś nie działa
 
@@ -123,7 +141,7 @@ W terminalu, z poziomu folderu `game/`:
 ```
 godot --headless --path . res://tests/run_tests.tscn
 ```
-Powinno wypisać listę `OK`/`FAIL` dla ok. 30 asercji i zakończyć się kodem
+Powinno wypisać listę `OK`/`FAIL` dla ok. 60 asercji i zakończyć się kodem
 wyjścia 0. To samo odpala się automatycznie w GitHub Actions przy każdym
 pushu (`.github/workflows/godot-check.yml`).
 
@@ -133,33 +151,50 @@ pushu (`.github/workflows/godot-check.yml`).
   "Web" — już skonfigurowany w `export_presets.cfg`), potem otwórz
   wyeksportowaną stronę w przeglądarce na telefonie (w tej samej sieci
   Wi-Fi, przez prosty serwer HTTP, np. `python3 -m http.server`).
-- **Prawdziwy APK:** wymaga JDK 17 + Android SDK (najprościej przez Android
-  Studio) skonfigurowanych w Godocie, potem `Project > Export` z presetem
-  "Android" (już przygotowanym w `export_presets.cfg` — zmień
+- **Prawdziwy APK, lokalnie:** wymaga JDK 17 + Android SDK (najprościej przez
+  Android Studio) skonfigurowanych w Godocie, potem `Project > Export` z
+  presetem "Android" (już przygotowanym w `export_presets.cfg` — zmień
   `package/unique_name` przed prawdziwą publikacją) albo one-click deploy na
   podłączony telefon z włączonym debugowaniem USB.
+- **Prawdziwy APK, bez lokalnego SDK:** workflow `.github/workflows/
+  android-build.yml` (uruchamiany ręcznie, `workflow_dispatch`, w GitHub
+  Actions) buduje debug APK od zera (Godot headless + export templates +
+  Android SDK, wszystko cachowane) i wystawia go jako artefakt do pobrania —
+  wygodne, gdy nie chcesz stawiać całego środowiska Android lokalnie.
 
 ## Struktura
 
 ```
 project.godot
 export_presets.cfg — startowa konfiguracja eksportu Web + Android
-art/backgrounds/   — grafiki teł (main_menu_title.jpg, hub_map.jpg, ...)
+translations/ui.csv — tłumaczenia PL/EN/DE (Localization.gd, TranslationServer)
+art/backgrounds/   — grafiki teł (większość ekranów + 18 miast, patrz
+                     docs/GRAFIKA_LEONARDO.md)
+art/paintings/     — 40 obrazów kolekcji + warianty podróbek (painting_NN.jpg,
+                     painting_NN_fake.jpg)
 scenes/            — ekrany gry (Control + skrypt): main_menu, hub,
-                     plantation, stock_market, races, auction_house,
-                     art_school, gallery, ending
-scripts/autoload/  — globalny stan gry: Calendar, Cities, Travel, Crops,
-                     Economy, PlayerPlantations, Paintings,
-                     ShippingCompanies, ForwardContracts, AIPlayers,
-                     Security, Players, GameState, SaveGame, SceneRouter
-scripts/ui/        — wspólne budowniczowie prostego UI (ScreenHelpers,
-                     MapPin — pinezki rysowane natywnie, bez grafiki)
+                     travel_map, travel_animation, plantation, warehouse,
+                     stock_market, races, auction_house, art_school, gallery,
+                     ending, settings
+scripts/autoload/  — globalny stan gry: SceneRouter, Calendar, Cities,
+                     Travel, Crops, Economy, PlayerPlantations, Paintings,
+                     Auctions, ShippingCompanies, ForwardContracts,
+                     AIPlayers, Security, Players, GameState, SaveGame,
+                     Localization
+scripts/ui/        — wspólne budowniczowie UI (ScreenHelpers) + natywnie
+                     rysowane ikonki tam, gdzie Leonardo.ai uparcie
+                     generowało pełne sceny zamiast wyizolowanych ikon:
+                     MapPin, MenuFrame, VaultIcon, TravelVehicle,
+                     PlantationTileIcon
 tests/             — run_tests.tscn/.gd, testy autoloadów uruchamiane w CI
 ```
 
 ## Co dalej
 
-Generowanie pozostałych teł ekranów (`docs/GRAFIKA_LEONARDO.md`, priorytet
-2: Plantacje, Dom aukcyjny, Giełda, Wyścigi, Szkoła sztuki, Galeria) i
-podpięcie ich tak samo jak menu główne/Hub — logika biznesowa jest gotowa
-i nie powinna wymagać większych zmian przy dodawaniu grafiki.
+Wszystkie tła ekranów z "priorytetu 2" (Plantacje, Dom aukcyjny, Giełda,
+Wyścigi, Szkoła sztuki, Galeria, Spichlerz) są już wygenerowane i podpięte —
+patrz tabela "Plan produkcji" w `docs/GRAFIKA_LEONARDO.md` po aktualny status.
+Zostały mniejsze/dodatkowe assety: ramka obrazu (do aukcji/galerii), ikony UI
+ogólne, portrety rywali AI, fazy wzrostu roślin, konie/dżokeje i reszta
+wariantów podróbek obrazów — logika biznesowa jest gotowa i nie powinna
+wymagać większych zmian przy ich dodawaniu.

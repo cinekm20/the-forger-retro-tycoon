@@ -31,22 +31,31 @@ game/   — projekt Godot 4 (kod gry)
 
 ## Gra (`game/`)
 
-Szkielet Godot 4 — **logicznie kompletny i grywalny już teraz**, tylko bez
-grafiki (samo UI: przyciski, etykiety, listy). Wszystkie 7 ekranów działa:
-mapa świata z podróżami między miastami (z przesiadkami), plantacje (siatka
-pól, bonus rzeki, robotnicy, zbiory), giełda (akcje + kontrakty terminowe),
-dom aukcyjny (licytacja przeciw AI, w tym Vico), szkoła sztuki
-(eksperckość), wyścigi konne, galeria. Ma pętlę wygrana/przegrana
-(kompletna kolekcja / bankructwo / rywal wygrywa pierwszy) i zapis/odczyt
-gry.
+Godot 4 — **logicznie kompletny i grywalny**, większość ekranów ma już
+podpiętą docelową grafikę tła (`docs/GRAFIKA_LEONARDO.md`). Ekrany: Hub +
+osobna mapa świata z podróżami między miastami (z przesiadkami i animacją
+podróży), plantacje (siatka 16×16 z losową rzeką, bonus rzeki, robotnicy,
+zbiory) + Spichlerz (zbiorczy magazyn upraw), giełda (akcje + kontrakty
+terminowe), dom aukcyjny (licytacja wg stałego harmonogramu przeciw 3
+rywalom AI, w tym Vico, z wizualnie odrębnymi fałszywkami dla części
+obrazów), szkoła sztuki (eksperckość), wyścigi konne, galeria (+ system
+ochrony/kradzieży), ustawienia (wybór języka). Ma pętlę wygrana/przegrana
+(kompletna kolekcja / bankructwo / rywal wygrywa pierwszy), hot-seat
+multiplayer do 4 graczy, zapis/odczyt gry i pełny interfejs w trzech
+językach (polski/angielski/niemiecki).
 
 Jak uruchomić: `game/README.md`.
 
 ## Status i następne kroki
 
 1. ✅ Projekt gry (GDD)
-2. ✅ Szkielet Godot z pełną logiką wszystkich systemów
-3. ⏳ Grafiki (Leonardo.ai) — plan gotowy w `docs/GRAFIKA_LEONARDO.md`,
-   generowanie po stronie użytkownika
-4. ⏳ Podpięcie grafik pod istniejące ekrany
-5. ⏳ Eksport na Androida (konfiguracja startowa: `game/export_presets.cfg`)
+2. ✅ Szkielet Godot z pełną logiką wszystkich systemów + multiplayer,
+   lokalizacja PL/EN/DE, zapis/odczyt
+3. ✅ Grafiki (Leonardo.ai) — większość teł ekranów, wszystkie tła miast (18)
+   i wszystkie 40 obrazów kolekcji już wygenerowane i podpięte; status
+   szczegółowy (co jeszcze zostało: ramka obrazu, część ikon UI, portrety
+   rywali, fazy wzrostu roślin, konie/dżokeje) w tabeli "Plan produkcji" w
+   `docs/GRAFIKA_LEONARDO.md`
+4. ✅ Podpięcie gotowych grafik pod ekrany
+5. ✅ Eksport APK działa (`.github/workflows/android-build.yml`, debug
+   keystore) — podpisywanie pod Google Play/AAB wciąż do zrobienia

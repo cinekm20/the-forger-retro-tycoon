@@ -40,30 +40,65 @@ rozgrywka przeciw AI**, sesje 10–30 min, grywalna epizodycznie (dobra pod mobi
 ## 4. Ekrany i mechaniki
 
 ### 4.1 Hub / Mapa świata
-Ekran startowy — stylizowana mapa świata (art déco, sepiowe odcienie + akcenty
-złota/turkusu) z pinezkami: Twoje plantacje, giełdy (NY/Londyn), tor wyścigowy, dom
-aukcyjny, szkoła sztuki. Tap na pinezkę = wejście w dany ekran. Górny pasek: gotówka,
-data w grze (tura = tydzień/miesiąc), licznik posiadanych obrazów (np. "7/40").
-Mapa obejmuje **ok. 18 lokacji** (12 miast plantacyjnych + Nowy Jork + 5 miast
-aukcyjnych w Europie) — pełna lista i czasy podróży w
+**Zaimplementowane jako dwa osobne ekrany**, nie jeden: Hub (`scenes/hub`) pokazuje
+tło aktualnego miasta + pasek stanu + menu nawigacyjne, a klikalna mapa świata z
+pinezkami żyje na osobnym ekranie (`scenes/travel_map`), otwieranym przyciskiem
+"Jedź »" — z animowanym przejściem zoom-in/zoom-out między nimi
+(`scenes/travel_animation`), żeby zachować ciągłość wizualną pinezki aktualnego
+miasta. Mapa obejmuje **ok. 18 lokacji** (12 miast plantacyjnych + Nowy Jork + 5
+miast aukcyjnych w Europie) — pełna lista i czasy podróży w
 `docs/MECHANIKI_EKONOMICZNE.md`. Podróż między lokacjami zajmuje dni gry i
 jest wizualizowana (patrz 4.9), nie jest natychmiastowym przeskokiem.
 
+Pasek stanu Huba to dwie skrzynki w przeciwległych górnych rogach (nie jeden
+pasek): lewa — imię gracza + lokalizacja (lub trasa w trakcie podróży), data w
+grze, licznik posiadanych obrazów (np. "7/40") i termin najbliższej aukcji;
+prawa — gotówka, plus ostrzegawcza etykieta, gdy zbliża się reforma walutowa
+(patrz 4.3.1).
+
+Menu nawigacyjne Huba jest dwupoziomowe: górny poziom to tylko "Jedź »",
+"Miejsca »", "Koniec tury »" i "Zapisz i wyjdź do menu"; przycisk "Miejsca »"
+otwiera podmenu z ekranami zależnymi od typu miasta (Plantacje, **Spichlerz** —
+patrz 4.2.1, Dom aukcyjny, Galeria) i zawsze dostępnymi (Giełda, Wyścigi, Szkoła
+sztuki), z przyciskiem "« Powrót". Ten dwupoziomowy układ zastąpił jedną, długą,
+przewijaną listę — przewijanie dotykiem na telefonie okazało się niewiarygodne.
+
 ### 4.2 Plantacje
-Widok siatkowy (grid) pojedynczej plantacji z rzeką przebiegającą przez pole —
-**pola przylegające do rzeki dają wyższy plon**, co zachęca do zwartego,
-przemyślanego układania upraw zamiast maksymalizowania powierzchni (patrz
-`MECHANIKI_EKONOMICZNE.md` pkt. 3–4). Mechaniki: wybór uprawy (kawa/tytoń/
-herbata/kakao — profil plonu zależny od lokalizacji), zatrudnianie
-robotników (plon skaluje się liniowo z ich liczbą), ryzyko regionalne
-(strajki przy braku wypłat, zamieszki/wywłaszczenia w niestabilnych
-regionach), zbiory i wysyłka towaru do magazynu (Nowy Jork/Londyn). Animacja
-wzrostu upraw (etapy graficzne: zasiew → wzrost → zbiory).
+Widok siatkowy (grid) **16×16 pól** pojedynczej plantacji, płaski od góry (nie
+izometryczny), z rzeką przebiegającą przez pole jako losowo wygenerowana,
+wijąca się ścieżka (błądzenie losowe kolumnami, inna przy każdym założeniu
+plantacji) — **pola przylegające do rzeki dają ×2 plonu** (patrz
+`MECHANIKI_EKONOMICZNE.md` pkt. 3–4), co zachęca do zwartego, przemyślanego
+układania upraw zamiast maksymalizowania powierzchni. Każde pole to natywnie
+rysowana ikonka (rzeka/dzika ziemia do kupienia/zaorana ziemia/roślinka w
+kolorze zależnym od uprawy), nie tekst czy zewnętrzna grafika. Mechaniki:
+wybór uprawy (kawa/tytoń/herbata/kakao — profil plonu zależny od lokalizacji
+i **pory roku**, tabela sezonowej wydajności w `MECHANIKI_EKONOMICZNE.md`),
+zatrudnianie robotników (plon skaluje się liniowo z ich liczbą), zbiory i
+wysyłka towaru do magazynu (Nowy Jork).
+
+⏳ **Zaplanowane, jeszcze niezaimplementowane:** ryzyko regionalne (strajki
+przy braku wypłat, zamieszki/wywłaszczenia w niestabilnych regionach) i
+animacja wzrostu upraw (etapy graficzne: zasiew → wzrost → zbiory) — na razie
+zbiory liczą się natychmiast po upływie czasu, bez animowanych faz.
+
+### 4.2.1 Spichlerz
+Osobny ekran (dostępny tak jak Plantacje, tylko w miastach typu plantacyjnego)
+pokazujący zbiorczy stan magazynów **ze wszystkich plantacji gracza naraz**,
+po jednym "silosie" na uprawę (kawa/tytoń/herbata/kakao) z wizualnym poziomem
+wypełnienia, aktualną ceną rynkową i przyciskiem "Wyślij i sprzedaj" — sprzedaje
+od razu cały zapas danej uprawy ze wszystkich plantacji, każdą partię z jej
+własnym kosztem transportu zależnym od miasta pochodzenia.
 
 ### 4.3 Giełda
-Ekran z wykresem cen (świece/linia, animowana), lista spółek/surowców, przyciski
-kupna/sprzedaży. Wydarzenia makro (krach 1929, hiperinflacja, reformy walutowe)
-jako karty zdarzeń z ilustracją gazety/nagłówka epoki.
+Ekran z listą spółek żeglugowych/surowców i przyciskami kupna/sprzedaży.
+⏳ **Zaplanowane, jeszcze niezaimplementowane:** animowany wykres cen
+(świece/linia — na razie same liczby w etykietach) i wydarzenia makro (krach
+1929, hiperinflacja, reformy walutowe) jako osobne karty zdarzeń z ilustracją
+gazety/nagłówka epoki — reformy/inflacja na razie działają jako ciche zmiany
+liczbowe z jedną tekstową etykietą ostrzegawczą w Hubie (patrz 4.3.1), bez
+własnego ekranu/karty. Prompty na karty zdarzeń już czekają gotowe w
+`docs/GRAFIKA_LEONARDO.md` §4.
 
 Notowane są też **4 fikcyjne linie żeglugowe** — Lloyd (Azja), Star (Afryka),
 Hanse (Ameryka Płd.), Royal (Ameryka Płn.) — których kurs realnie rośnie wraz
@@ -89,28 +124,48 @@ zacząć od uproszczonej animacji 2D — sylwetki koni przesuwające się po tor
 wynik i wypłata.
 
 ### 4.5 Dom aukcyjny
-Najbardziej "grafozależny" ekran. Prezentacja obrazu (w pełnej krasie, w ramie),
-licytacja w czasie rzeczywistym z paskiem czasu i konkurencyjnymi ofertami AI
-(z portretami rywali i ich "bid" bąbelkami). Opcja: wysłać pośrednika zamiast
-licytować osobiście (ryzyko przepłacenia/przegapienia). Wśród licytujących
-może pojawić się **Vico** — nazwany rywal-fałszerz, rozpoznawalna postać z
-własnym portretem/animacją, który świadomie podbija ceny lub sprzedaje
-podróbki.
+Najbardziej "grafozależny" ekran. Prezentacja obrazu (w pełnej krasie, na
+sztaludze) i licytacja w czasie rzeczywistym z paskiem czasu (limit 20 s na
+rundę) i konkurencyjnymi ofertami **3 rywali AI** (nie ~7 — patrz niżej).
+⏳ **Zaplanowane, jeszcze niezaimplementowane:** opcja wysłania pośrednika
+zamiast osobistej licytacji.
+
+Aukcje odbywają się wg **stałego harmonogramu** (jedno miasto + jeden dzień na
+raz, losowany z wyprzedzeniem 4–12 dni), widocznego w Hubie jako "Następna
+aukcja: ...". Jeśli gracz przesiedzi termin, harmonogram sam się przesuwa po
+kilku dniach zwłoki zamiast pokazywać nieaktualną datę; "Koniec tury" w
+mieście aukcyjnym zatrzymuje się dokładnie na dniu aukcji zamiast go
+przeskakiwać.
+
+Wśród licytujących zawsze bierze udział **Vico** — nazwany rywal-fałszerz z
+własnym portretem, agresywniejszym i bardziej nieprzewidywalnym stylem
+licytacji niż pozostałych dwóch (generycznych) rywali AI. Docelowy plan
+grafik (`docs/GRAFIKA_LEONARDO.md` §6) przewiduje więcej wariantów portretów
+rywali niż aktualnie wykorzystuje logika gry (3 rywale łącznie) — jest to
+zapas na przyszłe rozszerzenie liczby przeciwników, nie niespójność do
+naprawienia teraz.
 
 **System autentykacji (na bazie mechaniki oryginału):** każdy z 40 obrazów ma
 unikalny numer katalogowy w obrębie swojej kategorii stylistycznej. Jeśli
 gracz kupi/skataloguje obraz o numerze, który już posiada — zostaje on
-**automatycznie ujawniony jako fałszywka** (usuwany z kolekcji lub oznaczany).
-To główny, "systemowy" mechanizm wykrywania podróbek. Szkoła sztuki (patrz
-4.6) nie zastępuje tego systemu, tylko go wspiera — podnosi szansę, że gra
-*ostrzeże* gracza przed zakupem podejrzanego obrazu na aukcji, zanim ten
-padnie ofiarą duplikatu.
+**automatycznie ujawniony jako fałszywka** (pieniądze przepadają, obraz nie
+trafia do kolekcji). To główny, "systemowy" mechanizm wykrywania podróbek.
+Szkoła sztuki (patrz 4.6) nie zastępuje tego systemu, tylko go wspiera —
+podnosi szansę, że gra *ostrzeże* gracza przed zakupem podejrzanego obrazu na
+aukcji, zanim ten padnie ofiarą duplikatu. Niezależnie od tego ostrzeżenia,
+część obrazów (rosnąca z czasem pula, patrz `docs/GRAFIKA_LEONARDO.md` §7) ma
+**dedykowaną, wizualnie subtelnie inną grafikę podróbki** — więc uważny gracz
+może czasem rozpoznać fałszywkę "na oko", nawet bez ostrzeżenia z ekspertyzy.
 
 ### 4.6 Szkoła sztuki / autentykacja
-Mini-gra "znajdź różnicę" lub quiz porównawczy: dwa podobne obrazy, gracz uczy się
-wskazówek (pociągnięcia pędzla, sygnatura, patyna) — podnosi statystykę
-"eksperckość", która zwiększa szansę na wczesne ostrzeżenie o duplikacie numeru
-katalogowego (patrz 4.5) przed przybiciem młotka na aukcji.
+Kurs (koszt + czas trwania) podnoszący statystykę "eksperckość" o stały
+przyrost — zwiększa szansę na wczesne ostrzeżenie o duplikacie numeru
+katalogowego (patrz 4.5) przed przybiciem młotka na aukcji. Ważne: podnosi
+tylko szansę na *ostrzeżenie*, NIE dokładność szacowanej wartości obrazu —
+to częsta pomyłka testerów, więc ekran wprost tłumaczy tę różnicę.
+⏳ **Zaplanowane, jeszcze niezaimplementowane:** mini-gra "znajdź różnicę" lub
+quiz porównawczy (dwa podobne obrazy, gracz uczy się wskazówek — pociągnięcia
+pędzla, sygnatura, patyna) zamiast samego przycisku kursu.
 
 ### 4.7 Galeria / kolekcja
 Ekran-nagroda: wirtualna galeria z **8 sekcjami stylistycznymi** (Vermeer,
@@ -120,7 +175,14 @@ lista 40. Zdobyty i skatalogowany obraz **zostaje przypisany do gracza na
 stałe w statystykach kolekcji**, nawet jeśli fizycznie zmieni właściciela w
 dalszej rozgrywce (tak jak w oryginale — katalogowanie jest nieodwracalne).
 Im więcej wypełnionych sekcji, tym bardziej "żywa" galeria (zmieniające się
-oświetlenie, ambient muzyka).
+oświetlenie, ambient muzyka) — ⏳ **zaplanowane, jeszcze niezaimplementowane**,
+na razie sekcje pokazują tylko liczbowy postęp (X/5 na kategorię), bez układu
+gabloty/ściany ani reaktywnego oświetlenia.
+
+Ten sam ekran hostuje też system **Ochrony/kradzieży**: gracz może zatrudnić
+ochroniarza (stały koszt, chroni przed okradzeniem) i wysłać "gangstera"
+przeciwko wybranemu rywalowi (ryzykowna próba osłabienia jego kolekcji) —
+patrz `docs/DODATKOWE_MECHANIKI.md`.
 
 ### 4.8 Noworoczna Loteria (Neujahrstombola)
 Coroczne wydarzenie, osobne od aukcji i giełdy — losowanie/loteria na przełomie
@@ -156,16 +218,23 @@ osobiście na aukcję, czy wysłać pośrednika?").
 ## 6. Warunki zwycięstwa/porażki
 
 Wygrana: gracz jako pierwszy zdobywa wszystkie 40 obrazów (lub tryb skrócony:
-np. 15/40 na łatwym poziomie). Porażka: bankructwo (ujemny kapitał przez X tur)
-lub rywal komplementuje kolekcję pierwszy.
+**15/40 na łatwym poziomie**, `Paintings.EASY_WIN_THRESHOLD`, przełącznik przy
+zakładaniu nowej gry). Porażka: bankructwo (**ujemny kapitał przez 60 kolejnych
+dni gry**, `Economy.BANKRUPTCY_THRESHOLD_DAYS`) lub rywal komplementuje
+kolekcję pierwszy.
 
 ## 7. Sterowanie i UX (mobile)
 
 - Wyłącznie dotyk: tap/drag, brak zależności od fizycznych przycisków.
 - Duże, czytelne elementy UI (target dla ekranów 5–7").
-- Krótkie sesje: gra pauzuje się sama w tle, autosave po każdej turze.
-- Powiadomienia push (opcjonalnie): "Aukcja za 2 dni", "Twoje plantacje gotowe
-  do zbioru".
+- Krótkie sesje: zapis ręczny (przycisk "Zapisz i wyjdź do menu"), nie
+  automatyczny autosave co turę.
+- **Interfejs trójjęzyczny: polski (język źródłowy) / angielski / niemiecki**,
+  przełączany w ekranie Ustawień (dostępnym z menu głównego, obok "Nowa
+  gra"/"Wczytaj grę") — `Localization.gd` + `translations/ui.csv`, wybór
+  języka zapisywany trwale między sesjami.
+- ⏳ **Zaplanowane, jeszcze niezaimplementowane:** powiadomienia push
+  ("Aukcja za 2 dni", "Twoje plantacje gotowe do zbioru").
 
 ## 8. Stos technologiczny
 
@@ -179,21 +248,31 @@ Struktura katalogów (szkielet już utworzony w `game/`, patrz `game/README.md`)
 ```
 game/project.godot
 game/scenes
-  /main_menu, /hub, /plantation, /stock_market, /races, /auction_house,
-  /art_school, /gallery  — każdy: Scene.tscn + Scene.gd
+  /main_menu, /hub, /travel_map, /travel_animation, /plantation, /warehouse,
+  /stock_market, /races, /auction_house, /art_school, /gallery, /ending,
+  /settings  — każdy: Scene.tscn + Scene.gd
 game/scripts
-  /autoload  (SceneRouter, Calendar, Cities, Crops, Economy, Paintings,
-              ShippingCompanies, ForwardContracts, AIPlayers, SaveGame)
-  /ui  (screen_helpers.gd — wspólne budowniczowie placeholderowego UI)
-game/art        — puste, do wypełnienia grafikami z Leonardo.ai (docs/GRAFIKA_LEONARDO.md)
+  /autoload  (SceneRouter, Calendar, Cities, Travel, Crops, Economy,
+              PlayerPlantations, Paintings, Auctions, ShippingCompanies,
+              ForwardContracts, AIPlayers, Security, Players, GameState,
+              SaveGame, Localization)
+  /ui  (screen_helpers.gd — wspólne budowniczowie UI; MapPin.gd, MenuFrame.gd,
+        VaultIcon.gd, TravelVehicle.gd, PlantationTileIcon.gd — natywnie
+        rysowane ikonki tam, gdzie Leonardo.ai uparcie generowało pełne sceny
+        zamiast wyizolowanych ikon)
+game/art        — grafiki z Leonardo.ai (docs/GRAFIKA_LEONARDO.md), większość
+                  teł/obrazów już podpięta — status w tabeli "Plan produkcji"
   /ui, /characters, /paintings, /backgrounds, /icons
 game/audio      — puste, do wypełnienia
 ```
 
-Autoloady mają już wpięte realne dane źródłowe (miasta i czasy podróży,
-plony upraw, koszty transportu, katalog 40 obrazów, linie żeglugowe) —
-ekrany to na razie proste, tekstowe placeholdery z nawigacją, gotowe do
-podmiany na docelową grafikę.
+Autoloady mają wpięte realne dane źródłowe (miasta i czasy podróży, plony
+upraw, koszty transportu, katalog 40 obrazów, linie żeglugowe) oraz działającą
+logikę wszystkich mechanik z sekcji 4 (plantacje, giełda, aukcje z
+harmonogramem, kontrakty terminowe, ochrona/kradzieże, hot-seat multiplayer,
+zapis/odczyt, lokalizacja) — większość ekranów ma już podpiętą docelową
+grafikę teł (patrz `docs/GRAFIKA_LEONARDO.md`), zamiast czysto tekstowych
+placeholderów z wcześniejszych etapów projektu.
 
 ## 9. Kierunek artystyczny
 
@@ -203,33 +282,53 @@ spójne z epoką i tematem sztuki/kolekcjonerstwa. Unikać realistycznego 3D —
 stylizowana ilustracja 2D będzie szybsza do wygenerowania spójnie i lżejsza na
 mobile.
 
-## 10. Etapy budowy (proponowana kolejność)
+## 10. Etapy budowy (proponowana kolejność) — status
 
 1. ✅ GDD (ten dokument)
-2. Szkielet projektu Godot + nawigacja między pustymi ekranami
-3. Systemy danych (autoloady: ekonomia, kalendarz, 40 obrazów, AI)
-4. Ekran Hub + Mapa świata (pierwszy w pełni ograficzniony ekran)
-5. Plantacje → Giełda → Wyścigi → Dom aukcyjny → Szkoła sztuki → Galeria
-6. Dźwięk/muzyka, polish, testy na urządzeniu
-7. Eksport APK / AAB, podpisywanie, ewentualnie Google Play
+2. ✅ Szkielet projektu Godot + nawigacja między ekranami (`SceneRouter.gd`)
+3. ✅ Systemy danych (wszystkie autoloady z sekcji 8, z działającą logiką, nie
+   tylko surowymi danymi) + zestaw testów regresyjnych (`game/tests/`,
+   uruchamiany automatycznie w CI, patrz `.github/workflows/godot-check.yml`)
+4. ✅ Hub + osobny ekran Mapy świata (`travel_map`) + animacja podróży
+   (`travel_animation`) — w pełni zaimplementowane i podpięte grafiką
+5. ✅ Wszystkie ekrany z sekcji 4 zaimplementowane i grywalne: Plantacje +
+   Spichlerz, Giełda, Wyścigi, Dom aukcyjny, Szkoła sztuki, Galeria (+
+   Ochrona), Ustawienia (język) — większość ma podpiętą docelową grafikę tła
+   (`docs/GRAFIKA_LEONARDO.md`); pozostałe braki oznaczone ⏳ przy
+   poszczególnych mechanikach w sekcji 4 (wykres cen giełdy, karty zdarzeń
+   makro, animacja wzrostu upraw, mini-gra autentykacji, ryzyko regionalne na
+   plantacjach, powiadomienia push)
+6. ⏳ Dźwięk/muzyka, dalszy polish, testy na urządzeniu — częściowo w toku
+   (build Android już działa, patrz punkt 7)
+7. ✅ Eksport APK działa (`android-build.yml`, debug keystore) — podpisywanie
+   pod Google Play i AAB wciąż do zrobienia
 
-## 11. Otwarte pytania projektowe
+## 11. Pytania projektowe — rozstrzygnięte
 
-- **Multiplayer:** oryginał obsługiwał do 4 graczy lokalnie (hot-seat na
-  jednym C64). Wersja mobilna na start zakłada 1 gracza + 3 AI (patrz sekcja
-  6), ale hot-seat pass-and-play na jednym telefonie jest tanim rozszerzeniem
-  do rozważenia later — wymaga decyzji przed projektowaniem UI tur.
-- **Vico jako antagonista:** czy to zwykły, mocniejszy przeciwnik AI, czy
-  dedykowany "boss" z unikalnymi zachowaniami (np. czasem świadomie
-  podstawia fałszywki)? Do doprecyzowania fabularnego. Vico to w oryginale
-  nazwany fałszerz z własnymi scenkami i humorem — patrz
-  `MECHANIKI_EKONOMICZNE.md` pkt. 9 po pełny profil.
-- **Struktura tur:** oryginał nie ma stałych rund — kolejność wyznacza czas
-  zakończenia podróży/pobytu każdego gracza (kolejka zdarzeń). MVP zakłada
-  uproszczony model turowy z globalnym kalendarzem dni (patrz
-  `MECHANIKI_EKONOMICZNE.md` pkt. 8); pełny event-driven scheduler to
-  potencjalne rozszerzenie po MVP, do decyzji przed implementacją Calendar.gd.
-- **Balans ekonomiczny:** gracze oryginału krytykowali słabą opłacalność
-  kawy/kakao względem tytoniu oraz regionów afrykańskich względem bliższych
-  lokacji. W remake'u warto świadomie wyrównać rentowność upraw zamiast
-  kopiować stare liczby 1:1 — do przetestowania przy implementacji Economy.gd.
+Sekcja historycznie nazywała się "otwarte pytania"; wszystkie cztery poniższe
+zostały już rozstrzygnięte i zaimplementowane, zapisane tu jako notatka o
+przyjętym rozwiązaniu (nie żeby je ponownie rozważać):
+
+- **Multiplayer:** hot-seat pass-and-play (do 4 graczy na jednym telefonie)
+  **jest zaimplementowany** (`Players.gd`). Uproszczenie świadomie przyjęte:
+  zamiast symulować wszystkich graczy równolegle, gra **przełącza, kto jest
+  aktywny** — autoloady ekonomiczne (Economy, Travel, PlayerPlantations,
+  Paintings...) zawsze reprezentują aktualnie grającego, a stan pozostałych
+  graczy leży w snapshotach między ich turami. Efekty zależne od upływu czasu
+  (płace, dług, kontrakty) naliczają się tylko przy końcu czyjejś tury, nie
+  "jednocześnie" dla wszystkich w tle.
+- **Vico jako antagonista:** zaimplementowany jako jeden z 3 rywali AI
+  (`AIPlayers.rivals`), oznaczony `is_named_rival = true`, z bardziej
+  agresywnym/nieprzewidywalnym stylem licytacji niż pozostałych dwóch
+  (szerszy zakres mnożnika ofert) — patrz `MECHANIKI_EKONOMICZNE.md` pkt. 9
+  po pełny profil fabularny.
+- **Struktura tur:** przyjęto uproszczony model z globalnym kalendarzem dni —
+  jedna tura = 7 dni gry (`Players.DAYS_PER_TURN`), z wyjątkiem sytuacji, gdy
+  gracz stoi w mieście z zaplanowaną aukcją w tym oknie: wtedy tura skraca się
+  tak, by wylądować dokładnie na dniu aukcji (`Auctions.cap_turn_advance`),
+  zamiast ją przeskoczyć. Pełny event-driven scheduler pozostaje możliwym
+  rozszerzeniem, ale nie jest planowany na najbliższy etap.
+- **Balans ekonomiczny:** rentowność upraw została świadomie spłaszczona —
+  wszystkie 4 uprawy startują z tą samą bazową ceną rynkową
+  (`Crops.BASE_CROP_PRICE`), zamiast kopiować historyczny przechył na korzyść
+  tytoniu z oryginału.

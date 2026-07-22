@@ -2,10 +2,9 @@ extends Node
 ## Przeciwnicy AI, w tym nazwany rywal-fałszerz Vico.
 ## Patrz docs/MECHANIKI_EKONOMICZNE.md pkt. 9.
 ##
-## TODO fabularne (docs/DODATKOWE_MECHANIKI.md): rozważyć twist na koniec
-## gry, w którym Vico okazuje się być tą samą postacią co Walther von
-## Grünschild — do zaimplementowania w warstwie scenariusza/zakończenia,
-## nie w tym systemie ekonomicznym.
+## Twist fabularny (docs/DODATKOWE_MECHANIKI.md): Vico okazuje się być tą
+## samą postacią co Walther von Grünschild — zaimplementowane w warstwie
+## zakończenia, patrz scenes/ending/Ending.gd, nie w tym systemie ekonomicznym.
 
 const WEEKLY_INCOME_RANGE := Vector2(2000.0, 8000.0)  ## uproszczenie: AI nie symuluje własnych plantacji
 

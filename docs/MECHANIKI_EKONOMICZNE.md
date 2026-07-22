@@ -121,6 +121,14 @@ puzzle/optymalizacyjny mikro-management niż czysty grind powierzchni.
 
 ## 4. Robotnicy i ryzyko regionalne
 
+⚠ **Status w remake'u:** z tego punktu zaimplementowana jest tylko podstawowa
+płaca dzienna (`PlayerPlantations.WORKER_DAILY_WAGE`, naliczana codziennie i
+pogłębiająca dług gracza, jeśli brak gotówki — patrz `Economy.gd`) oraz
+liniowe skalowanie plonu liczbą robotników. **Strajk, podkupywanie robotników
+i niestabilność polityczna/wywłaszczenia opisane niżej NIE są jeszcze
+zaimplementowane** — brak pieniędzy na płace po prostu pogłębia dług, bez
+utraty zbiorów czy odrębnej mechaniki strajku.
+
 - Robotnicy pracują za dniówkę; płaca rośnie wraz z inflacją w grze — warto ją
   podnosić (opłaca się przez rosnące ceny sprzedaży).
 - **Strajk:** jeśli gracz nie stać na wypłatę (np. po reformie walutowej),
@@ -143,6 +151,11 @@ Kluczowa przewaga: ta cena **nie zmienia się nawet po reformie walutowej** —
 trafi się moment tuż przed reformą. Ryzyko: trzeba faktycznie dostarczyć
 towar (kupić zboże/nasiona, jeśli własna plantacja nie starczy).
 
+**Zaimplementowane parametry** (`ForwardContracts.gd`): **100 jednostek** na
+kontrakt, termin dostawy **30 dni**, cena ustalana z premią **+10%** ponad
+bieżącą cenę rynkową w momencie zawarcia, kara za niedostarczenie w terminie
+= **20% wartości kontraktu**.
+
 ## 6. Reformy walutowe i inflacja
 
 Nawiązanie do historycznej hiperinflacji Republiki Weimarskiej — okresowe
@@ -150,10 +163,17 @@ reformy walutowe (np. przelicznik 5:1) gwałtownie tną gotówkę graczy.
 Doświadczeni gracze **wyprzedzają reformę** kontraktami terminowymi z
 maksymalną wartością tuż przed nią, a "chowają się" przed płaceniem
 robotnikom tuż po reformie (akceptując krótki strajk zamiast płacić w nowej,
-droższej walucie). To najciekawszy, najbardziej "insider" system oryginału —
-warto go zachować jako mechanikę wysokiego ryzyka/nagrody dla zaawansowanych
-graczy, z czytelnym sygnałem ostrzegawczym w UI (np. rosnący kurs dolara jako
-wskaźnik nadchodzącej reformy).
+droższej walucie — patrz zastrzeżenie w pkt. 4: strajk sam w sobie nie jest
+jeszcze zaimplementowany). To najciekawszy, najbardziej "insider" system
+oryginału — warto go zachować jako mechanikę wysokiego ryzyka/nagrody dla
+zaawansowanych graczy, z czytelnym sygnałem ostrzegawczym w UI (np. rosnący
+kurs dolara jako wskaźnik nadchodzącej reformy).
+
+**Zaimplementowane parametry** (`Economy.gd`): ostrzeżenie w Hubie pojawia
+się, gdy kurs dolara osiągnie **14.0** (`REFORM_WARNING_DOLLAR_RATE`); od tego
+momentu reforma ma **15% szansy na wystąpienie w każdym przetworzonym
+tygodniu** (`REFORM_CHANCE_PER_WEEK`); przelicznik reformy to **5:1**
+(`REFORM_RATIO`), zgodnie z oryginałem.
 
 ## 7. Linie żeglugowe — połączenie plantacji z giełdą
 
@@ -194,12 +214,23 @@ kolejka zdarzeń w czasie ciągłym (event-driven scheduling), nie klasyczny
 "I gracz, potem II gracz". To elegancki system, ale bardziej złożony do
 zaimplementowania niż zwykłe tury.
 
-**Rekomendacja na MVP:** uprościć do modelu turowego z globalnym kalendarzem
-(1 tura = decyzja + upływ dni podróży/pobytu), ale **zachować ideę**, że różne
-akcje zajmują różną liczbę dni, więc gracze/AI nie poruszają się w idealnym
-rytmie — to i tak da dużo tej samej dynamiki bez pełnej złożoności kolejki
-zdarzeń. Pełny event-driven scheduler można rozważyć jako rozszerzenie po
-MVP.
+**Zaimplementowane rozwiązanie:** uproszczony model turowy z globalnym
+kalendarzem — 1 tura = **7 dni gry** (`Players.DAYS_PER_TURN`), z wyjątkiem
+gdy gracz stoi w mieście z zaplanowaną aukcją w tym oknie: wtedy tura skraca
+się, by wylądować dokładnie na dniu aukcji (`Auctions.cap_turn_advance`),
+zamiast go przeskoczyć — patrz pkt. 8a niżej. Pełny event-driven scheduler
+pozostaje możliwym rozszerzeniem, ale nie jest planowany na najbliższy etap.
+
+## 8a. Harmonogram aukcji (zaimplementowane)
+
+W przeciwieństwie do "aukcji zawsze dostępnej" z wcześniejszych wersji
+projektu, `Auctions.gd` losuje **jedną aukcję na raz** — jedno miasto
+aukcyjne + jeden dzień, z wyprzedzeniem 4–12 dni (`MIN_DAYS_AHEAD`/
+`MAX_DAYS_AHEAD`). Hub pokazuje ten termin jako osobną etykietę ("Następna
+aukcja: ..."). Jeśli gracz przesiedzi termin o więcej niż 3 dni
+(`MISSED_GRACE_DAYS`), harmonogram sam losuje nowy termin zamiast pokazywać
+nieaktualną datę w nieskończoność. Limit czasu na rundę licytacji w Domu
+aukcyjnym to **20 sekund** (`BID_TIME_LIMIT`).
 
 ## 9. Vico Vermeer — rozszerzony profil postaci
 
@@ -234,6 +265,9 @@ projektowaniu balansu remake'u:
 - Kawa i kakao są w oryginale wyraźnie mniej opłacalne niż tytoń — jeden z
   recenzentów krytykuje ten brak balansu. **W remake'u warto realnie
   wyrównać rentowność upraw**, zamiast biernie kopiować stare liczby.
+  ✅ **Zaimplementowane:** wszystkie 4 uprawy startują z tą samą bazową ceną
+  rynkową (`Crops.BASE_CROP_PRICE`), zamiast kopiować historyczny przechył na
+  korzyść tytoniu.
 - Trudne regiony (Ankara, Afryka) "rzadko się opłacają" — potwierdza to, co
   napisaliśmy w pkt. 2/4: warto świadomie zaprojektować risk/reward, a nie
   zostawić je przypadkowo słabszymi.
@@ -258,6 +292,8 @@ niedostępnych w danym mieście, zamiast je wyszarzać: Londyn (miasto
 aukcyjne) ma TRAVEL/BANK/MARK./AUCTION/COLLECT./OVERVIEW, a St. Louis
 (miasto plantacyjne) ma TRAVEL/BANK/MARK./PLANTAT./WORKERS/OVERVIEW —
 AUCTION i COLLECT. znikają całkiem, nie są tylko zablokowane. Hub.gd
-odtwarza to 1:1 dla Plantacji i Domu aukcyjnego: przycisk jest całkiem
-ukryty (`visible = false`), gdy miasto nie pasuje do wymaganego typu, a
-nie tylko wyszarzony.
+odtwarza to 1:1 dla Plantacji, **Spichlerza** (dodany później, ta sama
+brama `requires_type: "plantation"`) i Domu aukcyjnego/Galerii: przycisk
+jest całkiem ukryty (`visible = false`), gdy miasto nie pasuje do
+wymaganego typu, a nie tylko wyszarzony — patrz
+`Hub.LOCATION_GATED_DESTINATIONS`.
