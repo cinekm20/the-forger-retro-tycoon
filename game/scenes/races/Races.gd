@@ -22,7 +22,7 @@ func _ready() -> void:
 	ScreenHelpers.make_turn_indicator(root)
 
 	for horse in HORSES:
-		ScreenHelpers.make_label(root, "%s — kurs ×%.1f" % [horse["name"], horse["odds"]])
+		ScreenHelpers.make_label(root, tr("%s — kurs ×%.1f") % [horse["name"], horse["odds"]])
 
 	var bet_row := HBoxContainer.new()
 	bet_row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -69,7 +69,7 @@ func _pick_winner_index() -> int:
 func _on_bet_pressed() -> void:
 	var bet: float = bet_spin.value
 	if not Economy.spend(bet):
-		result_label.text = "Za mało gotówki na taki zakład."
+		result_label.text = tr("Za mało gotówki na taki zakład.")
 		return
 
 	var chosen_index := horse_option.selected
@@ -79,12 +79,12 @@ func _on_bet_pressed() -> void:
 	if winner_index == chosen_index:
 		var payout: float = bet * HORSES[chosen_index]["odds"]
 		Economy.earn(payout)
-		result_label.text = "Wygrywa %s! Wygrana: %.0f M" % [winner["name"], payout]
+		result_label.text = tr("Wygrywa %s! Wygrana: %.0f M") % [winner["name"], payout]
 	else:
-		result_label.text = "Wygrywa %s. Twój koń nie zwyciężył — zakład przepadł." % winner["name"]
+		result_label.text = tr("Wygrywa %s. Twój koń nie zwyciężył — zakład przepadł.") % winner["name"]
 
 	_update_info()
 
 
 func _update_info() -> void:
-	info_label.text = "Gotówka: %.0f M" % Economy.player_money
+	info_label.text = tr("Gotówka: %.0f M") % Economy.player_money

@@ -28,26 +28,19 @@ func _build_win(root: VBoxContainer, player_index: int) -> void:
 	ScreenHelpers.make_title(root, "Kolekcja kompletna")
 	ScreenHelpers.make_label(
 		root,
-		name_prefix + "Ostatni obraz trafia do gabloty. Posłaniec przynosi wiadomość: " +
-		"wuj Walther chce Cię widzieć natychmiast.",
+		name_prefix + tr("Ostatni obraz trafia do gabloty. Posłaniec przynosi wiadomość: wuj Walther chce Cię widzieć natychmiast."),
 	)
 	ScreenHelpers.make_label(
 		root,
-		"W gabinecie czeka na Ciebie zapieczętowany testament. Notariusz " +
-		"czyta go na głos, a przy podpisie zawodowo się zawiesza — obok " +
-		"nazwiska \"Walther von Grünschild\" widnieje dopisek innym charakterem " +
-		"pisma: \"znany też jako Vico Vermeer\".",
+		tr("W gabinecie czeka na Ciebie zapieczętowany testament. Notariusz czyta go na głos, a przy podpisie zawodowo się zawiesza — obok nazwiska \"Walther von Grünschild\" widnieje dopisek innym charakterem pisma: \"znany też jako Vico Vermeer\"."),
 	)
 	ScreenHelpers.make_label(
 		root,
-		"Cała pogoń za fałszerzem, każda podróbka podsunięta na aukcji, " +
-		"każda niechciana przejażdżka — to był test, który sam sobie " +
-		"zaplanował dla następcy, zanim zaufa mu swoje imperium. Właśnie go " +
-		"zdałeś/zdałaś.",
+		tr("Cała pogoń za fałszerzem, każda podróbka podsunięta na aukcji, każda niechciana przejażdżka — to był test, który sam sobie zaplanował dla następcy, zanim zaufa mu swoje imperium. Właśnie go zdałeś/zdałaś."),
 	)
 	ScreenHelpers.make_label(
 		root,
-		"Dni gry: %d | Gotówka: %.0f M | Obrazy: %d" % [
+		tr("Dni gry: %d | Gotówka: %.0f M | Obrazy: %d") % [
 			Calendar.current_day, Economy.player_money, Players.get_painting_count(player_index),
 		],
 	)
@@ -58,11 +51,9 @@ func _build_bankrupt(root: VBoxContainer, player_index: int) -> void:
 	ScreenHelpers.make_title(root, "Bankructwo")
 	ScreenHelpers.make_label(
 		root,
-		name_prefix + "Wierzyciele stracili cierpliwość. Twoje interesy zostają przejęte, " +
-		"a marzenie o spadku po wuju Waltherze przechodzi na innego, " +
-		"sprawniejszego kandydata.",
+		name_prefix + tr("Wierzyciele stracili cierpliwość. Twoje interesy zostają przejęte, a marzenie o spadku po wuju Waltherze przechodzi na innego, sprawniejszego kandydata."),
 	)
-	ScreenHelpers.make_label(root, "Dni gry: %d | Obrazy zebrane: %d" % [
+	ScreenHelpers.make_label(root, tr("Dni gry: %d | Obrazy zebrane: %d") % [
 		Calendar.current_day, Players.get_painting_count(player_index),
 	])
 
@@ -72,6 +63,6 @@ func _build_rival_win(root: VBoxContainer, rival_id: String) -> void:
 	ScreenHelpers.make_title(root, "Przegrana")
 	ScreenHelpers.make_label(
 		root,
-		"%s dociera do ostatniego brakującego obrazu pierwszy/-a. Testament wuja Walthera zostaje spisany na czyjeś inne nazwisko." % rival_name,
+		tr("%s dociera do ostatniego brakującego obrazu pierwszy/-a. Testament wuja Walthera zostaje spisany na czyjeś inne nazwisko.") % rival_name,
 	)
-	ScreenHelpers.make_label(root, "Dni gry: %d | Twoje obrazy: %d" % [Calendar.current_day, Paintings.owned_count()])
+	ScreenHelpers.make_label(root, tr("Dni gry: %d | Twoje obrazy: %d") % [Calendar.current_day, Paintings.owned_count()])

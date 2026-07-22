@@ -71,6 +71,11 @@ func _ready() -> void:
 
 	ScreenHelpers.make_button(root_panel, "Koniec tury »", _on_end_turn_pressed)
 	ScreenHelpers.make_button(root_panel, "Zapisz i wyjdź do menu", _on_save_and_exit_pressed)
+	ScreenHelpers.make_button(root_panel, "Ustawienia", func(): SceneRouter.goto_scene(SceneRouter.SETTINGS))
+	## Inne niż "Zapisz i wyjdź do menu" (który tylko wraca do MainMenu.tscn —
+	## proces gry dalej działa w tle): get_tree().quit() faktycznie kończy
+	## proces aplikacji i zwalnia pamięć.
+	ScreenHelpers.make_button(root_panel, "Wyjdź z gry", func(): get_tree().quit())
 
 	_update_status()
 
@@ -89,14 +94,9 @@ func _build_top_row() -> HBoxContainer:
 	## Margines od krawędzi ekranu — bez niego skrzynka gotówki (prawy górny
 	## róg) leżała dosłownie na samej krawędzi viewportu, więc na telefonie
 	## z zaokrąglonymi rogami/notchem część liczby wypadała poza widoczny
-	## obszar (zgłoszone przez testera: "nie widać całej liczby"). offset_right
-	## dodatkowo pomniejszony o szerokość przycisku "☰ Ustawienia"
-	## (SettingsMenu.gd) + margines, żeby skrzynka gotówki stanęła OBOK niego
-	## (ta sama wysokość, offset_top bez zmian) zamiast pod nim — użytkownik
-	## zgłosił, że wcześniejsza wersja (offset_top przesunięty w dół) zbędnie
-	## przestawiła też resztę skrzynek (lokalizacja/data/obrazy/aukcja).
+	## obszar (zgłoszone przez testera: "nie widać całej liczby").
 	row.offset_left = 16
-	row.offset_right = -(SettingsMenu.BUTTON_SIZE.x + SettingsMenu.BUTTON_MARGIN + 16.0)
+	row.offset_right = -16
 	row.offset_top = 12
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_theme_constant_override("separation", 16)
@@ -208,21 +208,21 @@ func _update_status() -> void:
 	## LISBON") — w multiplayer dodatkowo numer gracza, bo wtedy ważne jest,
 	## kto trzyma telefon.
 	if Travel.is_traveling():
-		location_label.text = "%s\nw podróży do %s (%.1f dnia)" % [
+		location_label.text = tr("%s\nw podróży do %s (%.1f dnia)") % [
 			Players.active_name(), Cities.get_city_name(Travel.get_destination()), Travel.days_remaining,
 		]
 	else:
-		location_label.text = "%s\nw: %s" % [Players.active_name(), Cities.get_city_name(Travel.current_city)]
+		location_label.text = tr("%s\nw: %s") % [Players.active_name(), Cities.get_city_name(Travel.current_city)]
 	if Players.is_multiplayer():
-		location_label.text += "\n(gracz %d/%d)" % [Players.active_index + 1, Players.player_count]
+		location_label.text += tr("\n(gracz %d/%d)") % [Players.active_index + 1, Players.player_count]
 
-	money_label.text = "%.0f M" % Economy.player_money
+	money_label.text = tr("%.0f M") % Economy.player_money
 	date_label.text = Calendar.get_date_string()
-	paintings_label.text = "Obrazy: %d/%d" % [Paintings.owned_count(), Paintings.win_threshold]
+	paintings_label.text = tr("Obrazy: %d/%d") % [Paintings.owned_count(), Paintings.win_threshold]
 	auction_schedule_label.text = Auctions.get_schedule_string()
 
 	warning_label.visible = Economy.is_reform_imminent()
-	warning_label.text = "⚠ Kurs dolara wysoki — zbliża się reforma walutowa!" if warning_label.visible else ""
+	warning_label.text = tr("⚠ Kurs dolara wysoki — zbliża się reforma walutowa!") if warning_label.visible else ""
 
 	travel_button.visible = not Travel.is_traveling()
 

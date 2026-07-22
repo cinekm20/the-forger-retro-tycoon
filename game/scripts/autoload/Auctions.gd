@@ -72,7 +72,7 @@ func resolve_and_reschedule() -> void:
 
 
 func get_schedule_string() -> String:
-	return "Następna aukcja: %s — %s" % [
+	return tr("Następna aukcja: %s — %s") % [
 		Calendar.format_day(next_auction_day), Cities.get_city_name(next_auction_city),
 	]
 

@@ -12,6 +12,7 @@ const GALLERY := "res://scenes/gallery/Gallery.tscn"
 const ENDING := "res://scenes/ending/Ending.tscn"
 const TRAVEL_MAP := "res://scenes/travel_map/TravelMap.tscn"
 const TRAVEL_ANIMATION := "res://scenes/travel_animation/TravelAnimation.tscn"
+const SETTINGS := "res://scenes/settings/Settings.tscn"
 
 
 func goto_scene(path: String) -> void:

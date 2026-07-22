@@ -22,8 +22,7 @@ func _ready() -> void:
 	## przyciski (zgłoszone przez testera: "nie bardzo wiadomo co tam robić").
 	ScreenHelpers.make_label(
 		root,
-		"~ rzeka (niedostępna) · + wolne pole (dotknij, by kupić) · ✓ Twoje pole (✓+ = przy rzece, większy plon)\n" +
-		"Wybierz uprawę i liczbę robotników, potem \"Zbierz plony\" (raz na jakiś czas) i wyślij do sprzedaży.",
+		tr("~ rzeka (niedostępna) · + wolne pole (dotknij, by kupić) · ✓ Twoje pole (✓+ = przy rzece, większy plon)\nWybierz uprawę i liczbę robotników, potem \"Zbierz plony\" (raz na jakiś czas) i wyślij do sprzedaży."),
 	)
 
 	var city_option := OptionButton.new()
@@ -54,7 +53,7 @@ func _ready() -> void:
 	worker_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	root.add_child(worker_row)
 	var worker_caption := Label.new()
-	worker_caption.text = "Robotnicy:"
+	worker_caption.text = tr("Robotnicy:")
 	worker_row.add_child(worker_caption)
 	worker_spin = SpinBox.new()
 	worker_spin.min_value = 0
@@ -153,9 +152,9 @@ func _on_harvest_pressed() -> void:
 	## wynosiły 0, bo od poprzednich zbiorów nie minął jeszcze żaden dzień).
 	var amount := PlayerPlantations.harvest(plantation_index)
 	if amount > 0:
-		harvest_status_label.text = "Zebrano: %d jednostek." % amount
+		harvest_status_label.text = tr("Zebrano: %d jednostek.") % amount
 	else:
-		harvest_status_label.text = "Nic do zebrania — brak uprawy, robotników albo nie minął jeszcze czas od ostatnich zbiorów."
+		harvest_status_label.text = tr("Nic do zebrania — brak uprawy, robotników albo nie minął jeszcze czas od ostatnich zbiorów.")
 	_update_info()
 
 
@@ -167,8 +166,8 @@ func _on_sell_pressed() -> void:
 func _update_info() -> void:
 	var plantation: Dictionary = PlayerPlantations.plantations[plantation_index]
 	var crop: String = plantation["crop"]
-	var crop_name: String = Crops.CROP_NAMES.get(crop, "brak") if crop != "" else "brak"
-	info_label.text = "Gotówka: %.0f M | Pola: %d | Uprawa: %s | Robotnicy: %d | Zboże w magazynie: %d" % [
+	var crop_name: String = Crops.CROP_NAMES.get(crop, tr("brak")) if crop != "" else tr("brak")
+	info_label.text = tr("Gotówka: %.0f M | Pola: %d | Uprawa: %s | Robotnicy: %d | Zboże w magazynie: %d") % [
 		Economy.player_money,
 		PlayerPlantations.get_owned_tile_count(plantation_index),
 		crop_name,

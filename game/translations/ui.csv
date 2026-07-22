@@ -1,0 +1,195 @@
+keys,en,de
+Szkoła sztuki,Art School,Kunstschule
+Za mało gotówki na kurs.,Not enough cash for the course.,Nicht genug Bargeld für den Kurs.
+"Kurs (%.0f M, %d dni)","Course (%.0f M, %d days)","Kurs (%.0f M, %d Tage)"
+"Eksperckość: %.0f%% — zwiększa szansę na wczesne ostrzeżenie o podróbce w Domu aukcyjnym (NIE wpływa na szacowaną wartość obrazu)
+Gotówka: %.0f M | Data: %s","Expertise: %.0f%% — increases the chance of an early forgery warning at the Auction House (does NOT affect the estimated value of a painting)
+Cash: %.0f M | Date: %s","Expertise: %.0f%% — erhöht die Chance auf eine frühe Fälschungswarnung im Auktionshaus (beeinflusst NICHT den Schätzwert eines Gemäldes)
+Bargeld: %.0f M | Datum: %s"
+Dom aukcyjny,Auction House,Auktionshaus
+"W tym mieście nie odbywa się teraz żadna aukcja.
+Wróć w podanym terminie.","There is no auction happening in this city right now.
+Come back on the given date.","In dieser Stadt findet gerade keine Auktion statt.
+Komm zum angegebenen Termin zurück."
+Podbij (+10%),Raise bid (+10%),Gebot erhöhen (+10%)
+Zakończ rundę,End round,Runde beenden
+Czas minął!,Time's up!,Zeit abgelaufen!
+Czas na podbicie: %d s,Time to bid: %d s,Zeit zum Bieten: %d s
+Zabrakło czasu na podbicie — rywale odpowiadają.,Time ran out to bid — rivals are responding.,Die Zeit zum Bieten ist abgelaufen — Rivalen antworten.
+%s podbija ofertę.,%s raises the bid.,%s erhöht das Gebot.
+Za mało gotówki na taką ofertę.,Not enough cash for that bid.,Nicht genug Bargeld für dieses Gebot.
+"To była FAŁSZYWKA! Pieniądze przepadły, obraz nie trafia do kolekcji.","It was a FORGERY! The money is lost, the painting doesn't join the collection.","Es war eine FÄLSCHUNG! Das Geld ist verloren, das Gemälde kommt nicht in die Sammlung."
+Wygrywasz aukcję! Obraz trafia do kolekcji (%d/%d).,You win the auction! The painting joins the collection (%d/%d).,Du gewinnst die Auktion! Das Gemälde kommt in die Sammlung (%d/%d).
+Nikt nie licytował — obraz zostaje niesprzedany.,No one bid — the painting remains unsold.,Niemand hat geboten — das Gemälde bleibt unverkauft.
+%s wygrywa aukcję.,%s wins the auction.,%s gewinnt die Auktion.
+Aukcja w toku: %s — %s,Auction in progress: %s — %s,Auktion läuft: %s — %s
+"Na sprzedaż: „%s” — %s, %s (%s) — szac. wartość %.0f M","For sale: “%s” — %s, %s (%s) — est. value %.0f M","Zu verkaufen: „%s“ — %s, %s (%s) — geschätzter Wert %.0f M"
+Na sprzedaż: obraz nr %d (%s) — szac. wartość %.0f M,For sale: painting #%d (%s) — est. value %.0f M,Zu verkaufen: Gemälde Nr. %d (%s) — geschätzter Wert %.0f M
+⚠ Szkoła Sztuki ostrzega: ten numer już masz w kolekcji — to może być podróbka!,⚠ The Art School warns: you already have this number in your collection — it might be a forgery!,⚠ Die Kunstschule warnt: Diese Nummer hast du bereits in deiner Sammlung — es könnte sich um eine Fälschung handeln!
+nikt,no one,niemand
+Ty,You,Du
+"Oferta: %.0f M
+(prowadzi: %s)","Bid: %.0f M
+(leading: %s)","Gebot: %.0f M
+(führend: %s)"
+"
+Jeśli nikt Cię nie przebije do końca czasu — wygrywasz!","
+If no one outbids you before time runs out — you win!","
+Wenn dich niemand überbietet, bevor die Zeit abläuft — gewinnst du!"
+Gotówka: %.0f M,Cash: %.0f M,Bargeld: %.0f M
+Następna aukcja: %s — %s,Next auction: %s — %s,Nächste Auktion: %s — %s
+Jedź »,Travel »,Reisen »
+Plantacje,Plantations,Plantagen
+Galeria,Gallery,Galerie
+Giełda,Stock Market,Börse
+Wyścigi konne,Horse Races,Pferderennen
+Koniec tury »,End turn »,Zug beenden »
+Zapisz i wyjdź do menu,Save and exit to menu,Speichern und zum Menü zurückkehren
+Ustawienia,Settings,Einstellungen
+Wyjdź z gry,Quit game,Spiel beenden
+"%s
+w podróży do %s (%.1f dnia)","%s
+traveling to %s (%.1f days)","%s
+auf Reise nach %s (%.1f Tage)"
+"%s
+w: %s","%s
+in: %s","%s
+in: %s"
+"
+(gracz %d/%d)","
+(player %d/%d)","
+(Spieler %d/%d)"
+Obrazy: %d/%d,Paintings: %d/%d,Gemälde: %d/%d
+⚠ Kurs dolara wysoki — zbliża się reforma walutowa!,⚠ Dollar rate is high — a currency reform is approaching!,⚠ Der Dollarkurs ist hoch — eine Währungsreform steht bevor!
+Ekonomiczna gra strategiczna — lata 20. XX wieku,An economic strategy game — the 1920s,Ein Wirtschaftsstrategiespiel — die 1920er Jahre
+Liczba graczy (hot-seat):,Number of players (hot-seat):,Anzahl der Spieler (Hot-Seat):
+Tryb łatwy (%d/%d obrazów do wygranej),Easy mode (%d/%d paintings to win),Einfacher Modus (%d/%d Gemälde zum Sieg)
+Nowa gra,New game,Neues Spiel
+Wczytaj grę,Load game,Spiel laden
+Galeria (placeholder),Gallery (placeholder),Galerie (Platzhalter)
+Twoja kolekcja: %d/%d (próg zwycięstwa),Your collection: %d/%d (win threshold),Deine Sammlung: %d/%d (Sieg-Schwelle)
+%s: %d/5,%s: %d/5,%s: %d/5
+Gracze,Players,Spieler
+ (Ty), (You), (Du)
+%s%s: %d obrazów,%s%s: %d paintings,%s%s: %d Gemälde
+Ochrona,Protection,Schutz
+Zatrudnij ochroniarza (%.0f M),Hire a bodyguard (%.0f M),Leibwächter anheuern (%.0f M)
+Rywale,Rivals,Rivalen
+%s: %d obrazów,%s: %d paintings,%s: %d Gemälde
+Wyślij gangstera (%.0f M),Send a gangster (%.0f M),Gangster schicken (%.0f M)
+Gangster wraca z obrazem!,The gangster returns with a painting!,Der Gangster kommt mit einem Gemälde zurück!
+Gangster wraca z pustymi rękami — pieniądze przepadły.,The gangster returns empty-handed — the money is lost.,Der Gangster kommt mit leeren Händen zurück — das Geld ist verloren.
+Masz ochroniarza — obrazy chronione przed kradzieżą.,You have a bodyguard — paintings are protected from theft.,Du hast einen Leibwächter — Gemälde sind vor Diebstahl geschützt.
+Bez ochrony — Twoja kolekcja jest narażona na kradzież (~%.0f%% szans/tydzień).,No protection — your collection is at risk of theft (~%.0f%% chance/week).,Kein Schutz — deine Sammlung ist diebstahlgefährdet (~%.0f%% Chance/Woche).
+%s — kurs ×%.1f,%s — odds ×%.1f,%s — Quote ×%.1f
+Postaw zakład,Place bet,Wette platzieren
+Za mało gotówki na taki zakład.,Not enough cash for that bet.,Nicht genug Bargeld für diese Wette.
+Wygrywa %s! Wygrana: %.0f M,%s wins! Payout: %.0f M,%s gewinnt! Gewinn: %.0f M
+Wygrywa %s. Twój koń nie zwyciężył — zakład przepadł.,%s wins. Your horse didn't win — the bet is lost.,%s gewinnt. Dein Pferd hat nicht gewonnen — die Wette ist verloren.
+Koniec gry,Game Over,Spielende
+Powrót do menu głównego,Return to main menu,Zurück zum Hauptmenü
+Kolekcja kompletna,Collection Complete,Sammlung komplett
+Ostatni obraz trafia do gabloty. Posłaniec przynosi wiadomość: wuj Walther chce Cię widzieć natychmiast.,The last painting takes its place in the display case. A messenger arrives with word: uncle Walther wants to see you at once.,Das letzte Gemälde findet seinen Platz in der Vitrine. Ein Bote überbringt die Nachricht: Onkel Walther will dich sofort sehen.
+"W gabinecie czeka na Ciebie zapieczętowany testament. Notariusz czyta go na głos, a przy podpisie zawodowo się zawiesza — obok nazwiska ""Walther von Grünschild"" widnieje dopisek innym charakterem pisma: ""znany też jako Vico Vermeer"".","In the study, a sealed will awaits you. The notary reads it aloud, and his voice catches at the signature — next to the name ""Walther von Grünschild"" is a note in different handwriting: ""also known as Vico Vermeer"".","Im Arbeitszimmer erwartet dich ein versiegeltes Testament. Der Notar liest es laut vor und stockt bei der Unterschrift — neben dem Namen ""Walther von Grünschild"" steht ein Vermerk in anderer Handschrift: ""auch bekannt als Vico Vermeer""."
+"Cała pogoń za fałszerzem, każda podróbka podsunięta na aukcji, każda niechciana przejażdżka — to był test, który sam sobie zaplanował dla następcy, zanim zaufa mu swoje imperium. Właśnie go zdałeś/zdałaś.","The whole chase after the forger, every fake slipped into an auction, every unwanted ride — it was a test he devised for his successor, before entrusting them with his empire. You just passed it.","Die ganze Jagd nach dem Fälscher, jede auf einer Auktion untergeschobene Fälschung, jede ungewollte Fahrt — das war ein Test, den er sich selbst für seinen Nachfolger ausgedacht hatte, bevor er ihm sein Imperium anvertraut. Du hast ihn gerade bestanden."
+Dni gry: %d | Gotówka: %.0f M | Obrazy: %d,Game days: %d | Cash: %.0f M | Paintings: %d,Spieltage: %d | Bargeld: %.0f M | Gemälde: %d
+Bankructwo,Bankruptcy,Bankrott
+"Wierzyciele stracili cierpliwość. Twoje interesy zostają przejęte, a marzenie o spadku po wuju Waltherze przechodzi na innego, sprawniejszego kandydata.","Your creditors have run out of patience. Your affairs are taken over, and the dream of uncle Walther's inheritance passes to another, more capable candidate.","Deine Gläubiger haben die Geduld verloren. Deine Geschäfte werden übernommen, und der Traum vom Erbe Onkel Walthers geht an einen anderen, fähigeren Kandidaten über."
+Dni gry: %d | Obrazy zebrane: %d,Game days: %d | Paintings collected: %d,Spieltage: %d | Gesammelte Gemälde: %d
+Przegrana,Defeat,Niederlage
+%s dociera do ostatniego brakującego obrazu pierwszy/-a. Testament wuja Walthera zostaje spisany na czyjeś inne nazwisko.,%s reaches the last missing painting first. Uncle Walther's will is drawn up in someone else's name.,%s erreicht als Erste(r) das letzte fehlende Gemälde. Onkel Walthers Testament wird auf einen anderen Namen ausgestellt.
+Dni gry: %d | Twoje obrazy: %d,Game days: %d | Your paintings: %d,Spieltage: %d | Deine Gemälde: %d
+TODO: wykres cen w czasie,TODO: price chart over time,TODO: Preisverlauf-Diagramm
+Ceny towarów,Commodity prices,Warenpreise
+Kontrakty terminowe,Forward contracts,Terminkontrakte
+"Kontrakt: %d jednostek za %d dni, cena dziś ×%.1f, kara %.0f%% przy niedostarczeniu","Contract: %d units in %d days, today's price ×%.1f, %.0f%% penalty for non-delivery","Kontrakt: %d Einheiten in %d Tagen, heutiger Preis ×%.1f, %.0f%% Strafe bei Nichtlieferung"
+Zawrzyj: %s,Sign: %s,Abschließen: %s
+%.1f M (masz: %d),%.1f M (you have: %d),%.1f M (du hast: %d)
+Kup 10,Buy 10,10 kaufen
+Sprzedaj 10,Sell 10,10 verkaufen
+Kupiono 10 akcji: %s.,Bought 10 shares: %s.,10 Aktien gekauft: %s.
+"Za mało gotówki, żeby kupić 10 akcji: %s.",Not enough cash to buy 10 shares: %s.,"Nicht genug Bargeld, um 10 Aktien zu kaufen: %s."
+Sprzedano 10 akcji: %s.,Sold 10 shares: %s.,10 Aktien verkauft: %s.
+"Nie masz 10 akcji, żeby sprzedać: %s.",You don't have 10 shares to sell: %s.,Du hast keine 10 Aktien zum Verkaufen: %s.
+%s: %.1f M / jednostkę,%s: %.1f M / unit,%s: %.1f M / Einheit
+"%s: %d szt. po %.1f M, termin dzień %d, kara %.0f M","%s: %d units at %.1f M, due day %d, penalty %.0f M","%s: %d Einheiten zu %.1f M, fällig Tag %d, Strafe %.0f M"
+Brak aktywnych kontraktów.,No active contracts.,Keine aktiven Kontrakte.
+"~ rzeka (niedostępna) · + wolne pole (dotknij, by kupić) · ✓ Twoje pole (✓+ = przy rzece, większy plon)
+Wybierz uprawę i liczbę robotników, potem ""Zbierz plony"" (raz na jakiś czas) i wyślij do sprzedaży.","~ river (unavailable) · + free tile (tap to buy) · ✓ your tile (✓+ = by the river, bigger yield)
+Pick a crop and worker count, then ""Harvest"" (once time has passed) and ship it for sale.","~ Fluss (nicht verfügbar) · + freies Feld (antippen, um zu kaufen) · ✓ dein Feld (✓+ = am Fluss, höherer Ertrag)
+Wähle eine Anbaupflanze und die Anzahl der Arbeiter, dann ""Ernten"" (wenn genug Zeit vergangen ist) und zum Verkauf versenden."
+Robotnicy:,Workers:,Arbeiter:
+Zbierz plony,Harvest,Ernten
+Wyślij i sprzedaj (Nowy Jork),Ship and sell (New York),Versenden und verkaufen (New York)
+Zebrano: %d jednostek.,Harvested: %d units.,Geerntet: %d Einheiten.
+"Nic do zebrania — brak uprawy, robotników albo nie minął jeszcze czas od ostatnich zbiorów.","Nothing to harvest — no crop, no workers, or not enough time has passed since the last harvest.","Nichts zu ernten — keine Anbaupflanze, keine Arbeiter, oder es ist noch nicht genug Zeit seit der letzten Ernte vergangen."
+brak,none,keine
+Gotówka: %.0f M | Pola: %d | Uprawa: %s | Robotnicy: %d | Zboże w magazynie: %d,Cash: %.0f M | Tiles: %d | Crop: %s | Workers: %d | Stored crop: %d,Bargeld: %.0f M | Felder: %d | Anbau: %s | Arbeiter: %d | Gelagerte Ernte: %d
+Dokąd jedziemy?,Where to?,Wohin reisen wir?
+Anuluj,Cancel,Abbrechen
+« Powrót,« Back,« Zurück
+Jesteś w: %s — dotknij pinezkę celu podróży,You are in: %s — tap the pin of your destination,Du bist in: %s — tippe die Pinnadel deines Reiseziels an
+pociągiem,by train,mit dem Zug
+samolotem,by plane,mit dem Flugzeug
+Podróż do %s: %.1f dnia (%s),Travel to %s: %.1f days (%s),Reise nach %s: %.1f Tage (%s)
+Podróż,Travel,Reise
+Pomiń »,Skip »,Überspringen »
+Tura: %s,Turn: %s,Zug: %s
+Paryż,Paris,Paris
+Lizbona,Lisbon,Lissabon
+Londyn,London,London
+Bombaj,Bombay,Bombay
+Abidżan,Abidjan,Abidjan
+Gwatemala,Guatemala City,Guatemala-Stadt
+Meksyk,Mexico City,Mexiko-Stadt
+Nowy Jork,New York,New York
+Kawa,Coffee,Kaffee
+Tytoń,Tobacco,Tabak
+Herbata,Tea,Tee
+Kakao,Cocoa,Kakao
+Barok,Baroque,Barock
+Klasycyzm,Classicism,Klassizismus
+Romantyzm,Romanticism,Romantik
+Impresjonizm,Impressionism,Impressionismus
+Symbolizm,Symbolism,Symbolismus
+Ekspresjonizm,Expressionism,Expressionismus
+Moderna,Modernism,Moderne
+Salwa armatnia,The Cannon Shot,Der Kanonenschuss
+Porwanie córek Leukipposa,The Rape of the Daughters of Leucippus,Der Raub der Töchter des Leukippos
+Pracownia malarska,The Art of Painting,Die Malkunst
+Koronczarka,The Lacemaker,Die Spitzenklöpplerin
+Starzec w fotelu,Old Man in an Armchair,Alter Mann im Sessel
+Czytająca list kobieta w błękicie,Woman in Blue Reading a Letter,Briefleserin in Blau
+Wanna,The Tub,Die Wanne
+Portret malarza Waltera Leistikowa,Portrait of the Painter Walter Leistikow,Bildnis des Malers Walter Leistikow
+Astronom,The Astronomer,Der Astronom
+Dziewczyna z perłą,Girl with a Pearl Earring,Mädchen mit dem Perlenohrring
+Gabrielle w rozpiętej bluzce,Gabrielle with Open Blouse,Gabrielle mit offener Bluse
+Klify pod Pourville,Cliffs near Pourville,Klippen bei Pourville
+Grający w karty,The Card Players,Die Kartenspieler
+Symfonia w bieli,Symphony in White,Symphonie in Weiß
+Morze lodu (Rozbite nadzieje),The Sea of Ice (The Wreck of Hope),Das Eismeer (Die gescheiterte Hoffnung)
+Latarnia morska w Harwich,Harwich Lighthouse,Der Leuchtturm von Harwich
+Kobieta jedząca ostrygi,Woman Eating Oysters,Austern essende Frau
+Portret Emilie Flöge,Portrait of Emilie Flöge,Bildnis Emilie Flöge
+"Pożar Izb Parlamentu w Londynie, 16 października 1834","The Burning of the Houses of Parliament, 16 October 1834","Der Brand des Parlaments, 16. Oktober 1834"
+Grecja na ruinach Missolungi,Greece on the Ruins of Missolonghi,Griechenland auf den Ruinen von Missolunghi
+Tryton i Nereida,Triton and Nereid,Triton und Nereide
+Zamykam się w sobie,I Lock My Door Upon Myself,Ich schließe mich in mir ein
+Autoportret,Self-Portrait,Selbstbildnis
+Dziedziniec zamku Warwick,The Courtyard of Warwick Castle,Der Hof von Warwick Castle
+Dwie Tahitanki,Two Tahitian Women,Zwei Tahitianerinnen
+Zwodzony most,The Langlois Bridge,Die Zugbrücke
+Kąpiąca się z Valpinçon,The Valpinçon Bather,Die Badende von Valpinçon
+Złote rybki i rzeźba,Goldfish and Sculpture,Goldfische und Skulptur
+Tancerka,The Dancer,Die Tänzerin
+Skruszony święty Piotr,The Repentant Saint Peter,Der reuige heilige Petrus
+Śmierć Marata,The Death of Marat,Der Tod des Marat
+Madonna,Madonna,Madonna
+Fryzura,The Coiffure,Die Frisur
+Żniwa,The Harvesters,Die Kornernte
+Młodzieniec trzymający czaszkę,Young Man Holding a Skull,Jüngling mit Totenschädel
+Kościół wiejski,Village Church,Dorfkirche
+Koń w krajobrazie,Horse in a Landscape,Pferd in Landschaft
+Targ w Tunisie,Market in Tunis,Markt in Tunis
+Wiadukt w L'Estaque,Viaduct at L'Estaque,Viadukt in L'Estaque

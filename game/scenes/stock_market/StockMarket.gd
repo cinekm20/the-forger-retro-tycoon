@@ -47,7 +47,7 @@ func _ready() -> void:
 	ScreenHelpers.make_title(root, "Kontrakty terminowe")
 	ScreenHelpers.make_label(
 		root,
-		"Kontrakt: %d jednostek za %d dni, cena dziś ×%.1f, kara %.0f%% przy niedostarczeniu" % [
+		tr("Kontrakt: %d jednostek za %d dni, cena dziś ×%.1f, kara %.0f%% przy niedostarczeniu") % [
 			ForwardContracts.CONTRACT_AMOUNT, ForwardContracts.DUE_IN_DAYS,
 			ForwardContracts.PRICE_PREMIUM, ForwardContracts.PENALTY_RATIO * 100.0,
 		],
@@ -57,7 +57,7 @@ func _ready() -> void:
 	root.add_child(contract_row)
 	for crop in Crops.CROPS:
 		var propose_btn := Button.new()
-		propose_btn.text = "Zawrzyj: %s" % Crops.CROP_NAMES[crop]
+		propose_btn.text = tr("Zawrzyj: %s") % Crops.CROP_NAMES[crop]
 		propose_btn.pressed.connect(_on_propose_contract_pressed.bind(crop))
 		contract_row.add_child(propose_btn)
 
@@ -97,7 +97,7 @@ func _rebuild_rows() -> void:
 		var price := ShippingCompanies.get_price(company_id)
 		var owned := ShippingCompanies.get_shares_owned(company_id)
 		var price_label := Label.new()
-		price_label.text = "%.1f M (masz: %d)" % [price, owned]
+		price_label.text = tr("%.1f M (masz: %d)") % [price, owned]
 		price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		price_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
 		column.add_child(price_label)
@@ -124,9 +124,9 @@ func _rebuild_rows() -> void:
 func _on_buy_pressed(company_id: String) -> void:
 	var company_name: String = ShippingCompanies.COMPANIES[company_id]["name"]
 	if ShippingCompanies.buy_shares(company_id, 10):
-		trade_status_label.text = "Kupiono 10 akcji: %s." % company_name
+		trade_status_label.text = tr("Kupiono 10 akcji: %s.") % company_name
 	else:
-		trade_status_label.text = "Za mało gotówki, żeby kupić 10 akcji: %s." % company_name
+		trade_status_label.text = tr("Za mało gotówki, żeby kupić 10 akcji: %s.") % company_name
 	_rebuild_rows()
 	_update_info()
 
@@ -134,9 +134,9 @@ func _on_buy_pressed(company_id: String) -> void:
 func _on_sell_pressed(company_id: String) -> void:
 	var company_name: String = ShippingCompanies.COMPANIES[company_id]["name"]
 	if ShippingCompanies.sell_shares(company_id, 10):
-		trade_status_label.text = "Sprzedano 10 akcji: %s." % company_name
+		trade_status_label.text = tr("Sprzedano 10 akcji: %s.") % company_name
 	else:
-		trade_status_label.text = "Nie masz 10 akcji, żeby sprzedać: %s." % company_name
+		trade_status_label.text = tr("Nie masz 10 akcji, żeby sprzedać: %s.") % company_name
 	_rebuild_rows()
 	_update_info()
 
@@ -146,7 +146,7 @@ func _rebuild_crop_rows() -> void:
 		child.queue_free()
 	for crop in Crops.CROPS:
 		var label := Label.new()
-		label.text = "%s: %.1f M / jednostkę" % [Crops.CROP_NAMES[crop], Crops.get_price(crop)]
+		label.text = tr("%s: %.1f M / jednostkę") % [Crops.CROP_NAMES[crop], Crops.get_price(crop)]
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		crop_rows_container.add_child(label)
 
@@ -157,14 +157,14 @@ func _on_propose_contract_pressed(crop: String) -> void:
 
 
 func _update_info() -> void:
-	location_label.text = "%s\n%s" % [Cities.get_city_name(Travel.current_city), Calendar.get_date_string()]
-	money_label.text = "%.0f M" % Economy.player_money
+	location_label.text = tr("%s\n%s") % [Cities.get_city_name(Travel.current_city), Calendar.get_date_string()]
+	money_label.text = tr("%.0f M") % Economy.player_money
 	_rebuild_crop_rows()
 
 	var lines: Array[String] = []
 	for contract in ForwardContracts.active_contracts:
-		lines.append("%s: %d szt. po %.1f M, termin dzień %d, kara %.0f M" % [
+		lines.append(tr("%s: %d szt. po %.1f M, termin dzień %d, kara %.0f M") % [
 			Crops.CROP_NAMES[contract["crop"]], contract["amount"], contract["price_per_unit"],
 			contract["due_day"], contract["penalty"],
 		])
-	contracts_label.text = "\n".join(lines) if not lines.is_empty() else "Brak aktywnych kontraktów."
+	contracts_label.text = "\n".join(lines) if not lines.is_empty() else tr("Brak aktywnych kontraktów.")

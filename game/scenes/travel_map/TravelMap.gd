@@ -37,7 +37,7 @@ func _ready() -> void:
 
 
 func _default_info_text() -> String:
-	return "Jesteś w: %s — dotknij pinezkę celu podróży" % Cities.get_city_name(Travel.current_city)
+	return tr("Jesteś w: %s — dotknij pinezkę celu podróży") % Cities.get_city_name(Travel.current_city)
 
 
 ## Pinezki NIE dostają jednorazowo wyliczonej pozycji w pikselach (`position =
@@ -88,8 +88,8 @@ func _on_pin_selected(city_id: String) -> void:
 	if preview.is_empty():
 		return
 	selected_city = city_id
-	var vehicle_name := "pociągiem" if preview["vehicle"] == Travel.Vehicle.TRAIN else "samolotem"
-	info_label.text = "Podróż do %s: %.1f dnia (%s)" % [Cities.get_city_name(city_id), preview["days"], vehicle_name]
+	var vehicle_name := tr("pociągiem") if preview["vehicle"] == Travel.Vehicle.TRAIN else tr("samolotem")
+	info_label.text = tr("Podróż do %s: %.1f dnia (%s)") % [Cities.get_city_name(city_id), preview["days"], vehicle_name]
 	confirm_button.visible = true
 	cancel_button.visible = true
 

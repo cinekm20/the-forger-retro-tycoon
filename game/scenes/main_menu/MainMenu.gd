@@ -34,7 +34,7 @@ func _ready() -> void:
 	player_row.add_child(player_count_option)
 
 	easy_mode_check = CheckBox.new()
-	easy_mode_check.text = "Tryb łatwy (%d/%d obrazów do wygranej)" % [Paintings.EASY_WIN_THRESHOLD, Paintings.CATALOG.size()]
+	easy_mode_check.text = tr("Tryb łatwy (%d/%d obrazów do wygranej)") % [Paintings.EASY_WIN_THRESHOLD, Paintings.CATALOG.size()]
 	root.add_child(easy_mode_check)
 
 	ScreenHelpers.make_button(root, "Nowa gra", func():

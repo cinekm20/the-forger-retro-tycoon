@@ -28,7 +28,7 @@ Security="*res://scripts/autoload/Security.gd"
 Players="*res://scripts/autoload/Players.gd"
 GameState="*res://scripts/autoload/GameState.gd"
 SaveGame="*res://scripts/autoload/SaveGame.gd"
-SettingsMenu="*res://scripts/autoload/SettingsMenu.gd"
+Localization="*res://scripts/autoload/Localization.gd"
 
 [display]
 
@@ -43,3 +43,7 @@ window/handheld/orientation="landscape"
 renderer/rendering_method="mobile"
 renderer/rendering_method.mobile="mobile"
 textures/vram_compression/import_etc2_astc=true
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://translations/ui.csv:en", "res://translations/ui.csv:de")

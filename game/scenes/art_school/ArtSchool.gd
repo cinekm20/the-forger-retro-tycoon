@@ -19,7 +19,7 @@ func _ready() -> void:
 
 	ScreenHelpers.make_button(
 		root,
-		"Kurs (%.0f M, %d dni)" % [TRAINING_COST, TRAINING_DAYS],
+		tr("Kurs (%.0f M, %d dni)") % [TRAINING_COST, TRAINING_DAYS],
 		_on_train_pressed,
 	)
 
@@ -42,6 +42,6 @@ func _update_info() -> void:
 	## Jawnie wypisane, co eksperckość robi (a czego NIE robi) — tester
 	## zgłosił, że spodziewał się dokładniejszej szacowanej wartości obrazu
 	## podczas aukcji i nie widział różnicy, bo to nie jest jej działanie.
-	info_label.text = "Eksperckość: %.0f%% — zwiększa szansę na wczesne ostrzeżenie o podróbce w Domu aukcyjnym (NIE wpływa na szacowaną wartość obrazu)\nGotówka: %.0f M | Data: %s" % [
+	info_label.text = tr("Eksperckość: %.0f%% — zwiększa szansę na wczesne ostrzeżenie o podróbce w Domu aukcyjnym (NIE wpływa na szacowaną wartość obrazu)\nGotówka: %.0f M | Data: %s") % [
 		Paintings.expertise * 100.0, Economy.player_money, Calendar.get_date_string(),
 	]

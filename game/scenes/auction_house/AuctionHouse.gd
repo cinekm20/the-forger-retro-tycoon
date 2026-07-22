@@ -60,7 +60,7 @@ func _ready() -> void:
 	schedule_label = ScreenHelpers.make_info_box(root, "")
 
 	if not Auctions.is_open(Travel.current_city):
-		ScreenHelpers.make_label(root, "W tym mieście nie odbywa się teraz żadna aukcja.\nWróć w podanym terminie.")
+		ScreenHelpers.make_label(root, tr("W tym mieście nie odbywa się teraz żadna aukcja.\nWróć w podanym terminie."))
 		schedule_label.text = Auctions.get_schedule_string()
 		ScreenHelpers.make_back_button(root)
 		return
@@ -140,8 +140,8 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	timer_bar.add_theme_stylebox_override("fill", bar_fill)
 	action_root.add_child(timer_bar)
 
-	bid_btn = ScreenHelpers.make_button(action_root, "Podbij (+10%)", _on_bid_pressed)
-	resolve_btn = ScreenHelpers.make_button(action_root, "Zakończ rundę", _on_resolve_round_pressed)
+	bid_btn = ScreenHelpers.make_button(action_root, tr("Podbij (+10%)"), _on_bid_pressed)
+	resolve_btn = ScreenHelpers.make_button(action_root, tr("Zakończ rundę"), _on_resolve_round_pressed)
 
 
 static func _make_expand_spacer() -> Control:
@@ -158,12 +158,12 @@ func _process(delta: float) -> void:
 	if bid_time_remaining <= 0.0:
 		bid_time_remaining = 0.0
 		auction_active = false
-		timer_label.text = "Czas minął!"
+		timer_label.text = tr("Czas minął!")
 		timer_bar.value = 0.0
 		_on_time_expired()
 		return
 
-	timer_label.text = "Czas na podbicie: %d s" % int(ceil(bid_time_remaining))
+	timer_label.text = tr("Czas na podbicie: %d s") % int(ceil(bid_time_remaining))
 	timer_bar.value = bid_time_remaining
 
 	if not rival_checked_this_round and bid_time_remaining <= rival_check_threshold:
@@ -180,7 +180,7 @@ func _start_bid_timer() -> void:
 
 
 func _on_time_expired() -> void:
-	status_label.text = "Zabrakło czasu na podbicie — rywale odpowiadają."
+	status_label.text = tr("Zabrakło czasu na podbicie — rywale odpowiadają.")
 	_on_resolve_round_pressed()
 
 
@@ -204,7 +204,7 @@ func _try_rival_counter_bid() -> bool:
 
 	current_bid = best_rival_bid
 	current_leader = best_rival_id
-	status_label.text = "%s podbija ofertę." % AIPlayers.get_rival(best_rival_id)["name"]
+	status_label.text = tr("%s podbija ofertę.") % AIPlayers.get_rival(best_rival_id)["name"]
 	_update_labels()
 	_start_bid_timer()
 	return true
@@ -224,7 +224,7 @@ func _on_bid_pressed() -> void:
 	var estimated_value := Paintings.get_estimated_value(current_number)
 	var next_bid := current_bid + estimated_value * BID_INCREMENT_RATIO
 	if not Economy.can_afford(next_bid):
-		status_label.text = "Za mało gotówki na taką ofertę."
+		status_label.text = tr("Za mało gotówki na taką ofertę.")
 		return
 	current_bid = next_bid
 	current_leader = "player"
@@ -248,17 +248,17 @@ func _resolve_auction() -> void:
 	if current_leader == "player":
 		Economy.spend(current_bid)
 		if Paintings.is_forgery_by_duplicate(current_number):
-			status_label.text = "To była FAŁSZYWKA! Pieniądze przepadły, obraz nie trafia do kolekcji."
+			status_label.text = tr("To była FAŁSZYWKA! Pieniądze przepadły, obraz nie trafia do kolekcji.")
 		else:
 			Paintings.catalogue(current_number)
-			status_label.text = "Wygrywasz aukcję! Obraz trafia do kolekcji (%d/%d)." % [
+			status_label.text = tr("Wygrywasz aukcję! Obraz trafia do kolekcji (%d/%d).") % [
 				Paintings.owned_count(), Paintings.win_threshold,
 			]
 	elif current_leader == "":
-		status_label.text = "Nikt nie licytował — obraz zostaje niesprzedany."
+		status_label.text = tr("Nikt nie licytował — obraz zostaje niesprzedany.")
 	else:
 		AIPlayers.award_painting(current_leader, current_number, current_bid)
-		status_label.text = "%s wygrywa aukcję." % AIPlayers.get_rival(current_leader)["name"]
+		status_label.text = tr("%s wygrywa aukcję.") % AIPlayers.get_rival(current_leader)["name"]
 	_update_labels()
 
 	Auctions.resolve_and_reschedule()
@@ -270,17 +270,17 @@ func _resolve_auction() -> void:
 
 
 func _update_labels() -> void:
-	schedule_label.text = "Aukcja w toku: %s — %s" % [Cities.get_city_name(Travel.current_city), Calendar.get_date_string()]
+	schedule_label.text = tr("Aukcja w toku: %s — %s") % [Cities.get_city_name(Travel.current_city), Calendar.get_date_string()]
 
 	var category: String = Paintings.get_category(current_number)
 	var category_name: String = Paintings.CATEGORY_NAMES.get(category, category)
 	var info := Paintings.get_painting_info(current_number)
 	if not info.is_empty():
-		painting_label.text = "Na sprzedaż: „%s” — %s, %s (%s) — szac. wartość %.0f M" % [
-			info["title"], info["artist"], info["year"], category_name, Paintings.get_estimated_value(current_number),
+		painting_label.text = tr("Na sprzedaż: „%s” — %s, %s (%s) — szac. wartość %.0f M") % [
+			tr(info["title"]), info["artist"], info["year"], category_name, Paintings.get_estimated_value(current_number),
 		]
 	else:
-		painting_label.text = "Na sprzedaż: obraz nr %d (%s) — szac. wartość %.0f M" % [
+		painting_label.text = tr("Na sprzedaż: obraz nr %d (%s) — szac. wartość %.0f M") % [
 			current_number, category_name, Paintings.get_estimated_value(current_number),
 		]
 
@@ -295,19 +295,19 @@ func _update_labels() -> void:
 	## miejsce (separacja VBoxContainer nadal by się liczyła).
 	warning_label.visible = current_forgery_warning
 	if current_forgery_warning:
-		warning_label.text = "⚠ Szkoła Sztuki ostrzega: ten numer już masz w kolekcji — to może być podróbka!"
+		warning_label.text = tr("⚠ Szkoła Sztuki ostrzega: ten numer już masz w kolekcji — to może być podróbka!")
 
-	var leader_text := "nikt"
+	var leader_text := tr("nikt")
 	if current_leader == "player":
-		leader_text = "Ty"
+		leader_text = tr("Ty")
 	elif current_leader != "":
 		leader_text = AIPlayers.get_rival(current_leader)["name"]
-	bid_label.text = "Oferta: %.0f M\n(prowadzi: %s)" % [current_bid, leader_text]
+	bid_label.text = tr("Oferta: %.0f M\n(prowadzi: %s)") % [current_bid, leader_text]
 
 	## Jawna zapowiedź, co się stanie, gdy licznik dobiegnie końca — tester
 	## zgłosił, że wygrana po prostu "sama się" pojawiła bez ostrzeżenia, gdy
 	## tylko czekał (mechanika była zamierzona — czas, który mija bez reakcji
 	## rywali, oznacza wygraną — ale bez zapowiedzi wyglądała na błąd).
 	if current_leader == "player":
-		bid_label.text += "\nJeśli nikt Cię nie przebije do końca czasu — wygrywasz!"
-	money_label.text = "Gotówka: %.0f M" % Economy.player_money
+		bid_label.text += tr("\nJeśli nikt Cię nie przebije do końca czasu — wygrywasz!")
+	money_label.text = tr("Gotówka: %.0f M") % Economy.player_money
