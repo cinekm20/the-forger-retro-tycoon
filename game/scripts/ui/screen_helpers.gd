@@ -45,11 +45,17 @@ const CONTENT_INSET_WITH_FRAME := 26.0
 ## ramce co Hub.gd/TravelMap.gd (MenuFrame) — dla spójności wizualnej na
 ## WSZYSTKICH ekranach placeholderowych (Galeria, Dom aukcyjny, Szkoła
 ## sztuki, Plantacje, Giełda, Wyścigi, Ending, MainMenu), nie tylko w menu
-## nawigacyjnym Huba. CenterContainer sam wylicza rozmiar potrzebny na
-## treść (PanelContainer wewnątrz bierze maksimum z rozmiarów swoich dzieci,
-## patrz make_root_bottom) i centruje go na całym ekranie — różne ekrany
-## mają różną ilość treści, więc ramka za każdym razem dostaje inny,
-## dopasowany rozmiar bez ręcznego liczenia.
+## nawigacyjnym Huba.
+##
+## Ramka (content) ma STAŁY rozmiar — 90% ekranu w obu wymiarach (anchory
+## 0.05..0.95), NIE rośnie z treścią. Wcześniej robił to CenterContainer
+## (rozmiar = rozmiar treści), co dla ekranów z dużo treścią (Galeria z
+## listą rywali, Giełda z listą spółek) dawało ramkę WIĘKSZĄ niż ekran —
+## dolne przyciski (np. "Powrót") wypadały poza widoczny obszar,
+## niewidoczne i nieklikalne (zgłoszone przez użytkownika na zrzucie
+## ekranu). Treść (root) jest teraz w ScrollContainer — jeśli mieści się
+## w 90% ekranu, wygląda tak samo jak wcześniej; jeśli nie, dostaje pasek
+## przewijania zamiast wypadać poza kadr.
 static func make_root(parent: Control, use_menu_frame: bool = true) -> VBoxContainer:
 	if not use_menu_frame:
 		var plain_root := VBoxContainer.new()
@@ -60,12 +66,16 @@ static func make_root(parent: Control, use_menu_frame: bool = true) -> VBoxConta
 		parent.add_child(plain_root)
 		return plain_root
 
-	var wrapper := CenterContainer.new()
+	var wrapper := Control.new()
 	wrapper.set_anchors_preset(Control.PRESET_FULL_RECT)
 	wrapper.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(wrapper)
 
 	var content := PanelContainer.new()
+	content.anchor_left = 0.05
+	content.anchor_top = 0.05
+	content.anchor_right = 0.95
+	content.anchor_bottom = 0.95
 	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	content.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	wrapper.add_child(content)
@@ -82,11 +92,15 @@ static func make_root(parent: Control, use_menu_frame: bool = true) -> VBoxConta
 	margin.add_theme_constant_override("margin_bottom", m)
 	content.add_child(margin)
 
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	margin.add_child(scroll)
+
 	var root := VBoxContainer.new()
 	root.alignment = BoxContainer.ALIGNMENT_CENTER
 	root.add_theme_constant_override("separation", 16)
-	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin.add_child(root)
+	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(root)
 	return root
 
 ## Wąski panel przy krawędzi ekranu (stała szerokość, pełna wysokość) z
