@@ -112,12 +112,21 @@ func get_auction_cities() -> Array:
 ## oryginalnej pozycji (patrz też TravelMap.gd — pinezki są teraz zakotwiczone
 ## na tych ułamkach przez anchor_left/right/top/bottom, więc RAZ dobrze
 ## skalibrowane współrzędne zostają poprawne przy każdej rozdzielczości).
+##
+## Kolejna poprawka: berlin/paryż/amsterdam/londyn (region "europe") leżały
+## wszystkie na wąskim, wysuniętym na północ półwyspie przypominającym
+## Norwegię/Skandynawię (zgłoszone przez użytkownika: "londyn, paryż i
+## amsterdam lądują w norwegii") zamiast na szerokim, głównym lądzie
+## kontynentu niżej — przesunięte w dół na tę szerszą, jednoznacznie lądową
+## część (zweryfikowane wymogiem "głębokiego lądu": margines koloru ląd/morze
+## musi być dodatni w całym promieniu ~7px wokół punktu, nie tylko w jednym
+## pikselu, żeby uniknąć wąskich przesmyków/zatoczek).
 const MAP_POSITION := {
-	"berlin": Vector2(0.554, 0.272),
-	"paris": Vector2(0.52, 0.29),
-	"amsterdam": Vector2(0.52, 0.26),
+	"berlin": Vector2(0.544, 0.471),
+	"paris": Vector2(0.515, 0.497),
+	"amsterdam": Vector2(0.515, 0.449),
 	"lisbon": Vector2(0.48, 0.42),
-	"london": Vector2(0.51, 0.27),
+	"london": Vector2(0.49, 0.475),
 	"ankara": Vector2(0.60, 0.31),
 	"bombay": Vector2(0.66, 0.49),
 	"colombo": Vector2(0.67, 0.53),
