@@ -52,7 +52,12 @@ func _ready() -> void:
 	info_label = Label.new()
 	info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	info_label.custom_minimum_size = Vector2(340, 0)
+	info_label.add_theme_font_size_override("font_size", 19)
+	## custom_minimum_size.y: rezerwuje miejsce na zawsze DOKŁADNIE 3 wiersze
+	## (patrz _update_info) — bez tego wysokość zależałaby od aktualnej
+	## treści i przesuwałaby resztę kolumny przy każdej zmianie (patrz
+	## komentarz przy _update_info).
+	info_label.custom_minimum_size = Vector2(340, 75)
 	right_column.add_child(info_label)
 
 	## Siatka 16x16 (256 pól) w oprawionej ramce, jak w oryginale (zrzut
@@ -117,7 +122,12 @@ func _ready() -> void:
 
 	harvest_status_label = ScreenHelpers.make_label(right_column, "")
 	harvest_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	harvest_status_label.custom_minimum_size = Vector2(340, 0)
+	## custom_minimum_size.y: rezerwuje miejsce na 2 wiersze na stałe — bez
+	## tego przełączanie między pustym tekstem (przed zbiorami) i najdłuższym
+	## komunikatem ("Nic do zebrania — ...", 2 linie) zmieniało wysokość
+	## etykiety i przesuwało guziki poniżej (ten sam problem co info_label
+	## wyżej — patrz _update_info).
+	harvest_status_label.custom_minimum_size = Vector2(340, 50)
 
 	ScreenHelpers.make_button(right_column, "Spichlerz »", func(): SceneRouter.goto_scene(SceneRouter.WAREHOUSE))
 	ScreenHelpers.make_back_button(right_column)
@@ -224,14 +234,20 @@ func _on_sell_pressed() -> void:
 	_update_info()
 
 
+## Trzy KRÓTKIE, stałe wiersze (każdy z osobna zawsze mieści się w
+## custom_minimum_size.x bez zawijania) zamiast jednego długiego zdania z
+## autowrap — długość samego tekstu (np. nazwy uprawy: "Kawa" vs "Herbata")
+## zmieniała wtedy liczbę zawiniętych linii, więc wysokość etykiety się
+## zmieniała, a to przesuwało wszystko poniżej niej w tej samej kolumnie
+## (zgłoszone przez użytkownika: "cały czas skacze ekran" przy zmianie
+## uprawy). Przy stałej liczbie wierszy wysokość jest zawsze taka sama,
+## niezależnie od wartości.
 func _update_info() -> void:
 	var plantation: Dictionary = PlayerPlantations.plantations[plantation_index]
 	var crop: String = plantation["crop"]
 	var crop_name: String = Crops.CROP_NAMES.get(crop, tr("brak")) if crop != "" else tr("brak")
-	info_label.text = tr("Gotówka: %.0f M | Pola: %d | Uprawa: %s | Robotnicy: %d | Zboże w magazynie: %d") % [
-		Economy.player_money,
-		PlayerPlantations.get_owned_tile_count(plantation_index),
-		crop_name,
-		int(plantation["workers"]),
-		plantation["stored_goods"],
+	info_label.text = "%s\n%s\n%s" % [
+		tr("Gotówka: %.0f M") % Economy.player_money,
+		tr("Pola: %d | Uprawa: %s") % [PlayerPlantations.get_owned_tile_count(plantation_index), crop_name],
+		tr("Robotnicy: %d | Zboże w magazynie: %d") % [int(plantation["workers"]), plantation["stored_goods"]],
 	]
