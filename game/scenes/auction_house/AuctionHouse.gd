@@ -20,6 +20,11 @@ var current_forgery_warning: bool = false  ## losowane raz na aukcję w _start_n
 
 var auction_active: bool = false  ## true = odlicza czas na kolejny ruch gracza
 var bid_time_remaining: float = 0.0
+## Rywal nie czeka już zawsze do samego końca licznika, żeby ewentualnie
+## podbić — losowy moment w trakcie odliczania, w którym sprawdzamy, czy
+## któryś rywal podbija (patrz _start_bid_timer/_process).
+var rival_check_threshold: float = 0.0
+var rival_checked_this_round: bool = false
 
 var schedule_label: Label
 var painting_label: Label
@@ -156,20 +161,53 @@ func _process(delta: float) -> void:
 		timer_label.text = "Czas minął!"
 		timer_bar.value = 0.0
 		_on_time_expired()
-	else:
-		timer_label.text = "Czas na podbicie: %d s" % int(ceil(bid_time_remaining))
-		timer_bar.value = bid_time_remaining
+		return
+
+	timer_label.text = "Czas na podbicie: %d s" % int(ceil(bid_time_remaining))
+	timer_bar.value = bid_time_remaining
+
+	if not rival_checked_this_round and bid_time_remaining <= rival_check_threshold:
+		rival_checked_this_round = true
+		_try_rival_counter_bid()
 
 
 func _start_bid_timer() -> void:
 	bid_time_remaining = BID_TIME_LIMIT
 	auction_active = true
 	timer_bar.value = BID_TIME_LIMIT
+	rival_checked_this_round = false
+	rival_check_threshold = randf_range(2.0, BID_TIME_LIMIT - 3.0)
 
 
 func _on_time_expired() -> void:
 	status_label.text = "Zabrakło czasu na podbicie — rywale odpowiadają."
 	_on_resolve_round_pressed()
+
+
+## Sprawdza, czy któryś rywal podbija bieżącą ofertę — wywoływane zarówno z
+## losowego, wcześniejszego momentu w trakcie odliczania (_process), jak i
+## przy "Zakończ rundę"/wygaśnięciu czasu. Zwraca true, jeśli ktoś podbił
+## (i licznik został zresetowany na nową rundę) — wywołujący wie wtedy, że
+## nie powinien od razu rozstrzygać aukcji.
+func _try_rival_counter_bid() -> bool:
+	var estimated_value := Paintings.get_estimated_value(current_number)
+	var best_rival_id := ""
+	var best_rival_bid := current_bid
+	for rival in AIPlayers.rivals:
+		var rival_bid: float = AIPlayers.decide_bid(rival["id"], current_bid, estimated_value)
+		if rival_bid > best_rival_bid:
+			best_rival_bid = rival_bid
+			best_rival_id = rival["id"]
+
+	if best_rival_id == "":
+		return false
+
+	current_bid = best_rival_bid
+	current_leader = best_rival_id
+	status_label.text = "%s podbija ofertę." % AIPlayers.get_rival(best_rival_id)["name"]
+	_update_labels()
+	_start_bid_timer()
+	return true
 
 
 func _start_new_auction() -> void:
@@ -195,23 +233,8 @@ func _on_bid_pressed() -> void:
 
 
 func _on_resolve_round_pressed() -> void:
-	var estimated_value := Paintings.get_estimated_value(current_number)
-	var best_rival_id := ""
-	var best_rival_bid := current_bid
-	for rival in AIPlayers.rivals:
-		var rival_bid: float = AIPlayers.decide_bid(rival["id"], current_bid, estimated_value)
-		if rival_bid > best_rival_bid:
-			best_rival_bid = rival_bid
-			best_rival_id = rival["id"]
-
-	if best_rival_id != "":
-		current_bid = best_rival_bid
-		current_leader = best_rival_id
-		status_label.text = "%s podbija ofertę." % AIPlayers.get_rival(best_rival_id)["name"]
-		_update_labels()
-		_start_bid_timer()
+	if _try_rival_counter_bid():
 		return
-
 	_resolve_auction()
 
 
