@@ -74,9 +74,20 @@ func _ready() -> void:
 ## dolnego rogu ekranu (make_root_bottom) — zgodnie z prośbą użytkownika, żeby
 ## akcje licytacji nie leżały wymieszane w pionowej liście opisów.
 func _build_active_auction_ui(root: VBoxContainer) -> void:
+	## make_root(false) domyślnie centruje wszystkie dzieci jako jedną grupę
+	## (ALIGNMENT_CENTER) — użytkownik zgłosił, że górne skrzynki (termin +
+	## nazwa obrazu) mają być na SAMEJ górze ekranu, a dolne (oferta/gotówka +
+	## status + powrót) na SAMYM dole, z obrazem gdzieś pośrodku. BEGIN +
+	## dwa rozciągliwe spacery (jeden przed obrazem, jeden przed dolnym
+	## klastrem) rozpychają te trzy grupy do krawędzi zamiast trzymać je
+	## zbite na środku.
+	root.alignment = BoxContainer.ALIGNMENT_BEGIN
+
 	painting_label = ScreenHelpers.make_info_box(root, "")
 	painting_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	painting_label.custom_minimum_size = Vector2(760, 0)
+
+	root.add_child(_make_expand_spacer())
 
 	var painting_center := CenterContainer.new()
 	root.add_child(painting_center)
@@ -87,6 +98,8 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	painting_texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	painting_texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	painting_center.add_child(painting_texture_rect)
+
+	root.add_child(_make_expand_spacer())
 
 	warning_label = ScreenHelpers.make_label(root, "")
 
@@ -124,6 +137,13 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 
 	bid_btn = ScreenHelpers.make_button(action_root, "Podbij (+10%)", _on_bid_pressed)
 	resolve_btn = ScreenHelpers.make_button(action_root, "Zakończ rundę", _on_resolve_round_pressed)
+
+
+static func _make_expand_spacer() -> Control:
+	var spacer := Control.new()
+	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return spacer
 
 
 func _process(delta: float) -> void:
