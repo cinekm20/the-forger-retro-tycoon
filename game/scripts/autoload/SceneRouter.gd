@@ -4,6 +4,7 @@ extends Node
 const MAIN_MENU := "res://scenes/main_menu/MainMenu.tscn"
 const HUB := "res://scenes/hub/Hub.tscn"
 const PLANTATION := "res://scenes/plantation/Plantation.tscn"
+const WAREHOUSE := "res://scenes/warehouse/Warehouse.tscn"
 const STOCK_MARKET := "res://scenes/stock_market/StockMarket.tscn"
 const RACES := "res://scenes/races/Races.tscn"
 const AUCTION_HOUSE := "res://scenes/auction_house/AuctionHouse.tscn"

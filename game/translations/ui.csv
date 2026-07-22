@@ -198,3 +198,9 @@ Gracz %d:,Player %d:,Spieler %d:
 Gracz %d,Player %d,Spieler %d
 Rozpocznij grę,Start game,Spiel starten
 Miejsca »,Places »,Orte »
+Spichlerz,Warehouse,Kornspeicher
+Spichlerz »,Warehouse »,Kornspeicher »
+Wyślij i sprzedaj,Ship and sell,Versenden und verkaufen
+Sprzedano %d jednostek: %s.,Sold %d units: %s.,%d Einheiten verkauft: %s.
+Brak zapasów do sprzedania: %s.,No stock to sell: %s.,Kein Bestand zum Verkauf: %s.
+%d szt. — %.1f M/szt.,%d units — %.1f M/unit,%d Einheiten — %.1f M/Einheit

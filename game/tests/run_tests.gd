@@ -37,6 +37,7 @@ func _ready() -> void:
 	_test_travel_completes_in_one_animation()
 	_test_auctions_schedule()
 	_test_auctions_cap_turn_advance()
+	_test_ship_and_sell_all_across_plantations()
 
 	print("\n=== Wynik: %d/%d testów przeszło ===" % [total - failures, total])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -138,6 +139,25 @@ func _test_harvest_scales_with_time() -> void:
 
 	_assert(harvest_20_days > harvest_10_days, "20 dni upraw daje więcej plonu niż 10 dni (ten sam miesiąc)")
 	_assert(absi(harvest_20_days - harvest_10_days * 2) <= 2, "plon skaluje się z grubsza liniowo z czasem (20d ≈ 2×10d)")
+
+
+func _test_ship_and_sell_all_across_plantations() -> void:
+	print("-- PlayerPlantations: ship_and_sell_all sprzedaje ten sam towar z WSZYSTKICH plantacji --")
+	PlayerPlantations.reset_new_game()
+	Economy.reset_new_game()
+
+	var idx_a := PlayerPlantations.found_plantation("richmond")
+	var idx_b := PlayerPlantations.found_plantation("mombasa")
+	PlayerPlantations.plantations[idx_a]["crop"] = "tobacco"
+	PlayerPlantations.plantations[idx_a]["stored_goods"] = 10
+	PlayerPlantations.plantations[idx_b]["crop"] = "tobacco"
+	PlayerPlantations.plantations[idx_b]["stored_goods"] = 15
+
+	var sold := PlayerPlantations.ship_and_sell_all("tobacco", "new_york")
+
+	_assert(sold == 25, "sprzedano łącznie 10+15=25 jednostek z obu plantacji")
+	_assert(int(PlayerPlantations.plantations[idx_a]["stored_goods"]) == 0, "magazyn plantacji A wyzerowany po sprzedaży")
+	_assert(int(PlayerPlantations.plantations[idx_b]["stored_goods"]) == 0, "magazyn plantacji B wyzerowany po sprzedaży")
 
 
 func _test_forgery_by_duplicate_number() -> void:

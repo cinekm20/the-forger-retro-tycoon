@@ -13,6 +13,7 @@ extends Control
 ## z każdego miasta.
 const LOCATION_GATED_DESTINATIONS := {
 	"Plantacje": {"path": "res://scenes/plantation/Plantation.tscn", "requires_type": "plantation"},
+	"Spichlerz": {"path": "res://scenes/warehouse/Warehouse.tscn", "requires_type": "plantation"},
 	"Dom aukcyjny": {"path": "res://scenes/auction_house/AuctionHouse.tscn", "requires_type": "auction"},
 	"Galeria": {"path": "res://scenes/gallery/Gallery.tscn", "requires_type": "auction"},
 }

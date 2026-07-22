@@ -189,6 +189,18 @@ func ship_and_sell(plantation_index: int, warehouse: String) -> int:
 	return amount
 
 
+## Jak ship_and_sell, ale dla WSZYSTKICH plantacji danej uprawy naraz (patrz
+## Spichlerz/Warehouse.gd — pokazuje zsumowany zapas ze wszystkich plantacji,
+## więc sprzedaż też musi obsłużyć wszystkie na raz, każdą z jej WŁASNYM
+## kosztem transportu, bo ten zależy od miasta danej plantacji).
+func ship_and_sell_all(crop: String, warehouse: String) -> int:
+	var total := 0
+	for i in plantations.size():
+		if plantations[i]["crop"] == crop:
+			total += ship_and_sell(i, warehouse)
+	return total
+
+
 ## Suma zebranego towaru danej uprawy w magazynach wszystkich plantacji gracza
 ## (uproszczenie: "magazyn" = suma stored_goods plantacji uprawiających dany
 ## towar — bez modelowania osobnych magazynów w Nowym Jorku/Londynie).

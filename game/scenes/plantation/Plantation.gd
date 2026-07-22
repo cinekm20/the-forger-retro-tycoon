@@ -98,6 +98,7 @@ func _ready() -> void:
 
 	harvest_status_label = ScreenHelpers.make_label(root, "")
 
+	ScreenHelpers.make_button(root, "Spichlerz »", func(): SceneRouter.goto_scene(SceneRouter.WAREHOUSE))
 	ScreenHelpers.make_back_button(root)
 
 	if Cities.get_plantation_cities().size() > 0:
