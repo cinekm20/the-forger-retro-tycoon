@@ -53,6 +53,12 @@ func _ready() -> void:
 ## rozpoczął). tree_changed leci bardzo często (dowolna zmiana w drzewie
 ## sceny), ale sam test poniżej jest tani, więc to nieistotne obciążenie.
 func _update_button_visibility() -> void:
+	## is_inside_tree() strzeże przed wywołaniem podczas zamykania gry —
+	## tree_changed potrafi jeszcze odpalić w trakcie sprzątania drzewa sceny
+	## (np. przy --quit w CI), kiedy ten węzeł nie jest już w drzewie i
+	## get_tree() zwraca null (SCRIPT ERROR zamiast cichego pominięcia).
+	if not is_inside_tree():
+		return
 	var scene := get_tree().current_scene
 	var visible_now: bool = scene != null and scene.scene_file_path != SceneRouter.MAIN_MENU
 	settings_button.visible = visible_now
