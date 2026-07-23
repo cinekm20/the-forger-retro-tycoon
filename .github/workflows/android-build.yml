@@ -78,15 +78,28 @@ jobs:
           unzip -q templates.tpz -d /tmp/templates
           mv /tmp/templates/templates/* ~/.local/share/godot/export_templates/${{ env.GODOT_TEMPLATES_DIR }}/
 
-      # Debug keystore ze standardowym hasłem "android"/"androiddebugkey" —
-      # dokładnie to, czego Godot używa domyślnie do podpisywania debugowych
-      # APK (nie jest to sekret produkcyjny, sam Android SDK generuje
-      # identyczny domyślny keystore lokalnie na każdym komputerze).
-      - name: Generate debug keystore
+      # Keystore ze standardowym hasłem "android"/"androiddebugkey" — dokładnie
+      # to, czego Godot używa domyślnie do podpisywania debugowych APK (nie
+      # jest to sekret produkcyjny, sam Android SDK generuje identyczny
+      # domyślny keystore lokalnie na każdym komputerze). WAŻNE: musi być ten
+      # SAM plik (ten sam klucz podpisujący) w każdym buildzie — wcześniej
+      # generowaliśmy nowy, losowy keystore przy KAŻDYM uruchomieniu, więc
+      # każdy kolejny APK miał inny podpis i Android odmawiał instalacji jako
+      # aktualizacji istniejącej gry ("konflikt z już istniejącą", wymagało
+      # odinstalowania). Plik game/android/debug.keystore jest wpisany do
+      # repo na stałe właśnie po to, żeby podpis się nie zmieniał między
+      # buildami — kopiujemy go zamiast generować od zera; generowanie
+      # zostaje tylko jako fallback, gdyby plik z jakiegoś powodu zniknął.
+      - name: Use committed debug keystore
         run: |
-          keytool -genkeypair -v -keystore ~/debug.keystore -storepass android \
-            -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 \
-            -validity 9999 -dname "CN=Android Debug,O=Android,C=US"
+          if [ -f game/android/debug.keystore ]; then
+            cp game/android/debug.keystore ~/debug.keystore
+          else
+            echo "game/android/debug.keystore nie znaleziony — generuję nowy (UWAGA: kolejne APK znowu będą konfliktować ze starymi instalacjami)." >&2
+            keytool -genkeypair -v -keystore ~/debug.keystore -storepass android \
+              -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 \
+              -validity 9999 -dname "CN=Android Debug,O=Android,C=US"
+          fi
 
       # EditorSettings Godota (ścieżka do Android SDK + keystore) normalnie
       # ustawia się w edytorze GUI — w CI trzeba podać ten sam plik ręcznie,
