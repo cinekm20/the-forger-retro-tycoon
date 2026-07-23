@@ -16,6 +16,9 @@ const LEGEND_ICON_SIZE := 28.0
 ## _ready() (ile miejsca ZOSTAJE na kolumnę po odjęciu siatki i separatorów)
 ## faktycznie odpowiada temu, co Container narysuje.
 const COLUMN_SEPARATION := 24.0
+## Zgłoszone przez użytkownika: litery mają być większe (domyślne z
+## ScreenHelpers.make_label to 19).
+const BODY_FONT_SIZE := 22
 
 var plantation_index: int = -1
 
@@ -122,18 +125,20 @@ func _ready() -> void:
 	## tylko w miastach typu plantacyjnego, patrz
 	## Hub.LOCATION_GATED_DESTINATIONS, więc Travel.current_city zawsze jest
 	## poprawnym miastem plantacyjnym, kiedy ten ekran jest w ogóle osiągalny).
-	ScreenHelpers.make_label(info_column, Cities.get_city_name(Travel.current_city))
+	var city_label := ScreenHelpers.make_label(info_column, Cities.get_city_name(Travel.current_city))
+	city_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 
 	info_label = Label.new()
 	info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	info_label.add_theme_font_size_override("font_size", 19)
+	info_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 	## custom_minimum_size.y: rezerwuje miejsce na zawsze DOKŁADNIE 4 wiersze
 	## (patrz _update_info) — bez tego wysokość zależałaby od aktualnej
 	## treści i przesuwałaby resztę kolumny przy każdej zmianie (patrz
 	## komentarz przy _update_info). Szerokość = wyliczona column_width, nie
 	## stała wartość — musi się zmieścić w połowie "reszty" obok siatki.
-	info_label.custom_minimum_size = Vector2(column_width, 100)
+	## Wysokość podniesiona do 120 (z 100) wraz z większą czcionką.
+	info_label.custom_minimum_size = Vector2(column_width, 120)
 	info_column.add_child(info_label)
 
 	## Jedna plantacja może jednocześnie uprawiać WSZYSTKIE 4 rodzaje towaru
@@ -146,6 +151,7 @@ func _ready() -> void:
 	info_column.add_child(crop_row)
 	var crop_caption := Label.new()
 	crop_caption.text = tr("Sadzić:")
+	crop_caption.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 	crop_row.add_child(crop_caption)
 	crop_option = OptionButton.new()
 	for crop in Crops.CROPS:
@@ -157,6 +163,7 @@ func _ready() -> void:
 	info_column.add_child(worker_row)
 	var worker_caption := Label.new()
 	worker_caption.text = tr("Robotnicy:")
+	worker_caption.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 	worker_row.add_child(worker_caption)
 	worker_spin = SpinBox.new()
 	worker_spin.min_value = 0
@@ -164,6 +171,13 @@ func _ready() -> void:
 	worker_spin.step = 10
 	worker_spin.value_changed.connect(_on_workers_changed)
 	worker_row.add_child(worker_spin)
+
+	## Puste miejsce nad guzikami rośnie/kurczy się (SIZE_EXPAND_FILL), więc
+	## guziki + status zbiorów zostają zawsze WYRÓWNANE OD DOŁU kolumny —
+	## zgłoszone przez użytkownika — zamiast leżeć zaraz pod polem
+	## "Robotnicy", w zmiennym miejscu zależnym od tego, ile miejsca zajmuje
+	## treść nad nimi.
+	info_column.add_child(_make_expand_spacer())
 
 	## Guziki akcji jeden POD drugim (nie obok siebie w jednym rzędzie, jak
 	## poprzednio) — w węższej kolumnie (połowa "reszty" obok siatki, zamiast
@@ -178,13 +192,15 @@ func _ready() -> void:
 	ScreenHelpers.make_button(info_column, "Wyślij i sprzedaj", _on_sell_pressed, column_width)
 
 	harvest_status_label = ScreenHelpers.make_label(info_column, "")
+	harvest_status_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 	harvest_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	## custom_minimum_size.y: rezerwuje miejsce na 2 wiersze na stałe — bez
 	## tego przełączanie między pustym tekstem (przed zbiorami) i najdłuższym
 	## komunikatem ("Nic do zebrania — ...", 2 linie) zmieniało wysokość
 	## etykiety i przesuwało guziki poniżej (ten sam problem co info_label
-	## wyżej — patrz _update_info).
-	harvest_status_label.custom_minimum_size = Vector2(column_width, 50)
+	## wyżej — patrz _update_info). Wysokość podniesiona do 60 (z 50) wraz z
+	## większą czcionką.
+	harvest_status_label.custom_minimum_size = Vector2(column_width, 60)
 
 	## Legenda WYGLĄDU pól — ikonka + podpis dla każdego stanu pola (nie tylko
 	## opis liczbowy) — zgłoszone przez użytkownika: musi być pokazane, jak
@@ -213,7 +229,10 @@ func _ready() -> void:
 	## więc razem z siatką na pełną wysokość ramki całość nie mieściła się w
 	## pionie i dokładała pasek przewijania (obcinając "Powrót" u dołu) —
 	## przeniesienie tych dwóch guzików do krótszej kolumny wyrównuje obie
-	## kolumny i usuwa potrzebę scrolla.
+	## kolumny i usuwa potrzebę scrolla. Spacer przed nimi (jak w info_column
+	## wyżej) — WYRÓWNANE OD DOŁU, na tej samej wysokości co guziki w drugiej
+	## kolumnie, niezależnie od tego, ile pól ma akurat obsianych każda uprawa.
+	legend_column.add_child(_make_expand_spacer())
 	ScreenHelpers.make_button(legend_column, "Spichlerz »", func(): SceneRouter.goto_scene(SceneRouter.WAREHOUSE), column_width)
 	ScreenHelpers.make_button(legend_column, "« Powrót", func(): SceneRouter.goto_hub(), column_width)
 
@@ -238,6 +257,7 @@ func _add_legend_row(parent: Container, kind: int, crop: String, river_adjacent:
 	var label := Label.new()
 	label.text = text
 	label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
+	label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 	## autowrap + szerokość ograniczona do legend_text_width (column_width
 	## minus ikonka minus odstęp) — najdłuższy podpis ("Sąsiaduje z rzeką...")
 	## inaczej byłby szerszy niż kolumna i rozpychałby ją ponad wyliczoną
@@ -246,6 +266,13 @@ func _add_legend_row(parent: Container, kind: int, crop: String, river_adjacent:
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	label.custom_minimum_size = Vector2(legend_text_width, 0)
 	row.add_child(label)
+
+
+static func _make_expand_spacer() -> Control:
+	var spacer := Control.new()
+	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return spacer
 
 
 func _setup_current_plantation() -> void:
