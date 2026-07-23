@@ -50,36 +50,41 @@ func _ready() -> void:
 	name_section.visible = false
 	root.add_child(name_section)
 
-	## Logo ma już wpisany napis "THE FORGER: RETRO TYCOON" w swojej grafice
-	## (kinowa scena z kurtynami, styl art déco zgodny z resztą gry) —
-	## zastępuje zwykły tekstowy tytuł zamiast leżeć obok niego. Zgłoszone
-	## przez użytkownika (dwukrotnie): najpierw że logo w ogóle się nie
-	## pokazywało, potem że po naprawie było za duże i cały ekran wymagał
-	## przewijania. Zamiast zgadywać ułamek ekranu na logo (poprzednie dwie
-	## wersje), MIERZYMY realną wysokość reszty menu — subtitle_label i
-	## setup_section są już zbudowane WYŻEJ, więc get_minimum_size()
-	## zwraca ich prawdziwą wysokość natychmiast, bez czekania na pełny
-	## layout pass silnika — i logo dostaje DOKŁADNIE tyle miejsca, ile
-	## zostaje w ramce, więc całość mieści się bez scrolla z definicji,
-	## niezależnie od rozmiaru czcionek/przycisków. name_section jest na
-	## razie visible=false, więc Container go pomija przy liczeniu wysokości
-	## (dokładnie to, co chcemy — logo ma dopasować się do EKRANU STARTOWEGO,
-	## nie do dłuższego formularza imion graczy pod "Nowa gra").
-	## Budowane na końcu i przesuwane na sam początek (move_child) — stąd
-	## pomiar PRZED policzeniem rozmiaru logo, a widoczna kolejność mimo to
-	## poprawna (logo nad napisem/przyciskami).
+	## MainMenu to PIERWSZY ekran gry, ładowany od razu przy zimnym starcie —
+	## w przeciwieństwie do Hub.gd/Plantation.gd/TravelAnimation.gd (ten sam
+	## wzorzec get_viewport_rect(), ale osiągalne dopiero PO tym, jak okno
+	## aplikacji na Androidzie zdąży się już w pełni ustabilizować do
+	## docelowego rozmiaru). Tu, w _ready(), get_viewport_rect() potrafi
+	## jeszcze zwracać nieostateczny rozmiar (immersive mode/wcięcia na
+	## ekranie ustawiają się asynchronicznie) — stąd dwukrotne zgłoszenie
+	## użytkownika, że logo dalej wychodziło za duże mimo poprawnej matematyki
+	## (liczone od złego, tymczasowego rozmiaru viewportu). await
+	## process_frame (dwa razy dla pewności) odkłada pomiar/budowę logo na
+	## moment, gdy silnik zdążył już przeliczyć docelowy rozmiar okna.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_build_logo(subtitle_label, setup_section)
+
+
+## Logo ma już wpisany napis "THE FORGER: RETRO TYCOON" w swojej grafice
+## (kinowa scena z kurtynami, styl art déco zgodny z resztą gry) —
+## zastępuje zwykły tekstowy tytuł zamiast leżeć obok niego. Zgłoszone przez
+## użytkownika: ma zajmować MAKS. 1/3 wysokości ekranu, więc reszta menu
+## (napis, wybór graczy, przyciski) zawsze mieści się bez przewijania.
+## Twardy limit 1/3 wysokości ramki, NIEZALEŻNY od pomiaru reszty menu —
+## poprzednia wersja liczyła dokładnie tyle miejsca, ile zostaje po
+## zmierzeniu subtitle_label/setup_section, ale to nadal potrafiło wyjść
+## zbyt duże (patrz komentarz w _ready() o niegotowym jeszcze rozmiarze
+## viewportu przy starcie), a użytkownik i tak chce jawny, przewidywalny
+## sufit rozmiaru, nie wyliczaną resztę.
+func _build_logo(subtitle_label: Label, setup_section: VBoxContainer) -> void:
 	var viewport_size := get_viewport_rect().size
 	var frame_content_width := viewport_size.x * 0.9 - ScreenHelpers.CONTENT_INSET_WITH_FRAME * 2.0
 	var frame_content_height := viewport_size.y * 0.9 - ScreenHelpers.CONTENT_INSET_WITH_FRAME * 2.0
 
-	var root_separation := root.get_theme_constant("separation")
-	var rest_height := subtitle_label.get_minimum_size().y + setup_section.get_minimum_size().y
-	## 2 odstępy: logo↔napis (nowy, dopiero po wstawieniu logo) i napis↔setup_section (już istniejący).
-	var available_for_logo := frame_content_height - rest_height - root_separation * 2.0
-
 	var logo_texture: Texture2D = load("res://art/backgrounds/logo.jpg")
 	var logo_aspect := logo_texture.get_width() / float(logo_texture.get_height())
-	var logo_height := clampf(available_for_logo, 50.0, frame_content_height * 0.4)
+	var logo_height := frame_content_height / 3.0
 	var logo_width := minf(logo_height * logo_aspect, frame_content_width * 0.85)
 	logo_height = logo_width / logo_aspect
 
@@ -89,9 +94,19 @@ func _ready() -> void:
 	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	logo.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	logo.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(logo)
 	root.move_child(logo, 0)
+
+	## Kontrola przy debugowaniu: jeśli logo + reszta menu i tak nie
+	## mieszczą się w ramce, ScrollContainer z make_root() zostaje jako
+	## zabezpieczenie (patrz komentarz w screen_helpers.gd) — ale przy
+	## twardym limicie 1/3 wysokości na logo nie powinno do tego dochodzić.
+	var root_separation := root.get_theme_constant("separation")
+	var total_height := logo_height + subtitle_label.get_minimum_size().y + setup_section.get_minimum_size().y + root_separation * 2.0
+	if total_height > frame_content_height:
+		push_warning("MainMenu: treść (%.0fpx) przekracza wysokość ramki (%.0fpx) mimo limitu na logo." % [total_height, frame_content_height])
 
 
 ## Zamiast od razu startować grę z domyślnymi nazwami "Gracz 1"/"Gracz 2"...,
