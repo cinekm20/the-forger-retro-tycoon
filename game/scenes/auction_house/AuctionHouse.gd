@@ -131,17 +131,18 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 
 	## font_size 26 (zamiast domyślnych 19) — użytkownik zgłosił, że oferta i
 	## informacja "kto prowadzi" powinny być trochę większe. autowrap +
-	## custom_minimum_size: bez tego długie imię rywala (np. "Contessa Isabella
-	## Moreau") mogłoby rozepchać/zawinąć skrzynkę inaczej niż krótkie "Ty" czy
-	## "nikt", przesuwając resztę ekranu — ten sam problem co wcześniej na
-	## ekranie Plantacji, naprawiony z góry tym samym patentem (stała szerokość
-	## + zawijanie zamiast jednej, zmiennej długości linii).
+	## custom_minimum_size (SZEROKOŚĆ i WYSOKOŚĆ oba stałe): długie imię
+	## rywala (np. "Contessa Isabella Moreau") mogło zawinąć się na dodatkową
+	## linię, zmieniając wysokość skrzynki i przesuwając layout — zgłoszone
+	## przez użytkownika, ten sam problem co wcześniej na ekranie Plantacji.
+	## Stała wysokość (2 pełne linie przy font_size 26) gwarantuje, że skrzynka
+	## nigdy się nie rusza, niezależnie od długości imienia.
 	bid_label = Label.new()
 	bid_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	bid_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
 	bid_label.add_theme_font_size_override("font_size", 26)
 	bid_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	bid_label.custom_minimum_size = Vector2(340, 0)
+	bid_label.custom_minimum_size = Vector2(340, 70)
 	bid_row.add_child(bid_label)
 
 	status_label = ScreenHelpers.make_label(root, "")

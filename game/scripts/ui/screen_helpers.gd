@@ -425,7 +425,7 @@ static func _style_button(btn: Button) -> void:
 ## Rozmiar/czcionka podniesione z (280, 46)/18px — tester zgłosił, że
 ## przyciski były za małe, mimo że na większości ekranów było sporo wolnego
 ## miejsca dookoła nich.
-static func make_button(root: VBoxContainer, text: String, on_pressed: Callable) -> Button:
+static func make_button(root: Container, text: String, on_pressed: Callable) -> Button:
 	var btn := Button.new()
 	btn.text = text
 	btn.custom_minimum_size = Vector2(320, 58)
@@ -435,7 +435,7 @@ static func make_button(root: VBoxContainer, text: String, on_pressed: Callable)
 	return btn
 
 
-static func make_back_button(root: VBoxContainer) -> Button:
+static func make_back_button(root: Container) -> Button:
 	return make_button(root, "« Powrót", func(): SceneRouter.goto_hub())
 
 

@@ -39,6 +39,9 @@ var places_menu_section: VBoxContainer
 var top_row: HBoxContainer
 var hub_bg: TextureRect
 var hub_overlay: ColorRect
+var turn_summary_container: HBoxContainer
+var turn_summary_label: Label
+var turn_summary_button: Button
 
 
 func _ready() -> void:
@@ -53,6 +56,7 @@ func _ready() -> void:
 	## kontener) trzyma lewą kolumnę (location/date/obrazy) i skrzynkę
 	## gotówki po przeciwnych stronach — patrz komentarz przy _build_top_row.
 	top_row = _build_top_row()
+	_build_turn_summary()
 
 	## Panel boczny na menu nawigacyjne — zostaje w prawym dolnym rogu,
 	## zgodnie z oryginałem, ale bez informacji statusu (te są teraz w
@@ -159,6 +163,63 @@ func _build_top_row() -> HBoxContainer:
 	return row
 
 
+## Krótkie podsumowanie aktualnego miasta, widoczne wyśrodkowane pod
+## skrzynkami statusu (np. zaraz po "Koniec tury" albo po przyjeździe) —
+## zgłoszone przez użytkownika: jeśli w mieście jest dziś aukcja, pokaż to z
+## możliwością od razu tam przejść; jeśli miasto ma plantację gracza, pokaż,
+## ile jest aktualnie gotowe do zbioru. Cała skrzynka (make_boxed_row) chowa
+## się całkiem, gdy żaden z warunków nie zachodzi.
+func _build_turn_summary() -> void:
+	## PRESET_FULL_RECT (nie PRESET_TOP_WIDE!) — ten sam patent co "row" w
+	## _build_top_row wyżej. PRESET_TOP_WIDE liczyłby wysokość raz, w
+	## momencie wywołania (czyli 0, zanim dojdą dzieci) i zablokował
+	## kontener na zerowej wysokości na zawsze (patrz komentarz przy
+	## make_root_side w screen_helpers.gd) — FULL_RECT jest bezpieczny, bo
+	## zawsze rozciąga się do dołu ekranu; SIZE_SHRINK_BEGIN na samej
+	## oprawionej skrzynce (nie na tym kontenerze — size_flags działają na
+	## DZIECKU Containera, nie na samym Containerze) przykleja ją do góry
+	## tego (niewidocznie dużego) obszaru, zamiast rozciągać na całą jego
+	## wysokość.
+	turn_summary_container = HBoxContainer.new()
+	turn_summary_container.set_anchors_preset(Control.PRESET_FULL_RECT)
+	turn_summary_container.offset_top = 150
+	turn_summary_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	turn_summary_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(turn_summary_container)
+
+	var row := ScreenHelpers.make_boxed_row(turn_summary_container)
+	row.get_parent().size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+
+	turn_summary_label = Label.new()
+	turn_summary_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	turn_summary_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
+	turn_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	turn_summary_label.custom_minimum_size = Vector2(300, 0)
+	row.add_child(turn_summary_label)
+
+	turn_summary_button = ScreenHelpers.make_button(row, tr("Przejdź do aukcji »"), func(): SceneRouter.goto_scene(SceneRouter.AUCTION_HOUSE))
+	turn_summary_button.visible = false
+
+
+func _update_turn_summary() -> void:
+	var lines: Array[String] = []
+
+	if not Travel.is_traveling() and Auctions.is_open(Travel.current_city):
+		lines.append(tr("W tym mieście trwa dziś aukcja!"))
+		turn_summary_button.visible = true
+	else:
+		turn_summary_button.visible = false
+
+	var plantation_index := PlayerPlantations.find_plantation_index(Travel.current_city)
+	if not Travel.is_traveling() and plantation_index != -1:
+		var ready_amount := PlayerPlantations.calculate_harvest(plantation_index)
+		if ready_amount > 0:
+			lines.append(tr("Gotowe do zbioru: %d jednostek.") % ready_amount)
+
+	turn_summary_container.visible = not lines.is_empty()
+	turn_summary_label.text = "\n".join(lines)
+
+
 ## Zamiast od razu przełączać scenę, tło Huba "kurczy się" do pozycji
 ## pinezki aktualnego miasta na mapie świata, a mapa pojawia się pod spodem
 ## — dopiero potem ładuje się TravelMap.tscn (który ma dokładnie tę samą
@@ -251,6 +312,7 @@ func _update_status() -> void:
 	warning_label.text = tr("⚠ Kurs dolara wysoki — zbliża się reforma walutowa!") if warning_label.visible else ""
 
 	travel_button.visible = not Travel.is_traveling()
+	_update_turn_summary()
 
 	for child in get_children():
 		_update_gated_button(child)

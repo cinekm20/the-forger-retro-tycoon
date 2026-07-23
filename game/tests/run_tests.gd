@@ -40,6 +40,7 @@ func _ready() -> void:
 	_test_auctions_schedule()
 	_test_auctions_cap_turn_advance()
 	_test_ship_and_sell_all_across_plantations()
+	_test_find_plantation_index()
 
 	print("\n=== Wynik: %d/%d testów przeszło ===" % [total - failures, total])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -160,6 +161,15 @@ func _test_ship_and_sell_all_across_plantations() -> void:
 	_assert(sold == 25, "sprzedano łącznie 10+15=25 jednostek z obu plantacji")
 	_assert(int(PlayerPlantations.plantations[idx_a]["stored_goods"]) == 0, "magazyn plantacji A wyzerowany po sprzedaży")
 	_assert(int(PlayerPlantations.plantations[idx_b]["stored_goods"]) == 0, "magazyn plantacji B wyzerowany po sprzedaży")
+
+
+func _test_find_plantation_index() -> void:
+	print("-- PlayerPlantations: find_plantation_index --")
+	PlayerPlantations.reset_new_game()
+	_assert(PlayerPlantations.find_plantation_index("richmond") == -1, "brak plantacji w mieście, gdzie gracz jej jeszcze nie założył")
+	var idx := PlayerPlantations.found_plantation("richmond")
+	_assert(PlayerPlantations.find_plantation_index("richmond") == idx, "po założeniu: find_plantation_index zwraca właściwy indeks")
+	_assert(PlayerPlantations.find_plantation_index("mombasa") == -1, "inne miasto nadal bez plantacji")
 
 
 func _test_forgery_by_duplicate_number() -> void:

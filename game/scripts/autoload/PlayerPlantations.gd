@@ -32,6 +32,16 @@ func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
 			Economy.player_money -= wage_cost
 
 
+## Indeks plantacji gracza w danym mieście, albo -1, jeśli gracz nie ma tam
+## (jeszcze) plantacji — patrz Hub.gd (podsumowanie po "Koniec tury") i
+## Plantation.gd, obie potrzebują tego samego wyszukiwania po city_id.
+func find_plantation_index(city_id: String) -> int:
+	for i in plantations.size():
+		if plantations[i]["city"] == city_id:
+			return i
+	return -1
+
+
 func found_plantation(city_id: String) -> int:
 	var grid: Array[bool] = []
 	grid.resize(GRID_SIZE * GRID_SIZE)

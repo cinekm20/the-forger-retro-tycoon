@@ -202,3 +202,6 @@ Brak zapasów do sprzedania: %s.,No stock to sell: %s.,Kein Bestand zum Verkauf:
 Pola: %d | Uprawa: %s,Fields: %d | Crop: %s,Felder: %d | Anbau: %s
 Robotnicy: %d,Workers: %d,Arbeiter: %d
 Zboże w magazynie: %d,Stored crop: %d,Lagerbestand: %d
+W tym mieście trwa dziś aukcja!,An auction is taking place in this city today!,Heute findet in dieser Stadt eine Auktion statt!
+Przejdź do aukcji »,Go to auction »,Zur Auktion »
+Gotowe do zbioru: %d jednostek.,Ready to harvest: %d units.,Erntereif: %d Einheiten.

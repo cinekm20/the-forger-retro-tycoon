@@ -139,11 +139,7 @@ func _ready() -> void:
 
 func _on_city_selected(index: int) -> void:
 	selected_city = Cities.get_plantation_cities()[index]
-	plantation_index = -1
-	for i in PlayerPlantations.plantations.size():
-		if PlayerPlantations.plantations[i]["city"] == selected_city:
-			plantation_index = i
-			break
+	plantation_index = PlayerPlantations.find_plantation_index(selected_city)
 	if plantation_index == -1:
 		plantation_index = PlayerPlantations.found_plantation(selected_city)
 
