@@ -140,31 +140,48 @@ func _build_top_row() -> HBoxContainer:
 	row.add_theme_constant_override("separation", 16)
 	add_child(row)
 
-	## Awatar aktywnego gracza (wybrany przy starcie nowej gry, patrz
-	## MainMenu.gd _show_name_entry / Players.get_avatar_path) — w hot-seat
-	## zmienia się przy każdym end_turn, bo _ready() przelicza go na nowo z
-	## Players.active_index po przeładowaniu Huba (SceneRouter.goto_hub()).
-	var avatar_rect := TextureRect.new()
-	avatar_rect.custom_minimum_size = Vector2(64, 64)
-	avatar_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	avatar_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	avatar_rect.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	var avatar_path := Players.active_avatar_path()
-	avatar_rect.texture = load(avatar_path) if ResourceLoader.exists(avatar_path) else null
-	row.add_child(avatar_rect)
-
 	var left_column := VBoxContainer.new()
 	left_column.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	left_column.add_theme_constant_override("separation", 8)
 	row.add_child(left_column)
 
-	## Wszystkie 4 skrzynki dostają TĘ SAMĄ szerokość (280) — użytkownik
-	## zgłosił, że muszą być zawsze jednakowej szerokości, niezależnie od
-	## treści (np. skrzynka terminu aukcji miała różną szerokość zależnie od
-	## długości nazwy miasta: Amsterdam vs Berlin). make_info_box z
-	## min_width > 0 wymusza teraz stałą szerokość + zawijanie zamiast
-	## rozpychania skrzynki (patrz komentarz w screen_helpers.gd).
-	location_label = ScreenHelpers.make_info_box(left_column, "", 280.0, 22)
+	## Awatar POŁĄCZONY z tą samą skrzynką co imię/lokalizacja gracza (nie
+	## osobno obok, jak wcześniej) i większy (80×80, było 64×64) —
+	## zgłoszone przez użytkownika. make_boxed_row (nie make_info_box), bo
+	## potrzeba więcej niż jednej etykiety w tej samej ramce. Skrzynka jest
+	## szersza (360) niż pozostałe 3 (280), żeby zmieścić avatar + tekst —
+	## nadal stała szerokość, więc nie "skacze" przy zmianie treści (patrz
+	## komentarz przy pozostałych skrzynkach niżej).
+	var location_row := ScreenHelpers.make_boxed_row(left_column)
+	location_row.get_parent().custom_minimum_size = Vector2(360, 0)
+
+	var avatar_rect := TextureRect.new()
+	avatar_rect.custom_minimum_size = Vector2(80, 80)
+	avatar_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	avatar_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	## Awatar aktywnego gracza (wybrany przy starcie nowej gry, patrz
+	## MainMenu.gd _show_name_entry / Players.get_avatar_path) — w hot-seat
+	## zmienia się przy każdym end_turn, bo _ready() przelicza go na nowo z
+	## Players.active_index po przeładowaniu Huba (SceneRouter.goto_hub()).
+	var avatar_path := Players.active_avatar_path()
+	avatar_rect.texture = load(avatar_path) if ResourceLoader.exists(avatar_path) else null
+	location_row.add_child(avatar_rect)
+
+	location_label = Label.new()
+	location_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	location_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
+	location_label.add_theme_font_size_override("font_size", 22)
+	location_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	location_label.custom_minimum_size = Vector2(230, 0)
+	location_row.add_child(location_label)
+
+	## Wszystkie pozostałe skrzynki dostają TĘ SAMĄ szerokość (280) —
+	## użytkownik zgłosił, że muszą być zawsze jednakowej szerokości,
+	## niezależnie od treści (np. skrzynka terminu aukcji miała różną
+	## szerokość zależnie od długości nazwy miasta: Amsterdam vs Berlin).
+	## make_info_box z min_width > 0 wymusza teraz stałą szerokość +
+	## zawijanie zamiast rozpychania skrzynki (patrz komentarz w
+	## screen_helpers.gd).
 	date_label = ScreenHelpers.make_info_box(left_column, "", 280.0)
 	paintings_label = ScreenHelpers.make_info_box(left_column, "", 280.0)
 	## Skrzynka "NEXT AUCTION IS: ..." z oryginału — widoczna niezależnie od

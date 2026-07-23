@@ -257,15 +257,17 @@ func _start_bid_timer() -> void:
 
 func _on_time_expired() -> void:
 	status_label.text = tr("Zabrakło czasu na podbicie — rywale odpowiadają.")
-	_on_resolve_round_pressed()
+	if _try_rival_counter_bid():
+		return
+	_resolve_auction()
 
 
-## Sprawdza, czy któryś rywal podbija bieżącą ofertę — wywoływane zarówno z
-## losowego, wcześniejszego momentu w trakcie odliczania (_process), jak i
-## przy "Zakończ rundę"/wygaśnięciu czasu. Zwraca true, jeśli ktoś podbił
-## (i licznik został zresetowany na nową rundę) — wywołujący wie wtedy, że
-## nie powinien od razu rozstrzygać aukcji.
-func _try_rival_counter_bid() -> bool:
+## Sama logika "czy ktoś z rywali podbija current_bid" — liczy najlepszą
+## ofertę i, jeśli jest wyższa, STOSUJE ją (current_bid/current_leader), ale
+## NIE decyduje, co dalej (nowa runda czy rozstrzygnięcie od razu) — to
+## zależy od wywołującego: _try_rival_counter_bid (jeszcze jedna runda) albo
+## _on_resolve_round_pressed (rezygnacja gracza, rozstrzygnięcie od razu).
+func _apply_best_rival_counter_bid() -> bool:
 	var estimated_value := Paintings.get_estimated_value(current_number)
 	var best_rival_id := ""
 	var best_rival_bid := current_bid
@@ -286,7 +288,17 @@ func _try_rival_counter_bid() -> bool:
 
 	current_bid = best_rival_bid
 	current_leader = best_rival_id
-	status_label.text = tr("%s podbija ofertę.") % AIPlayers.get_rival(best_rival_id)["name"]
+	return true
+
+
+## Wywoływane z losowego, wcześniejszego momentu w trakcie odliczania
+## (_process) i z wygaśnięcia czasu (_on_time_expired) — jeśli rywal
+## podbija, runda się NIE kończy, tylko zaczyna nową (gracz dostaje kolejne
+## 20 sekund na reakcję). Zwraca true, jeśli ktoś podbił.
+func _try_rival_counter_bid() -> bool:
+	if not _apply_best_rival_counter_bid():
+		return false
+	status_label.text = tr("%s podbija ofertę.") % AIPlayers.get_rival(current_leader)["name"]
 	_update_labels()
 	_start_bid_timer()
 	return true
@@ -314,9 +326,14 @@ func _on_bid_pressed() -> void:
 	_start_bid_timer()
 
 
+## Rezygnacja to JEDNORAZOWA, natychmiastowa akcja — zgłoszone przez
+## użytkownika: po kliknięciu gracz nie może już podbić, licznik czasu
+## przestaje lecieć, a wynik przelicza się OD RAZU do najwyższej oferty
+## rywali (jeśli w ogóle ktoś chce przebić) — w przeciwieństwie do
+## _try_rival_counter_bid (używanego, gdy czas naturalnie wygaśnie), tu nie
+## ma kolejnej rundy z nowym czasem.
 func _on_resolve_round_pressed() -> void:
-	if _try_rival_counter_bid():
-		return
+	_apply_best_rival_counter_bid()
 	_resolve_auction()
 
 

@@ -77,46 +77,61 @@ func _show_name_entry() -> void:
 
 	ScreenHelpers.make_title(name_section, "Podaj imiona graczy")
 
-	## Każdy gracz dostaje: imię, podgląd awatara, płeć i wariant awatara —
-	## wybór płci/awatara zgłoszony przez użytkownika. Awatary to ta sama
-	## pula 6 gotowych portretów co rywale AI (2 płcie × 3 warianty, patrz
-	## Players.GENDERS/AVATAR_VARIANTS) — nie trzeba generować nowej grafiki,
-	## chyba że kiedyś zabraknie wariantów (wtedy dopisać kolejne prompty w
-	## docs/GRAFIKA_LEONARDO.md §6).
+	## Każdy gracz dostaje: DUŻY podgląd awatara na górze (96×96, było 48×48,
+	## stłoczone w jednym rzędzie z resztą — zgłoszone przez użytkownika, że
+	## wybór powinien być większy i awatar może stać w innym miejscu niż
+	## kontrolki wyboru), a pod nim imię i wybór płci/wariantu. Awatary to ta
+	## sama pula 6 gotowych portretów co rywale AI (2 płcie × 3 warianty,
+	## patrz Players.GENDERS/AVATAR_VARIANTS) — nie trzeba generować nowej
+	## grafiki, chyba że kiedyś zabraknie wariantów (wtedy dopisać kolejne
+	## prompty w docs/GRAFIKA_LEONARDO.md §6).
 	var count := player_count_option.selected + 1
 	for i in count:
-		var row := ScreenHelpers.make_boxed_row(name_section)
+		var box := ScreenHelpers.make_boxed_row(name_section)
+		var column := VBoxContainer.new()
+		column.alignment = BoxContainer.ALIGNMENT_CENTER
+		column.add_theme_constant_override("separation", 8)
+		box.add_child(column)
+
+		var avatar_preview := TextureRect.new()
+		avatar_preview.custom_minimum_size = Vector2(96, 96)
+		avatar_preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		avatar_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		avatar_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		avatar_preview.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		column.add_child(avatar_preview)
+		avatar_previews.append(avatar_preview)
+
+		var name_row := HBoxContainer.new()
+		name_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		column.add_child(name_row)
 
 		var caption := Label.new()
 		caption.text = tr("Gracz %d:") % (i + 1)
-		row.add_child(caption)
+		name_row.add_child(caption)
 
 		var edit := LineEdit.new()
 		edit.placeholder_text = tr("Gracz %d") % (i + 1)
 		edit.custom_minimum_size = Vector2(160, 0)
-		row.add_child(edit)
+		name_row.add_child(edit)
 		name_edits.append(edit)
 
-		var avatar_preview := TextureRect.new()
-		avatar_preview.custom_minimum_size = Vector2(48, 48)
-		avatar_preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		avatar_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		avatar_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		row.add_child(avatar_preview)
-		avatar_previews.append(avatar_preview)
+		var choice_row := HBoxContainer.new()
+		choice_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		column.add_child(choice_row)
 
 		var gender_option := OptionButton.new()
 		for gender in Players.GENDERS:
 			gender_option.add_item(Players.GENDER_NAMES[gender])
 		gender_option.item_selected.connect(_on_avatar_choice_changed.bind(i))
-		row.add_child(gender_option)
+		choice_row.add_child(gender_option)
 		gender_options.append(gender_option)
 
 		var avatar_option := OptionButton.new()
 		for variant in Players.AVATAR_VARIANTS:
 			avatar_option.add_item(Players.AVATAR_VARIANT_NAMES[variant])
 		avatar_option.item_selected.connect(_on_avatar_choice_changed.bind(i))
-		row.add_child(avatar_option)
+		choice_row.add_child(avatar_option)
 		avatar_options.append(avatar_option)
 
 		_update_avatar_preview(i)
