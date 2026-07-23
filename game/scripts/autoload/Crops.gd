@@ -63,7 +63,14 @@ const RIVER_YIELD_MULTIPLIER := 2.0
 const BASE_CROP_PRICE := {"coffee": 50.0, "tobacco": 50.0, "tea": 50.0, "cocoa": 50.0}
 const DAILY_DRIFT_RANGE := 0.02  ## losowe wahanie ceny ±2% dziennie
 
+## Historia ceny do wykresu (StockMarket.gd, PriceChart.gd) — ten sam wzorzec
+## co ShippingCompanies.gd (patrz komentarz tam): jeden punkt na każde
+## wywołanie _on_day_advanced, MAX_HISTORY_POINTS ogranicza pamięć/szerokość
+## wykresu przy bardzo długiej grze (najstarsze punkty wypadają, FIFO).
+const MAX_HISTORY_POINTS := 60
+
 var market_price: Dictionary = {}
+var price_history: Dictionary = {}  ## crop -> Array[float]
 
 
 func _ready() -> void:
@@ -72,6 +79,9 @@ func _ready() -> void:
 
 func reset_new_game() -> void:
 	market_price = BASE_CROP_PRICE.duplicate()
+	price_history.clear()
+	for crop in CROPS:
+		price_history[crop] = [BASE_CROP_PRICE[crop]]
 
 
 func get_transport_cost(warehouse: String, from_city: String) -> int:
@@ -91,3 +101,12 @@ func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
 	for crop in CROPS:
 		var change_percent := randf_range(-DAILY_DRIFT_RANGE, DAILY_DRIFT_RANGE) * weeks
 		market_price[crop] = max(1.0, get_price(crop) * (1.0 + change_percent))
+		_record_history(crop)
+
+
+func _record_history(crop: String) -> void:
+	var history: Array = price_history.get(crop, [])
+	history.append(market_price[crop])
+	if history.size() > MAX_HISTORY_POINTS:
+		history.pop_front()
+	price_history[crop] = history

@@ -268,6 +268,13 @@ Cocoa plant, ready to harvest stage, isolated game sprite, simple flat illustrat
 - Tło: sala giełdy / tablica z kursami
 - Ikona wykresu/świec (UI, nie musi być z Leonardo — można zrobić natywnie w
   silniku), ale tło sceny i karty wydarzeń (krach, hossa) tak
+- ✅ **Wykres cen w czasie — zrobiony i podpięty, natywnie, bez grafiki**
+  (`scripts/ui/PriceChart.gd` — prosty wykres liniowy rysowany przez _draw(),
+  ten sam powód co pinezki/sejfy/ramka menu: Leonardo generowałoby pełną
+  scenę zamiast czystego wykresu). Dwa osobne wykresy w `StockMarket.gd`:
+  kursy 4 linii żeglugowych i ceny 4 towarów, każdy z historią cen
+  (`ShippingCompanies.price_history`/`Crops.price_history`, jeden punkt na
+  każdy skok kalendarza) i legendą kolor+nazwa pod wykresem.
 
 **Prompt:**
 ```

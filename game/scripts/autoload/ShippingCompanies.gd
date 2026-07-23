@@ -13,8 +13,17 @@ const COMPANIES := {
 const STARTING_PRICE := 100.0  ## zgodnie z realiami startu gry (1918, Londyn)
 const DAILY_DRIFT_RANGE := 0.03  ## losowe wahanie kursu ±3% dziennie
 
+## Historia kursu do wykresu (StockMarket.gd, PriceChart.gd) — jeden punkt na
+## każde wywołanie _on_day_advanced (czyli raz na "skok" kalendarza, nie co
+## dzień co do jednego — Koniec tury/podróż/Szkoła sztuki skaczą po kilka-
+## kilkanaście dni na raz), więc gęstość próbkowania naturalnie dopasowuje
+## się do tempa rozgrywki. MAX_HISTORY_POINTS ogranicza pamięć/szerokość
+## wykresu przy bardzo długiej grze — najstarsze punkty wypadają (FIFO).
+const MAX_HISTORY_POINTS := 60
+
 var stock_price: Dictionary = {}
 var shares_owned: Dictionary = {}
+var price_history: Dictionary = {}  ## company_id -> Array[float]
 
 
 func _ready() -> void:
@@ -24,9 +33,11 @@ func _ready() -> void:
 func reset_new_game() -> void:
 	stock_price.clear()
 	shares_owned.clear()
+	price_history.clear()
 	for company_id in COMPANIES.keys():
 		stock_price[company_id] = STARTING_PRICE
 		shares_owned[company_id] = 0
+		price_history[company_id] = [STARTING_PRICE]
 
 
 func boost_from_region_activity(region: String, amount: float) -> void:
@@ -65,3 +76,12 @@ func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
 	for company_id in COMPANIES.keys():
 		var change_percent := randf_range(-DAILY_DRIFT_RANGE, DAILY_DRIFT_RANGE) * weeks
 		stock_price[company_id] = max(1.0, get_price(company_id) * (1.0 + change_percent))
+		_record_history(company_id)
+
+
+func _record_history(company_id: String) -> void:
+	var history: Array = price_history.get(company_id, [])
+	history.append(stock_price[company_id])
+	if history.size() > MAX_HISTORY_POINTS:
+		history.pop_front()
+	price_history[company_id] = history

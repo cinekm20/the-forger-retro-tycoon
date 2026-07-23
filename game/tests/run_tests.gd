@@ -45,6 +45,7 @@ func _ready() -> void:
 	_test_plant_tile_requires_ownership()
 	_test_yearly_report_populated_on_new_year()
 	_test_players_gender_and_avatar_selection()
+	_test_price_history_for_charts()
 
 	print("\n=== Wynik: %d/%d testów przeszło ===" % [total - failures, total])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -500,3 +501,32 @@ func _test_players_gender_and_avatar_selection() -> void:
 	Players.set_player_avatar(1, "nieznany_wariant")
 	_assert(Players.player_genders[1] == "female", "nieprawidłowa płeć nie nadpisuje poprzedniego wyboru")
 	_assert(Players.player_avatar_variants[1] == "boa", "nieprawidłowy wariant nie nadpisuje poprzedniego wyboru")
+
+
+func _test_price_history_for_charts() -> void:
+	print("-- ShippingCompanies/Crops: historia cen do wykresu na Giełdzie --")
+	Calendar.reset_new_game()
+	ShippingCompanies.reset_new_game()
+	Crops.reset_new_game()
+
+	_assert(ShippingCompanies.price_history["lloyd"].size() == 1, "historia kursu Lloyd zaczyna się z 1 punktem (cena startowa)")
+	_assert(ShippingCompanies.price_history["lloyd"][0] == ShippingCompanies.STARTING_PRICE, "pierwszy punkt to STARTING_PRICE")
+	_assert(Crops.price_history["coffee"].size() == 1, "historia ceny kawy zaczyna się z 1 punktem (cena bazowa)")
+
+	## Calendar.advance_days (nie wywoływanie _on_day_advanced bezpośrednio) —
+	## tak samo jak reszta gry, przez sygnał Calendar.day_advanced, pod który
+	## podpięte są ShippingCompanies i Crops.
+	Calendar.advance_days(7)
+	_assert(ShippingCompanies.price_history["lloyd"].size() == 2, "kolejny skok dni dopisuje kolejny punkt historii (Lloyd)")
+	_assert(Crops.price_history["coffee"].size() == 2, "kolejny skok dni dopisuje kolejny punkt historii (kawa)")
+	_assert(ShippingCompanies.price_history["lloyd"][1] == ShippingCompanies.get_price("lloyd"), "ostatni punkt historii = aktualna cena")
+
+	## MAX_HISTORY_POINTS ogranicza długość historii (najstarsze punkty
+	## wypadają, FIFO) — bez tego pamięć/szerokość wykresu rosłaby bez końca
+	## w bardzo długiej grze.
+	for i in ShippingCompanies.MAX_HISTORY_POINTS + 10:
+		Calendar.advance_days(7)
+	_assert(
+		ShippingCompanies.price_history["lloyd"].size() == ShippingCompanies.MAX_HISTORY_POINTS,
+		"historia kursu nie rośnie w nieskończoność, zatrzymuje się na MAX_HISTORY_POINTS",
+	)

@@ -20,8 +20,10 @@ func save_game() -> void:
 		"days_in_debt": Economy.days_in_debt,
 		"shipping_prices": ShippingCompanies.stock_price,
 		"shipping_shares": ShippingCompanies.shares_owned,
+		"shipping_price_history": ShippingCompanies.price_history,
 		"plantations": PlayerPlantations.plantations,
 		"crop_prices": Crops.market_price,
+		"crop_price_history": Crops.price_history,
 		"forward_contracts": ForwardContracts.active_contracts,
 		"rivals": AIPlayers.rivals,
 		"current_city": Travel.current_city,
@@ -62,9 +64,20 @@ func load_game() -> void:
 	Paintings.win_threshold = data.get("win_threshold", Paintings.CATALOG.size())
 	ShippingCompanies.stock_price = data.get("shipping_prices", {})
 	ShippingCompanies.shares_owned = data.get("shipping_shares", {})
+	## Domyślnie: jeden punkt na bieżącej cenie — dla zapisów sprzed dodania
+	## wykresu (patrz ShippingCompanies.reset_new_game, ten sam wzorzec
+	## seedowania historii).
+	var default_shipping_history := {}
+	for company_id in ShippingCompanies.COMPANIES.keys():
+		default_shipping_history[company_id] = [ShippingCompanies.get_price(company_id)]
+	ShippingCompanies.price_history = data.get("shipping_price_history", default_shipping_history)
 	var loaded_plantations: Array = data.get("plantations", [])
 	PlayerPlantations.plantations.assign(loaded_plantations)
 	Crops.market_price = data.get("crop_prices", {})
+	var default_crop_history := {}
+	for crop in Crops.CROPS:
+		default_crop_history[crop] = [Crops.get_price(crop)]
+	Crops.price_history = data.get("crop_price_history", default_crop_history)
 	var loaded_contracts: Array = data.get("forward_contracts", [])
 	ForwardContracts.active_contracts.assign(loaded_contracts)
 	var loaded_rivals: Array = data.get("rivals", [])
