@@ -41,6 +41,8 @@ func _ready() -> void:
 	_test_auctions_cap_turn_advance()
 	_test_ship_and_sell_all_across_plantations()
 	_test_find_plantation_index()
+	_test_plantation_grows_multiple_crops_at_once()
+	_test_plant_tile_requires_ownership()
 
 	print("\n=== Wynik: %d/%d testów przeszło ===" % [total - failures, total])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -99,16 +101,16 @@ func _test_harvest_requires_elapsed_time() -> void:
 	print("-- PlayerPlantations: zbiory wymagają upływu czasu (regresja na naprawiony exploit) --")
 	PlayerPlantations.reset_new_game()
 	Calendar.reset_new_game()
+	Economy.reset_new_game()
 	var idx := PlayerPlantations.found_plantation("richmond")
 	PlayerPlantations.plantations[idx]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
-	PlayerPlantations.set_crop(idx, "tobacco")
-	PlayerPlantations.hire_workers(idx, 500)
-	Economy.reset_new_game()
 	PlayerPlantations.buy_tile(idx, 0)
+	PlayerPlantations.plant_tile(idx, 0, "tobacco")
+	PlayerPlantations.hire_workers(idx, 500)
 
 	Calendar.advance_days(30)
-	var first_harvest := PlayerPlantations.harvest(idx)
-	var second_harvest := PlayerPlantations.harvest(idx)  # bez upływu czasu od pierwszych zbiorów
+	var first_harvest: int = PlayerPlantations.harvest(idx).get("tobacco", 0)
+	var second_harvest: int = PlayerPlantations.harvest(idx).get("tobacco", 0)  # bez upływu czasu od pierwszych zbiorów
 
 	_assert(first_harvest > 0, "pierwsze zbiory po 30 dniach dają plon > 0")
 	_assert(second_harvest == 0, "powtórne zbiory BEZ upływu czasu dają 0 (exploit z sesji naprawiony)")
@@ -120,28 +122,60 @@ func _test_harvest_scales_with_time() -> void:
 	# sezonowy), żeby sezonowość nie zaburzała porównania.
 	PlayerPlantations.reset_new_game()
 	Calendar.reset_new_game()
+	Economy.reset_new_game()
 	var idx := PlayerPlantations.found_plantation("richmond")
 	PlayerPlantations.plantations[idx]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
-	PlayerPlantations.set_crop(idx, "tobacco")
-	PlayerPlantations.hire_workers(idx, 500)
-	Economy.reset_new_game()
 	PlayerPlantations.buy_tile(idx, 0)
+	PlayerPlantations.plant_tile(idx, 0, "tobacco")
+	PlayerPlantations.hire_workers(idx, 500)
 	Calendar.advance_days(10)
-	var harvest_10_days := PlayerPlantations.harvest(idx)
+	var harvest_10_days: int = PlayerPlantations.harvest(idx).get("tobacco", 0)
 
 	PlayerPlantations.reset_new_game()
 	Calendar.reset_new_game()
+	Economy.reset_new_game()
 	idx = PlayerPlantations.found_plantation("richmond")
 	PlayerPlantations.plantations[idx]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
-	PlayerPlantations.set_crop(idx, "tobacco")
-	PlayerPlantations.hire_workers(idx, 500)
-	Economy.reset_new_game()
 	PlayerPlantations.buy_tile(idx, 0)
+	PlayerPlantations.plant_tile(idx, 0, "tobacco")
+	PlayerPlantations.hire_workers(idx, 500)
 	Calendar.advance_days(20)
-	var harvest_20_days := PlayerPlantations.harvest(idx)
+	var harvest_20_days: int = PlayerPlantations.harvest(idx).get("tobacco", 0)
 
 	_assert(harvest_20_days > harvest_10_days, "20 dni upraw daje więcej plonu niż 10 dni (ten sam miesiąc)")
 	_assert(absi(harvest_20_days - harvest_10_days * 2) <= 2, "plon skaluje się z grubsza liniowo z czasem (20d ≈ 2×10d)")
+
+
+func _test_plantation_grows_multiple_crops_at_once() -> void:
+	print("-- PlayerPlantations: jedna plantacja uprawia kilka różnych roślin naraz --")
+	PlayerPlantations.reset_new_game()
+	Calendar.reset_new_game()
+	Economy.reset_new_game()
+	var idx := PlayerPlantations.found_plantation("richmond")
+	PlayerPlantations.plantations[idx]["river"].fill(false)
+	PlayerPlantations.hire_workers(idx, 500)
+
+	PlayerPlantations.buy_tile(idx, 0)
+	PlayerPlantations.buy_tile(idx, 1)
+	PlayerPlantations.plant_tile(idx, 0, "tobacco")
+	PlayerPlantations.plant_tile(idx, 1, "coffee")
+
+	_assert(PlayerPlantations.get_planted_tile_count(idx, "tobacco") == 1, "1 pole obsiane tytoniem")
+	_assert(PlayerPlantations.get_planted_tile_count(idx, "coffee") == 1, "1 pole obsiane kawą")
+	_assert(PlayerPlantations.get_planted_tile_count(idx, "tea") == 0, "0 pól obsianych herbatą")
+
+	Calendar.advance_days(30)
+	var amounts := PlayerPlantations.harvest(idx)
+	_assert(amounts.get("tobacco", 0) > 0, "zbiory obejmują tytoń")
+	_assert(amounts.get("coffee", 0) > 0, "zbiory obejmują kawę JEDNOCZEŚNIE z tytoniem")
+
+
+func _test_plant_tile_requires_ownership() -> void:
+	print("-- PlayerPlantations: plant_tile wymaga wcześniejszego kupienia pola --")
+	PlayerPlantations.reset_new_game()
+	var idx := PlayerPlantations.found_plantation("richmond")
+	PlayerPlantations.plantations[idx]["river"].fill(false)
+	_assert(not PlayerPlantations.plant_tile(idx, 0, "tobacco"), "nie da się zasadzić na polu, którego gracz jeszcze nie kupił")
 
 
 func _test_ship_and_sell_all_across_plantations() -> void:
@@ -151,16 +185,14 @@ func _test_ship_and_sell_all_across_plantations() -> void:
 
 	var idx_a := PlayerPlantations.found_plantation("richmond")
 	var idx_b := PlayerPlantations.found_plantation("mombasa")
-	PlayerPlantations.plantations[idx_a]["crop"] = "tobacco"
-	PlayerPlantations.plantations[idx_a]["stored_goods"] = 10
-	PlayerPlantations.plantations[idx_b]["crop"] = "tobacco"
-	PlayerPlantations.plantations[idx_b]["stored_goods"] = 15
+	PlayerPlantations.plantations[idx_a]["stored_goods"] = {"tobacco": 10}
+	PlayerPlantations.plantations[idx_b]["stored_goods"] = {"tobacco": 15}
 
 	var sold := PlayerPlantations.ship_and_sell_all("tobacco", "new_york")
 
 	_assert(sold == 25, "sprzedano łącznie 10+15=25 jednostek z obu plantacji")
-	_assert(int(PlayerPlantations.plantations[idx_a]["stored_goods"]) == 0, "magazyn plantacji A wyzerowany po sprzedaży")
-	_assert(int(PlayerPlantations.plantations[idx_b]["stored_goods"]) == 0, "magazyn plantacji B wyzerowany po sprzedaży")
+	_assert(int(PlayerPlantations.plantations[idx_a]["stored_goods"].get("tobacco", 0)) == 0, "magazyn plantacji A wyzerowany po sprzedaży")
+	_assert(int(PlayerPlantations.plantations[idx_b]["stored_goods"].get("tobacco", 0)) == 0, "magazyn plantacji B wyzerowany po sprzedaży")
 
 
 func _test_find_plantation_index() -> void:

@@ -46,13 +46,19 @@ func found_plantation(city_id: String) -> int:
 	var grid: Array[bool] = []
 	grid.resize(GRID_SIZE * GRID_SIZE)
 	grid.fill(false)
+	## tile_crops: uprawa PER POLE, nie jedna uprawa całej plantacji (zgłoszone
+	## przez użytkownika: jedna plantacja ma jednocześnie uprawiać wszystkie
+	## możliwe rośliny) — "" = pole kupione, ale jeszcze niezasiane.
+	var tile_crops: Array[String] = []
+	tile_crops.resize(GRID_SIZE * GRID_SIZE)
+	tile_crops.fill("")
 	plantations.append({
 		"city": city_id,
 		"grid": grid,
 		"river": _generate_river(),
-		"crop": "",
+		"tile_crops": tile_crops,
 		"workers": 0,
-		"stored_goods": 0,
+		"stored_goods": {},  ## uprawa -> ilość w magazynie (osobno per uprawa)
 		"last_harvest_day": Calendar.current_day,
 	})
 	return plantations.size() - 1
@@ -111,13 +117,26 @@ func buy_tile(plantation_index: int, tile_index: int) -> bool:
 	return true
 
 
-## Zmiana uprawy czyści niesprzedany zapas — inaczej stary towar zostałby po
-## cichu "przemianowany" na nową uprawę przy kolejnym get_total_stored/sell.
-func set_crop(plantation_index: int, crop: String) -> void:
+## Sadzi (albo zmienia) uprawę na WŁASNYM, niebędącym rzeką polu — każde pole
+## plantacji może mieć inną uprawę, więc jedna plantacja może jednocześnie
+## uprawiać wszystkie 4 rodzaje towaru naraz (zgłoszone przez użytkownika).
+## Zwraca false, jeśli pole nie jest (jeszcze) własnością gracza.
+func plant_tile(plantation_index: int, tile_index: int, crop: String) -> bool:
 	var plantation: Dictionary = plantations[plantation_index]
-	if plantation["crop"] != crop:
-		plantation["stored_goods"] = 0
-	plantation["crop"] = crop
+	if not plantation["grid"][tile_index]:
+		return false
+	plantation["tile_crops"][tile_index] = crop
+	return true
+
+
+## Ile pól tej plantacji jest obsianych daną uprawą — patrz legenda w
+## Plantation.gd (zgłoszone przez użytkownika).
+func get_planted_tile_count(plantation_index: int, crop: String) -> int:
+	var count := 0
+	for tile_crop in plantations[plantation_index]["tile_crops"]:
+		if tile_crop == crop:
+			count += 1
+	return count
 
 
 ## Zmienia liczbę robotników. Sam akt zatrudnienia nic nie kosztuje — koszt to
@@ -134,103 +153,129 @@ func get_owned_tile_count(plantation_index: int) -> int:
 	return count
 
 
-func get_river_adjacent_owned_count(plantation_index: int) -> int:
-	var plantation: Dictionary = plantations[plantation_index]
-	var count := 0
-	for i in plantation["grid"].size():
-		if plantation["grid"][i] and is_adjacent_to_river(plantation_index, i):
-			count += 1
-	return count
-
-
 const REFERENCE_PERIOD_DAYS := 30.0  ## REFERENCE_YIELD w Crops.gd to plon za 30 dni
 
 ## Plon skalowany rzeczywistym czasem od ostatnich zbiorów (patrz harvest())
 ## — reference w Crops.gd to plon za REFERENCE_PERIOD_DAYS, więc krótszy/dłuższy
-## odstęp od ostatnich zbiorów daje proporcjonalnie mniej/więcej.
-func calculate_harvest(plantation_index: int) -> int:
+## odstęp od ostatnich zbiorów daje proporcjonalnie mniej/więcej. Plantacja
+## może uprawiać kilka różnych roślin naraz (patrz plant_tile), więc plon
+## liczy się OSOBNO dla każdej uprawy obecnej na polach, sumując tylko jej
+## własne pola (robotnicy/czas/sezon są wspólne dla całej plantacji, ale
+## liczba i rodzaj pól — już nie). Zwraca słownik uprawa -> ilość (tylko
+## uprawy z plonem > 0).
+func calculate_harvest(plantation_index: int) -> Dictionary:
 	var plantation: Dictionary = plantations[plantation_index]
-	var crop: String = plantation["crop"]
-	if crop == "":
-		return 0
 	var days_since_harvest: int = Calendar.current_day - int(plantation["last_harvest_day"])
+	var result: Dictionary = {}
 	if days_since_harvest <= 0:
-		return 0
-	var reference: int = Crops.get_reference_yield(plantation["city"], crop)
-	if reference == 0:
-		return 0
+		return result
 	var worker_factor: float = float(plantation["workers"]) / 500.0
-	var river_tiles := get_river_adjacent_owned_count(plantation_index)
-	var normal_tiles := get_owned_tile_count(plantation_index) - river_tiles
-	var effective_tiles := normal_tiles + river_tiles * Crops.RIVER_YIELD_MULTIPLIER
-	var tile_factor: float = effective_tiles / REFERENCE_TILE_COUNT
 	var seasonal_factor: float = Crops.SEASONAL_YIELD_FACTOR[Calendar.get_month()]
 	var time_factor: float = days_since_harvest / REFERENCE_PERIOD_DAYS
-	return int(reference * worker_factor * tile_factor * seasonal_factor * time_factor)
+	var tile_crops: Array = plantation["tile_crops"]
+	for crop in Crops.CROPS:
+		var normal_tiles := 0
+		var river_tiles := 0
+		for i in tile_crops.size():
+			if tile_crops[i] != crop:
+				continue
+			if is_adjacent_to_river(plantation_index, i):
+				river_tiles += 1
+			else:
+				normal_tiles += 1
+		if normal_tiles == 0 and river_tiles == 0:
+			continue
+		var reference: int = Crops.get_reference_yield(plantation["city"], crop)
+		if reference == 0:
+			continue
+		var effective_tiles: float = normal_tiles + river_tiles * Crops.RIVER_YIELD_MULTIPLIER
+		var tile_factor: float = effective_tiles / REFERENCE_TILE_COUNT
+		var amount := int(reference * worker_factor * tile_factor * seasonal_factor * time_factor)
+		if amount > 0:
+			result[crop] = amount
+	return result
 
 
-## Zbiera plon narosły od ostatnich zbiorów i resetuje licznik dni — kolejne
-## wywołanie bez upływu czasu (Calendar.advance_days) zwróci 0.
-func harvest(plantation_index: int) -> int:
-	var amount := calculate_harvest(plantation_index)
+## Zbiera plon narosły od ostatnich zbiorów (osobno per uprawa, patrz
+## calculate_harvest) i resetuje licznik dni — kolejne wywołanie bez upływu
+## czasu (Calendar.advance_days) zwróci pusty słownik.
+func harvest(plantation_index: int) -> Dictionary:
+	var amounts := calculate_harvest(plantation_index)
 	var plantation: Dictionary = plantations[plantation_index]
-	plantation["stored_goods"] += amount
+	var stored: Dictionary = plantation["stored_goods"]
+	for crop in amounts:
+		stored[crop] = int(stored.get(crop, 0)) + amounts[crop]
 	plantation["last_harvest_day"] = Calendar.current_day
-	return amount
+	return amounts
 
 
-## Wysyła zebrany towar do magazynu i sprzedaje go po aktualnej cenie rynkowej
-## (Crops.get_price) — podbija też odpowiednią linię żeglugową
-## (docs/MECHANIKI_EKONOMICZNE.md pkt. 7).
-func ship_and_sell(plantation_index: int, warehouse: String) -> int:
+## Sprzedaje zapas JEDNEJ uprawy z JEDNEJ plantacji po aktualnej cenie
+## rynkowej (Crops.get_price) — podbija też odpowiednią linię żeglugową
+## (docs/MECHANIKI_EKONOMICZNE.md pkt. 7). Współdzielone przez ship_and_sell
+## (cała plantacja, wszystkie uprawy naraz) i ship_and_sell_all (jedna
+## uprawa, wszystkie plantacje naraz — patrz Warehouse.gd).
+func _ship_and_sell_crop(plantation_index: int, crop: String, warehouse: String) -> int:
 	var plantation: Dictionary = plantations[plantation_index]
-	var amount: int = plantation["stored_goods"]
+	var stored: Dictionary = plantation["stored_goods"]
+	var amount: int = int(stored.get(crop, 0))
 	if amount <= 0:
 		return 0
 	var transport_cost := Crops.get_transport_cost(warehouse, plantation["city"])
 	if transport_cost < 0:
 		return 0
 	Economy.player_money -= transport_cost * amount
-	Economy.earn(amount * Crops.get_price(plantation["crop"]))
-	plantation["stored_goods"] = 0
+	Economy.earn(amount * Crops.get_price(crop))
+	stored[crop] = 0
 
 	var region: String = Cities.CITIES[plantation["city"]]["region"]
 	ShippingCompanies.boost_from_region_activity(region, amount * 0.01)
 	return amount
 
 
-## Jak ship_and_sell, ale dla WSZYSTKICH plantacji danej uprawy naraz (patrz
-## Spichlerz/Warehouse.gd — pokazuje zsumowany zapas ze wszystkich plantacji,
-## więc sprzedaż też musi obsłużyć wszystkie na raz, każdą z jej WŁASNYM
-## kosztem transportu, bo ten zależy od miasta danej plantacji).
+## Sprzedaje WSZYSTKIE zapasy JEDNEJ plantacji naraz (wszystkie uprawy,
+## które akurat ma w magazynie) — przycisk "Wyślij i sprzedaj" w
+## Plantation.gd.
+func ship_and_sell(plantation_index: int, warehouse: String) -> int:
+	var stored: Dictionary = plantations[plantation_index]["stored_goods"]
+	var total := 0
+	for crop in stored.keys().duplicate():
+		total += _ship_and_sell_crop(plantation_index, crop, warehouse)
+	return total
+
+
+## Jak ship_and_sell, ale dla JEDNEJ uprawy ze WSZYSTKICH plantacji naraz
+## (patrz Spichlerz/Warehouse.gd — pokazuje zsumowany zapas danej uprawy ze
+## wszystkich plantacji, więc sprzedaż też musi obsłużyć wszystkie na raz,
+## każdą z jej WŁASNYM kosztem transportu, bo ten zależy od miasta danej
+## plantacji).
 func ship_and_sell_all(crop: String, warehouse: String) -> int:
 	var total := 0
 	for i in plantations.size():
-		if plantations[i]["crop"] == crop:
-			total += ship_and_sell(i, warehouse)
+		total += _ship_and_sell_crop(i, crop, warehouse)
 	return total
 
 
 ## Suma zebranego towaru danej uprawy w magazynach wszystkich plantacji gracza
-## (uproszczenie: "magazyn" = suma stored_goods plantacji uprawiających dany
-## towar — bez modelowania osobnych magazynów w Nowym Jorku/Londynie).
+## (uproszczenie: "magazyn" = suma stored_goods plantacji, które akurat mają
+## zapas tej uprawy — bez modelowania osobnych magazynów w Nowym Jorku/Londynie).
 func get_total_stored(crop: String) -> int:
 	var total := 0
 	for plantation in plantations:
-		if plantation["crop"] == crop:
-			total += plantation["stored_goods"]
+		total += int(plantation["stored_goods"].get(crop, 0))
 	return total
 
 
-## Zużywa zebrany towar (np. na poczet kontraktu terminowego) z plantacji
-## uprawiających dany towar, w kolejności iteracji.
+## Zużywa zebrany towar (np. na poczet kontraktu terminowego) z plantacji,
+## które mają zapas danej uprawy, w kolejności iteracji.
 func consume_stored(crop: String, amount: int) -> void:
 	var remaining := amount
 	for plantation in plantations:
 		if remaining <= 0:
 			break
-		if plantation["crop"] != crop:
+		var stored: Dictionary = plantation["stored_goods"]
+		var available: int = int(stored.get(crop, 0))
+		if available <= 0:
 			continue
-		var take: int = min(remaining, int(plantation["stored_goods"]))
-		plantation["stored_goods"] -= take
+		var take: int = min(remaining, available)
+		stored[crop] = available - take
 		remaining -= take

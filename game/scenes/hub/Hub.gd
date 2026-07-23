@@ -212,9 +212,12 @@ func _update_turn_summary() -> void:
 
 	var plantation_index := PlayerPlantations.find_plantation_index(Travel.current_city)
 	if not Travel.is_traveling() and plantation_index != -1:
-		var ready_amount := PlayerPlantations.calculate_harvest(plantation_index)
-		if ready_amount > 0:
-			lines.append(tr("Gotowe do zbioru: %d jednostek.") % ready_amount)
+		var ready_amounts := PlayerPlantations.calculate_harvest(plantation_index)
+		var ready_total := 0
+		for amount in ready_amounts.values():
+			ready_total += amount
+		if ready_total > 0:
+			lines.append(tr("Gotowe do zbioru: %d jednostek.") % ready_total)
 
 	turn_summary_container.visible = not lines.is_empty()
 	turn_summary_label.text = "\n".join(lines)

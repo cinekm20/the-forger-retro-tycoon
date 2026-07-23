@@ -5,10 +5,10 @@ extends Control
 
 const PlantationTileIconScript := preload("res://scripts/ui/PlantationTileIcon.gd")
 
-var selected_city: String = ""
 var plantation_index: int = -1
 
 var grid_container: GridContainer
+var legend_label: Label
 var info_label: Label
 var harvest_status_label: Label
 var crop_option: OptionButton
@@ -43,12 +43,14 @@ func _ready() -> void:
 	ScreenHelpers.make_title(right_column, "Plantacje")
 	ScreenHelpers.make_turn_indicator(right_column)
 
-	var city_option := OptionButton.new()
-	for city_id in Cities.get_plantation_cities():
-		city_option.add_item(Cities.get_city_name(city_id))
-		city_option.set_item_metadata(city_option.item_count - 1, city_id)
-	city_option.item_selected.connect(_on_city_selected)
-	right_column.add_child(city_option)
+	## Bez wyboru miasta z listy — zgłoszone przez użytkownika: stojąc na
+	## plantacji w jednym mieście nie powinno dać się zdalnie sadzić na
+	## plantacji w INNYM mieście. Ekran zawsze zarządza plantacją miasta, w
+	## którym gracz aktualnie się znajduje (Hub i tak pokazuje "Plantacje"
+	## tylko w miastach typu plantacyjnego, patrz
+	## Hub.LOCATION_GATED_DESTINATIONS, więc Travel.current_city zawsze jest
+	## poprawnym miastem plantacyjnym, kiedy ten ekran jest w ogóle osiągalny).
+	ScreenHelpers.make_label(right_column, Cities.get_city_name(Travel.current_city))
 
 	info_label = Label.new()
 	info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -87,13 +89,28 @@ func _ready() -> void:
 	grid_container.add_theme_constant_override("v_separation", 2)
 	grid_frame.add_child(grid_container)
 
+	## Legenda: ile pól jest obsianych którą uprawą — zgłoszone przez
+	## użytkownika. ZAWSZE dokładnie 4 wiersze (po jednym na każdą z 4 upraw,
+	## nawet przy 0 pól), tak samo jak info_label niżej — stała liczba
+	## wierszy niezależnie od wartości, żeby nic nie "skakało" przy sadzeniu.
+	legend_label = ScreenHelpers.make_label(left_column, "")
+	legend_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	legend_label.custom_minimum_size = Vector2(300, 100)
+
+	## Jedna plantacja może jednocześnie uprawiać WSZYSTKIE 4 rodzaje towaru
+	## naraz (zgłoszone przez użytkownika) — każde pole ma WŁASNĄ uprawę
+	## (patrz PlayerPlantations.plant_tile), więc to nie jest już "uprawa
+	## całej plantacji". Ten dropdown wybiera tylko, KTÓRĄ uprawę zasadzić
+	## przy najbliższym dotknięciu gołego (kupionego, ale niezasianego) pola.
 	var crop_row := HBoxContainer.new()
 	crop_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	right_column.add_child(crop_row)
+	var crop_caption := Label.new()
+	crop_caption.text = tr("Sadzić:")
+	crop_row.add_child(crop_caption)
 	crop_option = OptionButton.new()
 	for crop in Crops.CROPS:
 		crop_option.add_item(Crops.CROP_NAMES[crop])
-	crop_option.item_selected.connect(_on_crop_selected)
 	crop_row.add_child(crop_option)
 
 	var worker_row := HBoxContainer.new()
@@ -133,42 +150,41 @@ func _ready() -> void:
 	ScreenHelpers.make_button(right_column, "Spichlerz »", func(): SceneRouter.goto_scene(SceneRouter.WAREHOUSE))
 	ScreenHelpers.make_back_button(right_column)
 
-	if Cities.get_plantation_cities().size() > 0:
-		_on_city_selected(0)
+	_setup_current_plantation()
 
 
-func _on_city_selected(index: int) -> void:
-	selected_city = Cities.get_plantation_cities()[index]
-	plantation_index = PlayerPlantations.find_plantation_index(selected_city)
+func _setup_current_plantation() -> void:
+	var current_city := Travel.current_city
+	plantation_index = PlayerPlantations.find_plantation_index(current_city)
 	if plantation_index == -1:
-		plantation_index = PlayerPlantations.found_plantation(selected_city)
+		plantation_index = PlayerPlantations.found_plantation(current_city)
 
-	## Bez tego pola "Robotnicy"/"Uprawa" zawsze pokazywały wartość domyślną
-	## (0 / pierwsza uprawa) przy wejściu na ten ekran, niezależnie od tego,
-	## co faktycznie zapisano dla tej plantacji — tester zgłosił, że po
-	## powrocie z Hub liczba robotników "znowu wynosi 0", mimo że w danych
-	## gry nadal była zapamiętana poprawnie. set_value_no_signal/select() nie
-	## wywołują value_changed/item_selected, więc nie nadpisują tego, co
-	## właśnie odczytaliśmy.
+	## Bez tego pole "Robotnicy" zawsze pokazywało wartość domyślną (0) przy
+	## wejściu na ten ekran, niezależnie od tego, co faktycznie zapisano dla
+	## tej plantacji — tester zgłosił, że po powrocie z Hub liczba
+	## robotników "znowu wynosi 0", mimo że w danych gry nadal była
+	## zapamiętana poprawnie. set_value_no_signal nie wywołuje
+	## value_changed, więc nie nadpisuje tego, co właśnie odczytaliśmy.
 	var plantation: Dictionary = PlayerPlantations.plantations[plantation_index]
 	worker_spin.set_value_no_signal(plantation["workers"])
-	var crop_index: int = Crops.CROPS.find(plantation["crop"])
-	if crop_index != -1:
-		crop_option.select(crop_index)
 
 	harvest_status_label.text = ""
 	_rebuild_grid()
 	_update_info()
 
 
-## Kafelki rysowane jako ikonki (PlantationTileIcon) zamiast tekstu ~/+/✓/✓+
-## — nie wymaga już osobnej legendy tłumaczącej symbole (zgłoszone przez
-## użytkownika). btn.flat = true: zwykłe tło/ramka przycisku wyłączone,
-## widoczna jest tylko ikonka wypełniająca cały kafelek.
+## Kafelki rysowane jako ikonki (PlantationTileIcon) zamiast tekstu ~/+/✓/✓+.
+## btn.flat = true: zwykłe tło/ramka przycisku wyłączone, widoczna jest tylko
+## ikonka wypełniająca cały kafelek. Trzy klikalne stany: "+" (kup pole),
+## goła ziemia (kup, ale jeszcze nie zasiane — dotknij, żeby zasadzić
+## wybraną w dropdownie uprawę) i rzeka/obsiane pole (nieklikalne). Jedna
+## plantacja może mieć różne uprawy na różnych polach naraz (zgłoszone przez
+## użytkownika) — kolor/ikonka zależy od uprawy TEGO konkretnego pola.
 func _rebuild_grid() -> void:
 	for child in grid_container.get_children():
 		child.queue_free()
 	var plantation: Dictionary = PlayerPlantations.plantations[plantation_index]
+	var tile_crops: Array = plantation["tile_crops"]
 	for tile_index in plantation["grid"].size():
 		var btn := Button.new()
 		btn.custom_minimum_size = Vector2(22, 22)
@@ -183,12 +199,14 @@ func _rebuild_grid() -> void:
 			btn.disabled = true
 		elif plantation["grid"][tile_index]:
 			icon.river_adjacent = PlayerPlantations.is_adjacent_to_river(plantation_index, tile_index)
-			if plantation["crop"] != "":
+			var tile_crop: String = tile_crops[tile_index]
+			if tile_crop != "":
 				icon.kind = PlantationTileIconScript.Kind.CROP
-				icon.crop = plantation["crop"]
+				icon.crop = tile_crop
+				btn.disabled = true
 			else:
 				icon.kind = PlantationTileIconScript.Kind.SOIL
-			btn.disabled = true
+				btn.pressed.connect(_on_plant_tile_pressed.bind(tile_index))
 		else:
 			icon.kind = PlantationTileIconScript.Kind.VACANT
 			btn.pressed.connect(_on_tile_pressed.bind(tile_index))
@@ -203,9 +221,11 @@ func _on_tile_pressed(tile_index: int) -> void:
 		_update_info()
 
 
-func _on_crop_selected(index: int) -> void:
-	PlayerPlantations.set_crop(plantation_index, Crops.CROPS[index])
-	_update_info()
+func _on_plant_tile_pressed(tile_index: int) -> void:
+	var crop: String = Crops.CROPS[crop_option.selected]
+	if PlayerPlantations.plant_tile(plantation_index, tile_index, crop):
+		_rebuild_grid()
+		_update_info()
 
 
 func _on_workers_changed(value: float) -> void:
@@ -218,9 +238,15 @@ func _on_harvest_pressed() -> void:
 	## więc kliknięcie wyglądało, jakby nic się nie działo (zgłoszone przez
 	## testera), nawet gdy zbiory faktycznie się liczyły (albo świadomie
 	## wynosiły 0, bo od poprzednich zbiorów nie minął jeszcze żaden dzień).
-	var amount := PlayerPlantations.harvest(plantation_index)
-	if amount > 0:
-		harvest_status_label.text = tr("Zebrano: %d jednostek.") % amount
+	## harvest() zwraca teraz słownik uprawa->ilość (jedna plantacja może
+	## zbierać kilka różnych upraw naraz) — status pokazuje sumę, żeby
+	## komunikat zostawał zawsze tej samej, krótkiej postaci.
+	var amounts := PlayerPlantations.harvest(plantation_index)
+	var total := 0
+	for amount in amounts.values():
+		total += amount
+	if total > 0:
+		harvest_status_label.text = tr("Zebrano: %d jednostek.") % total
 	else:
 		harvest_status_label.text = tr("Nic do zebrania — brak uprawy, robotników albo nie minął jeszcze czas od ostatnich zbiorów.")
 	_update_info()
@@ -234,21 +260,31 @@ func _on_sell_pressed() -> void:
 ## CZTERY krótkie, stałe wiersze (każdy z osobna, sam jeden, zawsze mieści
 ## się w custom_minimum_size.x bez zawijania) zamiast jednego długiego
 ## zdania z autowrap — długość samej TREŚCI zmieniała liczbę zawiniętych
-## linii (np. nazwa uprawy: "Kawa" vs "Herbata", albo duża liczba
-## robotników/zapasów), więc wysokość etykiety się zmieniała i przesuwała
-## wszystko poniżej niej w tej samej kolumnie (zgłoszone przez użytkownika:
-## najpierw przy zmianie uprawy, potem — bo "Robotnicy: %d | Zboże w
-## magazynie: %d" połączone w jednej linii i tak potrafiło przekroczyć
-## szerokość przy dużych liczbach — przy zmianie liczby robotników).
-## Robotnicy i zapasy mają teraz OSOBNE wiersze, żeby żadna z tych dwóch
-## rosnących liczb nie musiała dzielić linii z drugą, ryzykując zawinięcie.
+## linii, więc wysokość etykiety się zmieniała i przesuwała wszystko
+## poniżej niej w tej samej kolumnie (zgłoszone przez użytkownika). "Uprawa"
+## zniknęła z tej listy (jedna plantacja ma teraz WIELE upraw naraz, patrz
+## _update_legend) — zamiast niej "Pola" ma teraz własny, osobny wiersz.
 func _update_info() -> void:
 	var plantation: Dictionary = PlayerPlantations.plantations[plantation_index]
-	var crop: String = plantation["crop"]
-	var crop_name: String = Crops.CROP_NAMES.get(crop, tr("brak")) if crop != "" else tr("brak")
+	var stored: Dictionary = plantation["stored_goods"]
+	var total_stored := 0
+	for amount in stored.values():
+		total_stored += int(amount)
 	info_label.text = "%s\n%s\n%s\n%s" % [
 		tr("Gotówka: %.0f M") % Economy.player_money,
-		tr("Pola: %d | Uprawa: %s") % [PlayerPlantations.get_owned_tile_count(plantation_index), crop_name],
+		tr("Pola: %d") % PlayerPlantations.get_owned_tile_count(plantation_index),
 		tr("Robotnicy: %d") % int(plantation["workers"]),
-		tr("Zboże w magazynie: %d") % plantation["stored_goods"],
+		tr("Zboże w magazynie: %d") % total_stored,
 	]
+	_update_legend()
+
+
+## Ile pól jest obsianych którą uprawą — zgłoszone przez użytkownika. ZAWSZE
+## dokładnie 4 wiersze (po jednym na każdą z 4 upraw, nawet przy 0 pól),
+## tak samo jak info_label wyżej — stała liczba wierszy niezależnie od
+## wartości, żeby nic nie "skakało" przy sadzeniu kolejnych pól.
+func _update_legend() -> void:
+	var lines: Array[String] = []
+	for crop in Crops.CROPS:
+		lines.append(tr("%s: %d pól") % [Crops.CROP_NAMES[crop], PlayerPlantations.get_planted_tile_count(plantation_index, crop)])
+	legend_label.text = "\n".join(lines)
