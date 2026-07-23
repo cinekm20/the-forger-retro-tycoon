@@ -137,13 +137,15 @@ kilku dniach zwłoki zamiast pokazywać nieaktualną datę; "Koniec tury" w
 mieście aukcyjnym zatrzymuje się dokładnie na dniu aukcji zamiast go
 przeskakiwać.
 
-Wśród licytujących zawsze bierze udział **Vico** — nazwany rywal-fałszerz z
-własnym (stałym) portretem, agresywniejszym i bardziej nieprzewidywalnym
-stylem licytacji niż pozostałych dwóch (generycznych) rywali AI. Pozostali
-dwaj rywale dostają **losowo, przy każdej nowej grze**, imię i portret z puli
-6 gotowych wariantów (2 płcie × 3 dodatki — cylinder/monokl/boa z piór, patrz
-`docs/GRAFIKA_LEONARDO.md` §6), zamiast statycznych "Rywal II"/"Rywal III" —
-imię i portret zawsze pochodzą z tego samego wariantu.
+Wśród licytujących zawsze bierze udział **Vico** — nazwany rywal-fałszerz,
+zawsze pod tym samym imieniem, ale z portretem losowanym przy każdej nowej
+grze z 3 gotowych wariantów (ten sam charakter, inne ujęcie), agresywniejszym
+i bardziej nieprzewidywalnym stylem licytacji niż pozostałych dwóch
+(generycznych) rywali AI. Pozostali dwaj rywale dostają **losowo, przy każdej
+nowej grze**, imię i portret z puli 6 gotowych wariantów (2 płcie × 3 dodatki
+— cylinder/monokl/boa z piór, patrz `docs/GRAFIKA_LEONARDO.md` §6), zamiast
+statycznych "Rywal II"/"Rywal III" — imię i portret zawsze pochodzą z tego
+samego wariantu.
 
 **System autentykacji (na bazie mechaniki oryginału):** każdy z 40 obrazów ma
 unikalny numer katalogowy w obrębie swojej kategorii stylistycznej. Jeśli

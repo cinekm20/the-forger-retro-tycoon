@@ -398,9 +398,10 @@ warianty po prostu nie pokażą portretu, gdy zostaną wylosowane).
 ```
 
 **Prompt (Vico Vermeer — nazwany rywal-fałszerz, patrz `MECHANIKI_EKONOMICZNE.md`
-pkt. 9; portret stały/nielosowany, `characters/vico.jpg`, generować 2–3
-warianty min z tym samym seedem: neutralny/uśmiechnięty/podejrzliwy, do
-scenek "Meanwhile" — na start wystarczy jeden, np. uśmiechnięty):**
+pkt. 9). ✅ 3 warianty gotowe i podpięte** (`characters/vico_1.jpg`,
+`vico_2.jpg`, `vico_3.jpg`) — losowane przy każdej nowej grze, tak samo jak
+portrety generycznych rywali (`AIPlayers.VICO_PORTRAIT_VARIANTS`), zamiast
+jednego stałego pliku:
 ```
 1920s dapper art forger character portrait, sly confident smirk, slicked
 hair, pencil moustache, fine tailored suit with pocket square, bust portrait,
@@ -818,7 +819,7 @@ Leonardo, żeby mieć z czego wybrać).
 | 6 | 3 | Ramka obrazu (do aukcji/galerii) | 1 | 1:1, transparent | §6 | ⬜ do zrobienia |
 | 7 | — | ~~Ramka menu Huba (grafika z Leonardo)~~ | — | — | §10 | ✅ **rozwiązane w kodzie**, nie generować — NinePatchRect na rozciąganym obrazku wyglądał źle (pojedyncze motywy zdobne przy krawędziach zniekształcały się przy rozciąganiu do wąskiego, wysokiego panelu). Ramka rysowana natywnie w `MenuFrame.gd`, tak jak pinezki (`MapPin.gd`) — bez grafiki, skaluje się bez artefaktów do dowolnej wysokości |
 | 7b | 3 | Pozostałe elementy UI ogólne (ikony statystyk, pasek postępu aukcji) | ~5 | 1:1, transparent | §10 | ⬜ do zrobienia — **uwaga**, ten sam typ zadania co pinezki/ramka menu (mały, wyizolowany element), może mieć ten sam problem ze "sceną" zamiast czystej ikony |
-| 8 | 4 | Portrety rywali AI (w tym Vico, 2–3 warianty mimiki) | ~7 | 3:4, transparent lub jednolite tło | §6 | ⬜ grafiki jeszcze nie zrobione, ale **kod już podpięty** (`AIPlayers.get_portrait_path` + losowanie imion/portretów z `GENERIC_RIVAL_POOL` + wyświetlanie w `AuctionHouse.gd`) — wystarczy wgrać pliki wg tabeli nazw w §6, zapisane jako `game/art/characters/<nazwa>.jpg` |
+| 8 | 4 | Portrety rywali AI (w tym Vico, 2–3 warianty mimiki) | ~7 | 3:4, transparent lub jednolite tło | §6 | ✅ zrobione i podpięte — 6 portretów generycznych rywali + 3 warianty Vico, wszystkie losowane przy nowej grze (`AIPlayers.GENERIC_RIVAL_POOL`/`VICO_PORTRAIT_VARIANTS`) i wyświetlane w `AuctionHouse.gd` |
 | 9 | 4 | Fazy wzrostu roślin (4 uprawy × 3 fazy) | 12 | 1:1, 512×512, transparent | §3 | ⬜ do zrobienia — **uwaga**, jak pinezki: mały wyizolowany obiekt, ryzyko tego samego problemu |
 | 10 | 5 | Konie + dżokeje (różne barwy jeźdźców) | 4–6 | 1:1 lub 4:3, transparent | §5 | ⬜ do zrobienia |
 | 11 | 6 | 40 obrazów kolekcji (na końcu, seriami po 5 per kategoria) | 40 | 1:1, min. 1024×1024 | §7 | ✅ zrobione i podpięte — wszystkie 40 (`painting_01.jpg`…`painting_40.jpg`, patrz `Paintings.get_texture_path`) |

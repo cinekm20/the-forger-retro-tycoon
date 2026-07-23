@@ -22,6 +22,12 @@ const GENERIC_RIVAL_POOL := {
 	"female_boa": "Madame Colette Dubois",
 }
 
+## Vico ma 3 gotowe warianty portretu (vico_1/2/3.jpg, wygenerowane z tym
+## samym seedem — patrz docs/GRAFIKA_LEONARDO.md §6), losowane przy każdej
+## nowej grze tak samo jak portrety generycznych rywali, zamiast jednego
+## sztywnego pliku.
+const VICO_PORTRAIT_VARIANTS := 3
+
 var rivals: Array[Dictionary] = []
 
 
@@ -32,8 +38,9 @@ func _ready() -> void:
 func reset_new_game() -> void:
 	var portrait_ids: Array = GENERIC_RIVAL_POOL.keys()
 	portrait_ids.shuffle()
+	var vico_portrait := "vico_%d" % (randi() % VICO_PORTRAIT_VARIANTS + 1)
 	rivals = [
-		{"id": "vico", "name": "Vico Vermeer", "portrait": "vico", "money": 50000.0, "is_named_rival": true, "paintings": []},
+		{"id": "vico", "name": "Vico Vermeer", "portrait": vico_portrait, "money": 50000.0, "is_named_rival": true, "paintings": []},
 		{"id": "rival_2", "name": GENERIC_RIVAL_POOL[portrait_ids[0]], "portrait": portrait_ids[0], "money": 50000.0, "is_named_rival": false, "paintings": []},
 		{"id": "rival_3", "name": GENERIC_RIVAL_POOL[portrait_ids[1]], "portrait": portrait_ids[1], "money": 50000.0, "is_named_rival": false, "paintings": []},
 	]

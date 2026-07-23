@@ -200,9 +200,15 @@ func _test_ai_players_rival_names_randomized() -> void:
 		"oba portrety pochodzą z puli generycznych rywali",
 	)
 	_assert(rival_2["portrait"] != rival_3["portrait"], "rival_2 i rival_3 dostają RÓŻNE portrety (bez powtórzeń)")
+
+	var vico := AIPlayers.get_rival("vico")
 	_assert(
-		AIPlayers.get_portrait_path("vico") == "res://art/characters/vico.jpg",
-		"Vico ma stałą, nielosowaną ścieżkę portretu",
+		vico["portrait"].begins_with("vico_"),
+		"Vico dostaje jeden z losowych wariantów portretu (vico_1/2/3)",
+	)
+	_assert(
+		AIPlayers.get_portrait_path("vico") == "res://art/characters/%s.jpg" % vico["portrait"],
+		"get_portrait_path liczy ścieżkę Vico z jego wylosowanego pola 'portrait'",
 	)
 	_assert(
 		AIPlayers.get_portrait_path("rival_2") == "res://art/characters/%s.jpg" % rival_2["portrait"],
