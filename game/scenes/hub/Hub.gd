@@ -171,32 +171,32 @@ func _build_top_row() -> HBoxContainer:
 	return row
 
 
-## Krótkie podsumowanie aktualnego miasta, widoczne wyśrodkowane pod
-## skrzynkami statusu (np. zaraz po "Koniec tury" albo po przyjeździe) —
-## zgłoszone przez użytkownika: jeśli w mieście jest dziś aukcja, pokaż to z
-## możliwością od razu tam przejść; jeśli miasto ma plantację gracza, pokaż,
-## ile jest aktualnie gotowe do zbioru. Cała skrzynka (make_boxed_row) chowa
-## się całkiem, gdy żaden z warunków nie zachodzi.
+## Krótkie podsumowanie aktualnego miasta, w lewym dolnym rogu ekranu
+## (zgłoszone przez użytkownika) — jeśli w mieście jest dziś aukcja, pokaż to
+## z możliwością od razu tam przejść; jeśli miasto ma plantację gracza,
+## pokaż, ile jest aktualnie gotowe do zbioru. Cała skrzynka (make_boxed_row)
+## chowa się całkiem, gdy żaden z warunków nie zachodzi.
 func _build_turn_summary() -> void:
-	## PRESET_FULL_RECT (nie PRESET_TOP_WIDE!) — ten sam patent co "row" w
-	## _build_top_row wyżej. PRESET_TOP_WIDE liczyłby wysokość raz, w
-	## momencie wywołania (czyli 0, zanim dojdą dzieci) i zablokował
-	## kontener na zerowej wysokości na zawsze (patrz komentarz przy
-	## make_root_side w screen_helpers.gd) — FULL_RECT jest bezpieczny, bo
-	## zawsze rozciąga się do dołu ekranu; SIZE_SHRINK_BEGIN na samej
-	## oprawionej skrzynce (nie na tym kontenerze — size_flags działają na
-	## DZIECKU Containera, nie na samym Containerze) przykleja ją do góry
-	## tego (niewidocznie dużego) obszaru, zamiast rozciągać na całą jego
-	## wysokość.
+	## PRESET_FULL_RECT (nie żaden z presetów typu BOTTOM_LEFT!) — ten sam
+	## patent co "row" w _build_top_row wyżej. Presety inne niż FULL_RECT
+	## liczyłyby rozmiar/offsety raz, w momencie wywołania (czyli na
+	## podstawie 0×0, zanim dojdą dzieci) i zablokowałyby kontener trwale na
+	## błędnym rozmiarze (patrz komentarz przy make_root_side w
+	## screen_helpers.gd) — FULL_RECT jest bezpieczny, bo zawsze rozciąga
+	## się na cały ekran; ALIGNMENT_BEGIN (poziomo) + SIZE_SHRINK_END
+	## (pionowo, na samej oprawionej skrzynce — size_flags działają na
+	## DZIECKU Containera, nie na samym Containerze) przyklejają ją do
+	## lewego DOLNEGO rogu tego (niewidocznie pełnoekranowego) obszaru.
 	turn_summary_container = HBoxContainer.new()
 	turn_summary_container.set_anchors_preset(Control.PRESET_FULL_RECT)
-	turn_summary_container.offset_top = 150
-	turn_summary_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	turn_summary_container.offset_left = 16
+	turn_summary_container.offset_bottom = -16
+	turn_summary_container.alignment = BoxContainer.ALIGNMENT_BEGIN
 	turn_summary_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(turn_summary_container)
 
 	var row := ScreenHelpers.make_boxed_row(turn_summary_container)
-	row.get_parent().size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	row.get_parent().size_flags_vertical = Control.SIZE_SHRINK_END
 
 	turn_summary_label = Label.new()
 	turn_summary_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
