@@ -29,7 +29,7 @@ var crop_chart: Control
 ## Skrzynki lokalizacja/data (lewy górny róg) i gotówka (prawy górny róg) —
 ## ten sam trik co Giełda/Hub, patrz ScreenHelpers.make_corner_status_row.
 func _ready() -> void:
-	ScreenHelpers.make_background(self, "res://art/backgrounds/stock_market.jpg")
+	ScreenHelpers.make_background(self, "res://art/backgrounds/market.jpg")
 	var corner := ScreenHelpers.make_corner_status_row(self, "", "")
 	location_label = corner["left"]
 	money_label = corner["right"]

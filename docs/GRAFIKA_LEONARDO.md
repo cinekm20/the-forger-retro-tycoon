@@ -266,11 +266,10 @@ Cocoa plant, ready to harvest stage, isolated game sprite, simple flat illustrat
 
 ### 4. Giełda i Rynek
 Zgłoszone przez użytkownika: dawny wspólny ekran Giełdy rozdzielony na dwie
-osobne plansze — Giełda (akcje linii żeglugowych, `StockMarket.gd`) i Rynek
-(ceny towarów + kontrakty terminowe, `scenes/market/Market.gd`). Oba na razie
-współdzielą to samo tło (`stock_market.jpg`) — osobne tło dla Rynku
-(np. hala targowa z workami towarów zamiast tablicy kursów) to możliwy
-przyszły krok, nieprzypisany priorytetowi w tej chwili.
+osobne plansze — Giełda (akcje linii żeglugowych, `StockMarket.gd`,
+tło `stock_market.jpg`) i Rynek (ceny towarów + kontrakty terminowe,
+`scenes/market/Market.gd`, własne tło `market.jpg` — dostarczone przez
+użytkownika, wygenerowane z promptu niżej).
 - Tło: sala giełdy / tablica z kursami
 - Ikona wykresu/świec (UI, nie musi być z Leonardo — można zrobić natywnie w
   silniku), ale tło sceny i karty wydarzeń (krach, hossa) tak
@@ -289,9 +288,7 @@ numbers, bustling brokers in background (silhouettes only, no detailed faces),
 game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
-**Prompt (Rynek — tło `market.jpg`, na razie tylko przewidziane, ekran wciąż
-używa `stock_market.jpg` do czasu wygenerowania i podpięcia tego pliku w
-`Market.gd`):**
+**Prompt (Rynek — tło `market.jpg`) — ✅ wygenerowane i podpięte:**
 ```
 1920s commodity trading hall, burlap sacks of coffee beans and cocoa pods, stacked wooden crates of tobacco leaves and tea chests along the walls, large weighing scales, a chalkboard listing crop prices, port warehouse atmosphere, bustling traders and dockworkers in background (silhouettes only, no detailed faces), game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
@@ -873,6 +870,7 @@ Leonardo, żeby mieć z czego wybrać).
 | 3e | 2 | Tło Szkoły sztuki | 1 | 16:9, 1920×1080 | §8 | ✅ zrobione i podpięte (`art_school.jpg`) |
 | 3f | 2 | Tło Galerii | 1 | 16:9, 1920×1080 | §9 | ✅ zrobione i podpięte (`gallery.jpg`) |
 | 3g | 2 | Tło Spichlerza (nowy ekran, patrz §7 w sekcji priorytet 2) | 1 | 16:9, 1920×1080 | §7 | ✅ zrobione i podpięte (`warehouse.jpg`) |
+| 3h | 2 | Tło Rynku (nowy ekran, wydzielony z Giełdy — patrz §4) | 1 | 16:9, 1920×1080 | §4 | ✅ zrobione i podpięte (`market.jpg`) |
 | — | — | Tło Mapy świata (Hub) | 1 | 16:9, 1920×1080 | §2 | ✅ zrobione (`hub_map.jpg`) |
 | 4 | 3 | Szablony regionalne teł miast (`Cities.gd` `REGION_BACKGROUNDS`) | 5 | 16:9, 1920×1080 | §2.1 | ✅ zrobione — zastąpione przez unikalne tła per miasto (wiersz niżej), zostają jako czysty fallback na wypadek nowego miasta bez własnej grafiki: Europa (`region_europe.jpg`), Ameryka Płd./Środk. (`region_tropical_port.jpg`, jeden plik dla obu), Afryka (`region_africa.jpg`), Azja (`region_asia.jpg`), Ameryka Płn. (`region_north_america.jpg`) |
 | 4b | 2 | Unikalne tła **per miasto** (`Cities.gd` `CITY_BACKGROUNDS`, ma priorytet nad tłem regionu) | 18 | 16:9, 1920×1080 | §2.2 | ✅ zrobione — wszystkie 18 miast: Berlin, Paryż, Amsterdam, Lizbona, Londyn, Ankara, Bombaj, Colombo, Mombasa, Duala, Abidżan, Rio, Bogota, Gwatemala, Meksyk, Nowy Jork, Richmond, St. Louis |
