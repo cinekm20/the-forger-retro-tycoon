@@ -410,36 +410,43 @@ game character icon, Art Deco 1920s illustration style, warm sepia and gold pale
 
 **Prompt (rama):**
 
-⚠ **Poprawione** — poprzednia wersja promptu ("empty center, isolated on
-transparent background") i tak dawała gruby, ozdobny brzeg z KOLOROWYM tłem
-wypełniającym cały kwadrat (bordowo-turkusowe romby/plamy), a sam pusty środek
-zajmował ledwie ułamek kadru — nieużyteczne jako rama, w którą wstawia się
-obraz w kodzie (zgłoszone przez użytkownika). Dwie zmiany niżej: (1) prompt
-wprost zakazuje jakiegokolwiek koloru/wzoru tła, zamiast tylko prosić o
-"transparent" (co model i tak ignorował), (2) wymuszony **cienki** brzeg ramy
-i **duży** pusty środek (min. ok. 80% kadru), zamiast zostawiać to przypadkowi.
-Do pola Negative Prompt dopisz DODATKOWO (tylko przy tym jednym assecie, nie
-globalnie) drugą linijkę niżej.
+⚠ **Poprawione drugi raz** — pierwsza poprawka (cienki brzeg + duży pusty
+środek) usunęła kolorowe tło, ale otwór w środku dalej wychodził jako
+PIONOWY PROSTOKĄT (portretowe proporcje, jak zwykła ramka na zdjęcie), mimo
+że całe płótno jest kwadratowe — model domyślnie rysuje "picture frame" z
+proporcjami pionowego portretu, niezależnie od kształtu całego obrazka.
+Problem wyszedł dopiero przy realnym wklejeniu kwadratowego obrazu (896×896,
+patrz `Paintings`/`art/paintings/`) w ten otwór: malowidło trzeba było
+przeskalować do szerokości otworu, zostawiając puste pasy płótna u góry i u
+dołu (zgłoszone przez użytkownika po podglądzie kompozytu). Rama MUSI mieć
+KWADRATOWY otwór w środku, żeby kwadratowe obrazy wypełniały go idealnie,
+bez żadnych pasów. Prompt niżej dopisuje to wprost + pilnuje RÓWNEJ
+szerokości brzegu ze wszystkich 4 stron (bez tego rama bywa "cięższa" u
+dołu, co też psuje kwadrat otworu).
 
 ```
-Ornate thin gold Art Deco picture frame border only, frame lines running
-close to the very edges of the square canvas, the frame border itself no
-more than 10% of the image width, one huge empty flat rectangular opening
-filling the remaining center of the canvas edge to edge, plain flat cream
-fill inside the opening, isolated on pure flat empty background, no
-background color, no background pattern, no scenery, no wall, no shadow,
-game UI asset, Art Deco 1920s illustration style, gold with deep green and
-burgundy accent details only on the frame itself, flat vector-gouache
-texture, subtle paper grain, elegant geometric ornamentation, mobile game
-asset, clean silhouette, no photorealism
+Ornate thin gold Art Deco picture frame border only, perfectly square inner
+opening exactly matching the square outer canvas proportions (NOT a tall
+portrait window), the frame border is the EXACT SAME width on all four
+sides — top, bottom, left, and right — frame lines running close to the
+very edges of the square canvas, the frame border itself no more than 10%
+of the image width, one huge empty flat SQUARE opening filling the
+remaining center of the canvas edge to edge, plain flat cream fill inside
+the opening, isolated on pure flat empty background, no background color,
+no background pattern, no scenery, no wall, no shadow, game UI asset, Art
+Deco 1920s illustration style, gold with deep green and burgundy accent
+details only on the frame itself, flat vector-gouache texture, subtle paper
+grain, elegant geometric ornamentation, mobile game asset, clean
+silhouette, no photorealism
 ```
 Dodatkowa linijka do Negative Prompt (tylko ten asset):
 ```
-background color, background pattern, colored background, gradient background, wall, backdrop, vignette, thick frame, wide frame border, small center opening, decorative scene, canvas texture, painting inside frame
+background color, background pattern, colored background, gradient background, wall, backdrop, vignette, thick frame, wide frame border, small center opening, portrait frame, tall rectangular opening, non-square opening, uneven border width, wider bottom rail, decorative scene, canvas texture, painting inside frame
 ```
-Jeśli mimo to tło dalej się pojawi, najszybciej po prostu przytnij wygenerowany
-obraz do samej ramy w edytorze i usuń tło ręcznie (np. magic wand + delete),
-zamiast dalej walczyć z promptem.
+Jeśli mimo to otwór dalej wyjdzie niekwadratowy (albo tło się pojawi),
+najszybciej po prostu przytnij wygenerowany obraz w edytorze — WAŻNE: przytnij
+tak, żeby otwór w środku był kwadratowy (dociąć nadmiar u góry/dołu albo po
+bokach, cokolwiek jest dłuższe), a nie tylko przyciąć tło dookoła całej ramy.
 
 ### 7. 40 obrazów kolekcji (8 kategorii × 5 obrazów)
 
