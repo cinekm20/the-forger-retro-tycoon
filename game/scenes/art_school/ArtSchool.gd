@@ -17,6 +17,16 @@ func _ready() -> void:
 	ScreenHelpers.make_turn_indicator(root)
 
 	info_label = ScreenHelpers.make_label(root, "")
+	## autowrap + custom_minimum_size (SZEROKOŚĆ i WYSOKOŚĆ oba stałe) —
+	## pierwsza linia jest bardzo długa (całe zdanie o działaniu
+	## eksperckości); bez zawijania renderowała się jako jeden, bardzo
+	## szeroki wiersz wychodzący poza ramkę ekranu na wąskich/portretowych
+	## rozdzielczościach (przegląd czytelności/dopasowania do rozdzielczości
+	## na żądanie użytkownika). Stała wysokość rezerwuje miejsce na
+	## najdłuższy możliwy wariant (zawinięta 1. linia + 2. linia
+	## gotówka/data), żeby przycisk poniżej nigdy się nie przesuwał.
+	info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	info_label.custom_minimum_size = Vector2(700, 110)
 
 	ScreenHelpers.make_button(
 		root,
@@ -30,7 +40,7 @@ func _ready() -> void:
 
 func _on_train_pressed() -> void:
 	if not Economy.spend(TRAINING_COST):
-		info_label.text = "Za mało gotówki na kurs."
+		info_label.text = tr("Za mało gotówki na kurs.")
 		return
 	Paintings.increase_expertise(EXPERTISE_GAIN)
 	Calendar.advance_days(TRAINING_DAYS)

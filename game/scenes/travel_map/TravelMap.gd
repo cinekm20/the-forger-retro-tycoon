@@ -29,6 +29,14 @@ func _ready() -> void:
 	var root := ScreenHelpers.make_root_bottom(self, true)
 	ScreenHelpers.make_title(root, "Dokąd jedziemy?")
 	info_label = ScreenHelpers.make_label(root, _default_info_text())
+	## autowrap + szerokość ograniczona do wnętrza paska (420 szerokości
+	## całego panelu - 2×26 marginesu ramki, patrz make_root_bottom) — bez
+	## tego długi tekst (np. "Podróż do Rio de Janeiro: 5.3 dnia
+	## (samolotem)") był szerszy niż panel i rozpychał go ponad zamierzone
+	## 420px, niespójnie zależnie od nazwy miasta (przegląd czytelności/
+	## dopasowania do rozdzielczości na żądanie użytkownika).
+	info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	info_label.custom_minimum_size = Vector2(360, 0)
 	confirm_button = ScreenHelpers.make_button(root, "Jedź »", _on_confirm_pressed)
 	cancel_button = ScreenHelpers.make_button(root, "Anuluj", _on_cancel_pressed)
 	confirm_button.visible = false
