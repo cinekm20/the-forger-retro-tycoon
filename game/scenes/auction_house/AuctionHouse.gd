@@ -39,11 +39,21 @@ var leader_portrait_rect: TextureRect
 var bid_btn: Button
 var resolve_btn: Button
 
-## 190 = 225 pomniejszone o kolejne ~15% (użytkownik: najpierw -25% z 300,
-## potem jeszcze -15%) — ekran nie ma już ramki+ScrollContainer (użytkownik:
-## "nie ma być ramki na cały ekran"), więc treść musi zmieścić się w jednym,
+## 268 = 190 (poprzedni rozmiar samego obrazu, patrz historia komentarza w
+## _build_active_auction_ui) powiększone tak, żeby po doliczeniu ramki
+## (art/icons/frame.png) WNĘTRZE ramki znów wychodziło na ~190×190 — ekran
+## nie ma już ramki na CAŁY ekran + ScrollContainer (użytkownik: "nie ma być
+## ramki na cały ekran"), więc treść musi zmieścić się w jednym,
 ## niescrollowanym widoku bez przycinania dolnych przycisków.
-const PAINTING_DISPLAY_SIZE := Vector2(190, 190)
+const FRAME_HOLDER_SIZE := Vector2(268, 268)
+const FRAME_TEXTURE_PATH := "res://art/icons/frame.png"
+## Ułamek FRAME_HOLDER_SIZE zajęty przez sam brzeg ramy z każdej strony —
+## zmierzone na art/icons/frame.png (kwadratowy plik, kwadratowy otwór w
+## środku, przezroczyste tło dookoła ramy — patrz poprawiony prompt w
+## docs/GRAFIKA_LEONARDO.md §6). painting_texture_rect jest zakotwiczony
+## dokładnie w tym ułamku, więc kwadratowy obraz (896×896) wypełnia otwór
+## idealnie, bez żadnych pustych pasów.
+const FRAME_INNER_INSET := 0.145
 
 
 func _ready() -> void:
@@ -81,9 +91,11 @@ func _ready() -> void:
 ## Buduje UI aktywnej licytacji. Nazwa/opis obrazu to oprawiona skrzynka
 ## PRZY GÓRZE ekranu (obok skrzynki terminu aukcji) — użytkownik zgłosił, że
 ## nieoprawiony tekst pod obrazem nachodził na pasek akcji w prawym dolnym
-## rogu. Sam obraz NIE ma już grubej złotej ramki wokół (użytkownik: "nie
-## powinna być taka ogromna rama") — leży bezpośrednio na tle karty, żeby
-## wyglądał jak wstawiony w scenę, a nie zamknięty w osobnym pudełku. Malejący
+## rogu. Sam obraz ma teraz cienką ozdobną ramę (art/icons/frame.png,
+## dostarczona przez użytkownika) — WCZEŚNIEJ obraz w ogóle nie miał ramki
+## (użytkownik zgłosił wtedy, że natywnie rysowana rama wychodziła "ogromna"),
+## ale ta grafika ma celowo cienki brzeg i duży kwadratowy otwór w środku
+## (patrz docs/GRAFIKA_LEONARDO.md §6), więc nie zajmuje dużo miejsca. Malejący
 ## czas na podbicie + przyciski są w OSOBNYM pasku przyklejonym do prawego
 ## dolnego rogu ekranu (make_root_bottom) — zgodnie z prośbą użytkownika, żeby
 ## akcje licytacji nie leżały wymieszane w pionowej liście opisów.
@@ -106,12 +118,33 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	var painting_center := CenterContainer.new()
 	root.add_child(painting_center)
 
+	var frame_holder := Control.new()
+	frame_holder.custom_minimum_size = FRAME_HOLDER_SIZE
+	frame_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	painting_center.add_child(frame_holder)
+
+	## Rama dodana PIERWSZA (rysuje się pod spodem) — jej wnętrze na
+	## frame.png jest w całości nieprzezroczyste (płaskie "puste płótno"),
+	## więc dopiero obraz DODANY PO NIEJ (rysuje się na wierzchu, dokładnie w
+	## ułamku FRAME_INNER_INSET) w pełni je zasłania, zostawiając widoczny
+	## tylko ozdobny brzeg dookoła — bez tego kolejność odwrotna: rama
+	## zasłoniłaby obraz.
+	var frame_rect := TextureRect.new()
+	frame_rect.texture = load(FRAME_TEXTURE_PATH)
+	frame_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	frame_rect.stretch_mode = TextureRect.STRETCH_SCALE
+	frame_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	frame_holder.add_child(frame_rect)
+
 	painting_texture_rect = TextureRect.new()
-	painting_texture_rect.custom_minimum_size = PAINTING_DISPLAY_SIZE
+	painting_texture_rect.anchor_left = FRAME_INNER_INSET
+	painting_texture_rect.anchor_top = FRAME_INNER_INSET
+	painting_texture_rect.anchor_right = 1.0 - FRAME_INNER_INSET
+	painting_texture_rect.anchor_bottom = 1.0 - FRAME_INNER_INSET
 	painting_texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	painting_texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	painting_texture_rect.stretch_mode = TextureRect.STRETCH_SCALE
 	painting_texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	painting_center.add_child(painting_texture_rect)
+	frame_holder.add_child(painting_texture_rect)
 
 	root.add_child(_make_expand_spacer())
 
