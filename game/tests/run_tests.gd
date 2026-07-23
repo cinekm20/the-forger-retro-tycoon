@@ -152,7 +152,13 @@ func _test_plantation_grows_multiple_crops_at_once() -> void:
 	PlayerPlantations.reset_new_game()
 	Calendar.reset_new_game()
 	Economy.reset_new_game()
-	var idx := PlayerPlantations.found_plantation("richmond")
+	## "rio" (nie "richmond") — richmond ma bazowy plon kawy tylko 22 (patrz
+	## Crops.REFERENCE_YIELD), więc przy JEDNYM polu kawy calculate_harvest
+	## liczy ~0,3 jednostki, co int() ucina do 0 i test fałszywie failuje
+	## (nie błąd gry — richmond to po prostu miasto tytoniowe, nie kawowe).
+	## Rio ma wysoki bazowy plon OBU upraw (kawa 220, tytoń 396), więc nawet
+	## po 1 polu każdej z nich wynik zaokrągla się w górę od zera.
+	var idx := PlayerPlantations.found_plantation("rio")
 	PlayerPlantations.plantations[idx]["river"].fill(false)
 	PlayerPlantations.hire_workers(idx, 500)
 
