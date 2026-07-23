@@ -5,6 +5,9 @@ var player_count_option: OptionButton
 var setup_section: VBoxContainer
 var name_section: VBoxContainer
 var name_edits: Array[LineEdit] = []
+var gender_options: Array[OptionButton] = []
+var avatar_options: Array[OptionButton] = []
+var avatar_previews: Array[TextureRect] = []
 var root: VBoxContainer
 
 
@@ -68,22 +71,55 @@ func _show_name_entry() -> void:
 	for child in name_section.get_children():
 		child.queue_free()
 	name_edits.clear()
+	gender_options.clear()
+	avatar_options.clear()
+	avatar_previews.clear()
 
 	ScreenHelpers.make_title(name_section, "Podaj imiona graczy")
 
+	## Każdy gracz dostaje: imię, podgląd awatara, płeć i wariant awatara —
+	## wybór płci/awatara zgłoszony przez użytkownika. Awatary to ta sama
+	## pula 6 gotowych portretów co rywale AI (2 płcie × 3 warianty, patrz
+	## Players.GENDERS/AVATAR_VARIANTS) — nie trzeba generować nowej grafiki,
+	## chyba że kiedyś zabraknie wariantów (wtedy dopisać kolejne prompty w
+	## docs/GRAFIKA_LEONARDO.md §6).
 	var count := player_count_option.selected + 1
 	for i in count:
-		var row := HBoxContainer.new()
-		row.alignment = BoxContainer.ALIGNMENT_CENTER
-		name_section.add_child(row)
+		var row := ScreenHelpers.make_boxed_row(name_section)
+
 		var caption := Label.new()
 		caption.text = tr("Gracz %d:") % (i + 1)
 		row.add_child(caption)
+
 		var edit := LineEdit.new()
 		edit.placeholder_text = tr("Gracz %d") % (i + 1)
-		edit.custom_minimum_size = Vector2(200, 0)
+		edit.custom_minimum_size = Vector2(160, 0)
 		row.add_child(edit)
 		name_edits.append(edit)
+
+		var avatar_preview := TextureRect.new()
+		avatar_preview.custom_minimum_size = Vector2(48, 48)
+		avatar_preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		avatar_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		avatar_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(avatar_preview)
+		avatar_previews.append(avatar_preview)
+
+		var gender_option := OptionButton.new()
+		for gender in Players.GENDERS:
+			gender_option.add_item(Players.GENDER_NAMES[gender])
+		gender_option.item_selected.connect(_on_avatar_choice_changed.bind(i))
+		row.add_child(gender_option)
+		gender_options.append(gender_option)
+
+		var avatar_option := OptionButton.new()
+		for variant in Players.AVATAR_VARIANTS:
+			avatar_option.add_item(Players.AVATAR_VARIANT_NAMES[variant])
+		avatar_option.item_selected.connect(_on_avatar_choice_changed.bind(i))
+		row.add_child(avatar_option)
+		avatar_options.append(avatar_option)
+
+		_update_avatar_preview(i)
 
 	ScreenHelpers.make_button(name_section, "Rozpocznij grę", _on_start_confirmed)
 	ScreenHelpers.make_button(name_section, "Anuluj", func():
@@ -93,6 +129,17 @@ func _show_name_entry() -> void:
 
 	setup_section.visible = false
 	name_section.visible = true
+
+
+func _on_avatar_choice_changed(_selected_index: int, player_index: int) -> void:
+	_update_avatar_preview(player_index)
+
+
+func _update_avatar_preview(player_index: int) -> void:
+	var gender: String = Players.GENDERS[gender_options[player_index].selected]
+	var variant: String = Players.AVATAR_VARIANTS[avatar_options[player_index].selected]
+	var path := "res://art/characters/%s_%s.jpg" % [gender, variant]
+	avatar_previews[player_index].texture = load(path) if ResourceLoader.exists(path) else null
 
 
 func _on_start_confirmed() -> void:
@@ -112,4 +159,6 @@ func _on_start_confirmed() -> void:
 	GameState.reset_new_game()
 	for i in name_edits.size():
 		Players.set_player_name(i, name_edits[i].text)
+		Players.set_player_gender(i, Players.GENDERS[gender_options[i].selected])
+		Players.set_player_avatar(i, Players.AVATAR_VARIANTS[avatar_options[i].selected])
 	SceneRouter.goto_hub()

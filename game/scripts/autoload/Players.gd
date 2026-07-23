@@ -21,9 +21,24 @@ signal turn_changed(player_index: int)
 const MAX_PLAYERS := 4
 const DAYS_PER_TURN := 7
 
+## Awatary graczy — ta sama pula grafik co GENERIC_RIVAL_POOL rywali AI
+## (docs/GRAFIKA_LEONARDO.md §6: 6 portretów, 2 płcie × 3 dodatki,
+## art/characters/<płeć>_<wariant>.jpg), więc wybór "płeć + avatar" na
+## ekranie nowej gry nie wymaga generowania nowej grafiki — 6 gotowych
+## wariantów starcza z zapasem na maks. 4 graczy (dopuszczalne powtórzenia,
+## jeśli kilku graczy wybierze tę samą kombinację). Gdyby kiedyś zabrakło
+## wariantów (więcej niż 3 dodatki na płeć), dopisać nowe prompty w
+## docs/GRAFIKA_LEONARDO.md §6 obok istniejących.
+const GENDERS := ["male", "female"]
+const GENDER_NAMES := {"male": "Mężczyzna", "female": "Kobieta"}
+const AVATAR_VARIANTS := ["tophat", "monocle", "boa"]
+const AVATAR_VARIANT_NAMES := {"tophat": "Cylinder", "monocle": "Monokl", "boa": "Boa z piór"}
+
 var player_count: int = 1
 var active_index: int = 0
 var player_names: Array[String] = []
+var player_genders: Array[String] = []
+var player_avatar_variants: Array[String] = []
 var snapshots: Array[Dictionary] = []  ## stan graczy, którzy NIE są właśnie aktywni
 
 
@@ -31,9 +46,13 @@ func reset_new_game(count: int) -> void:
 	player_count = clampi(count, 1, MAX_PLAYERS)
 	active_index = 0
 	player_names.clear()
+	player_genders.clear()
+	player_avatar_variants.clear()
 	snapshots.clear()
 	for i in player_count:
 		player_names.append("Gracz %d" % (i + 1))
+		player_genders.append(GENDERS[0])
+		player_avatar_variants.append(AVATAR_VARIANTS[0])
 		snapshots.append(_empty_snapshot())
 
 
@@ -49,8 +68,32 @@ func set_player_name(index: int, player_name: String) -> void:
 		player_names[index] = trimmed
 
 
+func set_player_gender(index: int, gender: String) -> void:
+	if index < 0 or index >= player_genders.size() or not GENDERS.has(gender):
+		return
+	player_genders[index] = gender
+
+
+func set_player_avatar(index: int, variant: String) -> void:
+	if index < 0 or index >= player_avatar_variants.size() or not AVATAR_VARIANTS.has(variant):
+		return
+	player_avatar_variants[index] = variant
+
+
+## Ścieżka do awatara gracza (patrz komentarz przy GENDERS wyżej) —
+## AIPlayers.get_portrait_path ma ten sam wzorzec ścieżki dla rywali.
+func get_avatar_path(index: int) -> String:
+	if index < 0 or index >= player_genders.size():
+		return ""
+	return "res://art/characters/%s_%s.jpg" % [player_genders[index], player_avatar_variants[index]]
+
+
 func active_name() -> String:
 	return player_names[active_index] if active_index < player_names.size() else "Gracz"
+
+
+func active_avatar_path() -> String:
+	return get_avatar_path(active_index)
 
 
 func _empty_snapshot() -> Dictionary:

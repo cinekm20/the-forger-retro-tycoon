@@ -358,6 +358,13 @@ każdy pod nazwą z tabeli niżej w `game/art/characters/` — `AuctionHouse.gd`
 sam sprawdza, czy plik istnieje, więc może być ich mniej niż 6 (brakujące
 warianty po prostu nie pokażą portretu, gdy zostaną wylosowane).
 
+✅ **Ta sama pula ponownie użyta jako awatary GRACZA** (zgłoszone przez
+użytkownika: wybór płci + awatara przy wpisywaniu imienia) —
+`Players.GENDERS`/`AVATAR_VARIANTS` w `MainMenu.gd` _show_name_entry, bez
+generowania nowej grafiki. Jeśli kiedyś zabraknie wariantów (więcej niż 3
+dodatki na płeć, albo więcej niż 2 płcie), dopisać kolejne prompty w tej
+samej konwencji nazw plików.
+
 | Wariant | Plik | Przypisane imię |
 |---|---|---|
 | Mężczyzna, cylinder | `characters/male_tophat.jpg` | Baron Heinrich von Falkenstein |

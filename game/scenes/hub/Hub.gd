@@ -140,6 +140,19 @@ func _build_top_row() -> HBoxContainer:
 	row.add_theme_constant_override("separation", 16)
 	add_child(row)
 
+	## Awatar aktywnego gracza (wybrany przy starcie nowej gry, patrz
+	## MainMenu.gd _show_name_entry / Players.get_avatar_path) — w hot-seat
+	## zmienia się przy każdym end_turn, bo _ready() przelicza go na nowo z
+	## Players.active_index po przeładowaniu Huba (SceneRouter.goto_hub()).
+	var avatar_rect := TextureRect.new()
+	avatar_rect.custom_minimum_size = Vector2(64, 64)
+	avatar_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	avatar_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	avatar_rect.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	var avatar_path := Players.active_avatar_path()
+	avatar_rect.texture = load(avatar_path) if ResourceLoader.exists(avatar_path) else null
+	row.add_child(avatar_rect)
+
 	var left_column := VBoxContainer.new()
 	left_column.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	left_column.add_theme_constant_override("separation", 8)

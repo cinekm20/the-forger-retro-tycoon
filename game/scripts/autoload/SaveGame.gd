@@ -30,6 +30,8 @@ func save_game() -> void:
 		"player_count": Players.player_count,
 		"active_index": Players.active_index,
 		"player_names": Players.player_names,
+		"player_genders": Players.player_genders,
+		"player_avatar_variants": Players.player_avatar_variants,
 		"player_snapshots": Players.snapshots,
 		"has_bodyguard": Security.has_bodyguard,
 		"next_auction_city": Auctions.next_auction_city,
@@ -76,6 +78,17 @@ func load_game() -> void:
 	Players.active_index = data.get("active_index", 0)
 	var loaded_names: Array = data.get("player_names", ["Gracz 1"])
 	Players.player_names.assign(loaded_names)
+	## Domyślne płeć/awatar dla zapisów sprzed dodania tego wyboru —
+	## jeden wpis na gracza, tak jak Players.reset_new_game().
+	var default_genders: Array = []
+	var default_avatar_variants: Array = []
+	for i in Players.player_count:
+		default_genders.append(Players.GENDERS[0])
+		default_avatar_variants.append(Players.AVATAR_VARIANTS[0])
+	var loaded_genders: Array = data.get("player_genders", default_genders)
+	Players.player_genders.assign(loaded_genders)
+	var loaded_avatar_variants: Array = data.get("player_avatar_variants", default_avatar_variants)
+	Players.player_avatar_variants.assign(loaded_avatar_variants)
 	var loaded_snapshots: Array = data.get("player_snapshots", [])
 	Players.snapshots.assign(loaded_snapshots)
 	Security.has_bodyguard = data.get("has_bodyguard", false)

@@ -44,6 +44,7 @@ func _ready() -> void:
 	_test_plantation_grows_multiple_crops_at_once()
 	_test_plant_tile_requires_ownership()
 	_test_yearly_report_populated_on_new_year()
+	_test_players_gender_and_avatar_selection()
 
 	print("\n=== Wynik: %d/%d testów przeszło ===" % [total - failures, total])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -480,3 +481,22 @@ func _test_yearly_report_populated_on_new_year() -> void:
 	_assert(report["shipping"].size() == ShippingCompanies.COMPANIES.size(), "migawka zawiera kursy wszystkich linii żeglugowych")
 	_assert(report["crops"].size() == Crops.CROPS.size(), "migawka zawiera ceny wszystkich towarów")
 	_assert(not YearlyReport.has_pending(), "consume_pending() czyści podsumowanie, żeby nie pokazało się drugi raz")
+
+
+func _test_players_gender_and_avatar_selection() -> void:
+	print("-- Players: wybór płci i awatara --")
+	Players.reset_new_game(2)
+
+	_assert(Players.player_genders[0] == Players.GENDERS[0], "domyślna płeć gracza 1 to pierwsza z GENDERS")
+	_assert(Players.player_avatar_variants[0] == Players.AVATAR_VARIANTS[0], "domyślny wariant awatara gracza 1 to pierwszy z AVATAR_VARIANTS")
+
+	Players.set_player_gender(1, "female")
+	Players.set_player_avatar(1, "boa")
+	_assert(Players.player_genders[1] == "female", "płeć gracza 2 ustawiona na 'female'")
+	_assert(Players.player_avatar_variants[1] == "boa", "wariant awatara gracza 2 ustawiony na 'boa'")
+	_assert(Players.get_avatar_path(1) == "res://art/characters/female_boa.jpg", "ścieżka awatara łączy płeć i wariant")
+
+	Players.set_player_gender(1, "nieznana_plec")
+	Players.set_player_avatar(1, "nieznany_wariant")
+	_assert(Players.player_genders[1] == "female", "nieprawidłowa płeć nie nadpisuje poprzedniego wyboru")
+	_assert(Players.player_avatar_variants[1] == "boa", "nieprawidłowy wariant nie nadpisuje poprzedniego wyboru")
