@@ -433,11 +433,14 @@ static func _style_button(btn: Button) -> void:
 
 ## Rozmiar/czcionka podniesione z (280, 46)/18px — tester zgłosił, że
 ## przyciski były za małe, mimo że na większości ekranów było sporo wolnego
-## miejsca dookoła nich.
-static func make_button(root: Container, text: String, on_pressed: Callable) -> Button:
+## miejsca dookoła nich. width opcjonalna (domyślnie 320, jak wszędzie) —
+## potrzebna tam, gdzie guzik siedzi w węższej niż zwykle kolumnie (patrz
+## Plantation.gd, kolumny obok kwadratowej siatki) i musi się realnie
+## zmieścić, zamiast rozpychać kolumnę ponad wyliczoną szerokość.
+static func make_button(root: Container, text: String, on_pressed: Callable, width: float = 320.0) -> Button:
 	var btn := Button.new()
 	btn.text = text
-	btn.custom_minimum_size = Vector2(320, 58)
+	btn.custom_minimum_size = Vector2(width, 58)
 	btn.pressed.connect(on_pressed)
 	_style_button(btn)
 	root.add_child(btn)
