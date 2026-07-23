@@ -9,6 +9,7 @@ config/name="Vermeer"
 config/description="Ekonomiczna gra strategiczna inspirowana grą Vermeer (Ariolasoft, 1987)."
 run/main_scene="res://scenes/main_menu/MainMenu.tscn"
 config/features=PackedStringArray("4.3", "Mobile")
+config/icon="res://art/icons/app_icon.png"
 
 [autoload]
 
@@ -23,6 +24,7 @@ Paintings="*res://scripts/autoload/Paintings.gd"
 Auctions="*res://scripts/autoload/Auctions.gd"
 ShippingCompanies="*res://scripts/autoload/ShippingCompanies.gd"
 ForwardContracts="*res://scripts/autoload/ForwardContracts.gd"
+YearlyReport="*res://scripts/autoload/YearlyReport.gd"
 AIPlayers="*res://scripts/autoload/AIPlayers.gd"
 Security="*res://scripts/autoload/Security.gd"
 Players="*res://scripts/autoload/Players.gd"

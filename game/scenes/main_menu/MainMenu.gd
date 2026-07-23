@@ -103,6 +103,7 @@ func _on_start_confirmed() -> void:
 	Auctions.reset_new_game()
 	ShippingCompanies.reset_new_game()
 	ForwardContracts.reset_new_game()
+	YearlyReport.reset_new_game()
 	AIPlayers.reset_new_game()
 	PlayerPlantations.reset_new_game()
 	Travel.reset_new_game()

@@ -45,6 +45,14 @@ var turn_summary_button: Button
 
 
 func _ready() -> void:
+	## Podsumowanie roku (patrz YearlyReport.gd) — jeśli od ostatniego wejścia
+	## do Huba minął Sylwester w grze, pokaż je NAJPIERW, zamiast budować
+	## resztę Huba pod spodem (i tak zostanie natychmiast odsłonięty
+	## normalny Hub po kliknięciu "Kontynuuj" na ekranie podsumowania).
+	if YearlyReport.has_pending():
+		SceneRouter.goto_scene(SceneRouter.YEAR_SUMMARY)
+		return
+
 	var bg_layers := ScreenHelpers.make_background_with_overlay(self, Cities.get_city_background(Travel.current_city))
 	hub_bg = bg_layers["background"]
 	hub_overlay = bg_layers["overlay"]

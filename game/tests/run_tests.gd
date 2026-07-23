@@ -43,6 +43,7 @@ func _ready() -> void:
 	_test_find_plantation_index()
 	_test_plantation_grows_multiple_crops_at_once()
 	_test_plant_tile_requires_ownership()
+	_test_yearly_report_populated_on_new_year()
 
 	print("\n=== Wynik: %d/%d testów przeszło ===" % [total - failures, total])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -452,3 +453,24 @@ func _test_auctions_cap_turn_advance() -> void:
 		Auctions.cap_turn_advance(7, Auctions.next_auction_city) == 7,
 		"gdy termin już nadszedł (gracz jest na miejscu), skok dni nie jest już capowany",
 	)
+
+
+func _test_yearly_report_populated_on_new_year() -> void:
+	print("-- YearlyReport: migawka gospodarki tworzona przy przejściu do nowego roku --")
+	Calendar.reset_new_game()
+	Economy.reset_new_game()
+	ShippingCompanies.reset_new_game()
+	Crops.reset_new_game()
+	YearlyReport.reset_new_game()
+
+	_assert(not YearlyReport.has_pending(), "brak podsumowania na starcie gry")
+
+	var days_to_new_year := Calendar.DAYS_PER_MONTH * 12 - Calendar.current_day
+	Calendar.advance_days(days_to_new_year)
+	_assert(YearlyReport.has_pending(), "po przekroczeniu Sylwestra podsumowanie czeka na pokazanie")
+
+	var report := YearlyReport.consume_pending()
+	_assert(report["year"] == Calendar.START_YEAR, "podsumowanie dotyczy roku, który się właśnie skończył, nie nowego")
+	_assert(report["shipping"].size() == ShippingCompanies.COMPANIES.size(), "migawka zawiera kursy wszystkich linii żeglugowych")
+	_assert(report["crops"].size() == Crops.CROPS.size(), "migawka zawiera ceny wszystkich towarów")
+	_assert(not YearlyReport.has_pending(), "consume_pending() czyści podsumowanie, żeby nie pokazało się drugi raz")
