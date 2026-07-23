@@ -527,8 +527,8 @@ func _test_price_history_for_charts() -> void:
 	## Calendar.advance_days (nie wywoływanie _on_day_advanced bezpośrednio) —
 	## tak samo jak reszta gry, przez sygnał Calendar.day_advanced, pod który
 	## podpięte są ShippingCompanies i Crops.
-	var lloyd_size_before := ShippingCompanies.price_history["lloyd"].size()
-	var coffee_size_before := Crops.price_history["coffee"].size()
+	var lloyd_size_before: int = ShippingCompanies.price_history["lloyd"].size()
+	var coffee_size_before: int = Crops.price_history["coffee"].size()
 	Calendar.advance_days(7)
 	_assert(ShippingCompanies.price_history["lloyd"].size() == lloyd_size_before + 1, "kolejny skok dni dopisuje kolejny punkt historii (Lloyd)")
 	_assert(Crops.price_history["coffee"].size() == coffee_size_before + 1, "kolejny skok dni dopisuje kolejny punkt historii (kawa)")
