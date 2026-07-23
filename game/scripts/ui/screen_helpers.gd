@@ -291,9 +291,15 @@ static func make_label(root: VBoxContainer, text: String) -> Label:
 ## tak jak w oryginale pasek stanu to kilka osobnych skrzynek (imię gracza +
 ## lokalizacja, gotówka, data), nie jeden zbity ciąg tekstu. Używać dla
 ## pojedynczych, krótkich informacji statusu (patrz Hub.gd).
-## min_width/font_size opcjonalne (0 = nie nadpisuj) — potrzebne dla
-## skrzynki "gracz w mieście", która ma więcej tekstu niż data/obrazy i
-## powinna być wyraźnie większa (patrz Hub.gd _build_top_row).
+## min_width/font_size opcjonalne (0 = nie nadpisuj). min_width > 0 to
+## NAPRAWDĘ stała szerokość (nie tylko minimum) — bez tego PanelContainer i
+## tak rośnie ponad min_width, gdy treść etykiety (bez zawijania) tego
+## wymaga, więc np. skrzynka terminu aukcji miała różną szerokość zależnie
+## od długości nazwy miasta (Amsterdam vs Berlin — zgłoszone przez
+## użytkownika, kilka takich skrzynek w rzędzie MUSI mieć zawsze tę samą
+## szerokość). Ustawiamy custom_minimum_size.x na SAMEJ etykiecie (nie tylko
+## na panelu) + autowrap, więc dłuższy tekst zawija się na kolejny wiersz
+## zamiast rozpychać skrzynkę.
 static func make_info_box(root: Container, text: String, min_width: float = 0.0, font_size: int = 0) -> Label:
 	var box := StyleBoxFlat.new()
 	box.bg_color = Color(COLOR_BURGUNDY_DARK.r, COLOR_BURGUNDY_DARK.g, COLOR_BURGUNDY_DARK.b, 0.85)
@@ -318,6 +324,9 @@ static func make_info_box(root: Container, text: String, min_width: float = 0.0,
 	## 19 = domyślny większy rozmiar (patrz make_label), zamiast pozostawiać
 	## niepodbite skrzynki na ciut mniejszym, domyślnym rozmiarze Godota.
 	label.add_theme_font_size_override("font_size", font_size if font_size > 0 else 19)
+	if min_width > 0.0:
+		label.custom_minimum_size = Vector2(min_width - box.content_margin_left - box.content_margin_right, 0)
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	panel.add_child(label)
 	return label
 

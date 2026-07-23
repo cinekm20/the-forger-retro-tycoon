@@ -145,9 +145,15 @@ func _build_top_row() -> HBoxContainer:
 	left_column.add_theme_constant_override("separation", 8)
 	row.add_child(left_column)
 
+	## Wszystkie 4 skrzynki dostają TĘ SAMĄ szerokość (280) — użytkownik
+	## zgłosił, że muszą być zawsze jednakowej szerokości, niezależnie od
+	## treści (np. skrzynka terminu aukcji miała różną szerokość zależnie od
+	## długości nazwy miasta: Amsterdam vs Berlin). make_info_box z
+	## min_width > 0 wymusza teraz stałą szerokość + zawijanie zamiast
+	## rozpychania skrzynki (patrz komentarz w screen_helpers.gd).
 	location_label = ScreenHelpers.make_info_box(left_column, "", 280.0, 22)
-	date_label = ScreenHelpers.make_info_box(left_column, "")
-	paintings_label = ScreenHelpers.make_info_box(left_column, "")
+	date_label = ScreenHelpers.make_info_box(left_column, "", 280.0)
+	paintings_label = ScreenHelpers.make_info_box(left_column, "", 280.0)
 	## Skrzynka "NEXT AUCTION IS: ..." z oryginału — widoczna niezależnie od
 	## typu aktualnego miasta, bo termin aukcji dotyczy jednego z 5 miast
 	## aukcyjnych, nie koniecznie tego, w którym gracz akurat jest.
