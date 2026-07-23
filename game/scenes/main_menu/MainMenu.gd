@@ -15,46 +15,7 @@ func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/main_menu_title.jpg")
 	root = ScreenHelpers.make_root(self)
 
-	## Logo ma już wpisany napis "THE FORGER: RETRO TYCOON" w swojej grafice
-	## (kinowa scena z kurtynami, styl art déco zgodny z resztą gry) —
-	## zastępuje zwykły tekstowy tytuł zamiast leżeć obok niego. Grafika jest
-	## SZEROKA (kompozycja sceny, ~16:9), nie kwadratowa jak poprzedni,
-	## mniejszy logotyp. custom_minimum_size dostaje JAWNIE obie wymiary
-	## (nie tylko szerokość) wyliczone z rzeczywistych proporcji tekstury —
-	## EXPAND_FIT_WIDTH_PROPORTIONAL z samą szerokością w custom_minimum_size
-	## (poprzednia wersja) zostawiał wysokość efektywnie na 0, więc logo było
-	## w ogóle niewidoczne. Ten sam "fixed-size defensive UI" wzorzec co
-	## gdzie indziej w grze (patrz np. Plantation.gd legend labels) — jawny
-	## rozmiar zamiast polegania na automatycznym liczeniu przez silnik.
-	var viewport_size := get_viewport_rect().size
-	var frame_content_width := viewport_size.x * 0.9 - ScreenHelpers.CONTENT_INSET_WITH_FRAME * 2.0
-	var frame_content_height := viewport_size.y * 0.9 - ScreenHelpers.CONTENT_INSET_WITH_FRAME * 2.0
-
-	## Gra jest w orientacji POZIOMEJ (project.godot: window/handheld/
-	## orientation=landscape) — to WYSOKOŚĆ ramki jest tu wąskim zasobem, nie
-	## szerokość. Logo liczone od SZEROKOŚCI (poprzednia wersja, 85% szer.
-	## ramki) było więc dużo wyższe niż cały dostępny ekran, wypychając
-	## resztę menu (napis, wybór graczy, przyciski) poza widoczny obszar —
-	## zgłoszone przez użytkownika: "za duże, dostosuj żeby wszystko
-	## mieściło się na jednym ekranie bez przewijania". Budżet WYSOKOŚCI
-	## (32% ramki, zostawia miejsce na resztę menu poniżej) + min() z 85%
-	## szerokości jako zabezpieczenie na bardzo wąskich/szerokich proporcjach.
-	var logo_texture: Texture2D = load("res://art/backgrounds/logo.jpg")
-	var logo_aspect := logo_texture.get_width() / float(logo_texture.get_height())
-	var logo_height := frame_content_height * 0.32
-	var logo_width := minf(logo_height * logo_aspect, frame_content_width * 0.85)
-	logo_height = logo_width / logo_aspect
-
-	var logo := TextureRect.new()
-	logo.texture = logo_texture
-	logo.custom_minimum_size = Vector2(logo_width, logo_height)
-	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	logo.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(logo)
-
-	ScreenHelpers.make_label(root, "Ekonomiczna gra strategiczna — lata 20. XX wieku")
+	var subtitle_label := ScreenHelpers.make_label(root, "Ekonomiczna gra strategiczna — lata 20. XX wieku")
 
 	setup_section = VBoxContainer.new()
 	root.add_child(setup_section)
@@ -88,6 +49,49 @@ func _ready() -> void:
 	name_section = VBoxContainer.new()
 	name_section.visible = false
 	root.add_child(name_section)
+
+	## Logo ma już wpisany napis "THE FORGER: RETRO TYCOON" w swojej grafice
+	## (kinowa scena z kurtynami, styl art déco zgodny z resztą gry) —
+	## zastępuje zwykły tekstowy tytuł zamiast leżeć obok niego. Zgłoszone
+	## przez użytkownika (dwukrotnie): najpierw że logo w ogóle się nie
+	## pokazywało, potem że po naprawie było za duże i cały ekran wymagał
+	## przewijania. Zamiast zgadywać ułamek ekranu na logo (poprzednie dwie
+	## wersje), MIERZYMY realną wysokość reszty menu — subtitle_label i
+	## setup_section są już zbudowane WYŻEJ, więc get_minimum_size()
+	## zwraca ich prawdziwą wysokość natychmiast, bez czekania na pełny
+	## layout pass silnika — i logo dostaje DOKŁADNIE tyle miejsca, ile
+	## zostaje w ramce, więc całość mieści się bez scrolla z definicji,
+	## niezależnie od rozmiaru czcionek/przycisków. name_section jest na
+	## razie visible=false, więc Container go pomija przy liczeniu wysokości
+	## (dokładnie to, co chcemy — logo ma dopasować się do EKRANU STARTOWEGO,
+	## nie do dłuższego formularza imion graczy pod "Nowa gra").
+	## Budowane na końcu i przesuwane na sam początek (move_child) — stąd
+	## pomiar PRZED policzeniem rozmiaru logo, a widoczna kolejność mimo to
+	## poprawna (logo nad napisem/przyciskami).
+	var viewport_size := get_viewport_rect().size
+	var frame_content_width := viewport_size.x * 0.9 - ScreenHelpers.CONTENT_INSET_WITH_FRAME * 2.0
+	var frame_content_height := viewport_size.y * 0.9 - ScreenHelpers.CONTENT_INSET_WITH_FRAME * 2.0
+
+	var root_separation := root.get_theme_constant("separation")
+	var rest_height := subtitle_label.get_minimum_size().y + setup_section.get_minimum_size().y
+	## 2 odstępy: logo↔napis (nowy, dopiero po wstawieniu logo) i napis↔setup_section (już istniejący).
+	var available_for_logo := frame_content_height - rest_height - root_separation * 2.0
+
+	var logo_texture: Texture2D = load("res://art/backgrounds/logo.jpg")
+	var logo_aspect := logo_texture.get_width() / float(logo_texture.get_height())
+	var logo_height := clampf(available_for_logo, 50.0, frame_content_height * 0.4)
+	var logo_width := minf(logo_height * logo_aspect, frame_content_width * 0.85)
+	logo_height = logo_width / logo_aspect
+
+	var logo := TextureRect.new()
+	logo.texture = logo_texture
+	logo.custom_minimum_size = Vector2(logo_width, logo_height)
+	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	logo.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(logo)
+	root.move_child(logo, 0)
 
 
 ## Zamiast od razu startować grę z domyślnymi nazwami "Gracz 1"/"Gracz 2"...,
