@@ -15,13 +15,21 @@ func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/main_menu_title.jpg")
 	root = ScreenHelpers.make_root(self)
 
-	## Logo ma już wpisany napis "VERMEER" w swojej grafice (styl art déco
-	## zgodny z resztą gry) — zastępuje zwykły tekstowy tytuł zamiast leżeć
-	## obok niego.
+	## Logo ma już wpisany napis "THE FORGER: RETRO TYCOON" w swojej grafice
+	## (kinowa scena z kurtynami, styl art déco zgodny z resztą gry) —
+	## zastępuje zwykły tekstowy tytuł zamiast leżeć obok niego. Grafika jest
+	## SZEROKA (kompozycja sceny, ~16:9), nie kwadratowa jak poprzedni,
+	## mniejszy logotyp — custom_minimum_size ustawia tylko SZEROKOŚĆ
+	## (proporcjonalną do ramki ekranu), a EXPAND_FIT_WIDTH_PROPORTIONAL liczy
+	## wysokość automatycznie z proporcji obrazka, więc dokładny rozmiar pliku
+	## może się zmienić bez konieczności przeliczania stałych w kodzie.
+	var viewport_size := get_viewport_rect().size
+	var frame_content_width := viewport_size.x * 0.9 - ScreenHelpers.CONTENT_INSET_WITH_FRAME * 2.0
+
 	var logo := TextureRect.new()
 	logo.texture = load("res://art/backgrounds/logo.jpg")
-	logo.custom_minimum_size = Vector2(240, 240)
-	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	logo.custom_minimum_size = Vector2(frame_content_width * 0.85, 0)
+	logo.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	logo.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
