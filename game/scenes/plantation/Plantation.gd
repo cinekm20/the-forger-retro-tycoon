@@ -97,13 +97,18 @@ func _ready() -> void:
 	right_half.add_theme_constant_override("separation", int(COLUMN_SEPARATION))
 	main_row.add_child(right_half)
 
+	## ALIGNMENT_BEGIN (nie CENTER) na obu kolumnach — zgłoszone przez
+	## użytkownika: legenda ma zaczynać się od samej góry, tak samo jak opis.
+	## Z CENTER każda kolumna centrowała się NIEZALEŻNIE w wysokości wiersza,
+	## a że legenda miała mniej treści niż opis, wizualnie zaczynała się
+	## niżej — z BEGIN obie zaczynają się dokładnie w tym samym miejscu.
 	var info_column := VBoxContainer.new()
-	info_column.alignment = BoxContainer.ALIGNMENT_CENTER
+	info_column.alignment = BoxContainer.ALIGNMENT_BEGIN
 	info_column.add_theme_constant_override("separation", 8)
 	right_half.add_child(info_column)
 
 	var legend_column := VBoxContainer.new()
-	legend_column.alignment = BoxContainer.ALIGNMENT_CENTER
+	legend_column.alignment = BoxContainer.ALIGNMENT_BEGIN
 	legend_column.add_theme_constant_override("separation", 6)
 	right_half.add_child(legend_column)
 
@@ -181,12 +186,6 @@ func _ready() -> void:
 	## wyżej — patrz _update_info).
 	harvest_status_label.custom_minimum_size = Vector2(column_width, 50)
 
-	ScreenHelpers.make_button(info_column, "Spichlerz »", func(): SceneRouter.goto_scene(SceneRouter.WAREHOUSE), column_width)
-	## Nie ScreenHelpers.make_back_button (zawsze 320px) — ten sam wywołujący
-	## efekt (powrót do Huba), ale z width=column_width, żeby zmieścić się w
-	## kolumnie.
-	ScreenHelpers.make_button(info_column, "« Powrót", func(): SceneRouter.goto_hub(), column_width)
-
 	## Legenda WYGLĄDU pól — ikonka + podpis dla każdego stanu pola (nie tylko
 	## opis liczbowy) — zgłoszone przez użytkownika: musi być pokazane, jak
 	## wygląda każdy rodzaj pola, nie tylko ile ich jest. Rzeka/wolne/puste
@@ -207,6 +206,16 @@ func _ready() -> void:
 	legend_crop_rows = VBoxContainer.new()
 	legend_crop_rows.add_theme_constant_override("separation", 6)
 	legend_column.add_child(legend_crop_rows)
+
+	## Spichlerz/Powrót POD legendą (nie pod opisem, jak wcześniej) —
+	## zgłoszone przez użytkownika. Efekt uboczny, którego użytkownik szukał
+	## bez nazywania go wprost: opis (info_column) był wyższy niż legenda,
+	## więc razem z siatką na pełną wysokość ramki całość nie mieściła się w
+	## pionie i dokładała pasek przewijania (obcinając "Powrót" u dołu) —
+	## przeniesienie tych dwóch guzików do krótszej kolumny wyrównuje obie
+	## kolumny i usuwa potrzebę scrolla.
+	ScreenHelpers.make_button(legend_column, "Spichlerz »", func(): SceneRouter.goto_scene(SceneRouter.WAREHOUSE), column_width)
+	ScreenHelpers.make_button(legend_column, "« Powrót", func(): SceneRouter.goto_hub(), column_width)
 
 	_setup_current_plantation()
 
