@@ -138,12 +138,12 @@ mieście aukcyjnym zatrzymuje się dokładnie na dniu aukcji zamiast go
 przeskakiwać.
 
 Wśród licytujących zawsze bierze udział **Vico** — nazwany rywal-fałszerz z
-własnym portretem, agresywniejszym i bardziej nieprzewidywalnym stylem
-licytacji niż pozostałych dwóch (generycznych) rywali AI. Docelowy plan
-grafik (`docs/GRAFIKA_LEONARDO.md` §6) przewiduje więcej wariantów portretów
-rywali niż aktualnie wykorzystuje logika gry (3 rywale łącznie) — jest to
-zapas na przyszłe rozszerzenie liczby przeciwników, nie niespójność do
-naprawienia teraz.
+własnym (stałym) portretem, agresywniejszym i bardziej nieprzewidywalnym
+stylem licytacji niż pozostałych dwóch (generycznych) rywali AI. Pozostali
+dwaj rywale dostają **losowo, przy każdej nowej grze**, imię i portret z puli
+6 gotowych wariantów (2 płcie × 3 dodatki — cylinder/monokl/boa z piór, patrz
+`docs/GRAFIKA_LEONARDO.md` §6), zamiast statycznych "Rywal II"/"Rywal III" —
+imię i portret zawsze pochodzą z tego samego wariantu.
 
 **System autentykacji (na bazie mechaniki oryginału):** każdy z 40 obrazów ma
 unikalny numer katalogowy w obrębie swojej kategorii stylistycznej. Jeśli

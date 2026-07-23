@@ -30,6 +30,7 @@ func _ready() -> void:
 	_test_harvest_scales_with_time()
 	_test_forgery_by_duplicate_number()
 	_test_forgery_texture_falls_back_when_missing()
+	_test_ai_players_rival_names_randomized()
 	_test_win_threshold_easy_mode()
 	_test_forward_contract_penalty_on_failure()
 	_test_players_hotseat_swap()
@@ -183,6 +184,29 @@ func _test_forgery_texture_falls_back_when_missing() -> void:
 	_assert(
 		Paintings.get_texture_path(1, true) == Paintings.get_texture_path(1, false),
 		"obraz nr 1 bez wariantu podróbki: is_fake=true spada z powrotem na zwykłą grafikę",
+	)
+
+
+func _test_ai_players_rival_names_randomized() -> void:
+	print("-- AIPlayers: imiona/portrety generycznych rywali losowane, nie statyczne --")
+	AIPlayers.reset_new_game()
+	var rival_2 := AIPlayers.get_rival("rival_2")
+	var rival_3 := AIPlayers.get_rival("rival_3")
+
+	_assert(rival_2["name"] != "Rywal II", "rival_2 dostaje wylosowane imię, nie statyczny placeholder")
+	_assert(rival_3["name"] != "Rywal III", "rival_3 dostaje wylosowane imię, nie statyczny placeholder")
+	_assert(
+		AIPlayers.GENERIC_RIVAL_POOL.has(rival_2["portrait"]) and AIPlayers.GENERIC_RIVAL_POOL.has(rival_3["portrait"]),
+		"oba portrety pochodzą z puli generycznych rywali",
+	)
+	_assert(rival_2["portrait"] != rival_3["portrait"], "rival_2 i rival_3 dostają RÓŻNE portrety (bez powtórzeń)")
+	_assert(
+		AIPlayers.get_portrait_path("vico") == "res://art/characters/vico.jpg",
+		"Vico ma stałą, nielosowaną ścieżkę portretu",
+	)
+	_assert(
+		AIPlayers.get_portrait_path("rival_2") == "res://art/characters/%s.jpg" % rival_2["portrait"],
+		"get_portrait_path liczy ścieżkę z pola 'portrait' danego rywala",
 	)
 
 

@@ -8,6 +8,20 @@ extends Node
 
 const WEEKLY_INCOME_RANGE := Vector2(2000.0, 8000.0)  ## uproszczenie: AI nie symuluje własnych plantacji
 
+## Pula generycznych rywali (docs/GRAFIKA_LEONARDO.md §6: 6 portretów, 2 płcie
+## × 3 dodatki) — klucz to jednocześnie identyfikator wariantu portretu, więc
+## nazwa i grafika zawsze trafiają do tego samego rywala. Imiona losowane przy
+## KAŻDEJ nowej grze (patrz reset_new_game), zamiast statycznego "Rywal II" —
+## zgłoszone przez użytkownika: imiona przeciwników powinny nadawać się same.
+const GENERIC_RIVAL_POOL := {
+	"male_tophat": "Baron Heinrich von Falkenstein",
+	"male_monocle": "Lord Edmund Ashcombe",
+	"male_boa": "Hrabia Alessandro Ricci",
+	"female_tophat": "Lady Wilhelmina Hartog",
+	"female_monocle": "Contessa Isabella Moreau",
+	"female_boa": "Madame Colette Dubois",
+}
+
 var rivals: Array[Dictionary] = []
 
 
@@ -16,11 +30,21 @@ func _ready() -> void:
 
 
 func reset_new_game() -> void:
+	var portrait_ids: Array = GENERIC_RIVAL_POOL.keys()
+	portrait_ids.shuffle()
 	rivals = [
-		{"id": "vico", "name": "Vico Vermeer", "money": 50000.0, "is_named_rival": true, "paintings": []},
-		{"id": "rival_2", "name": "Rywal II", "money": 50000.0, "is_named_rival": false, "paintings": []},
-		{"id": "rival_3", "name": "Rywal III", "money": 50000.0, "is_named_rival": false, "paintings": []},
+		{"id": "vico", "name": "Vico Vermeer", "portrait": "vico", "money": 50000.0, "is_named_rival": true, "paintings": []},
+		{"id": "rival_2", "name": GENERIC_RIVAL_POOL[portrait_ids[0]], "portrait": portrait_ids[0], "money": 50000.0, "is_named_rival": false, "paintings": []},
+		{"id": "rival_3", "name": GENERIC_RIVAL_POOL[portrait_ids[1]], "portrait": portrait_ids[1], "money": 50000.0, "is_named_rival": false, "paintings": []},
 	]
+
+
+## Ścieżka do portretu rywala (docs/GRAFIKA_LEONARDO.md §6) —
+## AuctionHouse.gd sam sprawdza ResourceLoader.exists() przed load(), więc
+## brakujący plik po prostu nie pokazuje portretu, zamiast crashować.
+func get_portrait_path(rival_id: String) -> String:
+	var rival := get_rival(rival_id)
+	return "res://art/characters/%s.jpg" % rival.get("portrait", rival_id)
 
 
 func get_rival(id: String) -> Dictionary:

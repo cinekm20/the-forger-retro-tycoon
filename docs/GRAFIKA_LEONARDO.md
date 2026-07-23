@@ -349,45 +349,58 @@ Elegant 1920s auction house interior, Art Deco wood paneling, podium, gathered
 silhouette crowd, single spotlighted empty easel in center, game background
 art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
-**Prompty (6 portretów rywali, 2 płcie × 3 dodatki, gotowe do wklejenia —
-razem z Vico niżej daje docelowe ~7 rywali AI):** ⚠ `AIPlayers.gd`
-instancjonuje na razie tylko **3 rywali łącznie** (Vico + 2 generyczni), nie
-7 — te dodatkowe portrety są zapasem na przyszłe rozszerzenie liczby
-przeciwników, nie czymś, co trzeba już teraz dopasować do kodu.
+**Prompty (6 portretów rywali, 2 płcie × 3 dodatki, gotowe do wklejenia).**
+✅ **Podpięte w kodzie**: `AIPlayers.GENERIC_RIVAL_POOL` losuje przy KAŻDEJ
+nowej grze 2 z tych 6 wariantów dla `rival_2`/`rival_3` (imię + portret
+zawsze razem, z tego samego wariantu) — 6 portretów to zapas puli, z
+którego co grę wybierane są tylko 2, nie sztywny rozmiar rosteru. Zapisz
+każdy pod nazwą z tabeli niżej w `game/art/characters/` — `AuctionHouse.gd`
+sam sprawdza, czy plik istnieje, więc może być ich mniej niż 6 (brakujące
+warianty po prostu nie pokażą portretu, gdy zostaną wylosowane).
 
-**Mężczyzna, cylinder**
+| Wariant | Plik | Przypisane imię |
+|---|---|---|
+| Mężczyzna, cylinder | `characters/male_tophat.jpg` | Baron Heinrich von Falkenstein |
+| Mężczyzna, monokl | `characters/male_monocle.jpg` | Lord Edmund Ashcombe |
+| Mężczyzna, boa z piór | `characters/male_boa.jpg` | Hrabia Alessandro Ricci |
+| Kobieta, cylinder | `characters/female_tophat.jpg` | Lady Wilhelmina Hartog |
+| Kobieta, monokl | `characters/female_monocle.jpg` | Contessa Isabella Moreau |
+| Kobieta, boa z piór | `characters/female_boa.jpg` | Madame Colette Dubois |
+
+**Mężczyzna, cylinder** (`characters/male_tophat.jpg`)
 ```
 1920s art collector character portrait, male, distinctive top hat accessory, bust portrait, game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
-**Mężczyzna, monokl**
+**Mężczyzna, monokl** (`characters/male_monocle.jpg`)
 ```
 1920s art collector character portrait, male, distinctive monocle accessory, bust portrait, game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
-**Mężczyzna, boa z piór**
+**Mężczyzna, boa z piór** (`characters/male_boa.jpg`)
 ```
 1920s art collector character portrait, male, distinctive feather boa accessory, bust portrait, game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
-**Kobieta, cylinder**
+**Kobieta, cylinder** (`characters/female_tophat.jpg`)
 ```
 1920s art collector character portrait, female, distinctive top hat accessory, bust portrait, game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
-**Kobieta, monokl**
+**Kobieta, monokl** (`characters/female_monocle.jpg`)
 ```
 1920s art collector character portrait, female, distinctive monocle accessory, bust portrait, game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
-**Kobieta, boa z piór**
+**Kobieta, boa z piór** (`characters/female_boa.jpg`)
 ```
 1920s art collector character portrait, female, distinctive feather boa accessory, bust portrait, game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Prompt (Vico Vermeer — nazwany rywal-fałszerz, patrz `MECHANIKI_EKONOMICZNE.md`
-pkt. 9, generować 2–3 warianty min z tym samym seedem: neutralny/uśmiechnięty/
-podejrzliwy, do scenek "Meanwhile"):**
+pkt. 9; portret stały/nielosowany, `characters/vico.jpg`, generować 2–3
+warianty min z tym samym seedem: neutralny/uśmiechnięty/podejrzliwy, do
+scenek "Meanwhile" — na start wystarczy jeden, np. uśmiechnięty):**
 ```
 1920s dapper art forger character portrait, sly confident smirk, slicked
 hair, pencil moustache, fine tailored suit with pocket square, bust portrait,
@@ -805,7 +818,7 @@ Leonardo, żeby mieć z czego wybrać).
 | 6 | 3 | Ramka obrazu (do aukcji/galerii) | 1 | 1:1, transparent | §6 | ⬜ do zrobienia |
 | 7 | — | ~~Ramka menu Huba (grafika z Leonardo)~~ | — | — | §10 | ✅ **rozwiązane w kodzie**, nie generować — NinePatchRect na rozciąganym obrazku wyglądał źle (pojedyncze motywy zdobne przy krawędziach zniekształcały się przy rozciąganiu do wąskiego, wysokiego panelu). Ramka rysowana natywnie w `MenuFrame.gd`, tak jak pinezki (`MapPin.gd`) — bez grafiki, skaluje się bez artefaktów do dowolnej wysokości |
 | 7b | 3 | Pozostałe elementy UI ogólne (ikony statystyk, pasek postępu aukcji) | ~5 | 1:1, transparent | §10 | ⬜ do zrobienia — **uwaga**, ten sam typ zadania co pinezki/ramka menu (mały, wyizolowany element), może mieć ten sam problem ze "sceną" zamiast czystej ikony |
-| 8 | 4 | Portrety rywali AI (w tym Vico, 2–3 warianty mimiki) | ~7 | 3:4, transparent lub jednolite tło | §6 | ⬜ do zrobienia — portrety zwykle nie mają problemu ze "sceną" |
+| 8 | 4 | Portrety rywali AI (w tym Vico, 2–3 warianty mimiki) | ~7 | 3:4, transparent lub jednolite tło | §6 | ⬜ grafiki jeszcze nie zrobione, ale **kod już podpięty** (`AIPlayers.get_portrait_path` + losowanie imion/portretów z `GENERIC_RIVAL_POOL` + wyświetlanie w `AuctionHouse.gd`) — wystarczy wgrać pliki wg tabeli nazw w §6, zapisane jako `game/art/characters/<nazwa>.jpg` |
 | 9 | 4 | Fazy wzrostu roślin (4 uprawy × 3 fazy) | 12 | 1:1, 512×512, transparent | §3 | ⬜ do zrobienia — **uwaga**, jak pinezki: mały wyizolowany obiekt, ryzyko tego samego problemu |
 | 10 | 5 | Konie + dżokeje (różne barwy jeźdźców) | 4–6 | 1:1 lub 4:3, transparent | §5 | ⬜ do zrobienia |
 | 11 | 6 | 40 obrazów kolekcji (na końcu, seriami po 5 per kategoria) | 40 | 1:1, min. 1024×1024 | §7 | ✅ zrobione i podpięte — wszystkie 40 (`painting_01.jpg`…`painting_40.jpg`, patrz `Paintings.get_texture_path`) |

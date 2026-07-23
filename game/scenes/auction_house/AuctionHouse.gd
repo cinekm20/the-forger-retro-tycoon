@@ -35,6 +35,7 @@ var status_label: Label
 var timer_label: Label
 var timer_bar: ProgressBar
 var painting_texture_rect: TextureRect
+var leader_portrait_rect: TextureRect
 var bid_btn: Button
 var resolve_btn: Button
 
@@ -112,6 +113,17 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	bid_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	bid_row.add_theme_constant_override("separation", 14)
 	root.add_child(bid_row)
+
+	## Portret prowadzącego rywala — widoczny tylko, gdy prowadzi rywal (nie
+	## gracz, nie pusto). Brakujący plik portretu (docs/GRAFIKA_LEONARDO.md §6)
+	## po prostu nie pokazuje niczego, tak samo jak obraz na sztaludze.
+	leader_portrait_rect = TextureRect.new()
+	leader_portrait_rect.custom_minimum_size = Vector2(64, 64)
+	leader_portrait_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	leader_portrait_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	leader_portrait_rect.visible = false
+	bid_row.add_child(leader_portrait_rect)
+
 	bid_label = ScreenHelpers.make_info_box(bid_row, "")
 	money_label = ScreenHelpers.make_info_box(bid_row, "")
 
@@ -301,10 +313,15 @@ func _update_labels() -> void:
 		warning_label.text = tr("⚠ Szkoła Sztuki ostrzega: ten numer już masz w kolekcji — to może być podróbka!")
 
 	var leader_text := tr("nikt")
+	leader_portrait_rect.visible = false
 	if current_leader == "player":
 		leader_text = tr("Ty")
 	elif current_leader != "":
 		leader_text = AIPlayers.get_rival(current_leader)["name"]
+		var portrait_path := AIPlayers.get_portrait_path(current_leader)
+		if ResourceLoader.exists(portrait_path):
+			leader_portrait_rect.texture = load(portrait_path)
+			leader_portrait_rect.visible = true
 	bid_label.text = tr("Oferta: %.0f M\n(prowadzi: %s)") % [current_bid, leader_text]
 
 	## Jawna zapowiedź, co się stanie, gdy licznik dobiegnie końca — tester
