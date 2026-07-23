@@ -19,17 +19,25 @@ func _ready() -> void:
 	## (kinowa scena z kurtynami, styl art déco zgodny z resztą gry) —
 	## zastępuje zwykły tekstowy tytuł zamiast leżeć obok niego. Grafika jest
 	## SZEROKA (kompozycja sceny, ~16:9), nie kwadratowa jak poprzedni,
-	## mniejszy logotyp — custom_minimum_size ustawia tylko SZEROKOŚĆ
-	## (proporcjonalną do ramki ekranu), a EXPAND_FIT_WIDTH_PROPORTIONAL liczy
-	## wysokość automatycznie z proporcji obrazka, więc dokładny rozmiar pliku
-	## może się zmienić bez konieczności przeliczania stałych w kodzie.
+	## mniejszy logotyp. custom_minimum_size dostaje JAWNIE obie wymiary
+	## (nie tylko szerokość) wyliczone z rzeczywistych proporcji tekstury —
+	## EXPAND_FIT_WIDTH_PROPORTIONAL z samą szerokością w custom_minimum_size
+	## (poprzednia wersja) zostawiał wysokość efektywnie na 0, więc logo było
+	## w ogóle niewidoczne (zgłoszone przez użytkownika: "nie ma logo na
+	## początku"). Ten sam "fixed-size defensive UI" wzorzec co gdzie indziej
+	## w grze (patrz np. Plantation.gd legend labels) — jawny rozmiar zamiast
+	## polegania na automatycznym liczeniu przez silnik.
 	var viewport_size := get_viewport_rect().size
 	var frame_content_width := viewport_size.x * 0.9 - ScreenHelpers.CONTENT_INSET_WITH_FRAME * 2.0
 
+	var logo_texture: Texture2D = load("res://art/backgrounds/logo.jpg")
+	var logo_width := frame_content_width * 0.85
+	var logo_height := logo_width * (logo_texture.get_height() / float(logo_texture.get_width()))
+
 	var logo := TextureRect.new()
-	logo.texture = load("res://art/backgrounds/logo.jpg")
-	logo.custom_minimum_size = Vector2(frame_content_width * 0.85, 0)
-	logo.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	logo.texture = logo_texture
+	logo.custom_minimum_size = Vector2(logo_width, logo_height)
+	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	logo.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
