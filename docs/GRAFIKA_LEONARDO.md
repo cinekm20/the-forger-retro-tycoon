@@ -282,11 +282,18 @@ przyszły krok, nieprzypisany priorytetowi w tej chwili.
   każdy z historią cen (`ShippingCompanies.price_history`/`Crops.price_history`,
   jeden punkt na każdy skok kalendarza) i legendą kolor+nazwa pod wykresem.
 
-**Prompt:**
+**Prompt (Giełda — tło `stock_market.jpg`):**
 ```
 1920s stock exchange trading floor, Art Deco architecture, chalkboard with
 numbers, bustling brokers in background (silhouettes only, no detailed faces),
 game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Prompt (Rynek — tło `market.jpg`, na razie tylko przewidziane, ekran wciąż
+używa `stock_market.jpg` do czasu wygenerowania i podpięcia tego pliku w
+`Market.gd`):**
+```
+1920s commodity trading hall, burlap sacks of coffee beans and cocoa pods, stacked wooden crates of tobacco leaves and tea chests along the walls, large weighing scales, a chalkboard listing crop prices, port warehouse atmosphere, bustling traders and dockworkers in background (silhouettes only, no detailed faces), game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 **Prompty (3 karty zdarzeń gospodarczych, gotowe do wklejenia):**
 
