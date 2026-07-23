@@ -299,10 +299,14 @@ func _apply_best_rival_counter_bid() -> bool:
 ## (_process) i z wygaśnięcia czasu (_on_time_expired) — jeśli rywal
 ## podbija, runda się NIE kończy, tylko zaczyna nową (gracz dostaje kolejne
 ## 20 sekund na reakcję). Zwraca true, jeśli ktoś podbił.
+## Bez komunikatu w status_label o tym, KTO podbił — zgłoszone przez
+## użytkownika (zrzut ekranu): ramka oferty (bid_label, _update_labels) już
+## pokazuje "(prowadzi: ...)", więc osobny status dublował tę samą
+## informację i na ekranie bez ScrollContainera wypychał layout poza dolną
+## krawędź ekranu.
 func _try_rival_counter_bid() -> bool:
 	if not _apply_best_rival_counter_bid():
 		return false
-	status_label.text = tr("%s podbija ofertę.") % AIPlayers.get_rival(current_leader)["name"]
 	_update_labels()
 	_start_bid_timer()
 	return true
