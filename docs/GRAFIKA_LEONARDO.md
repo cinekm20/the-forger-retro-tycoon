@@ -409,10 +409,37 @@ game character icon, Art Deco 1920s illustration style, warm sepia and gold pale
 ```
 
 **Prompt (rama):**
+
+⚠ **Poprawione** — poprzednia wersja promptu ("empty center, isolated on
+transparent background") i tak dawała gruby, ozdobny brzeg z KOLOROWYM tłem
+wypełniającym cały kwadrat (bordowo-turkusowe romby/plamy), a sam pusty środek
+zajmował ledwie ułamek kadru — nieużyteczne jako rama, w którą wstawia się
+obraz w kodzie (zgłoszone przez użytkownika). Dwie zmiany niżej: (1) prompt
+wprost zakazuje jakiegokolwiek koloru/wzoru tła, zamiast tylko prosić o
+"transparent" (co model i tak ignorował), (2) wymuszony **cienki** brzeg ramy
+i **duży** pusty środek (min. ok. 80% kadru), zamiast zostawiać to przypadkowi.
+Do pola Negative Prompt dopisz DODATKOWO (tylko przy tym jednym assecie, nie
+globalnie) drugą linijkę niżej.
+
 ```
-Ornate gold Art Deco picture frame, empty center, isolated on transparent
-background, game UI asset, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+Ornate thin gold Art Deco picture frame border only, frame lines running
+close to the very edges of the square canvas, the frame border itself no
+more than 10% of the image width, one huge empty flat rectangular opening
+filling the remaining center of the canvas edge to edge, plain flat cream
+fill inside the opening, isolated on pure flat empty background, no
+background color, no background pattern, no scenery, no wall, no shadow,
+game UI asset, Art Deco 1920s illustration style, gold with deep green and
+burgundy accent details only on the frame itself, flat vector-gouache
+texture, subtle paper grain, elegant geometric ornamentation, mobile game
+asset, clean silhouette, no photorealism
 ```
+Dodatkowa linijka do Negative Prompt (tylko ten asset):
+```
+background color, background pattern, colored background, gradient background, wall, backdrop, vignette, thick frame, wide frame border, small center opening, decorative scene, canvas texture, painting inside frame
+```
+Jeśli mimo to tło dalej się pojawi, najszybciej po prostu przytnij wygenerowany
+obraz do samej ramy w edytorze i usuń tło ręcznie (np. magic wand + delete),
+zamiast dalej walczyć z promptem.
 
 ### 7. 40 obrazów kolekcji (8 kategorii × 5 obrazów)
 
