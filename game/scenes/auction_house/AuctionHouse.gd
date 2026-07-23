@@ -117,16 +117,13 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 
 	warning_label = ScreenHelpers.make_label(root, "")
 
-	var bid_row := HBoxContainer.new()
-	bid_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	bid_row.add_theme_constant_override("separation", 14)
-	root.add_child(bid_row)
+	## Jedna wspólna, oprawiona skrzynka (make_boxed_row) na portret PROWADZĄCEGO
+	## rywala + tekst oferty — użytkownik zgłosił, że portret ma być W ŚRODKU
+	## tej ramki (nie osobno, obok niej) i trochę większy.
+	var bid_row := ScreenHelpers.make_boxed_row(root)
 
-	## Portret prowadzącego rywala — widoczny tylko, gdy prowadzi rywal (nie
-	## gracz, nie pusto). Brakujący plik portretu (docs/GRAFIKA_LEONARDO.md §6)
-	## po prostu nie pokazuje niczego, tak samo jak obraz na sztaludze.
 	leader_portrait_rect = TextureRect.new()
-	leader_portrait_rect.custom_minimum_size = Vector2(64, 64)
+	leader_portrait_rect.custom_minimum_size = Vector2(84, 84)
 	leader_portrait_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	leader_portrait_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	leader_portrait_rect.visible = false
@@ -139,9 +136,13 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	## "nikt", przesuwając resztę ekranu — ten sam problem co wcześniej na
 	## ekranie Plantacji, naprawiony z góry tym samym patentem (stała szerokość
 	## + zawijanie zamiast jednej, zmiennej długości linii).
-	bid_label = ScreenHelpers.make_info_box(bid_row, "", 0, 26)
+	bid_label = Label.new()
+	bid_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	bid_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
+	bid_label.add_theme_font_size_override("font_size", 26)
 	bid_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	bid_label.custom_minimum_size = Vector2(380, 0)
+	bid_label.custom_minimum_size = Vector2(340, 0)
+	bid_row.add_child(bid_label)
 
 	status_label = ScreenHelpers.make_label(root, "")
 	ScreenHelpers.make_back_button(root)
@@ -222,6 +223,12 @@ func _try_rival_counter_bid() -> bool:
 	var best_rival_id := ""
 	var best_rival_bid := current_bid
 	for rival in AIPlayers.rivals:
+		## Rywal, który już prowadzi, nie może "podbić samego siebie" —
+		## zgłoszone przez użytkownika: ten sam przeciwnik nie powinien
+		## podbijać ofertę pod rząd, musi ustąpić miejsca komuś innemu (albo
+		## nikomu, jeśli nikt inny nie chce przebić).
+		if rival["id"] == current_leader:
+			continue
 		var rival_bid: float = AIPlayers.decide_bid(rival["id"], current_bid, estimated_value)
 		if rival_bid > best_rival_bid:
 			best_rival_bid = rival_bid
