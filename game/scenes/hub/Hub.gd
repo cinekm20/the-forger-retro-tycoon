@@ -16,18 +16,16 @@ const LOCATION_GATED_DESTINATIONS := {
 	"Spichlerz": {"path": "res://scenes/warehouse/Warehouse.tscn", "requires_type": "plantation"},
 	"Dom aukcyjny": {"path": "res://scenes/auction_house/AuctionHouse.tscn", "requires_type": "auction"},
 	"Galeria": {"path": "res://scenes/gallery/Gallery.tscn", "requires_type": "auction"},
+	## Zgłoszone przez użytkownika: Szkoła sztuki ma być dostępna tylko w
+	## miastach aukcyjnych (Berlin/Paryż/Amsterdam/Lizbona/Londyn), nie
+	## wszędzie — bez Nowego Jorku (który jest typu "hub", nie "auction")
+	## mieści się już w istniejącym mechanizmie bramkowania wg typu, zamiast
+	## osobnej listy konkretnych miast.
+	"Szkoła sztuki": {"path": "res://scenes/art_school/ArtSchool.tscn", "requires_type": "auction"},
 }
 const FREE_DESTINATIONS := {
 	"Giełda": "res://scenes/stock_market/StockMarket.tscn",
 	"Wyścigi konne": "res://scenes/races/Races.tscn",
-}
-## Ekrany dostępne tylko w KONKRETNYCH miastach (nie wg typu, jak
-## LOCATION_GATED_DESTINATIONS wyżej — te 4 miasta nie dzielą wspólnego
-## Cities.CITIES["type"]: Londyn/Paryż/Berlin to "auction", Nowy Jork to
-## "hub") — zgłoszone przez użytkownika: Szkoła sztuki ma być dostępna
-## tylko w Londynie, Paryżu, Berlinie i Nowym Jorku.
-const CITY_GATED_DESTINATIONS := {
-	"Szkoła sztuki": {"path": "res://scenes/art_school/ArtSchool.tscn", "requires_cities": ["london", "paris", "berlin", "new_york"]},
 }
 
 const MapPinScript := preload("res://scripts/ui/MapPin.gd")
@@ -109,12 +107,6 @@ func _ready() -> void:
 	for destination_name in FREE_DESTINATIONS.keys():
 		var path: String = FREE_DESTINATIONS[destination_name]
 		ScreenHelpers.make_button(places_menu_section, destination_name, func(): SceneRouter.goto_scene(path))
-
-	for destination_name in CITY_GATED_DESTINATIONS.keys():
-		var info: Dictionary = CITY_GATED_DESTINATIONS[destination_name]
-		var path: String = info["path"]
-		var btn := ScreenHelpers.make_button(places_menu_section, destination_name, func(): SceneRouter.goto_scene(path))
-		btn.set_meta("requires_cities", info["requires_cities"])
 
 	ScreenHelpers.make_button(places_menu_section, "« Powrót", _hide_places_menu)
 
@@ -383,8 +375,5 @@ func _update_gated_button(node: Node) -> void:
 		var requires_type: String = node.get_meta("requires_type")
 		var current_type: String = Cities.CITIES.get(Travel.current_city, {}).get("type", "")
 		node.visible = not Travel.is_traveling() and current_type == requires_type
-	if node is Button and node.has_meta("requires_cities"):
-		var requires_cities: Array = node.get_meta("requires_cities")
-		node.visible = not Travel.is_traveling() and requires_cities.has(Travel.current_city)
 	for child in node.get_children():
 		_update_gated_button(child)
