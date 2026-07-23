@@ -3,7 +3,7 @@ extends Node
 ## Patrz docs/MECHANIKI_EKONOMICZNE.md pkt. 9.
 ##
 ## Twist fabularny (docs/DODATKOWE_MECHANIKI.md): Vico okazuje się być tą
-## samą postacią co Walther von Grünschild — zaimplementowane w warstwie
+## samą postacią co Walther von Rabenstein — zaimplementowane w warstwie
 ## zakończenia, patrz scenes/ending/Ending.gd, nie w tym systemie ekonomicznym.
 
 const WEEKLY_INCOME_RANGE := Vector2(2000.0, 8000.0)  ## uproszczenie: AI nie symuluje własnych plantacji
@@ -40,7 +40,7 @@ func reset_new_game() -> void:
 	portrait_ids.shuffle()
 	var vico_portrait := "vico_%d" % (randi() % VICO_PORTRAIT_VARIANTS + 1)
 	rivals = [
-		{"id": "vico", "name": "Vico Vermeer", "portrait": vico_portrait, "money": 50000.0, "is_named_rival": true, "paintings": []},
+		{"id": "vico", "name": "Vico Falsari", "portrait": vico_portrait, "money": 50000.0, "is_named_rival": true, "paintings": []},
 		{"id": "rival_2", "name": GENERIC_RIVAL_POOL[portrait_ids[0]], "portrait": portrait_ids[0], "money": 50000.0, "is_named_rival": false, "paintings": []},
 		{"id": "rival_3", "name": GENERIC_RIVAL_POOL[portrait_ids[1]], "portrait": portrait_ids[1], "money": 50000.0, "is_named_rival": false, "paintings": []},
 	]

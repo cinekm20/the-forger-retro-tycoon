@@ -2,7 +2,7 @@ extends Control
 ## Ekran zakończenia — trzy warianty wg GameState.last_outcome.
 ## Tekst zakończenia "win" to nasza własna, oryginalna scena inspirowana
 ## twistem fabularnym udokumentowanym w docs/DODATKOWE_MECHANIKI.md
-## (Walther von Grünschild = Vico Vermeer), a nie przedruk żadnego
+## (Walther von Rabenstein = Vico Falsari), a nie przedruk żadnego
 ## konkretnego źródła.
 
 func _ready() -> void:
@@ -45,7 +45,7 @@ func _build_win(root: VBoxContainer, player_index: int) -> void:
 	)
 	_make_narrative_label(
 		root,
-		tr("W gabinecie czeka na Ciebie zapieczętowany testament. Notariusz czyta go na głos, a przy podpisie zawodowo się zawiesza — obok nazwiska \"Walther von Grünschild\" widnieje dopisek innym charakterem pisma: \"znany też jako Vico Vermeer\"."),
+		tr("W gabinecie czeka na Ciebie zapieczętowany testament. Notariusz czyta go na głos, a przy podpisie zawodowo się zawiesza — obok nazwiska \"Walther von Rabenstein\" widnieje dopisek innym charakterem pisma: \"znany też jako Vico Falsari\"."),
 	)
 	_make_narrative_label(
 		root,

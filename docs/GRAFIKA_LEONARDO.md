@@ -430,7 +430,7 @@ samej konwencji nazw plików.
 1920s art collector character portrait, female, distinctive feather boa accessory, bust portrait, game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
-**Prompt (Vico Vermeer — nazwany rywal-fałszerz, patrz `MECHANIKI_EKONOMICZNE.md`
+**Prompt (Vico Falsari — nazwany rywal-fałszerz, patrz `MECHANIKI_EKONOMICZNE.md`
 pkt. 9). ✅ 3 warianty gotowe i podpięte** (`characters/vico_1.jpg`,
 `vico_2.jpg`, `vico_3.jpg`) — losowane przy każdej nowej grze, tak samo jak
 portrety generycznych rywali (`AIPlayers.VICO_PORTRAIT_VARIANTS`), zamiast

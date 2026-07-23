@@ -57,7 +57,10 @@ grafiki nie jest nam potrzebne jako referencja wizualna.
   było w istocie testem zaaranżowanym przez samego wuja dla przyszłego
   spadkobiercy. ✅ **Zaimplementowane niemal dosłownie** w ekranie zwycięstwa
   (`scenes/ending/Ending.gd::_build_win`) — nie jest to już tylko rekomendacja
-  do rozważenia.
+  do rozważenia. **Nazwiska zmienione** w naszej wersji (zgłoszone przez
+  użytkownika: te z oryginału niosą to samo ryzyko co dawny tytuł gry
+  "Vermeer") — u nas to **Walther von Rabenstein** i **Vico Falsari**, sam
+  twist fabularny (ta sama osoba pod dwiema tożsamościami) zostaje identyczny.
 
 ## Nowe mechaniki z tipów do sequela (1997)
 

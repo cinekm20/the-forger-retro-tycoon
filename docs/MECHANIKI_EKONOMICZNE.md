@@ -232,9 +232,14 @@ aukcja: ..."). Jeśli gracz przesiedzi termin o więcej niż 3 dni
 nieaktualną datę w nieskończoność. Limit czasu na rundę licytacji w Domu
 aukcyjnym to **20 sekund** (`BID_TIME_LIMIT`).
 
-## 9. Vico Vermeer — rozszerzony profil postaci
+## 9. Vico Falsari — rozszerzony profil postaci
 
-Vico Vermeer to **jeden z najlepszych fałszerzy sztuki swoich czasów** —
+Zgłoszone przez użytkownika: nazwisko zmienione z "Vermeer" na "Falsari" —
+oryginalne nazwisko było wprost z materiału źródłowego (opis przejścia gry
+z 1987, patrz `DODATKOWE_MECHANIKI.md`), tak samo ryzykowne jak tytuł gry.
+Poniższy opis osobowości/mechanik nadal dotyczy tej samej postaci.
+
+Vico Falsari to **jeden z najlepszych fałszerzy sztuki swoich czasów** —
 jedyny trop prowadzący do zaginionej kolekcji. To on (pośrednio) odpowiada za
 falszywki pojawiające się na aukcjach. W oryginale ma osobowość: pojawia się
 w scenkach przestojów ("Meanwhile") z zadowoloną z siebie pozą, czasem

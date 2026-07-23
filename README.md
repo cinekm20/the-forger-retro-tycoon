@@ -4,8 +4,8 @@ Graficzny remake ekonomicznej gry strategicznej *Vermeer* (Ariolasoft,
 1987, C64), teraz pod własnym tytułem *The Forger: Retro Tycoon* — na
 Androida, w Godot 4. Gracz jako spadkobierca odbudowuje
 fortunę (plantacje, giełda, wyścigi) i wykupuje na aukcjach rozproszoną
-kolekcję 40 obrazów wuja Walthera von Grünschilda, rywalizując z fałszerzem
-Vico Vermeerem i innymi spadkobiercami.
+kolekcję 40 obrazów wuja Walthera von Rabensteina, rywalizując z fałszerzem
+imieniem Vico Falsari i innymi spadkobiercami.
 
 ## Struktura repo
 
