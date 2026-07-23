@@ -38,6 +38,7 @@ var painting_texture_rect: TextureRect
 var leader_portrait_rect: TextureRect
 var bid_btn: Button
 var resolve_btn: Button
+var back_btn: Button
 
 ## 268 = 190 (poprzedni rozmiar samego obrazu, patrz historia komentarza w
 ## _build_active_auction_ui) powiększone tak, żeby po doliczeniu ramki
@@ -185,7 +186,13 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	bid_row.add_child(bid_label)
 
 	status_label = ScreenHelpers.make_label(root, "")
-	ScreenHelpers.make_back_button(root)
+	## Ukryty do rozstrzygnięcia aukcji (patrz _resolve_auction) — zgłoszone
+	## przez użytkownika: podczas trwającej licytacji nie powinno dać się
+	## wyjść z ekranu i wrócić do tej samej aukcji później (np. żeby
+	## przeczekać/zresetować licznik). Przycisk pojawia się dopiero, gdy
+	## wynik (kto wygrał) jest już wypisany w status_label.
+	back_btn = ScreenHelpers.make_back_button(root)
+	back_btn.visible = false
 
 	var action_root := ScreenHelpers.make_root_bottom(self, true, 380.0, true)
 	timer_label = ScreenHelpers.make_label(action_root, "")
@@ -210,7 +217,7 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	action_root.add_child(timer_bar)
 
 	bid_btn = ScreenHelpers.make_button(action_root, tr("Podbij (+10%)"), _on_bid_pressed)
-	resolve_btn = ScreenHelpers.make_button(action_root, tr("Zakończ rundę"), _on_resolve_round_pressed)
+	resolve_btn = ScreenHelpers.make_button(action_root, tr("Rezygnuję z aukcji"), _on_resolve_round_pressed)
 
 
 static func _make_expand_spacer() -> Control:
@@ -339,6 +346,11 @@ func _resolve_auction() -> void:
 	Auctions.resolve_and_reschedule()
 	schedule_label.text = Auctions.get_schedule_string()
 	status_label.text += "\n" + Auctions.get_schedule_string()
+
+	## Dopiero TERAZ (wynik już wypisany w status_label) — zgłoszone przez
+	## użytkownika: podczas trwającej licytacji nie powinno być możliwości
+	## wyjścia i powrotu na tę samą aukcję.
+	back_btn.visible = true
 
 	if GameState.check_game_over():
 		SceneRouter.goto_scene(SceneRouter.ENDING)
