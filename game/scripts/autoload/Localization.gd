@@ -16,7 +16,7 @@ const LANGUAGES := {
 	"de": "Deutsch",
 }
 
-const SETTINGS_PATH := "user://vermeer_settings.json"
+const SETTINGS_PATH := "user://the_forger_settings.json"
 
 var current_language: String = "pl"
 

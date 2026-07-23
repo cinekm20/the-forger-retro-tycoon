@@ -82,16 +82,25 @@ silhouette, no photorealism
 ## Lista assetów wg ekranu
 
 ### 1. Ekran startowy / logo
-- Logo gry "VERMEER" w liternictwie art déco, złote litery na sepiowym tle
-- Ekran tytułowy: sylwetka kolekcjonera sztuki przed sztalugą, mapa świata w tle
-- Opcjonalny motyw: własna, stylizowana reinterpretacja "Dziewczyny z perłą"
-  Jana Vermeera (obraz z ok. 1665, domena publiczna) — subtelne mrugnięcie do
-  oryginalnej gry, która miała podobny motyw na ekranie tytułowym. To ma być
-  **inspirowana reinterpretacja w naszym stylu art déco**, nie kopia obrazu.
+Zgłoszone przez użytkownika: gra zmieniła tytuł na **"The Forger: Retro
+Tycoon"** (wcześniej *Vermeer*, po tytule oryginału z 1987) — powód: niepewny
+status nazwy "Vermeer" jako marki. Katalog obrazów i kategoria "vermeer"
+(prawdziwy malarz Jan Vermeer) **zostają bez zmian** — to osobna sprawa od
+tytułu gry.
 
-**Prompt:**
+- ✅ **Logo — dostarczone przez użytkownika i podpięte**
+  (`art/backgrounds/logo.jpg`, używane w `MainMenu.gd`) — kinowa scena z
+  kurtynami, złotą rozetą i wypukłym napisem "THE FORGER" / "RETRO TYCOON"
+  w stylu art déco.
+- Opcjonalny motyw (nadal aktualny, niezależnie od zmiany tytułu): własna,
+  stylizowana reinterpretacja "Dziewczyny z perłą" Jana Vermeera (obraz z
+  ok. 1665, domena publiczna) — subtelne mrugnięcie do oryginalnej gry,
+  która miała podobny motyw na ekranie tytułowym. To ma być **inspirowana
+  reinterpretacja w naszym stylu art déco**, nie kopia obrazu.
+
+**Prompt (zastąpiony dostarczoną grafiką, zapis na wypadek regeneracji):**
 ```
-Art Deco game logo title screen, elegant gold typography reading "VERMEER",
+Art Deco game logo title screen, elegant gold typography reading "THE FORGER: RETRO TYCOON",
 1920s art collector silhouette standing before an easel, world map background,
 Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
@@ -862,7 +871,7 @@ Leonardo, żeby mieć z czego wybrać).
 | # | Priorytet | Asset | Szt. | Format / proporcje | Sekcja promptu | Status |
 |---|---|---|---|---|---|---|
 | 1 | 1 | Obraz referencyjny stylu / tło menu głównego | 1 | 16:9, docelowo 1920×1080 | §1 | ✅ zrobione (`main_menu_title.jpg`) |
-| 2 | 1 | Logo "VERMEER" | 1 | dowolne, PNG transparent | §1 | ⏸ zastąpione na razie tekstem w kodzie (Label), nie pilne |
+| 2 | 1 | Logo "The Forger: Retro Tycoon" | 1 | dowolne, JPG | §1 | ✅ dostarczone przez użytkownika i podpięte (`logo.jpg`) |
 | 3a | 2 | Tło Plantacji | 1 | 16:9, 1920×1080 | §3 | ✅ zrobione i podpięte (`plantation.jpg`) |
 | 3b | 2 | Tło Domu aukcyjnego | 1 | 16:9, 1920×1080 | §6 | ✅ zrobione i podpięte (`auction_house.jpg`) |
 | 3c | 2 | Tło Giełdy | 1 | 16:9, 1920×1080 | §4 | ✅ zrobione i podpięte (`stock_market.jpg`) |

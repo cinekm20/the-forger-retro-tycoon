@@ -21,7 +21,7 @@ var total: int = 0
 
 
 func _ready() -> void:
-	print("=== Vermeer — testy autoloadów ===")
+	print("=== The Forger: Retro Tycoon — testy autoloadów ===")
 
 	_test_cities_direct_travel()
 	_test_cities_route_via_transfer()

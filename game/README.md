@@ -1,4 +1,4 @@
-# Vermeer — szkielet gry (Godot 4)
+# The Forger: Retro Tycoon — szkielet gry (Godot 4)
 
 Wszystkie ekrany mają już działającą logikę (nie tylko nawigację) —
 plantacje + spichlerz, giełda, rynek, dom aukcyjny, szkoła sztuki, wyścigi,

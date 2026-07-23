@@ -1,4 +1,4 @@
-# Vermeer — Game Design Document (Android)
+# The Forger: Retro Tycoon — Game Design Document (Android)
 
 ## 1. Punkt wyjścia
 

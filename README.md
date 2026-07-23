@@ -1,7 +1,8 @@
-# Vermeer — remake na Androida
+# The Forger: Retro Tycoon — remake na Androida
 
 Graficzny remake ekonomicznej gry strategicznej *Vermeer* (Ariolasoft,
-1987, C64) — na Androida, w Godot 4. Gracz jako spadkobierca odbudowuje
+1987, C64), teraz pod własnym tytułem *The Forger: Retro Tycoon* — na
+Androida, w Godot 4. Gracz jako spadkobierca odbudowuje
 fortunę (plantacje, giełda, wyścigi) i wykupuje na aukcjach rozproszoną
 kolekcję 40 obrazów wuja Walthera von Grünschilda, rywalizując z fałszerzem
 Vico Vermeerem i innymi spadkobiercami.

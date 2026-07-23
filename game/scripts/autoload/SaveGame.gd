@@ -1,7 +1,7 @@
 extends Node
 ## Zapis/odczyt stanu gry do pojedynczego pliku JSON w katalogu użytkownika.
 
-const SAVE_PATH := "user://vermeer_save.json"
+const SAVE_PATH := "user://the_forger_save.json"
 
 
 func has_save() -> bool:

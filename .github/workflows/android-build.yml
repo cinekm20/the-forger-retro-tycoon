@@ -125,9 +125,9 @@ jobs:
         working-directory: game
         run: |
           mkdir -p ../android_build
-          timeout 300 godot --headless --export-debug "Android" ../android_build/vermeer-debug.apk --path . 2>&1 | tee export_output.log
+          timeout 300 godot --headless --export-debug "Android" ../android_build/the-forger-debug.apk --path . 2>&1 | tee export_output.log
           exit_code=${PIPESTATUS[0]}
-          if [ "$exit_code" -ne 0 ] || [ ! -f ../android_build/vermeer-debug.apk ]; then
+          if [ "$exit_code" -ne 0 ] || [ ! -f ../android_build/the-forger-debug.apk ]; then
             echo "Eksport nie powiódł się (kod $exit_code) albo plik .apk nie powstał."
             exit 1
           fi
@@ -135,5 +135,5 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: vermeer-debug-apk
-          path: android_build/vermeer-debug.apk
+          name: the-forger-debug-apk
+          path: android_build/the-forger-debug.apk

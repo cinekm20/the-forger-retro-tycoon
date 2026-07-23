@@ -1,15 +1,15 @@
-; Vermeer — szkielet projektu Godot 4
+; The Forger: Retro Tycoon — szkielet projektu Godot 4
 ; Zobacz docs/GDD.md w repo głównym po pełny projekt gry.
 
 config_version=5
 
 [application]
 
-config/name="Vermeer"
+config/name="The Forger: Retro Tycoon"
 config/description="Ekonomiczna gra strategiczna inspirowana grą Vermeer (Ariolasoft, 1987)."
 run/main_scene="res://scenes/main_menu/MainMenu.tscn"
 config/features=PackedStringArray("4.3", "Mobile")
-config/icon="res://art/icons/app_icon.png"
+config/icon="res://art/icons/app_icon.jpg"
 
 [autoload]
 
