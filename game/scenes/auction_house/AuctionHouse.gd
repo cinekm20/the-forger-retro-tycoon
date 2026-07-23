@@ -132,6 +132,12 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	var frame_rect := TextureRect.new()
 	frame_rect.texture = load(FRAME_TEXTURE_PATH)
 	frame_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	## EXPAND_IGNORE_SIZE: bez tego minimalny rozmiar TextureRect to naturalny
+	## rozmiar tekstury (frame.png = 1024×1024 px), który wygrywa z małym
+	## FRAME_HOLDER_SIZE i rama renderuje się w swoim naturalnym, ogromnym
+	## rozmiarze zamiast się zmniejszyć — zgłoszone przez użytkownika na
+	## zrzucie ekranu (rama "jakby w ogóle nie zmniejszona").
+	frame_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	frame_rect.stretch_mode = TextureRect.STRETCH_SCALE
 	frame_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	frame_holder.add_child(frame_rect)
