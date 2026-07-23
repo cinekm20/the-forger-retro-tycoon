@@ -351,27 +351,36 @@ func _resolve_auction() -> void:
 	resolve_btn.visible = false
 	back_btn.visible = true
 	timer_label.text = ""
-	timer_bar.value = 0.0
+	## visible = false (nie tylko value = 0) — zgłoszone przez użytkownika:
+	## pusty pasek czasu nie powinien już wisieć na ekranie po rozstrzygnięciu.
+	timer_bar.visible = false
 
+	## "Kto wygrał" NIE jest już tu powtarzane tekstem — zgłoszone przez
+	## użytkownika: ta informacja jest już widoczna w ramce oferty
+	## ("Oferta: X M (prowadzi: ...)", patrz _update_labels/bid_label), więc
+	## status_label pokazuje TYLKO to, czego w tamtej ramce nie widać: czy to
+	## była podróbka, o ile urosła kolekcja, albo że obraz zostaje niesprzedany.
 	if current_leader == "player":
 		Economy.spend(current_bid)
 		if Paintings.is_forgery_by_duplicate(current_number):
 			status_label.text = tr("To była FAŁSZYWKA! Pieniądze przepadły, obraz nie trafia do kolekcji.")
 		else:
 			Paintings.catalogue(current_number)
-			status_label.text = tr("Wygrywasz aukcję! Obraz trafia do kolekcji (%d/%d).") % [
+			status_label.text = tr("Obraz trafia do kolekcji (%d/%d).") % [
 				Paintings.owned_count(), Paintings.win_threshold,
 			]
 	elif current_leader == "":
 		status_label.text = tr("Nikt nie licytował — obraz zostaje niesprzedany.")
 	else:
 		AIPlayers.award_painting(current_leader, current_number, current_bid)
-		status_label.text = tr("%s wygrywa aukcję.") % AIPlayers.get_rival(current_leader)["name"]
+		status_label.text = ""
 	_update_labels()
 
+	## Termin kolejnej aukcji NIE jest już dublowany tu drugi raz — zgłoszone
+	## przez użytkownika: ta sama informacja już aktualizuje się w
+	## schedule_label na samej górze ekranu (patrz linijka niżej).
 	Auctions.resolve_and_reschedule()
 	schedule_label.text = Auctions.get_schedule_string()
-	status_label.text += "\n" + Auctions.get_schedule_string()
 
 	if GameState.check_game_over():
 		SceneRouter.goto_scene(SceneRouter.ENDING)
