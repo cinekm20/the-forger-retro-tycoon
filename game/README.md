@@ -6,8 +6,9 @@ galeria (+ ochrona), ustawienia (język). Hub pokazuje pasek stanu (dwie
 skrzynki w przeciwległych górnych rogach) i dwupoziomowe menu w wąskim
 panelu bocznym: górny poziom to "Jedź »", "Miejsca »", "Koniec tury »" i
 "Zapisz i wyjdź do menu"; "Miejsca »" otwiera podmenu z ekranami
-zależnymi od typu miasta (Plantacje, Spichlerz, Dom aukcyjny, Galeria) i
-zawsze dostępnymi (Giełda, Rynek, Wyścigi, Szkoła sztuki), z przyciskiem
+zależnymi od typu miasta (Plantacje, Spichlerz — tylko miasta plantacyjne;
+Dom aukcyjny, Galeria, Szkoła sztuki — tylko miasta aukcyjne; Giełda, Rynek —
+Nowy Jork i miasta aukcyjne) i zawsze dostępnym (Wyścigi), z przyciskiem
 "« Powrót" — zastąpiło to jedną, długą, przewijaną listę, bo przewijanie
 dotykiem na telefonie okazało się niewiarygodne. Tło Huba unikalne dla
 każdego z 18 miast (rozpoznawalny zabytek/motyw, np. Big Ben w Londynie

@@ -172,11 +172,24 @@ func _ready() -> void:
 	worker_spin.value_changed.connect(_on_workers_changed)
 	worker_row.add_child(worker_spin)
 
+	harvest_status_label = ScreenHelpers.make_label(info_column, "")
+	harvest_status_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
+	harvest_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	## custom_minimum_size.y: rezerwuje miejsce na 2 wiersze na stałe — bez
+	## tego przełączanie między pustym tekstem (przed zbiorami) i najdłuższym
+	## komunikatem ("Nic do zebrania — ...", 2 linie) zmieniało wysokość
+	## etykiety i przesuwało guziki poniżej (ten sam problem co info_label
+	## wyżej — patrz _update_info). Wysokość podniesiona do 60 (z 50) wraz z
+	## większą czcionką.
+	harvest_status_label.custom_minimum_size = Vector2(column_width, 60)
+
 	## Puste miejsce nad guzikami rośnie/kurczy się (SIZE_EXPAND_FILL), więc
-	## guziki + status zbiorów zostają zawsze WYRÓWNANE OD DOŁU kolumny —
-	## zgłoszone przez użytkownika — zamiast leżeć zaraz pod polem
-	## "Robotnicy", w zmiennym miejscu zależnym od tego, ile miejsca zajmuje
-	## treść nad nimi.
+	## guziki zostają zawsze WYRÓWNANE OD DOŁU kolumny, na tej samej wysokości
+	## co Spichlerz/Powrót w legend_column — zgłoszone przez użytkownika:
+	## guziki pod napisem "Plantacje" mają się wyrównać do dołu tak samo jak
+	## te pod legendą. status_label MUSI być PRZED spacerem (nie po guzikach,
+	## jak poprzednio) — inaczej to on, nie guzik, byłby ostatnim elementem
+	## kolumny i guziki kończyłyby się wyżej niż w legend_column.
 	info_column.add_child(_make_expand_spacer())
 
 	## Guziki akcji jeden POD drugim (nie obok siebie w jednym rzędzie, jak
@@ -190,17 +203,6 @@ func _ready() -> void:
 	## napis z nazwą miasta był za długi na węższą kolumnę (column_width),
 	## Godot obcinał go wewnątrz guzika.
 	ScreenHelpers.make_button(info_column, "Wyślij i sprzedaj", _on_sell_pressed, column_width)
-
-	harvest_status_label = ScreenHelpers.make_label(info_column, "")
-	harvest_status_label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
-	harvest_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	## custom_minimum_size.y: rezerwuje miejsce na 2 wiersze na stałe — bez
-	## tego przełączanie między pustym tekstem (przed zbiorami) i najdłuższym
-	## komunikatem ("Nic do zebrania — ...", 2 linie) zmieniało wysokość
-	## etykiety i przesuwało guziki poniżej (ten sam problem co info_label
-	## wyżej — patrz _update_info). Wysokość podniesiona do 60 (z 50) wraz z
-	## większą czcionką.
-	harvest_status_label.custom_minimum_size = Vector2(column_width, 60)
 
 	## Legenda WYGLĄDU pól — ikonka + podpis dla każdego stanu pola (nie tylko
 	## opis liczbowy) — zgłoszone przez użytkownika: musi być pokazane, jak

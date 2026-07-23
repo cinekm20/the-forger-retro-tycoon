@@ -20,6 +20,12 @@ const DAILY_DRIFT_RANGE := 0.03  ## losowe wahanie kursu ±3% dziennie
 ## się do tempa rozgrywki. MAX_HISTORY_POINTS ogranicza pamięć/szerokość
 ## wykresu przy bardzo długiej grze — najstarsze punkty wypadają (FIFO).
 const MAX_HISTORY_POINTS := 60
+## Zgłoszone przez użytkownika: cena na starcie nowej gry ma być losowa, a
+## wykres ma już mieć jakąś historię zamiast płaskiego pojedynczego punktu.
+## Symulujemy więc kilka "przeszłych" kroków tym samym wzorem co
+## _on_day_advanced (losowy dryf o DAILY_DRIFT_RANGE) — ostatni wygenerowany
+## punkt staje się aktualną (losową) ceną startową.
+const INITIAL_HISTORY_POINTS := 12
 
 var stock_price: Dictionary = {}
 var shares_owned: Dictionary = {}
@@ -35,9 +41,12 @@ func reset_new_game() -> void:
 	shares_owned.clear()
 	price_history.clear()
 	for company_id in COMPANIES.keys():
-		stock_price[company_id] = STARTING_PRICE
 		shares_owned[company_id] = 0
-		price_history[company_id] = [STARTING_PRICE]
+		var history: Array = [STARTING_PRICE]
+		for i in INITIAL_HISTORY_POINTS - 1:
+			history.append(max(1.0, history.back() * (1.0 + randf_range(-DAILY_DRIFT_RANGE, DAILY_DRIFT_RANGE))))
+		price_history[company_id] = history
+		stock_price[company_id] = history.back()
 
 
 func boost_from_region_activity(region: String, amount: float) -> void:

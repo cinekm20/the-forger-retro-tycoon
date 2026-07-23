@@ -509,17 +509,30 @@ func _test_price_history_for_charts() -> void:
 	ShippingCompanies.reset_new_game()
 	Crops.reset_new_game()
 
-	_assert(ShippingCompanies.price_history["lloyd"].size() == 1, "historia kursu Lloyd zaczyna się z 1 punktem (cena startowa)")
+	## Zgłoszone przez użytkownika: na starcie nowej gry wykres ma już mieć
+	## losową "przeszłość" (nie płaski pojedynczy punkt) — reset_new_game
+	## dogenerowuje INITIAL_HISTORY_POINTS punktów, pierwszy zawsze = cena
+	## bazowa, ostatni = aktualna (losowa) cena startowa.
+	_assert(
+		ShippingCompanies.price_history["lloyd"].size() == ShippingCompanies.INITIAL_HISTORY_POINTS,
+		"historia kursu Lloyd zaczyna się z INITIAL_HISTORY_POINTS punktami",
+	)
 	_assert(ShippingCompanies.price_history["lloyd"][0] == ShippingCompanies.STARTING_PRICE, "pierwszy punkt to STARTING_PRICE")
-	_assert(Crops.price_history["coffee"].size() == 1, "historia ceny kawy zaczyna się z 1 punktem (cena bazowa)")
+	_assert(ShippingCompanies.price_history["lloyd"][-1] == ShippingCompanies.get_price("lloyd"), "ostatni punkt historii = aktualna (losowa) cena startowa")
+	_assert(
+		Crops.price_history["coffee"].size() == Crops.INITIAL_HISTORY_POINTS,
+		"historia ceny kawy zaczyna się z INITIAL_HISTORY_POINTS punktami",
+	)
 
 	## Calendar.advance_days (nie wywoływanie _on_day_advanced bezpośrednio) —
 	## tak samo jak reszta gry, przez sygnał Calendar.day_advanced, pod który
 	## podpięte są ShippingCompanies i Crops.
+	var lloyd_size_before := ShippingCompanies.price_history["lloyd"].size()
+	var coffee_size_before := Crops.price_history["coffee"].size()
 	Calendar.advance_days(7)
-	_assert(ShippingCompanies.price_history["lloyd"].size() == 2, "kolejny skok dni dopisuje kolejny punkt historii (Lloyd)")
-	_assert(Crops.price_history["coffee"].size() == 2, "kolejny skok dni dopisuje kolejny punkt historii (kawa)")
-	_assert(ShippingCompanies.price_history["lloyd"][1] == ShippingCompanies.get_price("lloyd"), "ostatni punkt historii = aktualna cena")
+	_assert(ShippingCompanies.price_history["lloyd"].size() == lloyd_size_before + 1, "kolejny skok dni dopisuje kolejny punkt historii (Lloyd)")
+	_assert(Crops.price_history["coffee"].size() == coffee_size_before + 1, "kolejny skok dni dopisuje kolejny punkt historii (kawa)")
+	_assert(ShippingCompanies.price_history["lloyd"][-1] == ShippingCompanies.get_price("lloyd"), "ostatni punkt historii = aktualna cena")
 
 	## MAX_HISTORY_POINTS ogranicza długość historii (najstarsze punkty
 	## wypadają, FIFO) — bez tego pamięć/szerokość wykresu rosłaby bez końca

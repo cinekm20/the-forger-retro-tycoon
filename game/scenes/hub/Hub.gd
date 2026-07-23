@@ -11,24 +11,29 @@ extends Control
 ## całkiem UKRYWANE poza właściwym typem miasta, nie tylko wyszarzane
 ## (patrz _update_gated_button niżej). Ekrany spoza tej listy są dostępne
 ## z każdego miasta.
+## requires_types: lista typów miasta (patrz Cities.CITIES), w KTÓRYCH dana
+## pozycja ma być widoczna — string w tabeli niżej dla czytelności, ale
+## zawsze owijany w tablicę przy budowaniu przycisków (patrz _ready).
 const LOCATION_GATED_DESTINATIONS := {
-	"Plantacje": {"path": "res://scenes/plantation/Plantation.tscn", "requires_type": "plantation"},
-	"Spichlerz": {"path": "res://scenes/warehouse/Warehouse.tscn", "requires_type": "plantation"},
-	"Dom aukcyjny": {"path": "res://scenes/auction_house/AuctionHouse.tscn", "requires_type": "auction"},
-	"Galeria": {"path": "res://scenes/gallery/Gallery.tscn", "requires_type": "auction"},
+	"Plantacje": {"path": "res://scenes/plantation/Plantation.tscn", "requires_types": ["plantation"]},
+	"Spichlerz": {"path": "res://scenes/warehouse/Warehouse.tscn", "requires_types": ["plantation"]},
+	"Dom aukcyjny": {"path": "res://scenes/auction_house/AuctionHouse.tscn", "requires_types": ["auction"]},
+	"Galeria": {"path": "res://scenes/gallery/Gallery.tscn", "requires_types": ["auction"]},
 	## Zgłoszone przez użytkownika: Szkoła sztuki ma być dostępna tylko w
 	## miastach aukcyjnych (Berlin/Paryż/Amsterdam/Lizbona/Londyn), nie
 	## wszędzie — bez Nowego Jorku (który jest typu "hub", nie "auction")
 	## mieści się już w istniejącym mechanizmie bramkowania wg typu, zamiast
 	## osobnej listy konkretnych miast.
-	"Szkoła sztuki": {"path": "res://scenes/art_school/ArtSchool.tscn", "requires_type": "auction"},
+	"Szkoła sztuki": {"path": "res://scenes/art_school/ArtSchool.tscn", "requires_types": ["auction"]},
+	## Zgłoszone przez użytkownika: Giełda i Rynek mają być dostępne tylko w
+	## Nowym Jorku (typ "hub") i miastach aukcyjnych — NIE wszędzie, tak jak
+	## dotąd (to był błąd, ten sam co Plantacje pokazywane wszędzie by były).
+	## Dwa typy naraz (nie jeden jak reszta wyżej), stąd requires_types jako
+	## LISTA od razu w schemacie, zamiast osobnego pola na wyjątek.
+	"Giełda": {"path": "res://scenes/stock_market/StockMarket.tscn", "requires_types": ["hub", "auction"]},
+	"Rynek": {"path": "res://scenes/market/Market.tscn", "requires_types": ["hub", "auction"]},
 }
 const FREE_DESTINATIONS := {
-	"Giełda": "res://scenes/stock_market/StockMarket.tscn",
-	## Zgłoszone przez użytkownika: rozdzielenie dawnego wspólnego ekranu
-	## Giełdy na dwie osobne plansze — Giełda (akcje linii żeglugowych)
-	## i Rynek (ceny towarów + kontrakty terminowe), patrz scenes/market/Market.gd.
-	"Rynek": "res://scenes/market/Market.tscn",
 	"Wyścigi konne": "res://scenes/races/Races.tscn",
 }
 
@@ -106,7 +111,7 @@ func _ready() -> void:
 		var info: Dictionary = LOCATION_GATED_DESTINATIONS[destination_name]
 		var path: String = info["path"]
 		var btn := ScreenHelpers.make_button(places_menu_section, destination_name, func(): SceneRouter.goto_scene(path))
-		btn.set_meta("requires_type", info["requires_type"])
+		btn.set_meta("requires_types", info["requires_types"])
 
 	for destination_name in FREE_DESTINATIONS.keys():
 		var path: String = FREE_DESTINATIONS[destination_name]
@@ -375,9 +380,9 @@ func _update_status() -> void:
 
 
 func _update_gated_button(node: Node) -> void:
-	if node is Button and node.has_meta("requires_type"):
-		var requires_type: String = node.get_meta("requires_type")
+	if node is Button and node.has_meta("requires_types"):
+		var requires_types: Array = node.get_meta("requires_types")
 		var current_type: String = Cities.CITIES.get(Travel.current_city, {}).get("type", "")
-		node.visible = not Travel.is_traveling() and current_type == requires_type
+		node.visible = not Travel.is_traveling() and requires_types.has(current_type)
 	for child in node.get_children():
 		_update_gated_button(child)

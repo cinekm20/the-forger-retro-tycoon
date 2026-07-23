@@ -59,8 +59,10 @@ prawa — gotówka, plus ostrzegawcza etykieta, gdy zbliża się reforma walutow
 Menu nawigacyjne Huba jest dwupoziomowe: górny poziom to tylko "Jedź »",
 "Miejsca »", "Koniec tury »" i "Zapisz i wyjdź do menu"; przycisk "Miejsca »"
 otwiera podmenu z ekranami zależnymi od typu miasta (Plantacje, **Spichlerz** —
-patrz 4.2.1, Dom aukcyjny, Galeria) i zawsze dostępnymi (Giełda, Rynek, Wyścigi,
-Szkoła sztuki), z przyciskiem "« Powrót". Ten dwupoziomowy układ zastąpił jedną, długą,
+patrz 4.2.1, Dom aukcyjny, Galeria i Szkoła sztuki tylko w miastach
+aukcyjnych; Giełda i Rynek w Nowym Jorku i miastach aukcyjnych — zgłoszone
+przez użytkownika, bez sensu byłoby handlować akcjami na plantacji) i
+zawsze dostępnym (Wyścigi), z przyciskiem "« Powrót". Ten dwupoziomowy układ zastąpił jedną, długą,
 przewijaną listę — przewijanie dotykiem na telefonie okazało się niewiarygodne.
 
 ### 4.2 Plantacje

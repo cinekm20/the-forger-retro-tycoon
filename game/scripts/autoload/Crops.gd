@@ -68,6 +68,10 @@ const DAILY_DRIFT_RANGE := 0.02  ## losowe wahanie ceny ±2% dziennie
 ## wywołanie _on_day_advanced, MAX_HISTORY_POINTS ogranicza pamięć/szerokość
 ## wykresu przy bardzo długiej grze (najstarsze punkty wypadają, FIFO).
 const MAX_HISTORY_POINTS := 60
+## Zgłoszone przez użytkownika: cena na starcie nowej gry ma być losowa, a
+## wykres ma już mieć jakąś historię zamiast płaskiego pojedynczego punktu —
+## ten sam wzorzec symulowanej "przeszłości" co ShippingCompanies.gd.
+const INITIAL_HISTORY_POINTS := 12
 
 var market_price: Dictionary = {}
 var price_history: Dictionary = {}  ## crop -> Array[float]
@@ -78,10 +82,14 @@ func _ready() -> void:
 
 
 func reset_new_game() -> void:
-	market_price = BASE_CROP_PRICE.duplicate()
+	market_price.clear()
 	price_history.clear()
 	for crop in CROPS:
-		price_history[crop] = [BASE_CROP_PRICE[crop]]
+		var history: Array = [BASE_CROP_PRICE[crop]]
+		for i in INITIAL_HISTORY_POINTS - 1:
+			history.append(max(1.0, history.back() * (1.0 + randf_range(-DAILY_DRIFT_RANGE, DAILY_DRIFT_RANGE))))
+		price_history[crop] = history
+		market_price[crop] = history.back()
 
 
 func get_transport_cost(warehouse: String, from_city: String) -> int:
