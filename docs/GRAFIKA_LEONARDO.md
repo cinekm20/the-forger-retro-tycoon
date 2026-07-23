@@ -264,17 +264,23 @@ Cocoa plant, growing stage, isolated game sprite, simple flat illustration, tran
 Cocoa plant, ready to harvest stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
-### 4. Giełda
+### 4. Giełda i Rynek
+Zgłoszone przez użytkownika: dawny wspólny ekran Giełdy rozdzielony na dwie
+osobne plansze — Giełda (akcje linii żeglugowych, `StockMarket.gd`) i Rynek
+(ceny towarów + kontrakty terminowe, `scenes/market/Market.gd`). Oba na razie
+współdzielą to samo tło (`stock_market.jpg`) — osobne tło dla Rynku
+(np. hala targowa z workami towarów zamiast tablicy kursów) to możliwy
+przyszły krok, nieprzypisany priorytetowi w tej chwili.
 - Tło: sala giełdy / tablica z kursami
 - Ikona wykresu/świec (UI, nie musi być z Leonardo — można zrobić natywnie w
   silniku), ale tło sceny i karty wydarzeń (krach, hossa) tak
 - ✅ **Wykres cen w czasie — zrobiony i podpięty, natywnie, bez grafiki**
   (`scripts/ui/PriceChart.gd` — prosty wykres liniowy rysowany przez _draw(),
   ten sam powód co pinezki/sejfy/ramka menu: Leonardo generowałoby pełną
-  scenę zamiast czystego wykresu). Dwa osobne wykresy w `StockMarket.gd`:
-  kursy 4 linii żeglugowych i ceny 4 towarów, każdy z historią cen
-  (`ShippingCompanies.price_history`/`Crops.price_history`, jeden punkt na
-  każdy skok kalendarza) i legendą kolor+nazwa pod wykresem.
+  scenę zamiast czystego wykresu). Osobny wykres na każdym z dwóch ekranów:
+  kursy 4 linii żeglugowych w `StockMarket.gd`, ceny 4 towarów w `Market.gd`,
+  każdy z historią cen (`ShippingCompanies.price_history`/`Crops.price_history`,
+  jeden punkt na każdy skok kalendarza) i legendą kolor+nazwa pod wykresem.
 
 **Prompt:**
 ```

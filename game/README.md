@@ -1,13 +1,13 @@
 # Vermeer — szkielet gry (Godot 4)
 
 Wszystkie ekrany mają już działającą logikę (nie tylko nawigację) —
-plantacje + spichlerz, giełda, dom aukcyjny, szkoła sztuki, wyścigi,
+plantacje + spichlerz, giełda, rynek, dom aukcyjny, szkoła sztuki, wyścigi,
 galeria (+ ochrona), ustawienia (język). Hub pokazuje pasek stanu (dwie
 skrzynki w przeciwległych górnych rogach) i dwupoziomowe menu w wąskim
 panelu bocznym: górny poziom to "Jedź »", "Miejsca »", "Koniec tury »" i
 "Zapisz i wyjdź do menu"; "Miejsca »" otwiera podmenu z ekranami
 zależnymi od typu miasta (Plantacje, Spichlerz, Dom aukcyjny, Galeria) i
-zawsze dostępnymi (Giełda, Wyścigi, Szkoła sztuki), z przyciskiem
+zawsze dostępnymi (Giełda, Rynek, Wyścigi, Szkoła sztuki), z przyciskiem
 "« Powrót" — zastąpiło to jedną, długą, przewijaną listę, bo przewijanie
 dotykiem na telefonie okazało się niewiarygodne. Tło Huba unikalne dla
 każdego z 18 miast (rozpoznawalny zabytek/motyw, np. Big Ben w Londynie
@@ -91,8 +91,9 @@ się wywaliło, bardzo ułatwi mi naprawę).
    odpowiednim "silosie", kliknij **Wyślij i sprzedaj** przy tej uprawie —
    gotówka powinna wzrosnąć.
 5. **Giełda:** z Hubu wejdź w Giełdę — kup/sprzedaj kilka akcji linii
-   żeglugowych, zawrzyj kontrakt terminowy na dowolny towar (sprawdź, czy
-   pojawia się na liście aktywnych kontraktów).
+   żeglugowych, sprawdź wykres kursu poniżej. **Rynek:** osobna pozycja w
+   Hubie — sprawdź ceny towarów i wykres, zawrzyj kontrakt terminowy na
+   dowolny towar (sprawdź, czy pojawia się na liście aktywnych kontraktów).
 6. **Dom aukcyjny:** pojedź pinezką do **burgundowego** miasta (np.
    Londyn, Paryż), wejdź do Domu aukcyjnego. Podbijaj ofertę, klikaj
    "Zakończ rundę" aż licytacja się rozstrzygnie — sprawdź komunikat
@@ -174,8 +175,8 @@ art/paintings/     — 40 obrazów kolekcji + warianty podróbek (painting_NN.jp
                      painting_NN_fake.jpg)
 scenes/            — ekrany gry (Control + skrypt): main_menu, hub,
                      travel_map, travel_animation, plantation, warehouse,
-                     stock_market, races, auction_house, art_school, gallery,
-                     ending, settings
+                     stock_market, market, races, auction_house, art_school,
+                     gallery, ending, settings
 scripts/autoload/  — globalny stan gry: SceneRouter, Calendar, Cities,
                      Travel, Crops, Economy, PlayerPlantations, Paintings,
                      Auctions, ShippingCompanies, ForwardContracts,
@@ -185,7 +186,7 @@ scripts/ui/        — wspólne budowniczowie UI (ScreenHelpers) + natywnie
                      rysowane ikonki tam, gdzie Leonardo.ai uparcie
                      generowało pełne sceny zamiast wyizolowanych ikon:
                      MapPin, MenuFrame, VaultIcon, TravelVehicle,
-                     PlantationTileIcon
+                     PlantationTileIcon, PriceChart
 tests/             — run_tests.tscn/.gd, testy autoloadów uruchamiane w CI
 ```
 

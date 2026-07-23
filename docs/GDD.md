@@ -59,8 +59,8 @@ prawa — gotówka, plus ostrzegawcza etykieta, gdy zbliża się reforma walutow
 Menu nawigacyjne Huba jest dwupoziomowe: górny poziom to tylko "Jedź »",
 "Miejsca »", "Koniec tury »" i "Zapisz i wyjdź do menu"; przycisk "Miejsca »"
 otwiera podmenu z ekranami zależnymi od typu miasta (Plantacje, **Spichlerz** —
-patrz 4.2.1, Dom aukcyjny, Galeria) i zawsze dostępnymi (Giełda, Wyścigi, Szkoła
-sztuki), z przyciskiem "« Powrót". Ten dwupoziomowy układ zastąpił jedną, długą,
+patrz 4.2.1, Dom aukcyjny, Galeria) i zawsze dostępnymi (Giełda, Rynek, Wyścigi,
+Szkoła sztuki), z przyciskiem "« Powrót". Ten dwupoziomowy układ zastąpił jedną, długą,
 przewijaną listę — przewijanie dotykiem na telefonie okazało się niewiarygodne.
 
 ### 4.2 Plantacje
@@ -91,25 +91,34 @@ od razu cały zapas danej uprawy ze wszystkich plantacji, każdą partię z jej
 własnym kosztem transportu zależnym od miasta pochodzenia.
 
 ### 4.3 Giełda
-Ekran z listą spółek żeglugowych/surowców i przyciskami kupna/sprzedaży.
-⏳ **Zaplanowane, jeszcze niezaimplementowane:** animowany wykres cen
-(świece/linia — na razie same liczby w etykietach) i wydarzenia makro (krach
-1929, hiperinflacja, reformy walutowe) jako osobne karty zdarzeń z ilustracją
+Ekran z listą **4 fikcyjnych linii żeglugowych** — Lloyd (Azja), Star (Afryka),
+Hanse (Ameryka Płd.), Royal (Ameryka Płn.) — i przyciskami kupna/sprzedaży
+akcji. Kurs każdej spółki realnie rośnie wraz z aktywnością gracza na
+plantacjach w danym regionie, co spina giełdę z plantacjami w jeden system
+zamiast dwóch osobnych minigier (szczegóły: `MECHANIKI_EKONOMICZNE.md` pkt. 7).
+Pod listą spółek: wykres kursu w czasie (jedna linia na spółkę, natywnie
+rysowany, `scripts/ui/PriceChart.gd`) z legendą kolor+nazwa.
+
+Zgłoszone przez użytkownika: ceny towarów i kontrakty terminowe, wcześniej
+druga część tego samego ekranu, mają teraz **osobny ekran — Rynek** (patrz
+4.3a), dostępny z Huba obok Giełdy.
+
+⏳ **Zaplanowane, jeszcze niezaimplementowane:** wydarzenia makro (krach 1929,
+hiperinflacja, reformy walutowe) jako osobne karty zdarzeń z ilustracją
 gazety/nagłówka epoki — reformy/inflacja na razie działają jako ciche zmiany
 liczbowe z jedną tekstową etykietą ostrzegawczą w Hubie (patrz 4.3.1), bez
 własnego ekranu/karty. Prompty na karty zdarzeń już czekają gotowe w
 `docs/GRAFIKA_LEONARDO.md` §4.
 
-Notowane są też **4 fikcyjne linie żeglugowe** — Lloyd (Azja), Star (Afryka),
-Hanse (Ameryka Płd.), Royal (Ameryka Płn.) — których kurs realnie rośnie wraz
-z aktywnością gracza na plantacjach w danym regionie. To spina giełdę z
-plantacjami w jeden system zamiast dwóch osobnych minigier (szczegóły:
-`MECHANIKI_EKONOMICZNE.md` pkt. 7).
+### 4.3a Rynek
+Osobny ekran (wydzielony z dawnej Giełdy) z cenami towarów (kawa/tytoń/
+herbata/kakao) i własnym wykresem cen w czasie (jedna linia na towar,
+`scripts/ui/PriceChart.gd`, ten sam wzorzec co na Giełdzie).
 
-**Kontrakty terminowe (forward contracts):** osobna zakładka giełdy —
-gracz zobowiązuje się dostarczyć określoną ilość towaru w przyszłości po
-ustalonej dziś cenie. Cena nie zmienia się nawet po reformie walutowej, co
-czyni je kluczowym narzędziem zabezpieczenia (i ryzykownej spekulacji) wokół
+**Kontrakty terminowe (forward contracts):** osobna zakładka Rynku — gracz
+zobowiązuje się dostarczyć określoną ilość towaru w przyszłości po ustalonej
+dziś cenie. Cena nie zmienia się nawet po reformie walutowej, co czyni je
+kluczowym narzędziem zabezpieczenia (i ryzykownej spekulacji) wokół
 nadchodzących reform (patrz 4.3.1 niżej i `MECHANIKI_EKONOMICZNE.md` pkt. 5–6).
 
 ### 4.3.1 Reformy walutowe
@@ -251,7 +260,7 @@ Struktura katalogów (szkielet już utworzony w `game/`, patrz `game/README.md`)
 game/project.godot
 game/scenes
   /main_menu, /hub, /travel_map, /travel_animation, /plantation, /warehouse,
-  /stock_market, /races, /auction_house, /art_school, /gallery, /ending,
+  /stock_market, /market, /races, /auction_house, /art_school, /gallery, /ending,
   /settings  — każdy: Scene.tscn + Scene.gd
 game/scripts
   /autoload  (SceneRouter, Calendar, Cities, Travel, Crops, Economy,
@@ -294,12 +303,12 @@ mobile.
 4. ✅ Hub + osobny ekran Mapy świata (`travel_map`) + animacja podróży
    (`travel_animation`) — w pełni zaimplementowane i podpięte grafiką
 5. ✅ Wszystkie ekrany z sekcji 4 zaimplementowane i grywalne: Plantacje +
-   Spichlerz, Giełda, Wyścigi, Dom aukcyjny, Szkoła sztuki, Galeria (+
+   Spichlerz, Giełda, Rynek, Wyścigi, Dom aukcyjny, Szkoła sztuki, Galeria (+
    Ochrona), Ustawienia (język) — większość ma podpiętą docelową grafikę tła
    (`docs/GRAFIKA_LEONARDO.md`); pozostałe braki oznaczone ⏳ przy
-   poszczególnych mechanikach w sekcji 4 (wykres cen giełdy, karty zdarzeń
-   makro, animacja wzrostu upraw, mini-gra autentykacji, ryzyko regionalne na
-   plantacjach, powiadomienia push)
+   poszczególnych mechanikach w sekcji 4 (karty zdarzeń makro, animacja
+   wzrostu upraw, mini-gra autentykacji, ryzyko regionalne na plantacjach,
+   powiadomienia push)
 6. ⏳ Dźwięk/muzyka, dalszy polish, testy na urządzeniu — częściowo w toku
    (build Android już działa, patrz punkt 7)
 7. ✅ Eksport APK działa (`android-build.yml`, debug keystore) — podpisywanie

@@ -2,36 +2,28 @@ extends Control
 ## Giełda — działające kupno/sprzedaż akcji linii żeglugowych, z kursem
 ## powiązanym z aktywnością gracza na plantacjach (docs/MECHANIKI_EKONOMICZNE.md
 ## pkt. 7) i losowym dziennym dryfem (ShippingCompanies._on_day_advanced).
+## Ceny towarów i kontrakty terminowe mają od tego osobny ekran — Rynek
+## (scenes/market/Market.gd), zgłoszone przez użytkownika jako rozdzielenie
+## dwóch odrębnych plansz z jednego ekranu Giełdy.
 
 const VaultIconScript := preload("res://scripts/ui/VaultIcon.gd")
 const PriceChartScript := preload("res://scripts/ui/PriceChart.gd")
 
-## Kolory serii na wykresach (PriceChart.gd) — osobne od kolorów w
+## Kolory serii na wykresie (PriceChart.gd) — osobne od kolorów w
 ## PlantationTileIcon.CROP_COLORS (te dobrane pod tło pola/ikonkę, dość
-## przygaszone — kawa i kakao wychodzą tam prawie tym samym brązem, co na
-## LINII wykresu byłoby nieczytelne). Tu każda uprawa/spółka ma wyraźnie
-## odróżnialny odcień.
+## przygaszone). Tu każda spółka ma wyraźnie odróżnialny odcień.
 const SHIPPING_COLORS := {
 	"lloyd": Color(1.0, 0.83, 0.4),
 	"star": Color(0.3, 0.78, 0.78),
 	"hanse": Color(0.88, 0.35, 0.35),
 	"royal": Color(0.6, 0.75, 0.95),
 }
-const CROP_CHART_COLORS := {
-	"coffee": Color(0.65, 0.42, 0.18),
-	"tobacco": Color(0.88, 0.78, 0.25),
-	"tea": Color(0.35, 0.68, 0.35),
-	"cocoa": Color(0.75, 0.28, 0.18),
-}
 
 var rows_container: HFlowContainer
-var crop_rows_container: VBoxContainer
-var contracts_label: Label
 var location_label: Label
 var money_label: Label
 var trade_status_label: Label
 var shipping_chart: Control
-var crop_chart: Control
 
 
 ## Skrzynki lokalizacja/data (lewy górny róg) i gotówka (prawy górny róg)
@@ -49,7 +41,7 @@ func _ready() -> void:
 	ScreenHelpers.make_turn_indicator(root)
 
 	## HFlowContainer zamiast HBoxContainer: na wąskim (portretowym) ekranie
-	## 5 sejfów obok siebie by się nie zmieściło — FlowContainer sam
+	## 4 sejfy obok siebie by się nie zmieściły — FlowContainer sam
 	## zawija do kolejnego wiersza, kiedy brakuje miejsca, więc układ
 	## dostosowuje się do szerokości ekranu bez ręcznego liczenia kolumn.
 	rows_container = HFlowContainer.new()
@@ -70,41 +62,9 @@ func _ready() -> void:
 	root.add_child(shipping_chart)
 	_build_chart_legend(root, ShippingCompanies.COMPANIES.keys(), func(id): return ShippingCompanies.COMPANIES[id]["name"], SHIPPING_COLORS)
 
-	ScreenHelpers.make_title(root, "Ceny towarów")
-	crop_rows_container = VBoxContainer.new()
-	root.add_child(crop_rows_container)
-
-	## Wykres cen towarów w czasie (Crops.price_history) — ten sam wzorzec co
-	## wykres linii żeglugowych wyżej.
-	crop_chart = PriceChartScript.new()
-	crop_chart.custom_minimum_size = Vector2(420, 140)
-	crop_chart.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	root.add_child(crop_chart)
-	_build_chart_legend(root, Crops.CROPS, func(id): return Crops.CROP_NAMES[id], CROP_CHART_COLORS)
-
-	ScreenHelpers.make_title(root, "Kontrakty terminowe")
-	ScreenHelpers.make_label(
-		root,
-		tr("Kontrakt: %d jednostek za %d dni, cena dziś ×%.1f, kara %.0f%% przy niedostarczeniu") % [
-			ForwardContracts.CONTRACT_AMOUNT, ForwardContracts.DUE_IN_DAYS,
-			ForwardContracts.PRICE_PREMIUM, ForwardContracts.PENALTY_RATIO * 100.0,
-		],
-	)
-	var contract_row := HBoxContainer.new()
-	contract_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	root.add_child(contract_row)
-	for crop in Crops.CROPS:
-		var propose_btn := Button.new()
-		propose_btn.text = tr("Zawrzyj: %s") % Crops.CROP_NAMES[crop]
-		propose_btn.pressed.connect(_on_propose_contract_pressed.bind(crop))
-		contract_row.add_child(propose_btn)
-
-	contracts_label = ScreenHelpers.make_label(root, "")
-
 	ScreenHelpers.make_back_button(root)
 
 	_rebuild_rows()
-	_rebuild_crop_rows()
 	_update_info()
 
 
@@ -179,34 +139,10 @@ func _on_sell_pressed(company_id: String) -> void:
 	_update_info()
 
 
-func _rebuild_crop_rows() -> void:
-	for child in crop_rows_container.get_children():
-		child.queue_free()
-	for crop in Crops.CROPS:
-		var label := Label.new()
-		label.text = tr("%s: %.1f M / jednostkę") % [Crops.CROP_NAMES[crop], Crops.get_price(crop)]
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		crop_rows_container.add_child(label)
-
-
-func _on_propose_contract_pressed(crop: String) -> void:
-	ForwardContracts.propose_contract(crop)
-	_update_info()
-
-
 func _update_info() -> void:
 	location_label.text = tr("%s\n%s") % [Cities.get_city_name(Travel.current_city), Calendar.get_date_string()]
 	money_label.text = tr("%.0f M") % Economy.player_money
-	_rebuild_crop_rows()
-	_update_charts()
-
-	var lines: Array[String] = []
-	for contract in ForwardContracts.active_contracts:
-		lines.append(tr("%s: %d szt. po %.1f M, termin dzień %d, kara %.0f M") % [
-			Crops.CROP_NAMES[contract["crop"]], contract["amount"], contract["price_per_unit"],
-			contract["due_day"], contract["penalty"],
-		])
-	contracts_label.text = "\n".join(lines) if not lines.is_empty() else tr("Brak aktywnych kontraktów.")
+	_update_chart()
 
 
 ## Kolorowy kwadracik + nazwa dla każdej serii, pod wykresem — czysty tekst
@@ -233,10 +169,10 @@ func _build_chart_legend(parent: Container, ids: Array, get_name: Callable, colo
 		entry.add_child(label)
 
 
-## Odświeża dane obu wykresów z aktualnej historii cen (ShippingCompanies/
-## Crops.price_history) — wywoływane za każdym razem, gdy coś mogło zmienić
-## ceny (kupno/sprzedaż akcji, nowy kontrakt, wejście na ekran).
-func _update_charts() -> void:
+## Odświeża wykres z aktualnej historii kursów (ShippingCompanies.price_history)
+## — wywoływane za każdym razem, gdy coś mogło zmienić ceny (kupno/sprzedaż
+## akcji, wejście na ekran).
+func _update_chart() -> void:
 	var shipping_series := {}
 	for company_id in ShippingCompanies.COMPANIES.keys():
 		shipping_series[company_id] = {
@@ -244,11 +180,3 @@ func _update_charts() -> void:
 			"color": SHIPPING_COLORS.get(company_id, Color.WHITE),
 		}
 	shipping_chart.set_series(shipping_series)
-
-	var crop_series := {}
-	for crop in Crops.CROPS:
-		crop_series[crop] = {
-			"values": Crops.price_history.get(crop, []),
-			"color": CROP_CHART_COLORS.get(crop, Color.WHITE),
-		}
-	crop_chart.set_series(crop_series)

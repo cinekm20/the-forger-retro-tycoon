@@ -25,6 +25,10 @@ const LOCATION_GATED_DESTINATIONS := {
 }
 const FREE_DESTINATIONS := {
 	"Giełda": "res://scenes/stock_market/StockMarket.tscn",
+	## Zgłoszone przez użytkownika: rozdzielenie dawnego wspólnego ekranu
+	## Giełdy na dwie osobne plansze — Giełda (akcje linii żeglugowych)
+	## i Rynek (ceny towarów + kontrakty terminowe), patrz scenes/market/Market.gd.
+	"Rynek": "res://scenes/market/Market.tscn",
 	"Wyścigi konne": "res://scenes/races/Races.tscn",
 }
 
