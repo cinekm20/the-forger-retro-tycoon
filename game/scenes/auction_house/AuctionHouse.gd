@@ -49,6 +49,14 @@ const PAINTING_DISPLAY_SIZE := Vector2(190, 190)
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/auction_house.jpg")
 
+	## Gotówka w stałej skrzynce w prawym górnym rogu (jak w Hubie/Giełdzie),
+	## NIE w wierszu z ofertą — użytkownik zgłosił, że powinna zostać na górze,
+	## niezależnie od reszty licytacji. Lewa skrzynka (nieużywana tu) jest po
+	## prostu ukryta, zamiast pokazywać pustą ramkę bez treści.
+	var corner := ScreenHelpers.make_corner_status_row(self, "", "")
+	corner["left"].get_parent().visible = false
+	money_label = corner["right"]
+
 	## use_menu_frame=false: użytkownik zgłosił, że ozdobna ramka na cały
 	## ekran (ta sama co w Hub/TravelMap) tu tylko przeszkadzała — ma zostać
 	## WYŁĄCZNIE oprawiona skrzynka do podbijania oferty w prawym dolnym rogu
@@ -124,8 +132,16 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	leader_portrait_rect.visible = false
 	bid_row.add_child(leader_portrait_rect)
 
-	bid_label = ScreenHelpers.make_info_box(bid_row, "")
-	money_label = ScreenHelpers.make_info_box(bid_row, "")
+	## font_size 26 (zamiast domyślnych 19) — użytkownik zgłosił, że oferta i
+	## informacja "kto prowadzi" powinny być trochę większe. autowrap +
+	## custom_minimum_size: bez tego długie imię rywala (np. "Contessa Isabella
+	## Moreau") mogłoby rozepchać/zawinąć skrzynkę inaczej niż krótkie "Ty" czy
+	## "nikt", przesuwając resztę ekranu — ten sam problem co wcześniej na
+	## ekranie Plantacji, naprawiony z góry tym samym patentem (stała szerokość
+	## + zawijanie zamiast jednej, zmiennej długości linii).
+	bid_label = ScreenHelpers.make_info_box(bid_row, "", 0, 26)
+	bid_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	bid_label.custom_minimum_size = Vector2(380, 0)
 
 	status_label = ScreenHelpers.make_label(root, "")
 	ScreenHelpers.make_back_button(root)
@@ -322,12 +338,9 @@ func _update_labels() -> void:
 		if ResourceLoader.exists(portrait_path):
 			leader_portrait_rect.texture = load(portrait_path)
 			leader_portrait_rect.visible = true
+	## Bez dopisku "jeśli nikt Cię nie przebije — wygrywasz" — użytkownik
+	## zgłosił, że ta trzecia linijka (widoczna tylko gdy prowadzi gracz)
+	## zmieniała wysokość skrzynki i przesuwała layout; ma zawsze zostać
+	## dokładnie dwuwierszowa, niezależnie od tego, kto prowadzi.
 	bid_label.text = tr("Oferta: %.0f M\n(prowadzi: %s)") % [current_bid, leader_text]
-
-	## Jawna zapowiedź, co się stanie, gdy licznik dobiegnie końca — tester
-	## zgłosił, że wygrana po prostu "sama się" pojawiła bez ostrzeżenia, gdy
-	## tylko czekał (mechanika była zamierzona — czas, który mija bez reakcji
-	## rywali, oznacza wygraną — ale bez zapowiedzi wyglądała na błąd).
-	if current_leader == "player":
-		bid_label.text += tr("\nJeśli nikt Cię nie przebije do końca czasu — wygrywasz!")
 	money_label.text = tr("Gotówka: %.0f M") % Economy.player_money
