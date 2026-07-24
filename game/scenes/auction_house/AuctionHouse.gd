@@ -119,8 +119,8 @@ func _ready() -> void:
 
 
 ## Buduje UI aktywnej licytacji BEZ ramek graczy (patrz _build_player_frames
-## niżej, budowane osobno na bokach ekranu). Nazwa/opis obrazu, skrzynka
-## "kto prowadzi", malejący czas i przycisk powrotu zostają jako wspólne,
+## niżej, budowane osobno na bokach ekranu). Pasek czasu, nazwa/opis obrazu,
+## skrzynka "kto prowadzi" i przycisk powrotu zostają jako wspólne,
 ## WYŚRODKOWANE podsumowanie na środku ekranu (między bocznymi kolumnami
 ## ramek graczy — SIZE_SHRINK_CENTER na panelach, patrz komentarze niżej,
 ## inaczej rozciągają się na pełną szerokość i chowają się pod bocznymi
@@ -128,6 +128,38 @@ func _ready() -> void:
 ## przyciskami podbicia/rezygnacji (patrz _build_player_frame).
 func _build_active_auction_ui(root: VBoxContainer) -> void:
 	root.alignment = BoxContainer.ALIGNMENT_BEGIN
+
+	## Pasek czasu budowany TU, zaraz przy tytule/terminie — nie na dole
+	## ekranu (gdzie był wcześniej): suma elementów w dolnej części (obraz +
+	## skrzynka oferty + status) już sama w sobie przekracza wysokość ekranu
+	## na wariancie BEZ ScrollContainera (make_root(self, false) go nie ma, w
+	## odróżnieniu od wariantu z ozdobną ramką), więc pasek czasu i tak
+	## renderował się poza widocznym obszarem (zgłoszone przez użytkownika:
+	## "nigdzie nie widać czasu"). Góra ekranu zawsze ma zapas miejsca (patrz
+	## zrzuty ekranu), więc jest tu bezpiecznie. Budowane dopiero tutaj (nie
+	## w _ready) — na ekranie "brak aukcji teraz" (wczesny return w _ready)
+	## w ogóle nie ma czasu do odliczania, więc pasek by tam nie miał sensu.
+	timer_label = ScreenHelpers.make_label(root, "")
+	timer_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
+
+	timer_bar = ProgressBar.new()
+	timer_bar.custom_minimum_size = Vector2(220, 20)
+	timer_bar.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	timer_bar.show_percentage = false
+	timer_bar.min_value = 0.0
+	timer_bar.max_value = BID_TIME_LIMIT
+	timer_bar.step = 0.01
+	var timer_bar_bg := StyleBoxFlat.new()
+	timer_bar_bg.bg_color = Color(ScreenHelpers.COLOR_BURGUNDY_DARK.r, ScreenHelpers.COLOR_BURGUNDY_DARK.g, ScreenHelpers.COLOR_BURGUNDY_DARK.b, 0.9)
+	timer_bar_bg.border_color = ScreenHelpers.COLOR_GOLD
+	timer_bar_bg.set_border_width_all(2)
+	timer_bar_bg.set_corner_radius_all(4)
+	var timer_bar_fill := StyleBoxFlat.new()
+	timer_bar_fill.bg_color = ScreenHelpers.COLOR_GOLD_BRIGHT
+	timer_bar_fill.set_corner_radius_all(4)
+	timer_bar.add_theme_stylebox_override("background", timer_bar_bg)
+	timer_bar.add_theme_stylebox_override("fill", timer_bar_fill)
+	root.add_child(timer_bar)
 
 	painting_label = ScreenHelpers.make_info_box(root, "")
 	painting_label.autowrap_mode = TextServer.AUTOWRAP_WORD
@@ -199,36 +231,10 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 
 	status_label = ScreenHelpers.make_label(root, "")
 
-	## Pasek czasu NIE jest już przyklejony do prawego dolnego rogu
-	## (make_root_bottom) — tam kolidował z prawą kolumną ramek graczy
-	## (zgłoszone przez użytkownika, zrzut ekranu: pasek czasu nachodził na
-	## ramkę gracza). Zamiast tego to zwykłe dziecko środkowej kolumny root,
-	## więc zawsze zostaje w wolnym pasie na środku, między bocznymi
-	## kolumnami, niezależnie od tego, ile ramek jest po której stronie.
-	timer_label = ScreenHelpers.make_label(root, "")
-	timer_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
-
-	timer_bar = ProgressBar.new()
-	timer_bar.custom_minimum_size = Vector2(220, 20)
-	timer_bar.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	timer_bar.show_percentage = false
-	timer_bar.min_value = 0.0
-	timer_bar.max_value = BID_TIME_LIMIT
-	timer_bar.step = 0.01
-	var bar_bg := StyleBoxFlat.new()
-	bar_bg.bg_color = Color(ScreenHelpers.COLOR_BURGUNDY_DARK.r, ScreenHelpers.COLOR_BURGUNDY_DARK.g, ScreenHelpers.COLOR_BURGUNDY_DARK.b, 0.9)
-	bar_bg.border_color = ScreenHelpers.COLOR_GOLD
-	bar_bg.set_border_width_all(2)
-	bar_bg.set_corner_radius_all(4)
-	var bar_fill := StyleBoxFlat.new()
-	bar_fill.bg_color = ScreenHelpers.COLOR_GOLD_BRIGHT
-	bar_fill.set_corner_radius_all(4)
-	timer_bar.add_theme_stylebox_override("background", bar_bg)
-	timer_bar.add_theme_stylebox_override("fill", bar_fill)
-	root.add_child(timer_bar)
-
 	## Zastępuje przyciski Podbij/Rezygnuj (teraz w ramkach graczy) dopiero
-	## po rozstrzygnięciu aukcji — do tego momentu ukryty.
+	## po rozstrzygnięciu aukcji — do tego momentu ukryty. Pasek czasu
+	## zbudowany wcześniej, na samej górze tej funkcji — TU zostaje tylko
+	## przycisk powrotu.
 	back_btn = ScreenHelpers.make_back_button(root)
 	back_btn.visible = false
 
@@ -249,9 +255,10 @@ func _build_player_frames() -> void:
 
 ## Jedna ramka gracza: awatar + imię (identyfikacja, zgłoszone przez
 ## użytkownika: "w ramkach powinna być informacja który to jest gracz"),
-## własna gotówka, status (prowadzi/zrezygnował/ostrzeżenie o podróbce) i
-## własne przyciski Podbij/Rezygnuję — .bind(index) wiąże każdy przycisk z
-## KONKRETNYM graczem, więc _on_bid_pressed/_on_resign_pressed zawsze wiedzą,
+## własna gotówka, status (zrezygnował/ostrzeżenie o podróbce — BEZ "kto
+## prowadzi", patrz _update_frame) i własne przyciski Podbij/Rezygnuję —
+## .bind(index) wiąże każdy przycisk z KONKRETNYM graczem, więc
+## _on_bid_pressed/_on_resign_pressed zawsze wiedzą,
 ## w czyim imieniu działają, niezależnie od tego, kto jest aktualnie
 ## "aktywnym" graczem hot-seatu (Players.active_index).
 ##
@@ -372,8 +379,14 @@ func _apply_best_rival_counter_bid() -> bool:
 func _try_rival_counter_bid() -> bool:
 	if not _apply_best_rival_counter_bid():
 		return false
-	_update_labels()
+	## _start_bid_timer() PRZED _update_labels() — bez tego auction_active
+	## byłoby jeszcze false w momencie liczenia frame["bid_btn"].disabled
+	## (patrz _update_frame), więc przyciski zostawałyby zablokowane aż do
+	## KOLEJNEGO odświeżenia etykiet (zgłoszone przez użytkownika: "na
+	## początku aukcji nie mogłem nic nacisnąć, dopiero jak bot podbił się
+	## odblokowały").
 	_start_bid_timer()
+	_update_labels()
 	return true
 
 
@@ -394,8 +407,12 @@ func _start_new_auction() -> void:
 		player_forgery_duplicate[index] = is_duplicate
 		player_forgery_warning[index] = is_duplicate and randf() < Players.get_player_expertise(index)
 
-	_update_labels()
+	## _start_bid_timer() PRZED _update_labels() — patrz ten sam komentarz w
+	## _try_rival_counter_bid, dokładnie ten sam błąd na starcie KAŻDEJ
+	## aukcji (nie tylko pierwszej): auction_active musi być true ZANIM
+	## _update_labels() policzy, czy przyciski mają być zablokowane.
 	_start_bid_timer()
+	_update_labels()
 
 
 ## Podbicie w imieniu KONKRETNEGO gracza (index, przypięty przez .bind() w
@@ -526,8 +543,11 @@ func _update_labels() -> void:
 
 
 ## Odświeża ramkę JEDNEGO obecnego gracza: własna gotówka, status
-## (rezygnacja / prowadzi / ostrzeżenie o podróbce — w tej kolejności
-## pierwszeństwa) i czy jego przyciski są aktywne.
+## (rezygnacja / ostrzeżenie o podróbce) i czy jego przyciski są aktywne.
+## Bez osobnego "Prowadzi!" w ramce (zgłoszone przez użytkownika) — kto
+## prowadzi widać już w centralnej skrzynce oferty (_update_labels,
+## bid_label), dublowanie tej informacji w ramce byłoby zbędne. is_leader
+## nadal liczone niżej — prowadzący nie może podbić samego siebie.
 func _update_frame(index: int) -> void:
 	var frame: Dictionary = player_frames[index]
 	frame["money_label"].text = tr("Gotówka: %.0f M") % Players.get_player_money(index)
@@ -537,8 +557,6 @@ func _update_frame(index: int) -> void:
 	var status := ""
 	if withdrawn:
 		status = tr("Zrezygnował(a)")
-	elif is_leader:
-		status = tr("Prowadzi!")
 	elif player_forgery_warning.get(index, false):
 		status = tr("⚠ możliwa podróbka!")
 	frame["status_label"].text = status
