@@ -77,7 +77,7 @@ func _ready() -> void:
 ## zbyt duże (patrz komentarz w _ready() o niegotowym jeszcze rozmiarze
 ## viewportu przy starcie), a użytkownik i tak chce jawny, przewidywalny
 ## sufit rozmiaru, nie wyliczaną resztę.
-func _build_logo(subtitle_label: Label, setup_section: VBoxContainer) -> void:
+func _build_logo(subtitle_label: Label, setup_section_ref: VBoxContainer) -> void:
 	var viewport_size := get_viewport_rect().size
 	var frame_content_width := viewport_size.x * 0.9 - ScreenHelpers.CONTENT_INSET_WITH_FRAME * 2.0
 	var frame_content_height := viewport_size.y * 0.9 - ScreenHelpers.CONTENT_INSET_WITH_FRAME * 2.0
@@ -104,7 +104,7 @@ func _build_logo(subtitle_label: Label, setup_section: VBoxContainer) -> void:
 	## zabezpieczenie (patrz komentarz w screen_helpers.gd) — ale przy
 	## twardym limicie 1/3 wysokości na logo nie powinno do tego dochodzić.
 	var root_separation := root.get_theme_constant("separation")
-	var total_height := logo_height + subtitle_label.get_minimum_size().y + setup_section.get_minimum_size().y + root_separation * 2.0
+	var total_height := logo_height + subtitle_label.get_minimum_size().y + setup_section_ref.get_minimum_size().y + root_separation * 2.0
 	if total_height > frame_content_height:
 		push_warning("MainMenu: treść (%.0fpx) przekracza wysokość ramki (%.0fpx) mimo limitu na logo." % [total_height, frame_content_height])
 
