@@ -168,24 +168,36 @@ func _build_framed_image(parent: Container, texture_path: String, holder_size: V
 ## Jeden kafelek kategorii: okładka epoki w ramie (art/categories/<id>.jpg,
 ## docs/GRAFIKA_LEONARDO.md §9b — po cichu pusta, jeśli plik jeszcze nie
 ## istnieje, jak wszystkie opcjonalne grafiki w tej grze) + nazwa + "X/5".
-## Klikalny TYLKO jeśli owned_in_category > 0 (zgłoszone przez użytkownika:
-## "po kliknięciu jak są tam jakieś obrazy") — niewidzialny, płaski Button
-## dodany NA WIERZCH całej skrzynki (ten sam trik co Plantation.gd
-## _rebuild_grid: PanelContainer daje WSZYSTKIM dzieciom tę samą wypełnioną
-## powierzchnię, więc button-na-wierzchu przechwytuje kliknięcia z całego
-## kafelka, nie tylko samego obrazka). size_flags_horizontal na PANELU
-## (nie tylko custom_minimum_size) — zgłoszone przez użytkownika: kafelki
-## mają się rozłożyć równomiernie na całą szerokość ekranu, nie zbić w
-## ciasną grupkę po lewej.
+## BEZ dodatkowej burgundowo-złotej skrzynki dookoła (zgłoszone przez
+## użytkownika: "te ramki systemowe pod obrazami zlikwiduj") — sama rama
+## obrazu (frame.png, _build_framed_image) już wystarcza, druga rama byłaby
+## zbędnym dublowaniem. Klikalny TYLKO jeśli owned_in_category > 0
+## (zgłoszone przez użytkownika: "po kliknięciu jak są tam jakieś obrazy") —
+## flat Button jako NAJBARDZIEJ ZEWNĘTRZNY węzeł z resztą jako dzieckiem
+## (ten sam trik co kafelki Plantation.gd _rebuild_grid), więc cały kafelek
+## jest klikalny, nie tylko sam obrazek. size_flags_horizontal NA PRZYCISKU
+## — zgłoszone przez użytkownika: kafelki mają się rozłożyć równomiernie na
+## całą szerokość ekranu, nie zbić w ciasną grupkę po lewej.
 func _build_category_card(parent: Container, category_id: String) -> void:
 	var owned_in_category := 0
 	for number in Paintings.catalogued_numbers:
 		if Paintings.get_category(number) == category_id:
 			owned_in_category += 1
 
-	var column := ScreenHelpers.make_boxed_column(parent)
-	column.custom_minimum_size = CATEGORY_CARD_SIZE
-	column.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var card_btn := Button.new()
+	card_btn.custom_minimum_size = CATEGORY_CARD_SIZE
+	card_btn.flat = true
+	card_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card_btn.disabled = owned_in_category == 0
+	if owned_in_category > 0:
+		card_btn.pressed.connect(_on_category_pressed.bind(category_id))
+	parent.add_child(card_btn)
+
+	var column := VBoxContainer.new()
+	column.set_anchors_preset(Control.PRESET_FULL_RECT)
+	column.alignment = BoxContainer.ALIGNMENT_CENTER
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card_btn.add_child(column)
 
 	var cover_center := CenterContainer.new()
 	column.add_child(cover_center)
@@ -196,12 +208,6 @@ func _build_category_card(parent: Container, category_id: String) -> void:
 	var name_label := ScreenHelpers.make_label(column, tr("%s: %d/5") % [category_name, owned_in_category])
 	if owned_in_category >= 5:
 		name_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
-
-	if owned_in_category > 0:
-		var overlay_btn := Button.new()
-		overlay_btn.flat = true
-		overlay_btn.pressed.connect(_on_category_pressed.bind(category_id))
-		column.get_parent().add_child(overlay_btn)
 
 
 func _on_category_pressed(category_id: String) -> void:
