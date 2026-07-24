@@ -694,8 +694,8 @@ func _test_catching_up_player_does_not_double_world_drift() -> void:
 	Crops.reset_new_game()
 
 	Players.advance_active_player_time(15)
-	var history_size_after_player_1 := Crops.price_history["coffee"].size()
-	var world_day_after_player_1 := Calendar.current_day
+	var history_size_after_player_1: int = Crops.price_history["coffee"].size()
+	var world_day_after_player_1: int = Calendar.current_day
 
 	Players.pass_turn_to_earliest_player()
 	Players.advance_active_player_time(15)  # gracz 2 dogania do JUŻ zasymulowanego dnia 15
