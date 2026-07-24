@@ -251,6 +251,15 @@ func _add_legend_row(parent: Container, kind: int, crop: String, river_adjacent:
 
 	var icon: Control = PlantationTileIconScript.new()
 	icon.custom_minimum_size = Vector2(LEGEND_ICON_SIZE, LEGEND_ICON_SIZE)
+	## SIZE_SHRINK_CENTER (pionowo) — zgłoszone przez użytkownika: gdy podpis
+	## zawijał się na 2 linie, HBoxContainer domyślnie rozciągał ikonkę na
+	## całą wysokość wiersza (do wysokości 2 linii tekstu), a _draw() w
+	## PlantationTileIcon.gd rysuje na całym `size` kontrolki — więc ikonka
+	## wizualnie "rozciągała się" zamiast zostać kwadracikiem w rozmiarze
+	## pojedynczego pola siatki. Z SHRINK_CENTER ikonka zostaje przy swoim
+	## custom_minimum_size niezależnie od wysokości wiersza, wyśrodkowana w
+	## pionie obok tekstu.
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	icon.kind = kind
 	icon.crop = crop
 	icon.river_adjacent = river_adjacent

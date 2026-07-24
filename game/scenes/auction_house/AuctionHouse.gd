@@ -166,7 +166,10 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	leader_portrait_rect.custom_minimum_size = Vector2(84, 84)
 	leader_portrait_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	leader_portrait_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	leader_portrait_rect.visible = false
+	## visible ZAWSZE true (patrz _update_labels) — tylko modulate.a
+	## przełącza widoczność OBRAZKA, żeby bid_row miał zawsze tę samą
+	## szerokość niezależnie od tego, kto akurat prowadzi.
+	leader_portrait_rect.modulate.a = 0.0
 	bid_row.add_child(leader_portrait_rect)
 
 	## font_size 26 (zamiast domyślnych 19) — użytkownik zgłosił, że oferta i
@@ -421,16 +424,31 @@ func _update_labels() -> void:
 	if current_forgery_warning:
 		warning_label.text = tr("⚠ Szkoła Sztuki ostrzega: ten numer już masz w kolekcji — to może być podróbka!")
 
+	## leader_portrait_rect zostaje ZAWSZE visible=true (rezerwuje swoje
+	## miejsce w bid_row) — zgłoszone przez użytkownika: ramka oferty była
+	## węższa, gdy prowadził gracz (portret ukryty, więc znikał z layoutu) i
+	## szersza, gdy prowadził rywal (portret dochodził) — ta sama ramka miała
+	## dwie różne szerokości zależnie od tego, kto prowadzi. Teraz zmienia
+	## się tylko WIDOCZNOŚĆ OBRAZKA (modulate.a), nie obecność w layoucie —
+	## szerokość bid_row jest więc zawsze taka sama. Gdy prowadzi gracz,
+	## pokazuje jego własny awatar (Players.active_avatar_path, ten sam
+	## system co Hub.gd) zamiast portretu rywala.
 	var leader_text := tr("nikt")
-	leader_portrait_rect.visible = false
+	leader_portrait_rect.visible = true
+	leader_portrait_rect.modulate.a = 0.0
+	leader_portrait_rect.texture = null
 	if current_leader == "player":
 		leader_text = tr("Ty")
+		var avatar_path := Players.active_avatar_path()
+		if ResourceLoader.exists(avatar_path):
+			leader_portrait_rect.texture = load(avatar_path)
+			leader_portrait_rect.modulate.a = 1.0
 	elif current_leader != "":
 		leader_text = AIPlayers.get_rival(current_leader)["name"]
 		var portrait_path := AIPlayers.get_portrait_path(current_leader)
 		if ResourceLoader.exists(portrait_path):
 			leader_portrait_rect.texture = load(portrait_path)
-			leader_portrait_rect.visible = true
+			leader_portrait_rect.modulate.a = 1.0
 	## Bez dopisku "jeśli nikt Cię nie przebije — wygrywasz" — użytkownik
 	## zgłosił, że ta trzecia linijka (widoczna tylko gdy prowadzi gracz)
 	## zmieniała wysokość skrzynki i przesuwała layout; ma zawsze zostać
