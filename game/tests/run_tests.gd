@@ -35,7 +35,7 @@ func _ready() -> void:
 	_test_win_threshold_easy_mode()
 	_test_forward_contract_penalty_on_failure()
 	_test_players_hotseat_swap()
-	_test_travel_ends_turn_when_longer_than_a_week()
+	_test_players_turn_follows_earliest_date()
 	_test_art_school_course_ends_turn_after_applying_effects()
 	_test_security_bodyguard_and_gangster()
 	_test_travel_vehicle_choice()
@@ -353,41 +353,49 @@ func _test_players_hotseat_swap() -> void:
 
 ## Zgłoszone przez użytkownika: kolejność tur NIE jest sztywnym round-robin —
 ## po KAŻDEJ czynności (tu: podróż) silnik oddaje ruch temu, kto ma teraz
-## najwcześniejszą datę (Players.pass_turn_to_earliest_player). Krótka
-## podróż nie wysuwa gracza 1 przed gracza 2 (który wciąż jest na dniu 0),
-## więc ruch NIE przechodzi; długa podróż wysuwa gracza 1 daleko do przodu,
-## więc ruch przechodzi na gracza 2 (wciąż na dniu 0 — teraz on ma
-## najwcześniejszą datę). Symuluje dokładnie to, co robi
-## TravelAnimation.gd::_on_finished (advance_active_player_time, potem
+## najwcześniejszą datę (Players.pass_turn_to_earliest_player). W grze
+## 2-osobowej: gracz aktywny zawsze zaczyna swoją akcję będąc na RÓWNI z
+## resztą (bo dostał ruch właśnie dlatego, że miał najwcześniejszą datę), więc
+## KAŻDA podróż z niezerową liczbą dni wysuwa go przed pozostałych i oddaje im
+## ruch — nie ma już progu "dłużej niż tydzień". Ten sam gracz dostaje ruch
+## z powrotem drugi raz z rzędu tylko wtedy, gdy nadal jest najbardziej "z
+## tyłu" w czasie (patrz trzeci etap testu niżej). Symuluje dokładnie to, co
+## robi TravelAnimation.gd::_on_finished (advance_active_player_time, potem
 ## bezwarunkowo pass_turn_to_earliest_player) — scen nie instancjonujemy w
 ## tym pakiecie testów, patrz konwencja innych testów w tym pliku.
-func _test_travel_ends_turn_when_longer_than_a_week() -> void:
+func _test_players_turn_follows_earliest_date() -> void:
 	print("-- Travel/Players: silnik oddaje ruch graczowi z najwcześniejszą datą --")
 	Economy.reset_new_game()
 	Security.reset_new_game()
 	Security.has_bodyguard = true  # eliminuje losową kradzież w tle, tak jak w _test_players_hotseat_swap
 	Players.reset_new_game(2)
-
 	Travel.reset_new_game()
 	Calendar.reset_new_game()
+
 	Travel.current_city = "berlin"
 	Travel.route.clear()
-	Travel.start_travel("london")  # 3.0 dnia — krótsza niż tydzień
+	Travel.start_travel("london")  # 3.0 dnia
 	var short_days := int(ceil(Travel.last_travel_total_days))
-	Players.advance_active_player_time(short_days)
+	Players.advance_active_player_time(short_days)  # gracz 1: dzień 0 -> %d dni
 	Players.pass_turn_to_earliest_player()
-	_assert(Players.active_index == 0, "krótka podróż (Berlin -> Londyn, %d dni) NIE zmienia aktywnego gracza (gracz 2 wciąż nie jest przed nim w czasie)" % short_days)
+	_assert(Players.active_index == 1, "gracz 1 po podróży (%d dni) wysuwa się przed gracza 2 (wciąż dzień 0) — ruch przechodzi na gracza 2" % short_days)
 
-	Travel.reset_new_game()
-	Calendar.reset_new_game()
-	Players.reset_new_game(2)
 	Travel.current_city = "london"
 	Travel.route.clear()
-	Travel.start_travel("new_york")  # 13.9 dnia — dłuższa niż tydzień
+	Travel.start_travel("new_york")  # 13.9 dnia — znacznie dłuższa
 	var long_days := int(ceil(Travel.last_travel_total_days))
-	Players.advance_active_player_time(long_days)
+	Players.advance_active_player_time(long_days)  # gracz 2: dzień 0 -> %d dni, znacznie więcej niż gracz 1
 	Players.pass_turn_to_earliest_player()
-	_assert(Players.active_index == 1, "długa podróż (Londyn -> Nowy Jork, %d dni) wysuwa gracza 1 do przodu, ruch przechodzi na gracza 2 (najwcześniejsza data)" % long_days)
+	_assert(Players.active_index == 0, "gracz 2 wyprzedza gracza 1 długą podróżą (%d dni) — ruch wraca do gracza 1 (znów najwcześniejsza data)" % long_days)
+
+	# Gracz 1 (aktywny) wraca z podróży do Londynu (patrz przywrócona migawka
+	# po pass_turn_to_earliest_player wyżej) — kolejna, krótsza podróż stąd.
+	Travel.route.clear()
+	Travel.start_travel("ankara")  # 7.8 dnia z Londynu
+	var third_days := int(ceil(Travel.last_travel_total_days))
+	Players.advance_active_player_time(third_days)
+	Players.pass_turn_to_earliest_player()
+	_assert(Players.active_index == 0, "gracz 1 nadal jest najbardziej 'z tyłu' (dzień %d wciąż < gracz 2, dzień %d) — dostaje ruch DRUGI RAZ z rzędu, silnik NIE wraca do sztywnego round-robin" % [Players.get_player_day(0), Players.get_player_day(1)])
 
 
 ## Ten sam problem co podróż wyżej, ale subtelniejszy: Economy.player_money
@@ -419,7 +427,16 @@ func _test_art_school_course_ends_turn_after_applying_effects() -> void:
 	_assert(Economy.player_money == Economy.STARTING_MONEY, "gracz 2 widzi swój świeży stan, nie kasę pomniejszoną przez kurs gracza 1")
 	_assert(is_equal_approx(Paintings.expertise, 0.0), "gracz 2 nie odziedziczył eksperckości zdobytej przez gracza 1")
 
-	Players.end_turn()  # gracz 2 -> gracz 1, sprawdzamy migawkę gracza 1
+	# Gracz 2 wyprzedza gracza 1 w czasie (dzień training_days+1 > training_days)
+	# — dopiero to oddaje ruch z powrotem, sprawdzamy migawkę gracza 1. NIE
+	# używamy Players.end_turn() tutaj: ono dolicza własny tydzień (i cap
+	# Auctions.cap_turn_advance) PRZED sprawdzeniem najwcześniejszej daty, co
+	# przy training_days=14 > DAYS_PER_TURN=7 nie wystarczyłoby, by wyprzedzić
+	# gracza 1 — testowalibyśmy więc coś innego niż samą logikę
+	# pass_turn_to_earliest_player.
+	Players.advance_active_player_time(training_days + 1)
+	Players.pass_turn_to_earliest_player()
+	_assert(Players.active_index == 0, "gracz 2 wyprzedził gracza 1 w czasie — ruch wraca do gracza 1 (znów najwcześniejsza data)")
 	_assert(
 		is_equal_approx(Economy.player_money, Economy.STARTING_MONEY - training_cost),
 		"po powrocie: gotówka gracza 1 poprawnie pomniejszona o koszt kursu",
