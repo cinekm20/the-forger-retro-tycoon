@@ -36,6 +36,7 @@ func _ready() -> void:
 	_test_forward_contract_penalty_on_failure()
 	_test_players_hotseat_swap()
 	_test_travel_ends_turn_when_longer_than_a_week()
+	_test_art_school_course_ends_turn_after_applying_effects()
 	_test_security_bodyguard_and_gangster()
 	_test_travel_vehicle_choice()
 	_test_travel_completes_in_one_animation()
@@ -375,6 +376,44 @@ func _test_travel_ends_turn_when_longer_than_a_week() -> void:
 	if Players.is_multiplayer() and long_days > Players.DAYS_PER_TURN:
 		Players.advance_active_player()
 	_assert(Players.active_index == 1, "długa podróż (Londyn -> Nowy Jork, %d dni) kończy turę, przechodzi na gracza 2" % long_days)
+
+
+## Ten sam problem co podróż wyżej, ale subtelniejszy: Economy.player_money
+## i Paintings.expertise są migawkowane PER GRACZ (Players._capture_active),
+## więc przekazanie tury MUSI nastąpić DOPIERO PO zastosowaniu efektów kursu
+## (opłata + zdobyta eksperckość z quizu) — inaczej trafiłyby do migawki
+## złego gracza. Symuluje kolejność z ArtSchool.gd (_on_train_pressed ->
+## quiz -> _end_course_turn), nie sam quiz UI (scen nie instancjonujemy w
+## tym pakiecie testów).
+func _test_art_school_course_ends_turn_after_applying_effects() -> void:
+	print("-- ArtSchool: długi kurs (hot-seat) kończy turę PO zastosowaniu efektów --")
+	Calendar.reset_new_game()
+	Economy.reset_new_game()
+	Paintings.reset_new_game()
+	Security.reset_new_game()
+	Security.has_bodyguard = true
+	Players.reset_new_game(2)
+
+	var training_cost := 2000.0
+	var training_days := 14
+	var expertise_gain := 0.15  # symuluje trafną odpowiedź w quizie
+
+	Economy.spend(training_cost)
+	Calendar.advance_days(training_days)
+	Paintings.increase_expertise(expertise_gain)
+	if Players.is_multiplayer() and training_days > Players.DAYS_PER_TURN:
+		Players.advance_active_player()
+
+	_assert(Players.active_index == 1, "kurs dłuższy niż tydzień (%d dni) kończy turę, przechodzi na gracza 2" % training_days)
+	_assert(Economy.player_money == Economy.STARTING_MONEY, "gracz 2 widzi swój świeży stan, nie kasę pomniejszoną przez kurs gracza 1")
+	_assert(is_equal_approx(Paintings.expertise, 0.0), "gracz 2 nie odziedziczył eksperckości zdobytej przez gracza 1")
+
+	Players.end_turn()  # gracz 2 -> gracz 1, sprawdzamy migawkę gracza 1
+	_assert(
+		is_equal_approx(Economy.player_money, Economy.STARTING_MONEY - training_cost),
+		"po powrocie: gotówka gracza 1 poprawnie pomniejszona o koszt kursu",
+	)
+	_assert(is_equal_approx(Paintings.expertise, expertise_gain), "po powrocie: eksperckość gracza 1 poprawnie zapisana z kursu")
 
 
 func _test_security_bodyguard_and_gangster() -> void:

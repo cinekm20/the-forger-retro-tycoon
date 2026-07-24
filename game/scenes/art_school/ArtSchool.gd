@@ -79,7 +79,7 @@ func _start_quiz() -> void:
 		## podróbki (np. świeży branch bez tych plików), kurs po prostu daje
 		## bazową eksperckość bez quizu, zamiast pokazać pusty ekran.
 		Paintings.increase_expertise(EXPERTISE_GAIN_WRONG)
-		_update_info()
+		_end_course_turn()
 		return
 
 	quiz_painting_number = candidates[randi() % candidates.size()]
@@ -151,6 +151,21 @@ func _close_quiz() -> void:
 	quiz_section.visible = false
 	course_button.visible = true
 	info_label.visible = true
+	_end_course_turn()
+
+
+## Zgłoszone przez użytkownika: ten sam problem co przy długiej podróży w
+## hot-seat (patrz TravelAnimation.gd) — kurs trwa TRAINING_DAYS (14 dni,
+## dłużej niż tydzień Players.DAYS_PER_TURN), ale bez tego wywołania ten
+## sam gracz mógł kupować kurs za kursem bez oddawania tury drugiemu
+## graczowi. MUSI być wywołane na SAMYM KOŃCU (po zastosowaniu eksperckości
+## z quizu w _on_quiz_guess, nie zaraz po zapłaceniu za kurs) — Economy.
+## player_money i Paintings.expertise są migawkowane PER GRACZ
+## (Players._capture_active/_apply_snapshot); przełączenie aktywnego gracza
+## wcześniej przypisałoby zdobytą eksperckość złej osobie.
+func _end_course_turn() -> void:
+	if Players.is_multiplayer() and TRAINING_DAYS > Players.DAYS_PER_TURN:
+		Players.advance_active_player()
 	_update_info()
 
 
