@@ -76,8 +76,8 @@ const FRAME_TEXTURE_PATH := "res://art/icons/frame.png"
 ## docs/GRAFIKA_LEONARDO.md §6).
 const FRAME_INNER_INSET := 0.145
 
-## Szerokość ramek graczy po bokach ekranu (make_root_side) — patrz
-## _build_player_frames. Środkowa treść (obraz + opis) zwężona odpowiednio
+## Szerokość ramek graczy po bokach ekranu (patrz _make_side_column/
+## _build_player_frames). Środkowa treść (obraz + opis) zwężona odpowiednio
 ## (patrz painting_label/bid_label niżej), żeby zmieściła się między dwiema
 ## takimi kolumnami.
 ##
@@ -254,19 +254,51 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	back_btn.visible = false
 
 
-## Buduje boczne kolumny ramek graczy (make_root_side — ta sama, stała
-## szerokość co paski boczne Hub.gd/TravelAnimation.gd), każda podzielona na
-## GÓRNY i DOLNY slot rozdzielony rozpychającym spacerem. Kolejność
-## zajmowania miejsc (zgłoszone przez użytkownika): 1. gracz -> prawy dół,
-## 2. gracz -> lewy dół, 3. gracz -> prawy góra, 4. gracz -> lewy góra. Sloty
-## budowane ZAWSZE wszystkie cztery, niezależnie od liczby obecnych graczy —
-## dzięki temu np. przy jednym graczu jego ramka zawsze ląduje w prawym
-## dole, a nie na środku kolumny.
+## Boczna kolumna ramek graczy — TA SAMA szerokość/pozycja co
+## ScreenHelpers.make_root_side, ale BEZ ScrollContainera. make_root_side
+## opakowuje swój VBoxContainer w ScrollContainer, a ScrollContainer NIE
+## rozciąga dziecka na pełną wysokość w osi przewijania (daje mu tylko jego
+## naturalny, minimalny rozmiar) — więc "rozpychający" spacer wewnątrz nie
+## miał czego rozpychać i cała kolumna zbijała się na samej górze zamiast
+## rozjechać się na górny/dolny slot (zgłoszone przez użytkownika, zrzut
+## ekranu: ramka jedynego gracza wylądowała u góry zamiast w prawym dole).
+## Tu VBoxContainer jest zakotwiczony BEZPOŚREDNIO (anchor na całą wysokość
+## paska, jak plain_root w ScreenHelpers.make_root) — dokładnie ten sam
+## mechanizm co ScreenHelpers.make_root_bottom (który z tego samego powodu
+## też nie używa ScrollContainera), więc expand-fill spacer faktycznie ma
+## się czym rozepchnąć.
+func _make_side_column(on_right: bool) -> VBoxContainer:
+	var column := VBoxContainer.new()
+	column.anchor_top = 0.0
+	column.anchor_bottom = 1.0
+	column.offset_top = SIDE_FRAMES_TOP_OFFSET
+	column.offset_bottom = 0.0
+	if on_right:
+		column.anchor_left = 1.0
+		column.anchor_right = 1.0
+		column.offset_left = -ScreenHelpers.SIDE_PANEL_WIDTH
+		column.offset_right = 0.0
+	else:
+		column.anchor_left = 0.0
+		column.anchor_right = 0.0
+		column.offset_left = 0.0
+		column.offset_right = ScreenHelpers.SIDE_PANEL_WIDTH
+	column.alignment = BoxContainer.ALIGNMENT_BEGIN
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(column)
+	return column
+
+
+## Buduje boczne kolumny ramek graczy, każda podzielona na GÓRNY i DOLNY
+## slot rozdzielony rozpychającym spacerem. Kolejność zajmowania miejsc
+## (zgłoszone przez użytkownika): 1. gracz -> prawy dół, 2. gracz -> lewy
+## dół, 3. gracz -> prawy góra, 4. gracz -> lewy góra. Sloty budowane ZAWSZE
+## wszystkie cztery, niezależnie od liczby obecnych graczy — dzięki temu np.
+## przy jednym graczu jego ramka zawsze ląduje w prawym dole, a nie na
+## środku/górze kolumny.
 func _build_player_frames() -> void:
-	var left_root := ScreenHelpers.make_root_side(self, false, false, SIDE_FRAMES_TOP_OFFSET)
-	var right_root := ScreenHelpers.make_root_side(self, true, false, SIDE_FRAMES_TOP_OFFSET)
-	left_root.alignment = BoxContainer.ALIGNMENT_BEGIN
-	right_root.alignment = BoxContainer.ALIGNMENT_BEGIN
+	var left_root := _make_side_column(false)
+	var right_root := _make_side_column(true)
 
 	var left_top := VBoxContainer.new()
 	left_root.add_child(left_top)
