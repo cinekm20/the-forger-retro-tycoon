@@ -159,6 +159,15 @@ func _apply_snapshot(state: Dictionary) -> void:
 func end_turn() -> void:
 	var days := Auctions.cap_turn_advance(DAYS_PER_TURN, Travel.current_city)
 	Calendar.advance_days(days)
+	advance_active_player()
+
+
+## Sama zmiana aktywnego gracza (snapshot/przełączenie/przywrócenie), BEZ
+## naliczania dni kalendarzowych — wydzielone z end_turn(), żeby
+## TravelAnimation.gd mogło wywołać to samo przekazanie tury po długiej
+## podróży (patrz komentarz tam), skoro dni na czas podróży nalicza samo,
+## osobnym Calendar.advance_days().
+func advance_active_player() -> void:
 	if is_multiplayer():
 		snapshots[active_index] = _capture_active()
 		active_index = (active_index + 1) % player_count

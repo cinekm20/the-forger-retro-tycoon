@@ -16,7 +16,11 @@ extends Control
 ## lokalizacji, bo formalnie gracz jeszcze tam "był" — realny bug zgłoszony
 ## przez użytkownika). Dni podróży nadal w pełni naliczają płace/wzrost
 ## upraw/kursy akcji jak zwykłe tury — tylko naliczone w jednym momencie
-## zamiast rozbite na kilka kliknięć "Koniec tury".
+## zamiast rozbite na kilka kliknięć "Koniec tury". W hot-seat: podróż
+## DŁUŻSZA niż jedna tura (Players.DAYS_PER_TURN) dodatkowo kończy turę
+## podróżującego gracza (Players.advance_active_player() w _on_finished) —
+## zgłoszone przez użytkownika, inaczej reszta graczy traciła tyle dni, ile
+## trwała cudza podróż, bez własnej akcji w tym czasie.
 
 const ANIMATION_DURATION := 1.8
 const ARRIVAL_ZOOM_DURATION := 0.8
@@ -86,6 +90,17 @@ func _on_finished() -> void:
 	if GameState.check_game_over():
 		SceneRouter.goto_scene(SceneRouter.ENDING)
 		return
+
+	## Zgłoszone przez użytkownika: w hot-seat, podróż DŁUŻSZA niż jedna tura
+	## (Players.DAYS_PER_TURN, 7 dni) ma kończyć turę podróżującego gracza i
+	## przekazywać ją kolejnemu — inaczej pozostali gracze "tracili" tyle dni
+	## kalendarza (płace, wzrost upraw, kursy akcji), ile trwała cudza
+	## podróż, bez żadnej własnej akcji w tym czasie. Krótsze podróże
+	## (<= tydzień) zostają w obrębie tej samej tury, tak jak dotąd —
+	## Players.advance_active_player() nalicza TYLKO zmianę aktywnego
+	## gracza, dni już naliczone wyżej przez Calendar.advance_days().
+	if Players.is_multiplayer() and days_to_advance > Players.DAYS_PER_TURN:
+		Players.advance_active_player()
 
 	_play_arrival_zoom_in()
 

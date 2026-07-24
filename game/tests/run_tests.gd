@@ -35,6 +35,7 @@ func _ready() -> void:
 	_test_win_threshold_easy_mode()
 	_test_forward_contract_penalty_on_failure()
 	_test_players_hotseat_swap()
+	_test_travel_ends_turn_when_longer_than_a_week()
 	_test_security_bodyguard_and_gangster()
 	_test_travel_vehicle_choice()
 	_test_travel_completes_in_one_animation()
@@ -337,6 +338,43 @@ func _test_players_hotseat_swap() -> void:
 	_assert(Players.active_index == 0, "po drugim end_turn wracamy do gracza 1")
 	_assert(Economy.player_money == 12345.0, "stan gracza 1 poprawnie przywrócony z migawki")
 	_assert(Paintings.owned_count() == 1, "gracz 1 nadal ma swój obraz")
+
+
+## Zgłoszone przez użytkownika: w hot-seat, podróż DŁUŻSZA niż jedna tura
+## (Players.DAYS_PER_TURN, 7 dni) ma kończyć turę podróżującego gracza i
+## przekazywać ją kolejnemu — inaczej pozostali gracze tracili dni
+## kalendarza bez własnej akcji. Symuluje dokładnie to, co robi
+## TravelAnimation.gd::_on_finished (Calendar.advance_days, potem warunkowo
+## Players.advance_active_player) — scen nie instancjonujemy w tym pakiecie
+## testów, patrz konwencja innych testów w tym pliku.
+func _test_travel_ends_turn_when_longer_than_a_week() -> void:
+	print("-- Travel/Players: długa podróż w hot-seat kończy turę --")
+	Economy.reset_new_game()
+	Security.reset_new_game()
+	Security.has_bodyguard = true  # eliminuje losową kradzież w tle, tak jak w _test_players_hotseat_swap
+	Players.reset_new_game(2)
+
+	Travel.reset_new_game()
+	Calendar.reset_new_game()
+	Travel.current_city = "berlin"
+	Travel.route.clear()
+	Travel.start_travel("london")  # 3.0 dnia — krótsza niż tydzień
+	var short_days := int(ceil(Travel.last_travel_total_days))
+	Calendar.advance_days(short_days)
+	if Players.is_multiplayer() and short_days > Players.DAYS_PER_TURN:
+		Players.advance_active_player()
+	_assert(Players.active_index == 0, "krótka podróż (Berlin -> Londyn, %d dni) NIE zmienia aktywnego gracza" % short_days)
+
+	Travel.reset_new_game()
+	Calendar.reset_new_game()
+	Travel.current_city = "london"
+	Travel.route.clear()
+	Travel.start_travel("new_york")  # 13.9 dnia — dłuższa niż tydzień
+	var long_days := int(ceil(Travel.last_travel_total_days))
+	Calendar.advance_days(long_days)
+	if Players.is_multiplayer() and long_days > Players.DAYS_PER_TURN:
+		Players.advance_active_player()
+	_assert(Players.active_index == 1, "długa podróż (Londyn -> Nowy Jork, %d dni) kończy turę, przechodzi na gracza 2" % long_days)
 
 
 func _test_security_bodyguard_and_gangster() -> void:

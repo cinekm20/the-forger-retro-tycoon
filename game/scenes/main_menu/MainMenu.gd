@@ -123,6 +123,20 @@ func _show_name_entry() -> void:
 
 	ScreenHelpers.make_title(name_section, "Podaj imiona graczy")
 
+	## HFlowContainer zamiast pionowego stosu boksów per gracz — zgłoszone
+	## przez użytkownika: przy 2+ graczach boksy stackowały się jeden pod
+	## drugim, a w orientacji poziomej (mało miejsca w pionie) ekran nie
+	## mieścił wszystkiego do przycisku "Rozpocznij grę" bez przewijania,
+	## które na tym ekranie (tak jak wcześniej na Hub.gd) zawodzi dotykiem.
+	## Boksy graczy obok siebie w POZIOMIE (do 4, Players.MAX_PLAYERS,
+	## mieszczą się swobodnie na szerokim ekranie) — wysokość rośnie tylko o
+	## wysokość JEDNEGO boksu, niezależnie od liczby graczy.
+	var players_row := HFlowContainer.new()
+	players_row.alignment = FlowContainer.ALIGNMENT_CENTER
+	players_row.add_theme_constant_override("h_separation", 20)
+	players_row.add_theme_constant_override("v_separation", 16)
+	name_section.add_child(players_row)
+
 	## Każdy gracz dostaje: DUŻY podgląd awatara na górze (96×96, było 48×48,
 	## stłoczone w jednym rzędzie z resztą — zgłoszone przez użytkownika, że
 	## wybór powinien być większy i awatar może stać w innym miejscu niż
@@ -133,7 +147,7 @@ func _show_name_entry() -> void:
 	## prompty w docs/GRAFIKA_LEONARDO.md §6).
 	var count := player_count_option.selected + 1
 	for i in count:
-		var box := ScreenHelpers.make_boxed_row(name_section)
+		var box := ScreenHelpers.make_boxed_row(players_row)
 		var column := VBoxContainer.new()
 		column.alignment = BoxContainer.ALIGNMENT_CENTER
 		column.add_theme_constant_override("separation", 8)
