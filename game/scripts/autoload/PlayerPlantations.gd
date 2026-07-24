@@ -14,18 +14,17 @@ const REFERENCE_TILE_COUNT := 50.0  ## odniesienie do tabeli plonów (ok. 50 ha 
 var plantations: Array[Dictionary] = []
 
 
-func _ready() -> void:
-	Calendar.day_advanced.connect(_on_day_advanced)
-
-
 func reset_new_game() -> void:
 	plantations.clear()
 
 
-## Płaca robotników nalicza się cyklicznie za każdy dzień pracy (nie
-## jednorazowo przy zatrudnieniu) — brak pieniędzy nie blokuje pracy, tylko
-## pogłębia dług gracza (spójne z mechaniką bankructwa w Economy.gd).
-func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
+## Tor B — osobiste dla aktywnego gracza: płaca robotników nalicza się
+## cyklicznie za każdy dzień pracy (nie jednorazowo przy zatrudnieniu) — brak
+## pieniędzy nie blokuje pracy, tylko pogłębia dług gracza (spójne z
+## mechaniką bankructwa w Economy.gd). Wywoływane wprost przez
+## Players.advance_active_player_time (NIE podłączone do Calendar.day_advanced
+## — to osobisty koszt TEGO gracza, nie zjawisko globalne).
+func apply_player_days_elapsed(days_elapsed: int) -> void:
 	for plantation in plantations:
 		var wage_cost: float = int(plantation["workers"]) * WORKER_DAILY_WAGE * days_elapsed
 		if wage_cost > 0.0:
@@ -59,7 +58,7 @@ func found_plantation(city_id: String) -> int:
 		"tile_crops": tile_crops,
 		"workers": 0,
 		"stored_goods": {},  ## uprawa -> ilość w magazynie (osobno per uprawa)
-		"last_harvest_day": Calendar.current_day,
+		"last_harvest_day": Players.active_day(),
 	})
 	return plantations.size() - 1
 
@@ -165,12 +164,12 @@ const REFERENCE_PERIOD_DAYS := 30.0  ## REFERENCE_YIELD w Crops.gd to plon za 30
 ## uprawy z plonem > 0).
 func calculate_harvest(plantation_index: int) -> Dictionary:
 	var plantation: Dictionary = plantations[plantation_index]
-	var days_since_harvest: int = Calendar.current_day - int(plantation["last_harvest_day"])
+	var days_since_harvest: int = Players.active_day() - int(plantation["last_harvest_day"])
 	var result: Dictionary = {}
 	if days_since_harvest <= 0:
 		return result
 	var worker_factor: float = float(plantation["workers"]) / 500.0
-	var seasonal_factor: float = Crops.SEASONAL_YIELD_FACTOR[Calendar.get_month()]
+	var seasonal_factor: float = Crops.SEASONAL_YIELD_FACTOR[Calendar.get_month_for_day(Players.active_day())]
 	var time_factor: float = days_since_harvest / REFERENCE_PERIOD_DAYS
 	var tile_crops: Array = plantation["tile_crops"]
 	for crop in Crops.CROPS:
@@ -205,7 +204,7 @@ func harvest(plantation_index: int) -> Dictionary:
 	var stored: Dictionary = plantation["stored_goods"]
 	for crop in amounts:
 		stored[crop] = int(stored.get(crop, 0)) + amounts[crop]
-	plantation["last_harvest_day"] = Calendar.current_day
+	plantation["last_harvest_day"] = Players.active_day()
 	return amounts
 
 

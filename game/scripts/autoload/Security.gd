@@ -21,10 +21,6 @@ const GANGSTER_SUCCESS_CHANCE := 0.4  ## "nie zawsze dostarczają towar"
 var has_bodyguard: bool = false
 
 
-func _ready() -> void:
-	Calendar.day_advanced.connect(_on_day_advanced)
-
-
 func reset_new_game() -> void:
 	has_bodyguard = false
 
@@ -38,7 +34,10 @@ func hire_bodyguard() -> bool:
 	return true
 
 
-func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
+## Tor B — ryzyko kradzieży sprawdzane dla aktywnego gracza wg jego WŁASNYCH
+## dni, wywoływane wprost przez Players.advance_active_player_time (NIE
+## podłączone do Calendar.day_advanced).
+func apply_player_days_elapsed(days_elapsed: int) -> void:
 	if has_bodyguard or Paintings.catalogued_numbers.is_empty():
 		return
 	var weeks: float = float(days_elapsed) / 7.0

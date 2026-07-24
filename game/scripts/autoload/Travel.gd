@@ -1,9 +1,12 @@
 extends Node
 ## Stan podróży gracza — aktualna lokalizacja, trasa w toku i pozostałe dni.
 ## Wieloetapowa podróż (przesiadki) jest liczona automatycznie przez
-## Cities.find_route. Postęp podróży posuwa się wraz z każdym
-## Calendar.advance_days (Hub "Tydzień naprzód", kurs w Szkole Sztuki itd.)
-## Patrz docs/MECHANIKI_EKONOMICZNE.md pkt. 2.
+## Cities.find_route. Tor B (patrz Players.gd): postęp podróży to sprawa
+## OSOBISTA aktywnego gracza, więc posuwa się wraz z
+## Players.advance_active_player_time (nie globalnym Calendar.day_advanced)
+## — inaczej podróż gracza "doganiającego" resztę zawieszałaby się w
+## połowie trasy, skoro Tor A mógłby już nie mieć dla niego nowych dni do
+## rozegrania. Patrz docs/MECHANIKI_EKONOMICZNE.md pkt. 2.
 
 signal departed(route: Array, total_days: float)
 signal arrived(city_id: String)
@@ -21,10 +24,6 @@ var last_travel_from: String = ""
 var last_travel_to: String = ""
 var last_travel_vehicle: Vehicle = Vehicle.TRAIN
 var last_travel_total_days: float = 0.0
-
-
-func _ready() -> void:
-	Calendar.day_advanced.connect(_on_day_advanced)
 
 
 func reset_new_game() -> void:
@@ -89,7 +88,7 @@ func get_destination() -> String:
 const ARRIVAL_EPSILON := 0.0001
 
 
-func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
+func apply_player_days_elapsed(days_elapsed: int) -> void:
 	if not is_traveling():
 		return
 	days_remaining -= days_elapsed

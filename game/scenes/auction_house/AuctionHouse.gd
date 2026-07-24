@@ -399,7 +399,7 @@ func _resolve_auction() -> void:
 
 
 func _update_labels() -> void:
-	schedule_label.text = tr("Aukcja w toku: %s — %s") % [Cities.get_city_name(Travel.current_city), Calendar.get_date_string()]
+	schedule_label.text = tr("Aukcja w toku: %s — %s") % [Cities.get_city_name(Travel.current_city), Calendar.format_day(Players.active_day())]
 
 	var category: String = Paintings.get_category(current_number)
 	var category_name: String = Paintings.CATEGORY_NAMES.get(category, category)

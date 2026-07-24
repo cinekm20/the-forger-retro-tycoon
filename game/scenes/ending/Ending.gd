@@ -54,7 +54,7 @@ func _build_win(root: VBoxContainer, player_index: int) -> void:
 	ScreenHelpers.make_label(
 		root,
 		tr("Dni gry: %d | Gotówka: %.0f M | Obrazy: %d") % [
-			Calendar.current_day, Economy.player_money, Players.get_painting_count(player_index),
+			Players.get_player_day(player_index), Economy.player_money, Players.get_painting_count(player_index),
 		],
 	)
 
@@ -67,7 +67,7 @@ func _build_bankrupt(root: VBoxContainer, player_index: int) -> void:
 		name_prefix + tr("Wierzyciele stracili cierpliwość. Twoje interesy zostają przejęte, a marzenie o spadku po wuju Waltherze przechodzi na innego, sprawniejszego kandydata."),
 	)
 	ScreenHelpers.make_label(root, tr("Dni gry: %d | Obrazy zebrane: %d") % [
-		Calendar.current_day, Players.get_painting_count(player_index),
+		Players.get_player_day(player_index), Players.get_painting_count(player_index),
 	])
 
 
@@ -78,7 +78,7 @@ func _build_rival_win(root: VBoxContainer, rival_id: String) -> void:
 		root,
 		tr("%s dociera do ostatniego brakującego obrazu pierwszy/-a. Testament wuja Walthera zostaje spisany na czyjeś inne nazwisko.") % rival_name,
 	)
-	ScreenHelpers.make_label(root, tr("Dni gry: %d | Twoje obrazy: %d") % [Calendar.current_day, Paintings.owned_count()])
+	ScreenHelpers.make_label(root, tr("Dni gry: %d | Twoje obrazy: %d") % [Players.active_day(), Paintings.owned_count()])
 
 
 func _make_narrative_label(root: VBoxContainer, text: String) -> Label:

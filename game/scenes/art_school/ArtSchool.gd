@@ -62,7 +62,7 @@ func _on_train_pressed() -> void:
 	if not Economy.spend(TRAINING_COST):
 		info_label.text = tr("Za mało gotówki na kurs.")
 		return
-	Calendar.advance_days(TRAINING_DAYS)
+	Players.advance_active_player_time(TRAINING_DAYS)
 	if GameState.check_game_over():
 		SceneRouter.goto_scene(SceneRouter.ENDING)
 		return
@@ -154,18 +154,15 @@ func _close_quiz() -> void:
 	_end_course_turn()
 
 
-## Zgłoszone przez użytkownika: ten sam problem co przy długiej podróży w
-## hot-seat (patrz TravelAnimation.gd) — kurs trwa TRAINING_DAYS (14 dni,
-## dłużej niż tydzień Players.DAYS_PER_TURN), ale bez tego wywołania ten
-## sam gracz mógł kupować kurs za kursem bez oddawania tury drugiemu
-## graczowi. MUSI być wywołane na SAMYM KOŃCU (po zastosowaniu eksperckości
-## z quizu w _on_quiz_guess, nie zaraz po zapłaceniu za kurs) — Economy.
-## player_money i Paintings.expertise są migawkowane PER GRACZ
+## Dni kursu (Players.advance_active_player_time) nalicza już _on_train_pressed(),
+## ale przekazanie ruchu (Players.pass_turn_to_earliest_player) czeka
+## DO TERAZ, na sam koniec — po zastosowaniu eksperckości z quizu w
+## _on_quiz_guess (nie zaraz po zapłaceniu za kurs) — Economy.player_money i
+## Paintings.expertise są migawkowane PER GRACZ
 ## (Players._capture_active/_apply_snapshot); przełączenie aktywnego gracza
 ## wcześniej przypisałoby zdobytą eksperckość złej osobie.
 func _end_course_turn() -> void:
-	if Players.is_multiplayer() and TRAINING_DAYS > Players.DAYS_PER_TURN:
-		Players.advance_active_player()
+	Players.pass_turn_to_earliest_player()
 	_update_info()
 
 
@@ -174,5 +171,5 @@ func _update_info() -> void:
 	## zgłosił, że spodziewał się dokładniejszej szacowanej wartości obrazu
 	## podczas aukcji i nie widział różnicy, bo to nie jest jej działanie.
 	info_label.text = tr("Eksperckość: %.0f%% — zwiększa szansę na wczesne ostrzeżenie o podróbce w Domu aukcyjnym (NIE wpływa na szacowaną wartość obrazu)\nGotówka: %.0f M | Data: %s") % [
-		Paintings.expertise * 100.0, Economy.player_money, Calendar.get_date_string(),
+		Paintings.expertise * 100.0, Economy.player_money, Calendar.format_day(Players.active_day()),
 	]

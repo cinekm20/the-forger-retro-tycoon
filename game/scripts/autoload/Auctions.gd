@@ -52,9 +52,10 @@ func _pick_new_schedule(from_day: int) -> void:
 
 ## Czy w podanym mieście trwa właśnie zaplanowana aukcja — termin nadszedł
 ## (albo minął, jeśli gracz spóźnił się i akurat tam jest) i jeszcze nie
-## został rozstrzygnięty.
+## został rozstrzygnięty. Sprawdzane wg WŁASNEGO dnia aktywnego gracza (Tor
+## B) — zawsze wywoływane w kontekście aktywnego gracza (patrz AuctionHouse.gd).
 func is_open(city_id: String) -> bool:
-	return city_id == next_auction_city and Calendar.current_day >= next_auction_day
+	return city_id == next_auction_city and Players.active_day() >= next_auction_day
 
 
 func get_current_painting_number() -> int:
@@ -85,7 +86,7 @@ func get_schedule_string() -> String:
 ## zalicytować. Zwraca requested_days bez zmian, jeśli gracz jest gdzie
 ## indziej albo termin już minął (nic nie ma co ciąć).
 func cap_turn_advance(requested_days: int, city_id: String) -> int:
-	if city_id != next_auction_city or Calendar.current_day >= next_auction_day:
+	if city_id != next_auction_city or Players.active_day() >= next_auction_day:
 		return requested_days
-	var days_to_auction := next_auction_day - Calendar.current_day
+	var days_to_auction := next_auction_day - Players.active_day()
 	return mini(requested_days, days_to_auction)

@@ -37,6 +37,15 @@ func get_month() -> int:
 	return 1 + (current_day / DAYS_PER_MONTH) % 12
 
 
+## Miesiąc DOWOLNEGO dnia (nie tylko current_day) — mirror get_month(),
+## potrzebne np. dla plantacji liczonych wg dnia AKTYWNEGO GRACZA
+## (Players.active_day()), nie globalnego zegara (patrz Tor B w
+## per-graczowej architekturze czasu, PlayerPlantations.gd).
+func get_month_for_day(day: int) -> int:
+	@warning_ignore("integer_division")
+	return 1 + (day / DAYS_PER_MONTH) % 12
+
+
 func get_day_of_month() -> int:
 	return 1 + current_day % DAYS_PER_MONTH
 

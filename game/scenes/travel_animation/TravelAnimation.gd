@@ -10,17 +10,17 @@ extends Control
 ## odbicie zoom-outu z Hub.gd _on_travel_pressed().
 ##
 ## Animacja = cała podróż: w momencie zakończenia lotu/jazdy dogrywamy
-## Calendar.advance_days() na całą pozostałą długość trasy, więc
-## Travel.current_city zdąży się zaktualizować na miasto docelowe PRZED
-## zoom-inem (inaczej Hub.gd po przełączeniu scen pokazywał tło poprzedniej
-## lokalizacji, bo formalnie gracz jeszcze tam "był" — realny bug zgłoszony
-## przez użytkownika). Dni podróży nadal w pełni naliczają płace/wzrost
-## upraw/kursy akcji jak zwykłe tury — tylko naliczone w jednym momencie
-## zamiast rozbite na kilka kliknięć "Koniec tury". W hot-seat: podróż
-## DŁUŻSZA niż jedna tura (Players.DAYS_PER_TURN) dodatkowo kończy turę
-## podróżującego gracza (Players.advance_active_player() w _on_finished) —
-## zgłoszone przez użytkownika, inaczej reszta graczy traciła tyle dni, ile
-## trwała cudza podróż, bez własnej akcji w tym czasie.
+## Players.advance_active_player_time() na całą pozostałą długość trasy,
+## więc Travel.current_city zdąży się zaktualizować na miasto docelowe
+## PRZED zoom-inem (inaczej Hub.gd po przełączeniu scen pokazywał tło
+## poprzedniej lokalizacji, bo formalnie gracz jeszcze tam "był" — realny
+## bug zgłoszony przez użytkownika). Dni podróży nadal w pełni naliczają
+## płace/wzrost upraw/kursy akcji jak zwykłe tury — tylko naliczone w jednym
+## momencie zamiast rozbite na kilka kliknięć "Koniec tury". Po naliczeniu
+## dni ZAWSZE (nie tylko w hot-seat, i bez progu długości trasy) oddajemy
+## ruch temu, kto ma teraz najwcześniejszą datę (Players.pass_turn_to_earliest_player()
+## w _on_finished) — silnik sam decyduje, czy to nadal ten sam gracz, czy
+## ktoś inny, patrz Players.gd.
 
 const ANIMATION_DURATION := 1.8
 const ARRIVAL_ZOOM_DURATION := 0.8
@@ -76,13 +76,13 @@ func _on_finished() -> void:
 		return
 	finished = true
 
-	## ceil, nie round/floor: Calendar.advance_days() przyjmuje tylko pełne
-	## dni, więc zaokrąglamy w górę, żeby na pewno pokryć całą (często
-	## ułamkową) długość trasy — Travel._on_day_advanced() sam poprawnie
-	## rozlicza nadmiarowe dni przy wieloetapowych trasach z przesiadką.
+	## ceil, nie round/floor: dni muszą być pełne, więc zaokrąglamy w górę,
+	## żeby na pewno pokryć całą (często ułamkową) długość trasy —
+	## Travel.apply_player_days_elapsed() sam poprawnie rozlicza nadmiarowe
+	## dni przy wieloetapowych trasach z przesiadką.
 	var days_to_advance := int(ceil(Travel.last_travel_total_days))
 	if days_to_advance > 0:
-		Calendar.advance_days(days_to_advance)
+		Players.advance_active_player_time(days_to_advance)
 
 	## Ominięcie animacji przy bankructwie/wygranej w trakcie podróży —
 	## normalnie ten check robi Hub.gd po "Koniec tury", ale tu przełączamy
@@ -91,16 +91,11 @@ func _on_finished() -> void:
 		SceneRouter.goto_scene(SceneRouter.ENDING)
 		return
 
-	## Zgłoszone przez użytkownika: w hot-seat, podróż DŁUŻSZA niż jedna tura
-	## (Players.DAYS_PER_TURN, 7 dni) ma kończyć turę podróżującego gracza i
-	## przekazywać ją kolejnemu — inaczej pozostali gracze "tracili" tyle dni
-	## kalendarza (płace, wzrost upraw, kursy akcji), ile trwała cudza
-	## podróż, bez żadnej własnej akcji w tym czasie. Krótsze podróże
-	## (<= tydzień) zostają w obrębie tej samej tury, tak jak dotąd —
-	## Players.advance_active_player() nalicza TYLKO zmianę aktywnego
-	## gracza, dni już naliczone wyżej przez Calendar.advance_days().
-	if Players.is_multiplayer() and days_to_advance > Players.DAYS_PER_TURN:
-		Players.advance_active_player()
+	## Przekazanie ruchu jest ZAWSZE, dla każdej długości trasy — silnik
+	## (Players.pass_turn_to_earliest_player) sam decyduje, czy to nadal ten
+	## sam gracz (bo wciąż jest "najbardziej z tyłu" w czasie), czy ktoś
+	## inny.
+	Players.pass_turn_to_earliest_player()
 
 	_play_arrival_zoom_in()
 

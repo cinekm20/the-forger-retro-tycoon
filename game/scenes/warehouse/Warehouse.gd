@@ -21,7 +21,7 @@ func _ready() -> void:
 	var corner := ScreenHelpers.make_corner_status_row(self, "", "")
 	var location_label: Label = corner["left"]
 	var money_label: Label = corner["right"]
-	location_label.text = tr("%s\n%s") % [Cities.get_city_name(Travel.current_city), Calendar.get_date_string()]
+	location_label.text = tr("%s\n%s") % [Cities.get_city_name(Travel.current_city), Calendar.format_day(Players.active_day())]
 	money_label.text = tr("%.0f M") % Economy.player_money
 
 	var root := ScreenHelpers.make_root(self)

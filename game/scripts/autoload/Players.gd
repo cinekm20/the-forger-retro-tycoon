@@ -41,6 +41,14 @@ var player_genders: Array[String] = []
 var player_avatar_variants: Array[String] = []
 var snapshots: Array[Dictionary] = []  ## stan graczy, którzy NIE są właśnie aktywni
 
+## Niezależny licznik dni KAŻDEGO gracza (Tor B — patrz advance_active_player_time
+## niżej). Płaska tablica jak player_names, celowo NIE migawkowana w
+## snapshots[] — w odróżnieniu od pieniędzy/plantacji, nikt nigdy nie
+## potrzebuje "aktualnej wartości" dnia gracza, który akurat nie jest
+## aktywny, tylko wartości spod dowolnego indeksu (get_player_day), więc
+## płaska tablica wystarcza.
+var player_days: Array[int] = [0]
+
 
 func reset_new_game(count: int) -> void:
 	player_count = clampi(count, 1, MAX_PLAYERS)
@@ -49,11 +57,13 @@ func reset_new_game(count: int) -> void:
 	player_genders.clear()
 	player_avatar_variants.clear()
 	snapshots.clear()
+	player_days.clear()
 	for i in player_count:
 		player_names.append("Gracz %d" % (i + 1))
 		player_genders.append(GENDERS[0])
 		player_avatar_variants.append(AVATAR_VARIANTS[0])
 		snapshots.append(_empty_snapshot())
+		player_days.append(0)
 
 
 func is_multiplayer() -> bool:
@@ -94,6 +104,17 @@ func active_name() -> String:
 
 func active_avatar_path() -> String:
 	return get_avatar_path(active_index)
+
+
+## Własny, niezależny dzień aktywnego gracza (Tor B) — NIE to samo co
+## Calendar.current_day (Tor A, wspólny dla wszystkich, patrz komentarz
+## przy player_days wyżej i przy advance_active_player_time niżej).
+func active_day() -> int:
+	return player_days[active_index]
+
+
+func get_player_day(index: int) -> int:
+	return player_days[index]
 
 
 func _empty_snapshot() -> Dictionary:
@@ -151,26 +172,62 @@ func _apply_snapshot(state: Dictionary) -> void:
 
 
 ## Kończy turę aktywnego gracza: dolicza tydzień (płace, kontrakty, dług —
-## patrz nagłówek pliku), a w multiplayerze przełącza na kolejnego gracza.
+## patrz nagłówek pliku), a w multiplayerze przekazuje ruch temu, kto ma
+## teraz najwcześniejszą datę (patrz pass_turn_to_earliest_player niżej).
 ## Auctions.cap_turn_advance skraca ten skok, jeśli pełny tydzień przeleciałby
 ## od razu przez dzień aukcji w mieście, w którym gracz akurat stoi (patrz
 ## komentarz przy tej funkcji) — bez tego nigdy nie dało się trafić dokładnie
 ## na termin, żeby zdążyć wejść do Domu aukcyjnego.
 func end_turn() -> void:
 	var days := Auctions.cap_turn_advance(DAYS_PER_TURN, Travel.current_city)
-	Calendar.advance_days(days)
-	advance_active_player()
+	advance_active_player_time(days)
+	pass_turn_to_earliest_player()
 
 
-## Sama zmiana aktywnego gracza (snapshot/przełączenie/przywrócenie), BEZ
-## naliczania dni kalendarzowych — wydzielone z end_turn(), żeby
-## TravelAnimation.gd mogło wywołać to samo przekazanie tury po długiej
-## podróży (patrz komentarz tam), skoro dni na czas podróży nalicza samo,
-## osobnym Calendar.advance_days().
-func advance_active_player() -> void:
-	if is_multiplayer():
+## Nalicza upływ dni TYLKO aktywnemu graczowi — czysta matematyka dni, BEZ
+## przekazania ruchu (patrz pass_turn_to_earliest_player niżej, wywoływane
+## osobno). Tor A (Calendar.current_day, wspólny dla wszystkich) rusza
+## TYLKO o nowy teren ponad to, co już zasymulowane — dzięki temu ten sam
+## dzień zawsze ma tę samą cenę na Giełdzie/Rynku, niezależnie kto do niego
+## dotarł pierwszy. Tor B (Travel/Economy/PlayerPlantations/ForwardContracts/
+## Security) dostaje ZAWSZE pełną liczbę dni — z perspektywy TEGO gracza te
+## dni i tak minęły, nawet jeśli świat był już dalej (bez tego catching-up
+## gracz nie płaciłby swoim robotnikom / nie kończyłby podróży).
+func advance_active_player_time(days: int) -> void:
+	if days <= 0:
+		return
+	var new_day := player_days[active_index] + days
+	player_days[active_index] = new_day
+	if new_day > Calendar.current_day:
+		Calendar.advance_days(new_day - Calendar.current_day)
+	Travel.apply_player_days_elapsed(days)
+	Economy.apply_player_days_elapsed(days)
+	PlayerPlantations.apply_player_days_elapsed(days)
+	ForwardContracts.apply_player_days_elapsed(days)
+	Security.apply_player_days_elapsed(days)
+
+
+## Decyduje, KTO gra dalej — nie sztywny round-robin, tylko gracz z
+## najwcześniejszą (najmniejszą) datą (patrz nagłówek pliku i GDD). Może to
+## być ten sam gracz drugi raz z rzędu, jeśli nadal jest "najbardziej z
+## tyłu" w czasie. Remis rozstrzyga najniższy indeks (deterministyczne,
+## odtwarza zwykły round-robin, gdy wszystkie akcje trwają tyle samo).
+## Publiczna i wywoływana OSOBNO od advance_active_player_time — Szkoła
+## sztuki (ArtSchool.gd) musi rozegrać quiz PO naliczeniu dni, ale PRZED
+## przekazaniem ruchu, żeby zdobyta eksperckość trafiła do właściwego,
+## wciąż aktywnego gracza (Economy.player_money/Paintings.expertise są
+## migawkowane per gracz).
+func pass_turn_to_earliest_player() -> void:
+	if not is_multiplayer():
+		turn_changed.emit(active_index)
+		return
+	var earliest_index := 0
+	for i in range(1, player_count):
+		if player_days[i] < player_days[earliest_index]:
+			earliest_index = i
+	if earliest_index != active_index:
 		snapshots[active_index] = _capture_active()
-		active_index = (active_index + 1) % player_count
+		active_index = earliest_index
 		_apply_snapshot(snapshots[active_index])
 	turn_changed.emit(active_index)
 

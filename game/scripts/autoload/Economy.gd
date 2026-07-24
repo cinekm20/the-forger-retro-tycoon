@@ -72,6 +72,10 @@ func earn(amount: float) -> void:
 	player_money += amount
 
 
+## Tor A — wspólne dla wszystkich graczy: kurs dolara, inflacja, reforma
+## walutowa. Zostaje podłączone do Calendar.day_advanced (globalny zegar) bez
+## zmian — te zjawiska naprawdę dzieją się "w świecie", nie osobno dla
+## każdego gracza.
 func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
 	var weeks: float = float(days_elapsed) / 7.0
 	dollar_rate *= 1.0 + inflation * 0.01 * weeks
@@ -81,6 +85,13 @@ func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
 	if is_reform_imminent() and randf() < REFORM_CHANCE_PER_WEEK * weeks:
 		apply_currency_reform(REFORM_RATIO)
 
+
+## Tor B — osobiste dla aktywnego gracza: dni w długu. Wydzielone z
+## _on_day_advanced (patrz wyżej) i wywoływane wprost przez
+## Players.advance_active_player_time — bez tego zadłużenie gracza
+## "doganiającego" resztę liczyłoby się na podstawie delty świata, a nie
+## jego własnych dni.
+func apply_player_days_elapsed(days_elapsed: int) -> void:
 	if player_money < 0.0:
 		days_in_debt += days_elapsed
 	else:

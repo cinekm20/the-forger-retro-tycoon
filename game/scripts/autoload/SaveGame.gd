@@ -35,6 +35,7 @@ func save_game() -> void:
 		"player_genders": Players.player_genders,
 		"player_avatar_variants": Players.player_avatar_variants,
 		"player_snapshots": Players.snapshots,
+		"player_days": Players.player_days,
 		"has_bodyguard": Security.has_bodyguard,
 		"next_auction_city": Auctions.next_auction_city,
 		"next_auction_day": Auctions.next_auction_day,
@@ -104,6 +105,18 @@ func load_game() -> void:
 	Players.player_avatar_variants.assign(loaded_avatar_variants)
 	var loaded_snapshots: Array = data.get("player_snapshots", [])
 	Players.snapshots.assign(loaded_snapshots)
+	## Zapisy sprzed dodania niezależnych linii czasu per gracz nie mają
+	## "player_days" (albo mają tablicę złego rozmiaru, np. po zmianie
+	## liczby graczy) — najlepsze dostępne przybliżenie to ówczesny
+	## wspólny Calendar.current_day dla każdego gracza.
+	var loaded_days: Array = data.get("player_days", [])
+	if loaded_days.size() != Players.player_count:
+		loaded_days.clear()
+		for i in Players.player_count:
+			loaded_days.append(Calendar.current_day)
+	var player_days: Array[int] = []
+	player_days.assign(loaded_days)
+	Players.player_days = player_days
 	Security.has_bodyguard = data.get("has_bodyguard", false)
 	Auctions.next_auction_city = data.get("next_auction_city", "")
 	Auctions.next_auction_day = data.get("next_auction_day", 0)

@@ -365,7 +365,7 @@ func _update_status() -> void:
 		location_label.text += tr("\n(gracz %d/%d)") % [Players.active_index + 1, Players.player_count]
 
 	money_label.text = tr("%.0f M") % Economy.player_money
-	date_label.text = Calendar.get_date_string()
+	date_label.text = Calendar.format_day(Players.active_day())
 	paintings_label.text = tr("Obrazy: %d/%d") % [Paintings.owned_count(), Paintings.win_threshold]
 	auction_schedule_label.text = Auctions.get_schedule_string()
 

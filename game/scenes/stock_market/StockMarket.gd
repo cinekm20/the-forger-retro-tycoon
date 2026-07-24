@@ -140,7 +140,7 @@ func _on_sell_pressed(company_id: String) -> void:
 
 
 func _update_info() -> void:
-	location_label.text = tr("%s\n%s") % [Cities.get_city_name(Travel.current_city), Calendar.get_date_string()]
+	location_label.text = tr("%s\n%s") % [Cities.get_city_name(Travel.current_city), Calendar.format_day(Players.active_day())]
 	money_label.text = tr("%.0f M") % Economy.player_money
 	_update_chart()
 

@@ -49,6 +49,11 @@ func _ready() -> void:
 	_test_yearly_report_populated_on_new_year()
 	_test_players_gender_and_avatar_selection()
 	_test_price_history_for_charts()
+	_test_players_days_diverge()
+	_test_shared_price_by_day()
+	_test_catching_up_player_does_not_double_world_drift()
+	_test_catching_up_player_gets_full_personal_consequences()
+	_test_catching_up_player_completes_travel()
 
 	print("\n=== Wynik: %d/%d testów przeszło ===" % [total - failures, total])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -108,13 +113,14 @@ func _test_harvest_requires_elapsed_time() -> void:
 	PlayerPlantations.reset_new_game()
 	Calendar.reset_new_game()
 	Economy.reset_new_game()
+	Players.reset_new_game(1)
 	var idx := PlayerPlantations.found_plantation("richmond")
 	PlayerPlantations.plantations[idx]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
 	PlayerPlantations.buy_tile(idx, 0)
 	PlayerPlantations.plant_tile(idx, 0, "tobacco")
 	PlayerPlantations.hire_workers(idx, 500)
 
-	Calendar.advance_days(30)
+	Players.advance_active_player_time(30)
 	var first_harvest: int = PlayerPlantations.harvest(idx).get("tobacco", 0)
 	var second_harvest: int = PlayerPlantations.harvest(idx).get("tobacco", 0)  # bez upływu czasu od pierwszych zbiorów
 
@@ -129,23 +135,25 @@ func _test_harvest_scales_with_time() -> void:
 	PlayerPlantations.reset_new_game()
 	Calendar.reset_new_game()
 	Economy.reset_new_game()
+	Players.reset_new_game(1)
 	var idx := PlayerPlantations.found_plantation("richmond")
 	PlayerPlantations.plantations[idx]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
 	PlayerPlantations.buy_tile(idx, 0)
 	PlayerPlantations.plant_tile(idx, 0, "tobacco")
 	PlayerPlantations.hire_workers(idx, 500)
-	Calendar.advance_days(10)
+	Players.advance_active_player_time(10)
 	var harvest_10_days: int = PlayerPlantations.harvest(idx).get("tobacco", 0)
 
 	PlayerPlantations.reset_new_game()
 	Calendar.reset_new_game()
 	Economy.reset_new_game()
+	Players.reset_new_game(1)
 	idx = PlayerPlantations.found_plantation("richmond")
 	PlayerPlantations.plantations[idx]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
 	PlayerPlantations.buy_tile(idx, 0)
 	PlayerPlantations.plant_tile(idx, 0, "tobacco")
 	PlayerPlantations.hire_workers(idx, 500)
-	Calendar.advance_days(20)
+	Players.advance_active_player_time(20)
 	var harvest_20_days: int = PlayerPlantations.harvest(idx).get("tobacco", 0)
 
 	_assert(harvest_20_days > harvest_10_days, "20 dni upraw daje więcej plonu niż 10 dni (ten sam miesiąc)")
@@ -157,6 +165,7 @@ func _test_plantation_grows_multiple_crops_at_once() -> void:
 	PlayerPlantations.reset_new_game()
 	Calendar.reset_new_game()
 	Economy.reset_new_game()
+	Players.reset_new_game(1)
 	## "rio" (nie "richmond") — richmond ma bazowy plon kawy tylko 22 (patrz
 	## Crops.REFERENCE_YIELD), więc przy JEDNYM polu kawy calculate_harvest
 	## liczy ~0,3 jednostki, co int() ucina do 0 i test fałszywie failuje
@@ -176,7 +185,7 @@ func _test_plantation_grows_multiple_crops_at_once() -> void:
 	_assert(PlayerPlantations.get_planted_tile_count(idx, "coffee") == 1, "1 pole obsiane kawą")
 	_assert(PlayerPlantations.get_planted_tile_count(idx, "tea") == 0, "0 pól obsianych herbatą")
 
-	Calendar.advance_days(30)
+	Players.advance_active_player_time(30)
 	var amounts := PlayerPlantations.harvest(idx)
 	_assert(amounts.get("tobacco", 0) > 0, "zbiory obejmują tytoń")
 	_assert(amounts.get("coffee", 0) > 0, "zbiory obejmują kawę JEDNOCZEŚNIE z tytoniem")
@@ -293,13 +302,14 @@ func _test_forward_contract_penalty_on_failure() -> void:
 	Crops.reset_new_game()
 	PlayerPlantations.reset_new_game()
 	ForwardContracts.reset_new_game()
+	Players.reset_new_game(1)
 
 	ForwardContracts.propose_contract("tobacco")
 	_assert(ForwardContracts.active_contracts.size() == 1, "kontrakt utworzony")
 	var money_before := Economy.player_money
 
 	# Żadna plantacja nie dostarcza tytoniu -> po terminie kontrakt musi zawieść.
-	Calendar.advance_days(ForwardContracts.DUE_IN_DAYS + 1)
+	Players.advance_active_player_time(ForwardContracts.DUE_IN_DAYS + 1)
 
 	_assert(ForwardContracts.active_contracts.is_empty(), "kontrakt rozliczony i usunięty z listy aktywnych")
 	_assert(Economy.player_money < money_before, "gotówka spadła o karę umowną za niedostarczenie")
@@ -341,15 +351,18 @@ func _test_players_hotseat_swap() -> void:
 	_assert(Paintings.owned_count() == 1, "gracz 1 nadal ma swój obraz")
 
 
-## Zgłoszone przez użytkownika: w hot-seat, podróż DŁUŻSZA niż jedna tura
-## (Players.DAYS_PER_TURN, 7 dni) ma kończyć turę podróżującego gracza i
-## przekazywać ją kolejnemu — inaczej pozostali gracze tracili dni
-## kalendarza bez własnej akcji. Symuluje dokładnie to, co robi
-## TravelAnimation.gd::_on_finished (Calendar.advance_days, potem warunkowo
-## Players.advance_active_player) — scen nie instancjonujemy w tym pakiecie
-## testów, patrz konwencja innych testów w tym pliku.
+## Zgłoszone przez użytkownika: kolejność tur NIE jest sztywnym round-robin —
+## po KAŻDEJ czynności (tu: podróż) silnik oddaje ruch temu, kto ma teraz
+## najwcześniejszą datę (Players.pass_turn_to_earliest_player). Krótka
+## podróż nie wysuwa gracza 1 przed gracza 2 (który wciąż jest na dniu 0),
+## więc ruch NIE przechodzi; długa podróż wysuwa gracza 1 daleko do przodu,
+## więc ruch przechodzi na gracza 2 (wciąż na dniu 0 — teraz on ma
+## najwcześniejszą datę). Symuluje dokładnie to, co robi
+## TravelAnimation.gd::_on_finished (advance_active_player_time, potem
+## bezwarunkowo pass_turn_to_earliest_player) — scen nie instancjonujemy w
+## tym pakiecie testów, patrz konwencja innych testów w tym pliku.
 func _test_travel_ends_turn_when_longer_than_a_week() -> void:
-	print("-- Travel/Players: długa podróż w hot-seat kończy turę --")
+	print("-- Travel/Players: silnik oddaje ruch graczowi z najwcześniejszą datą --")
 	Economy.reset_new_game()
 	Security.reset_new_game()
 	Security.has_bodyguard = true  # eliminuje losową kradzież w tle, tak jak w _test_players_hotseat_swap
@@ -361,32 +374,31 @@ func _test_travel_ends_turn_when_longer_than_a_week() -> void:
 	Travel.route.clear()
 	Travel.start_travel("london")  # 3.0 dnia — krótsza niż tydzień
 	var short_days := int(ceil(Travel.last_travel_total_days))
-	Calendar.advance_days(short_days)
-	if Players.is_multiplayer() and short_days > Players.DAYS_PER_TURN:
-		Players.advance_active_player()
-	_assert(Players.active_index == 0, "krótka podróż (Berlin -> Londyn, %d dni) NIE zmienia aktywnego gracza" % short_days)
+	Players.advance_active_player_time(short_days)
+	Players.pass_turn_to_earliest_player()
+	_assert(Players.active_index == 0, "krótka podróż (Berlin -> Londyn, %d dni) NIE zmienia aktywnego gracza (gracz 2 wciąż nie jest przed nim w czasie)" % short_days)
 
 	Travel.reset_new_game()
 	Calendar.reset_new_game()
+	Players.reset_new_game(2)
 	Travel.current_city = "london"
 	Travel.route.clear()
 	Travel.start_travel("new_york")  # 13.9 dnia — dłuższa niż tydzień
 	var long_days := int(ceil(Travel.last_travel_total_days))
-	Calendar.advance_days(long_days)
-	if Players.is_multiplayer() and long_days > Players.DAYS_PER_TURN:
-		Players.advance_active_player()
-	_assert(Players.active_index == 1, "długa podróż (Londyn -> Nowy Jork, %d dni) kończy turę, przechodzi na gracza 2" % long_days)
+	Players.advance_active_player_time(long_days)
+	Players.pass_turn_to_earliest_player()
+	_assert(Players.active_index == 1, "długa podróż (Londyn -> Nowy Jork, %d dni) wysuwa gracza 1 do przodu, ruch przechodzi na gracza 2 (najwcześniejsza data)" % long_days)
 
 
 ## Ten sam problem co podróż wyżej, ale subtelniejszy: Economy.player_money
 ## i Paintings.expertise są migawkowane PER GRACZ (Players._capture_active),
-## więc przekazanie tury MUSI nastąpić DOPIERO PO zastosowaniu efektów kursu
-## (opłata + zdobyta eksperckość z quizu) — inaczej trafiłyby do migawki
-## złego gracza. Symuluje kolejność z ArtSchool.gd (_on_train_pressed ->
-## quiz -> _end_course_turn), nie sam quiz UI (scen nie instancjonujemy w
-## tym pakiecie testów).
+## więc przekazanie tury (Players.pass_turn_to_earliest_player) MUSI nastąpić
+## DOPIERO PO zastosowaniu efektów kursu (opłata + zdobyta eksperckość z
+## quizu) — inaczej trafiłyby do migawki złego gracza. Symuluje kolejność z
+## ArtSchool.gd (_on_train_pressed -> quiz -> _end_course_turn), nie sam
+## quiz UI (scen nie instancjonujemy w tym pakiecie testów).
 func _test_art_school_course_ends_turn_after_applying_effects() -> void:
-	print("-- ArtSchool: długi kurs (hot-seat) kończy turę PO zastosowaniu efektów --")
+	print("-- ArtSchool: długi kurs oddaje ruch graczowi z najwcześniejszą datą, PO zastosowaniu efektów --")
 	Calendar.reset_new_game()
 	Economy.reset_new_game()
 	Paintings.reset_new_game()
@@ -399,12 +411,11 @@ func _test_art_school_course_ends_turn_after_applying_effects() -> void:
 	var expertise_gain := 0.15  # symuluje trafną odpowiedź w quizie
 
 	Economy.spend(training_cost)
-	Calendar.advance_days(training_days)
+	Players.advance_active_player_time(training_days)  # patrz ArtSchool.gd::_on_train_pressed
 	Paintings.increase_expertise(expertise_gain)
-	if Players.is_multiplayer() and training_days > Players.DAYS_PER_TURN:
-		Players.advance_active_player()
+	Players.pass_turn_to_earliest_player()  # patrz ArtSchool.gd::_end_course_turn, wywołane PO quizie
 
-	_assert(Players.active_index == 1, "kurs dłuższy niż tydzień (%d dni) kończy turę, przechodzi na gracza 2" % training_days)
+	_assert(Players.active_index == 1, "kurs dłuższy niż tydzień (%d dni) wysuwa gracza 1 do przodu, ruch przechodzi na gracza 2 (najwcześniejsza data)" % training_days)
 	_assert(Economy.player_money == Economy.STARTING_MONEY, "gracz 2 widzi swój świeży stan, nie kasę pomniejszoną przez kurs gracza 1")
 	_assert(is_equal_approx(Paintings.expertise, 0.0), "gracz 2 nie odziedziczył eksperckości zdobytej przez gracza 1")
 
@@ -468,24 +479,26 @@ func _test_travel_vehicle_choice() -> void:
 ## przesiadką (gdzie Travel._on_day_advanced musi poprawnie rozliczyć
 ## "nadmiarowe" dni między etapami).
 func _test_travel_completes_in_one_animation() -> void:
-	print("-- Travel: cała podróż kończy się po jednym Calendar.advance_days --")
+	print("-- Travel: cała podróż kończy się po jednym advance_active_player_time --")
 	Travel.reset_new_game()
 	Calendar.reset_new_game()
+	Players.reset_new_game(1)
 	Travel.current_city = "richmond"
 	Travel.route.clear()
 	Travel.start_travel("st_louis")
-	Calendar.advance_days(int(ceil(Travel.last_travel_total_days)))
-	_assert(not Travel.is_traveling(), "Richmond -> St. Louis: podróż zakończona po jednym advance_days")
+	Players.advance_active_player_time(int(ceil(Travel.last_travel_total_days)))
+	_assert(not Travel.is_traveling(), "Richmond -> St. Louis: podróż zakończona po jednym advance_active_player_time")
 	_assert(Travel.current_city == "st_louis", "Travel.current_city zaktualizowany na miasto docelowe")
 
 	# Trasa z przesiadką (Berlin -> St. Louis, patrz _test_cities_route_via_transfer).
 	Travel.reset_new_game()
 	Calendar.reset_new_game()
+	Players.reset_new_game(1)
 	Travel.current_city = "berlin"
 	Travel.route.clear()
 	Travel.start_travel("st_louis")
-	Calendar.advance_days(int(ceil(Travel.last_travel_total_days)))
-	_assert(not Travel.is_traveling(), "Berlin -> St. Louis (z przesiadką): podróż zakończona po jednym advance_days")
+	Players.advance_active_player_time(int(ceil(Travel.last_travel_total_days)))
+	_assert(not Travel.is_traveling(), "Berlin -> St. Louis (z przesiadką): podróż zakończona po jednym advance_active_player_time")
 	_assert(Travel.current_city == "st_louis", "Travel.current_city zaktualizowany na miasto docelowe mimo przesiadki")
 
 
@@ -498,13 +511,14 @@ func _test_auctions_schedule() -> void:
 	print("-- Auctions: aukcja dostępna tylko we właściwym mieście i terminie --")
 	Calendar.reset_new_game()
 	Auctions.reset_new_game()
+	Players.reset_new_game(1)
 
 	_assert(Cities.get_auction_cities().has(Auctions.next_auction_city), "wylosowane miasto aukcji jest jednym z miast typu 'auction'")
-	_assert(Auctions.next_auction_day > Calendar.current_day, "termin aukcji jest w przyszłości względem startu gry")
+	_assert(Auctions.next_auction_day > Players.active_day(), "termin aukcji jest w przyszłości względem startu gry")
 	_assert(not Auctions.is_open(Auctions.next_auction_city), "aukcja jeszcze nieotwarta przed nadejściem terminu")
 
 	var other_city: String = Cities.get_auction_cities().filter(func(c): return c != Auctions.next_auction_city)[0]
-	Calendar.advance_days(Auctions.next_auction_day - Calendar.current_day)
+	Players.advance_active_player_time(Auctions.next_auction_day - Players.active_day())
 	_assert(not Auctions.is_open(other_city), "inne miasto aukcyjne pozostaje zamknięte, nawet gdy termin nadszedł")
 	_assert(Auctions.is_open(Auctions.next_auction_city), "właściwe miasto otwiera aukcję dokładnie w zaplanowanym dniu")
 
@@ -523,6 +537,7 @@ func _test_auctions_cap_turn_advance() -> void:
 	print("-- Auctions: cap_turn_advance zatrzymuje koniec tury dokładnie na dniu aukcji --")
 	Calendar.reset_new_game()
 	Auctions.reset_new_game()
+	Players.reset_new_game(1)
 
 	var other_city: String = Cities.get_auction_cities().filter(func(c): return c != Auctions.next_auction_city)[0]
 	_assert(
@@ -530,7 +545,7 @@ func _test_auctions_cap_turn_advance() -> void:
 		"w innym mieście (nie tym z aukcją) skok dni zostaje bez zmian",
 	)
 
-	var days_to_auction := Auctions.next_auction_day - Calendar.current_day
+	var days_to_auction := Auctions.next_auction_day - Players.active_day()
 	if days_to_auction < 7:
 		_assert(
 			Auctions.cap_turn_advance(7, Auctions.next_auction_city) == days_to_auction,
@@ -542,7 +557,7 @@ func _test_auctions_cap_turn_advance() -> void:
 			"w mieście aukcji, gdy termin jest dalej niż 7 dni, skok zostaje bez zmian",
 		)
 
-	Calendar.advance_days(days_to_auction)
+	Players.advance_active_player_time(days_to_auction)
 	_assert(
 		Auctions.cap_turn_advance(7, Auctions.next_auction_city) == 7,
 		"gdy termin już nadszedł (gracz jest na miejscu), skok dni nie jest już capowany",
@@ -629,3 +644,110 @@ func _test_price_history_for_charts() -> void:
 		ShippingCompanies.price_history["lloyd"].size() == ShippingCompanies.MAX_HISTORY_POINTS,
 		"historia kursu nie rośnie w nieskończoność, zatrzymuje się na MAX_HISTORY_POINTS",
 	)
+
+
+## Niezależne linie czasu per gracz (hot-seat) — patrz nagłówek Players.gd.
+## Testy niżej pokrywają nowy podział Tor A ("świat", Calendar.current_day,
+## wspólny) / Tor B (Players.player_days, osobisty dla każdego gracza).
+func _test_players_days_diverge() -> void:
+	print("-- Players: gracze mają niezależne linie czasu --")
+	Calendar.reset_new_game()
+	Players.reset_new_game(2)
+	Players.advance_active_player_time(10)
+	_assert(Players.get_player_day(0) == 10, "gracz 1 (aktywny) ma dzień 10 po własnej akcji")
+	_assert(Players.get_player_day(1) == 0, "gracz 2 pozostaje na dniu 0 (nie wykonał żadnej akcji)")
+	_assert(Players.get_player_day(0) != Players.get_player_day(1), "linie czasu graczy się rozjeżdżają")
+
+
+## Zgłoszone przez użytkownika: ceny na Giełdzie/Rynku mają być WSPÓLNE — ten
+## sam dzień = ta sama cena, niezależnie kto do niego dotarł pierwszy. Skoro
+## Crops/ShippingCompanies to Tor A (nie migawkowane per gracz), gracz
+## doganiający resztę do JUŻ zasymulowanego dnia po prostu odczytuje tę samą,
+## niezmienioną cenę — nie losuje jej na nowo.
+func _test_shared_price_by_day() -> void:
+	print("-- Crops/ShippingCompanies: ten sam dzień = ta sama cena, niezależnie kto dotarł pierwszy --")
+	Calendar.reset_new_game()
+	Players.reset_new_game(2)
+	Crops.reset_new_game()
+	ShippingCompanies.reset_new_game()
+
+	Players.advance_active_player_time(15)  # gracz 1 pcha świat do dnia 15
+	var price_after_player_1 := Crops.get_price("coffee")
+	var shipping_after_player_1 := ShippingCompanies.get_price("lloyd")
+
+	Players.pass_turn_to_earliest_player()
+	_assert(Players.active_index == 1, "gracz 2 (dzień 0, najwcześniejsza data) dostaje ruch")
+	Players.advance_active_player_time(15)  # gracz 2 dogania do dnia 15 — już zasymulowanego
+
+	_assert(is_equal_approx(Crops.get_price("coffee"), price_after_player_1), "gracz 2, docierając do TEGO SAMEGO dnia, widzi tę samą cenę kawy")
+	_assert(is_equal_approx(ShippingCompanies.get_price("lloyd"), shipping_after_player_1), "to samo dla kursu linii żeglugowej Lloyd")
+	_assert(Players.get_player_day(1) == 15, "własny dzień gracza 2 mimo to poprawnie dochodzi do 15")
+
+
+## Regresja na błąd znaleziony przez agenta walidującego plan: bez rozdziału
+## Toru A/B, gracz doganiający resztę mógłby wywołać DRUGI raz ten sam skok
+## światowego dryfu cen dla zakresu dni, który już raz się wydarzył.
+func _test_catching_up_player_does_not_double_world_drift() -> void:
+	print("-- Players: gracz doganiający resztę nie podwaja światowego dryfu (Tor A rusza raz na dzień) --")
+	Calendar.reset_new_game()
+	Players.reset_new_game(2)
+	Crops.reset_new_game()
+
+	Players.advance_active_player_time(15)
+	var history_size_after_player_1 := Crops.price_history["coffee"].size()
+	var world_day_after_player_1 := Calendar.current_day
+
+	Players.pass_turn_to_earliest_player()
+	Players.advance_active_player_time(15)  # gracz 2 dogania do JUŻ zasymulowanego dnia 15
+
+	_assert(Calendar.current_day == world_day_after_player_1, "świat (Tor A) nie rusza się dalej, gdy doganiający gracz nie wychodzi poza już zasymulowany zakres")
+	_assert(Crops.price_history["coffee"].size() == history_size_after_player_1, "historia cen nie dostaje dodatkowego punktu za doganianie tego samego zakresu dni")
+
+
+## Regresja na błąd znaleziony przez agenta walidującego plan: Economy.gd
+## trzymało days_in_debt w tym samym _on_day_advanced co dollar_rate/inflation
+## (Tor A) — bez wydzielenia go do apply_player_days_elapsed (Tor B), zadłużenie
+## gracza doganiającego resztę liczyłoby się na podstawie delty ŚWIATA, a nie
+## jego WŁASNYCH dni, i wynosiłoby 0, mimo że dla NIEGO te dni realnie minęły.
+func _test_catching_up_player_gets_full_personal_consequences() -> void:
+	print("-- Players: gracz doganiający dostaje PEŁNE osobiste konsekwencje, nawet gdy świat się nie rusza --")
+	Calendar.reset_new_game()
+	Players.reset_new_game(2)
+	Economy.reset_new_game()
+
+	Players.advance_active_player_time(20)  # gracz 1 pcha świat do dnia 20
+
+	Players.pass_turn_to_earliest_player()
+	_assert(Players.active_index == 1, "gracz 2 (dzień 0) jest teraz najwcześniejszy")
+	Economy.player_money = -100.0  # symulacja długu gracza 2
+
+	Players.advance_active_player_time(20)  # gracz 2 dogania do dnia 20 — Tor A JUŻ tam był
+
+	_assert(Calendar.current_day == 20, "świat pozostaje na dniu 20 (bez zmian od tej akcji)")
+	_assert(Economy.days_in_debt == 20, "mimo braku ruchu świata, gracz 2 dostaje PEŁNE 20 dni w długu (Tor B liczy się z jego WŁASNEJ perspektywy)")
+
+
+## Regresja na drugi (najkrytyczniejszy) błąd znaleziony przez agenta
+## walidującego plan: Travel.gd było pierwotnie pominięte na liście systemów
+## Toru B — bez przełączenia go na apply_player_days_elapsed, podróż gracza
+## doganiającego resztę zawieszałaby się w połowie trasy, gdy Tor A nie ma już
+## dla niego nowych dni do rozegrania.
+func _test_catching_up_player_completes_travel() -> void:
+	print("-- Travel: gracz doganiający kończy podróż, nawet gdy Tor A się nie rusza --")
+	Calendar.reset_new_game()
+	Players.reset_new_game(2)
+	Travel.reset_new_game()
+
+	Players.advance_active_player_time(30)  # gracz 1 pcha świat daleko do przodu
+
+	Players.pass_turn_to_earliest_player()
+	_assert(Players.active_index == 1, "gracz 2 (dzień 0) jest teraz najwcześniejszy")
+
+	Travel.current_city = "berlin"
+	Travel.route.clear()
+	Travel.start_travel("london")  # 3.0 dnia — krócej niż to, co świat już zasymulował
+	var days := int(ceil(Travel.last_travel_total_days))
+	Players.advance_active_player_time(days)  # gracz 2 dogania w obrębie już zasymulowanego zakresu
+
+	_assert(not Travel.is_traveling(), "podróż gracza 2 kończy się mimo że Tor A (Calendar.current_day) się nie rusza")
+	_assert(Travel.current_city == "london", "Travel.current_city gracza 2 poprawnie zaktualizowany na miasto docelowe")
