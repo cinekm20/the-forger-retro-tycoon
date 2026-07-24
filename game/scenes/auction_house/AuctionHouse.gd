@@ -80,7 +80,13 @@ const FRAME_INNER_INSET := 0.145
 ## _build_player_frames. Środkowa treść (obraz + opis) zwężona odpowiednio
 ## (patrz painting_label/bid_label niżej), żeby zmieściła się między dwiema
 ## takimi kolumnami.
-const SIDE_FRAMES_TOP_OFFSET := 130.0
+##
+## 200 (nie 130) — musi zostawić miejsce na tytuł + wskaźnik tury + skrzynkę
+## terminu aukcji, które leżą NAD bocznymi kolumnami (te trzy zajmują razem
+## ok. 180px wysokości) — za mała wartość powodowała, że górna krawędź
+## pierwszej ramki gracza zachodziła na skrzynkę terminu (zgłoszone przez
+## użytkownika, zrzut ekranu).
+const SIDE_FRAMES_TOP_OFFSET := 200.0
 
 
 func _ready() -> void:
@@ -93,6 +99,12 @@ func _ready() -> void:
 	ScreenHelpers.make_turn_indicator(root)
 
 	schedule_label = ScreenHelpers.make_info_box(root, "")
+	## SIZE_SHRINK_CENTER — bez tego skrzynka rozciąga się na PEŁNĄ szerokość
+	## VBoxContainera (custom_minimum_size to tylko MINIMUM, nie maksimum),
+	## co przy bocznych ramkach graczy (patrz _build_player_frames) chowało
+	## się pod nimi zamiast zostać wyśrodkowaną w wolnym pasie na środku
+	## (zgłoszone przez użytkownika, zrzut ekranu: teksty zachodziły pod ramki).
+	schedule_label.get_parent().size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 
 	if not Auctions.is_open(Travel.current_city):
 		ScreenHelpers.make_label(root, tr("W tym mieście nie odbywa się teraz żadna aukcja.\nWróć w podanym terminie."))
@@ -107,12 +119,13 @@ func _ready() -> void:
 
 
 ## Buduje UI aktywnej licytacji BEZ ramek graczy (patrz _build_player_frames
-## niżej, budowane osobno na bokach ekranu). Nazwa/opis obrazu i skrzynka
-## "kto prowadzi" zostają jako wspólne, centralne podsumowanie — po bokach
-## dochodzą osobne ramki per gracz z ich WŁASNYMI przyciskami (patrz
-## _build_player_frame). Malejący czas + przycisk powrotu zostają w pasku
-## przyklejonym do prawego dolnego rogu, tak jak dawniej — ale bez przycisków
-## podbicia/rezygnacji, które teraz są w ramkach graczy.
+## niżej, budowane osobno na bokach ekranu). Nazwa/opis obrazu, skrzynka
+## "kto prowadzi", malejący czas i przycisk powrotu zostają jako wspólne,
+## WYŚRODKOWANE podsumowanie na środku ekranu (między bocznymi kolumnami
+## ramek graczy — SIZE_SHRINK_CENTER na panelach, patrz komentarze niżej,
+## inaczej rozciągają się na pełną szerokość i chowają się pod bocznymi
+## ramkami) — po bokach dochodzą osobne ramki per gracz z ich WŁASNYMI
+## przyciskami podbicia/rezygnacji (patrz _build_player_frame).
 func _build_active_auction_ui(root: VBoxContainer) -> void:
 	root.alignment = BoxContainer.ALIGNMENT_BEGIN
 
@@ -121,8 +134,12 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	## 500 (nie 760 jak wcześniej) — ekran ma teraz dwie boczne kolumny ramek
 	## graczy (patrz _build_player_frames, SIDE_PANEL_WIDTH=380 każda), więc
 	## środkowa treść musi się zwęzić, żeby wszystko zmieściło się w 1280px
-	## szerokości viewportu (project.godot).
+	## szerokości viewportu (project.godot). SIZE_SHRINK_CENTER na PANELU
+	## (nie tylko custom_minimum_size na etykiecie) — bez tego panel i tak
+	## rozciąga się na pełną szerokość VBoxContainera i chowa się pod
+	## bocznymi ramkami (ten sam fix co przy schedule_label wyżej).
 	painting_label.custom_minimum_size = Vector2(500, 0)
+	painting_label.get_parent().size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 
 	root.add_child(_make_expand_spacer())
 
@@ -160,6 +177,7 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	## Jedna wspólna, oprawiona skrzynka na portret PROWADZĄCEGO (może być
 	## KTÓRYKOLWIEK z obecnych graczy, nie tylko "Ty") + tekst oferty.
 	var bid_row := ScreenHelpers.make_boxed_row(root)
+	bid_row.get_parent().size_flags_horizontal = Control.SIZE_SHRINK_CENTER  ## patrz schedule_label wyżej
 
 	leader_portrait_rect = TextureRect.new()
 	leader_portrait_rect.custom_minimum_size = Vector2(84, 84)
@@ -181,12 +199,18 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 
 	status_label = ScreenHelpers.make_label(root, "")
 
-	var action_root := ScreenHelpers.make_root_bottom(self, true, 300.0, true)
-	timer_label = ScreenHelpers.make_label(action_root, "")
+	## Pasek czasu NIE jest już przyklejony do prawego dolnego rogu
+	## (make_root_bottom) — tam kolidował z prawą kolumną ramek graczy
+	## (zgłoszone przez użytkownika, zrzut ekranu: pasek czasu nachodził na
+	## ramkę gracza). Zamiast tego to zwykłe dziecko środkowej kolumny root,
+	## więc zawsze zostaje w wolnym pasie na środku, między bocznymi
+	## kolumnami, niezależnie od tego, ile ramek jest po której stronie.
+	timer_label = ScreenHelpers.make_label(root, "")
 	timer_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
 
 	timer_bar = ProgressBar.new()
 	timer_bar.custom_minimum_size = Vector2(220, 20)
+	timer_bar.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	timer_bar.show_percentage = false
 	timer_bar.min_value = 0.0
 	timer_bar.max_value = BID_TIME_LIMIT
@@ -201,11 +225,11 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	bar_fill.set_corner_radius_all(4)
 	timer_bar.add_theme_stylebox_override("background", bar_bg)
 	timer_bar.add_theme_stylebox_override("fill", bar_fill)
-	action_root.add_child(timer_bar)
+	root.add_child(timer_bar)
 
 	## Zastępuje przyciski Podbij/Rezygnuj (teraz w ramkach graczy) dopiero
 	## po rozstrzygnięciu aukcji — do tego momentu ukryty.
-	back_btn = ScreenHelpers.make_back_button(action_root)
+	back_btn = ScreenHelpers.make_back_button(root)
 	back_btn.visible = false
 
 
@@ -230,6 +254,12 @@ func _build_player_frames() -> void:
 ## KONKRETNYM graczem, więc _on_bid_pressed/_on_resign_pressed zawsze wiedzą,
 ## w czyim imieniu działają, niezależnie od tego, kto jest aktualnie
 ## "aktywnym" graczem hot-seatu (Players.active_index).
+##
+## Celowo zwarta (zgłoszone przez użytkownika: "dolny kwadrat wychodzi poza"
+## — dwie ramki jedna pod drugą w kolumnie nie mieściły się w pionie):
+## awatar 48×48 (nie 84), przyciski OBOK SIEBIE w jednym wierszu (nie jeden
+## pod drugim), a pusta linia statusu jest CHOWANA (nie tylko pusta), gdy
+## akurat nic nie ma do pokazania — patrz _update_frame.
 func _build_player_frame(parent: Container, index: int) -> void:
 	var column := ScreenHelpers.make_boxed_column(parent)
 
@@ -239,7 +269,7 @@ func _build_player_frame(parent: Container, index: int) -> void:
 	var avatar_center := CenterContainer.new()
 	column.add_child(avatar_center)
 	var avatar_rect := TextureRect.new()
-	avatar_rect.custom_minimum_size = Vector2(64, 64)
+	avatar_rect.custom_minimum_size = Vector2(48, 48)
 	avatar_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	avatar_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	var avatar_path := Players.get_avatar_path(index)
@@ -250,8 +280,15 @@ func _build_player_frame(parent: Container, index: int) -> void:
 	var money_label := ScreenHelpers.make_label(column, "")
 	var status_label_frame := ScreenHelpers.make_label(column, "")
 
-	var bid_btn := ScreenHelpers.make_button(column, tr("Podbij (+10%)"), _on_bid_pressed.bind(index), 260.0)
-	var resign_btn := ScreenHelpers.make_button(column, tr("Rezygnuję"), _on_resign_pressed.bind(index), 260.0)
+	var button_row := HBoxContainer.new()
+	button_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	button_row.add_theme_constant_override("separation", 8)
+	column.add_child(button_row)
+	## Sam tekst skrócony do "Podbij" (bez powtarzania "+10%" w każdej z do
+	## 4 ramek) — przy szerokości 150px (nie 320 jak domyślnie) dłuższy
+	## napis albo się przycinał, albo wymuszał zawijanie i wyższy przycisk.
+	var bid_btn := ScreenHelpers.make_button(button_row, tr("Podbij"), _on_bid_pressed.bind(index), 150.0)
+	var resign_btn := ScreenHelpers.make_button(button_row, tr("Rezygnuję"), _on_resign_pressed.bind(index), 150.0)
 
 	player_frames[index] = {
 		"money_label": money_label,
@@ -369,7 +406,11 @@ func _on_bid_pressed(index: int) -> void:
 	var estimated_value := Paintings.get_estimated_value(current_number)
 	var next_bid := current_bid + estimated_value * BID_INCREMENT_RATIO
 	if not Players.player_can_afford(index, next_bid):
+		## visible = true jawnie — status_label bywa ukryty (patrz
+		## _update_frame), gdy nie ma nic do pokazania; sam zapis tekstu, bez
+		## odkrycia etykiety, zostałby niewidoczny.
 		player_frames[index]["status_label"].text = tr("Za mało gotówki na taką ofertę.")
+		player_frames[index]["status_label"].visible = true
 		return
 	current_bid = next_bid
 	current_leader = "player:%d" % index
@@ -501,6 +542,11 @@ func _update_frame(index: int) -> void:
 	elif player_forgery_warning.get(index, false):
 		status = tr("⚠ możliwa podróbka!")
 	frame["status_label"].text = status
+	## visible = false (nie tylko pusty tekst) — zgłoszone przez użytkownika:
+	## pusta linijka statusu zostawiała martwe miejsce nad przyciskami,
+	## wydłużając ramkę bez potrzeby (patrz zrzut ekranu — "pod gotówką jest
+	## miejsce do guzików").
+	frame["status_label"].visible = status != ""
 
 	## Prowadzący nie może "podbić samego siebie" — ta sama zasada co dla
 	## rywali w _apply_best_rival_counter_bid.
