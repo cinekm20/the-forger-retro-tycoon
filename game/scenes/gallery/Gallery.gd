@@ -58,7 +58,16 @@ var selected_number: int = -1
 
 
 func _ready() -> void:
-	var bg_layers := ScreenHelpers.make_background_with_overlay(self, "res://art/backgrounds/gallery.jpg")
+	## Zgłoszone przez użytkownika: zwykłe tło Galerii wyszło zbyt wypełnione
+	## (ściany już obwieszone własnymi obrazami/ławkami/żyrandolem), więc
+	## konkurowało wizualnie z kafelkami/podglądem, które gra nakłada na
+	## wierzchu (_build_framed_image). Preferowany prostszy wariant
+	## (docs/GRAFIKA_LEONARDO.md §9) — po cichu spada z powrotem na zwykłe
+	## tło, dopóki plik nie istnieje, tak jak wszystkie opcjonalne grafiki.
+	var background_path := "res://art/backgrounds/gallery_empty.jpg"
+	if not ResourceLoader.exists(background_path):
+		background_path = "res://art/backgrounds/gallery.jpg"
+	var bg_layers := ScreenHelpers.make_background_with_overlay(self, background_path)
 	overlay = bg_layers["overlay"]
 
 	var fill_ratio := float(Paintings.owned_count()) / float(Paintings.win_threshold)

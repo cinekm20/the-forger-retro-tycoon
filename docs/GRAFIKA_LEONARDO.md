@@ -769,6 +769,21 @@ hanging paintings, soft gallery lighting, elegant benches, game background
 art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
+⚠ **Zgłoszone przez użytkownika** — wygenerowany obrazek wyszedł ZBYT
+wypełniony (ściany już obwieszone własnymi obrazami w ramach, ławki,
+żyrandol, cokoły z rzeźbami), więc konkuruje wizualnie z kafelkami/dużym
+podglądem, które gra i tak nakłada na wierzchu (patrz Gallery.gd
+_build_framed_image). Potrzebny PROŚCIEJSZY wariant, nazwany osobno
+(`gallery_empty.jpg`, patrz konwencja nazw niżej) — kod (`Gallery.gd`)
+próbuje najpierw tego wariantu, a jeśli pliku jeszcze nie ma, po cichu
+spada z powrotem na zwykły `gallery.jpg` powyżej, więc podmiana jest
+bezpieczna do wgrania w dowolnym momencie.
+
+**Prompt (wariant pusty, bez obrazów na ścianach):**
+```
+Art Deco private gallery hall interior, plain flat wall panels with NO paintings hanging, no benches, no pedestals, no sculptures, no chandelier, minimal empty floor, soft ambient lighting, uncluttered negative space in the center and lower half of the frame, game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
 ### 9b. Ikony kategorii stylistycznych w Galerii (8 sztuk)
 
 Zgłoszone przez użytkownika: w Galerii kafelek każdej z 8 kategorii
@@ -958,7 +973,8 @@ Leonardo, żeby mieć z czego wybrać).
 | 10 | 5 | Konie + dżokeje (różne barwy jeźdźców) | 4–6 | 1:1 lub 4:3, transparent | §5 | ⬜ do zrobienia |
 | 11 | 6 | 40 obrazów kolekcji (na końcu, seriami po 5 per kategoria) | 40 | 1:1, min. 1024×1024 | §7 | ✅ zrobione i podpięte — wszystkie 40 (`painting_01.jpg`…`painting_40.jpg`, patrz `Paintings.get_texture_path`) |
 | 12 | 7 (opcjonalnie) | Warianty "fałszywka" wybranych obrazów (do szkoły sztuki) | ~8–10 | 1:1, jak oryginał | §7, §8 | ✅ 10/~8–10 zrobione i podpięte — obrazy 7, 10, 11, 16, 21, 25, 29, 30, 32, 33 (`painting_NN_fake.jpg`); reszta katalogu dalej pokazuje zwykłą grafikę przy fałszywce (`Paintings.get_texture_path` po cichu spada na oryginał, gdy wariantu brak) |
-| 13 | 6 | Ikony 8 kategorii stylistycznych (okładki kafelków w Galerii) | 8 | 1:1, min. 1024×1024 | §9b | ⬜ do zrobienia — kod (`Gallery.gd`) po cichu pomija brakujące, można dorabiać pojedynczo |
+| 13 | 6 | Ikony 8 kategorii stylistycznych (okładki kafelków w Galerii) | 8 | 1:1, min. 1024×1024 | §9b | ✅ zrobione i podpięte — wszystkie 8 (`vermeer.jpg`, `baroque.jpg`, `classicism.jpg`, `romanticism.jpg`, `impressionism.jpg`, `symbolism.jpg`, `expressionism.jpg`, `modern.jpg`) |
+| 14 | 2 | Pusty wariant tła Galerii (bez obrazów/ławek/żyrandola na ścianach) | 1 | 16:9, 1920×1080 | §9 | ⬜ do zrobienia — zwykły `gallery.jpg` wyszedł zbyt wypełniony, konkuruje wizualnie z kafelkami/podglądem nakładanymi w kodzie; `Gallery.gd` po cichu spada na `gallery.jpg`, dopóki `gallery_empty.jpg` nie istnieje |
 
 **Zasada dla wierszy oznaczonych "uwaga" (7 i 9):** jeśli Leonardo znowu
 zacznie robić pełne sceny zamiast wyizolowanych ikon/sprite'ów mimo
@@ -1001,3 +1017,7 @@ nazwiska malarza.
 `Paintings.CATEGORIES` (`vermeer`, `baroque`, `classicism`, `romanticism`,
 `impressionism`, `symbolism`, `expressionism`, `modern`) — `Gallery.gd`
 liczy tę ścieżkę wprost ze wzoru (`"res://art/categories/%s.jpg" % category_id`).
+
+**Pusty wariant tła Galerii (§9) — konwencja nazwy:** `backgrounds/gallery_empty.jpg`
+— `Gallery.gd` próbuje go NAJPIERW, z fallbackiem na zwykły
+`backgrounds/gallery.jpg`, jeśli plik jeszcze nie istnieje.
