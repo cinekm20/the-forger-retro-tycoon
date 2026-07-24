@@ -176,9 +176,14 @@ przyrost — zwiększa szansę na wczesne ostrzeżenie o duplikacie numeru
 katalogowego (patrz 4.5) przed przybiciem młotka na aukcji. Ważne: podnosi
 tylko szansę na *ostrzeżenie*, NIE dokładność szacowanej wartości obrazu —
 to częsta pomyłka testerów, więc ekran wprost tłumaczy tę różnicę.
-⏳ **Zaplanowane, jeszcze niezaimplementowane:** mini-gra "znajdź różnicę" lub
-quiz porównawczy (dwa podobne obrazy, gracz uczy się wskazówek — pociągnięcia
-pędzla, sygnatura, patyna) zamiast samego przycisku kursu.
+✅ **Zrobione i podpięte:** kurs to teraz mini-gra "znajdź podróbkę" —
+`ArtSchool.gd::_start_quiz` losuje numer katalogowy z dedykowanym wariantem
+grafiki podróbki (`Paintings.get_numbers_with_fake_variant()`, na razie 10 z
+40) i pokazuje oba obrazy obok siebie w losowej kolejności; gracz wskazuje,
+który to fałszywka. Trafna odpowiedź daje więcej eksperckości
+(`EXPERTISE_GAIN_CORRECT`, 15%) niż nietrafiona (`EXPERTISE_GAIN_WRONG`, 5%)
+— uczy realnie patrzeć na obraz, zamiast dawać eksperckość za sam fakt
+kliknięcia przycisku kursu.
 
 ### 4.7 Galeria / kolekcja
 Ekran-nagroda: wirtualna galeria z **8 sekcjami stylistycznymi** (Vermeer,
@@ -187,10 +192,13 @@ po 5 slotów na obraz każda — układ gabloty/ściany tematycznej, nie płaska
 lista 40. Zdobyty i skatalogowany obraz **zostaje przypisany do gracza na
 stałe w statystykach kolekcji**, nawet jeśli fizycznie zmieni właściciela w
 dalszej rozgrywce (tak jak w oryginale — katalogowanie jest nieodwracalne).
-Im więcej wypełnionych sekcji, tym bardziej "żywa" galeria (zmieniające się
-oświetlenie, ambient muzyka) — ⏳ **zaplanowane, jeszcze niezaimplementowane**,
-na razie sekcje pokazują tylko liczbowy postęp (X/5 na kategorię), bez układu
-gabloty/ściany ani reaktywnego oświetlenia.
+Im więcej wypełnionych sekcji, tym bardziej "żywa" galeria — ✅ **oświetlenie
+i głośność muzyki w tle już reagują na wypełnienie** (`Gallery.gd`: nakładka
+na tło przechodzi od ciemnej/chłodnej przy pustej kolekcji do ciepłej/złotej
+przy pełnej, `Music.set_volume_offset` podbija głośność proporcjonalnie do
+`owned_count()/win_threshold`; w pełni skompletowana kategoria 5/5 podświetla
+się na złoto). ⏳ **Wciąż niezaimplementowane:** fizyczny układ
+gabloty/ściany tematycznej zamiast płaskiej listy etykiet X/5 na kategorię.
 
 Ten sam ekran hostuje też system **Ochrony/kradzieży**: gracz może zatrudnić
 ochroniarza (stały koszt, chroni przed okradzeniem) i wysłać "gangstera"

@@ -193,3 +193,16 @@ func get_texture_path(number: int, is_fake: bool = false) -> String:
 		if ResourceLoader.exists(fake_path):
 			return fake_path
 	return "res://art/paintings/painting_%02d.jpg" % number
+
+
+## Numery katalogowe, które mają dedykowany wariant graficzny podróbki
+## (`painting_NN_fake.jpg`) — używane przez ArtSchool.gd do mini-gry "znajdź
+## podróbkę" (GDD.md pkt. 4.6). Liczone dynamicznie przez ResourceLoader
+## zamiast trzymać osobną, zdublowaną listę numerów w kodzie — rośnie samo,
+## gdy dojdą kolejne warianty (docs/GRAFIKA_LEONARDO.md §7/§8).
+func get_numbers_with_fake_variant() -> Array[int]:
+	var result: Array[int] = []
+	for number in CATALOG.keys():
+		if ResourceLoader.exists("res://art/paintings/painting_%02d_fake.jpg" % number):
+			result.append(number)
+	return result

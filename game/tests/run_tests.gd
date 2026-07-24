@@ -30,6 +30,7 @@ func _ready() -> void:
 	_test_harvest_scales_with_time()
 	_test_forgery_by_duplicate_number()
 	_test_forgery_texture_falls_back_when_missing()
+	_test_paintings_numbers_with_fake_variant()
 	_test_ai_players_rival_names_randomized()
 	_test_win_threshold_easy_mode()
 	_test_forward_contract_penalty_on_failure()
@@ -236,6 +237,14 @@ func _test_forgery_texture_falls_back_when_missing() -> void:
 		Paintings.get_texture_path(1, true) == Paintings.get_texture_path(1, false),
 		"obraz nr 1 bez wariantu podróbki: is_fake=true spada z powrotem na zwykłą grafikę",
 	)
+
+
+func _test_paintings_numbers_with_fake_variant() -> void:
+	print("-- Paintings: get_numbers_with_fake_variant (mini-gra Szkoły sztuki) --")
+	var numbers := Paintings.get_numbers_with_fake_variant()
+	_assert(numbers.has(7), "obraz nr 7 (ma dedykowaną grafikę podróbki) jest na liście")
+	_assert(not numbers.has(1), "obraz nr 1 (bez dedykowanej grafiki podróbki) NIE jest na liście")
+	_assert(not numbers.is_empty(), "lista nie jest pusta — mini-gra ma z czego losować")
 
 
 func _test_ai_players_rival_names_randomized() -> void:

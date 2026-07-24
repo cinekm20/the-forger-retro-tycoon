@@ -223,3 +223,9 @@ Cylinder,Top Hat,Zylinder
 Monokl,Monocle,Monokel
 Boa z piór,Feather Boa,Federboa
 Obraz trafia do kolekcji (%d/%d).,Painting joins the collection (%d/%d).,Das Gemälde geht in die Sammlung ein (%d/%d).
+Który z tych dwóch obrazów to podróbka?,Which of these two paintings is the forgery?,Welches der beiden Gemälde ist die Fälschung?
+Ta jest podróbką,This one is the forgery,Das ist die Fälschung
+Trafnie! To rzeczywiście była podróbka.,Correct! That really was the forgery.,Richtig! Das war tatsächlich die Fälschung.
+Nietrafiona odpowiedź — to był oryginał.,Wrong guess — that was the original.,Falsch geraten — das war das Original.
+" Eksperckość +%.0f%%."," Expertise +%.0f%%."," Expertise +%.0f%%."
+Zamknij,Close,Schließen

@@ -31,3 +31,13 @@ func play_track(path: String) -> void:
 	player.stream = stream
 	player.volume_db = VOLUME_DB
 	player.play()
+
+
+## Chwilowe podbicie/przyciszenie głośności względem VOLUME_DB — używane
+## przez Gallery.gd, żeby muzyka w tle robiła się "żywsza" wraz z
+## wypełnieniem kolekcji (zgłoszone przez użytkownika: reaktywna Galeria).
+## Wywołujący MUSI przywrócić offset_db=0.0 przy wyjściu z ekranu (patrz
+## Gallery._exit_tree) — inaczej zmiana głośności zostałaby też na innych
+## ekranach.
+func set_volume_offset(offset_db: float) -> void:
+	player.volume_db = VOLUME_DB + offset_db

@@ -1,14 +1,37 @@
 extends Control
-## Placeholder — docelowo 8 sekcji stylistycznych, po 5 slotów.
-## Patrz GDD.md pkt. 4.7. Ochrona/kradzieże: docs/DODATKOWE_MECHANIKI.md.
+## Docelowo 8 sekcji stylistycznych, po 5 slotów. Patrz GDD.md pkt. 4.7.
+## Ochrona/kradzieże: docs/DODATKOWE_MECHANIKI.md.
+##
+## Zgłoszone przez użytkownika: "reaktywna Galeria" — oświetlenie sali
+## (nakładka na tło) i głośność muzyki w tle reagują na to, jak bardzo
+## kolekcja jest zapełniona (Paintings.owned_count()/win_threshold), zamiast
+## samego liczbowego postępu X/5. Pusta/początkowa kolekcja = ciemna,
+## przygaszona sala i cichsza muzyka; pełna kolekcja = ciepła, złota
+## poświata i głośniejsza, "żywsza" muzyka. Każda w pełni skompletowana
+## kategoria (5/5) dodatkowo podświetla się na złoto zamiast zwykłej kremowej
+## etykiety.
+
+## Kolor nakładki przy pustej kolekcji — ciemny, chłodny (przygaszona sala).
+const DIM_OVERLAY_COLOR := Color(0.0, 0.0, 0.05, 0.6)
+## Kolor nakładki przy pełnej kolekcji — ciepły, prawie przezroczysty (złota poświata).
+const LIT_OVERLAY_COLOR := Color(0.55, 0.4, 0.1, 0.05)
+## Maks. podbicie głośności muzyki w tle przy pełnej kolekcji (patrz Music.gd).
+const MAX_MUSIC_VOLUME_BOOST_DB := 6.0
 
 var security_label: Label
+var overlay: ColorRect
 
 
 func _ready() -> void:
-	ScreenHelpers.make_background(self, "res://art/backgrounds/gallery.jpg")
+	var bg_layers := ScreenHelpers.make_background_with_overlay(self, "res://art/backgrounds/gallery.jpg")
+	overlay = bg_layers["overlay"]
+
+	var fill_ratio := float(Paintings.owned_count()) / float(Paintings.win_threshold)
+	overlay.color = DIM_OVERLAY_COLOR.lerp(LIT_OVERLAY_COLOR, fill_ratio)
+	Music.set_volume_offset(fill_ratio * MAX_MUSIC_VOLUME_BOOST_DB)
+
 	var root := ScreenHelpers.make_root(self)
-	ScreenHelpers.make_title(root, "Galeria (placeholder)")
+	ScreenHelpers.make_title(root, "Galeria")
 	ScreenHelpers.make_turn_indicator(root)
 
 	ScreenHelpers.make_label(root, tr("Twoja kolekcja: %d/%d (próg zwycięstwa)") % [
@@ -21,7 +44,9 @@ func _ready() -> void:
 		for number in Paintings.catalogued_numbers:
 			if Paintings.get_category(number) == category_id:
 				owned_in_category += 1
-		ScreenHelpers.make_label(root, tr("%s: %d/5") % [category_name, owned_in_category])
+		var category_label := ScreenHelpers.make_label(root, tr("%s: %d/5") % [category_name, owned_in_category])
+		if owned_in_category >= 5:
+			category_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
 
 	if Players.is_multiplayer():
 		ScreenHelpers.make_title(root, "Gracze")
@@ -55,6 +80,13 @@ func _ready() -> void:
 		rival_row.add_child(gangster_btn)
 
 	ScreenHelpers.make_back_button(root)
+
+
+## Podbicie głośności ustawione w _ready() dotyczy TYLKO tego ekranu — bez
+## przywrócenia tutaj zostałoby też na Hubie/innych ekranach po wyjściu z
+## Galerii, cichnąc/głośniejąc dopiero przy następnym wejściu do niej.
+func _exit_tree() -> void:
+	Music.set_volume_offset(0.0)
 
 
 func _on_hire_bodyguard_pressed() -> void:
