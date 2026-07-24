@@ -769,6 +769,60 @@ hanging paintings, soft gallery lighting, elegant benches, game background
 art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
+### 9b. Ikony kategorii stylistycznych w Galerii (8 sztuk)
+
+Zgłoszone przez użytkownika: w Galerii kafelek każdej z 8 kategorii
+(Vermeer, Barok, Klasycyzm, Romantyzm, Impresjonizm, Symbolizm,
+Ekspresjonizm, Moderna) ma pokazywać obrazek reprezentujący DANĄ EPOKĘ/STYL
+— nie konkretny numer katalogowy z §7, tylko emblematyczną, ogólną scenę w
+tym stylu, służącą jako "okładka" kategorii w siatce Galerii. Kod (patrz
+`Gallery.gd`) po cichu nie pokazuje obrazka, dopóki plik nie istnieje —
+można dorabiać pojedynczo, w dowolnej kolejności.
+
+Ta sama zasada anty-diorama co przy §7 (model lubi dorysować aksamitną
+kurtynę/cokół zamiast płaskiego płótna) — prompty niżej mają to już
+naprawione.
+
+**Vermeer**
+```
+17th century Dutch Golden Age genre painting, domestic interior scene, soft window light, muted earthy palette, oil painting texture, flat single painting filling the entire square canvas edge to edge, no curtain, no pedestal, no display stand, no surrounding objects, not a staged museum display, subject: a woman standing at a sunlit window reading a letter, quiet domestic moment
+```
+
+**Barok**
+```
+Baroque oil painting, dramatic chiaroscuro lighting, rich dark background, opulent fabric and gesture, oil painting texture, flat single painting filling the entire square canvas edge to edge, no curtain, no pedestal, no display stand, no surrounding objects, not a staged museum display, subject: a richly dressed nobleman in candlelight, dramatic shadow across half the face
+```
+
+**Klasycyzm**
+```
+Neoclassical oil painting, balanced formal composition, clean idealized figures, restrained noble color palette, oil painting texture, flat single painting filling the entire square canvas edge to edge, no curtain, no pedestal, no display stand, no surrounding objects, not a staged museum display, subject: a formal garden with a classical marble statue and symmetrical hedges
+```
+
+**Romantyzm**
+```
+Romantic era oil painting, dramatic sky and landscape, sublime nature, emotional atmosphere, sweeping brushwork, oil painting texture, flat single painting filling the entire square canvas edge to edge, no curtain, no pedestal, no display stand, no surrounding objects, not a staged museum display, subject: a lone ship battling a stormy sea under a dramatic, glowing sunset sky
+```
+
+**Impresjonizm**
+```
+Impressionist oil painting, loose visible brushstrokes, dappled natural light, outdoor scene, soft vibrant palette, oil painting texture, flat single painting filling the entire square canvas edge to edge, no curtain, no pedestal, no display stand, no surrounding objects, not a staged museum display, subject: a riverside garden path with figures strolling under dappled sunlight through trees
+```
+
+**Symbolizm**
+```
+Symbolist oil painting, dreamlike mysterious mood, decorative ornamental detail, muted jewel-tone palette, oil painting texture, flat single painting filling the entire square canvas edge to edge, no curtain, no pedestal, no display stand, no surrounding objects, not a staged museum display, subject: a solitary robed figure gazing at a glowing moon over a still, dark lake
+```
+
+**Ekspresjonizm**
+```
+Expressionist oil painting, bold distorted forms, intense unnatural color contrasts, emotional raw brushwork, early 20th century avant-garde, oil painting texture, flat single painting filling the entire square canvas edge to edge, no curtain, no pedestal, no display stand, no surrounding objects, not a staged museum display, subject: a lone anguished figure on a bridge under a swirling, violently colored sky
+```
+
+**Moderna**
+```
+Early modernist oil painting, simplified geometric or fragmented forms, flattened perspective, bold unconventional color blocks, early 20th century avant-garde composition, oil painting texture, flat single painting filling the entire square canvas edge to edge, no curtain, no pedestal, no display stand, no surrounding objects, not a staged museum display, subject: a fragmented cubist still life of a guitar and fruit bowl on a table
+```
+
 ### 10. UI ogólne
 - Przyciski, ramki paneli, ikony waluty, ikony statystyk (kapitał, ekspertyza,
   data), pasek postępu aukcji
@@ -892,6 +946,7 @@ Leonardo, żeby mieć z czego wybrać).
 | 10 | 5 | Konie + dżokeje (różne barwy jeźdźców) | 4–6 | 1:1 lub 4:3, transparent | §5 | ⬜ do zrobienia |
 | 11 | 6 | 40 obrazów kolekcji (na końcu, seriami po 5 per kategoria) | 40 | 1:1, min. 1024×1024 | §7 | ✅ zrobione i podpięte — wszystkie 40 (`painting_01.jpg`…`painting_40.jpg`, patrz `Paintings.get_texture_path`) |
 | 12 | 7 (opcjonalnie) | Warianty "fałszywka" wybranych obrazów (do szkoły sztuki) | ~8–10 | 1:1, jak oryginał | §7, §8 | ✅ 10/~8–10 zrobione i podpięte — obrazy 7, 10, 11, 16, 21, 25, 29, 30, 32, 33 (`painting_NN_fake.jpg`); reszta katalogu dalej pokazuje zwykłą grafikę przy fałszywce (`Paintings.get_texture_path` po cichu spada na oryginał, gdy wariantu brak) |
+| 13 | 6 | Ikony 8 kategorii stylistycznych (okładki kafelków w Galerii) | 8 | 1:1, min. 1024×1024 | §9b | ⬜ do zrobienia — kod (`Gallery.gd`) po cichu pomija brakujące, można dorabiać pojedynczo |
 
 **Zasada dla wierszy oznaczonych "uwaga" (7 i 9):** jeśli Leonardo znowu
 zacznie robić pełne sceny zamiast wyizolowanych ikon/sprite'ów mimo
@@ -928,3 +983,9 @@ kodzie (np. `backgrounds/hub_map.png`, `characters/vico_smirk.png`), żeby
 `Paintings.get_texture_path(number)` w kodzie liczy tę ścieżkę wprost ze
 wzoru, więc nazwy MUSZĄ się zgadzać co do joty, bez dopisków w rodzaju
 nazwiska malarza.
+
+**8 ikon kategorii (§9b) — konwencja nazw:** nowy podfolder
+`categories/<id>.jpg`, gdzie `<id>` to identyfikator kategorii z
+`Paintings.CATEGORIES` (`vermeer`, `baroque`, `classicism`, `romanticism`,
+`impressionism`, `symbolism`, `expressionism`, `modern`) — `Gallery.gd`
+liczy tę ścieżkę wprost ze wzoru (`"res://art/categories/%s.jpg" % category_id`).
