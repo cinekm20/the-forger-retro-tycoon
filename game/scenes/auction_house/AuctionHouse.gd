@@ -301,6 +301,12 @@ func _build_player_frame(parent: Container, index: int) -> void:
 
 	var money_label := ScreenHelpers.make_label(column, "")
 	var status_label_frame := ScreenHelpers.make_label(column, "")
+	## Wysokość ZAWSZE stała (nigdy nie chowana/pokazywana) — zgłoszone przez
+	## użytkownika: rozmiar ramki nie może się nigdy zmieniać. Rezerwuje
+	## miejsce na jedną linijkę niezależnie od tego, czy akurat jest coś do
+	## pokazania (patrz _update_frame — tekst może być pusty, ale wysokość
+	## etykiety zostaje ta sama).
+	status_label_frame.custom_minimum_size = Vector2(0, 24)
 
 	var button_row := HBoxContainer.new()
 	button_row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -438,11 +444,7 @@ func _on_bid_pressed(index: int) -> void:
 	var estimated_value := Paintings.get_estimated_value(current_number)
 	var next_bid := current_bid + estimated_value * BID_INCREMENT_RATIO
 	if not Players.player_can_afford(index, next_bid):
-		## visible = true jawnie — status_label bywa ukryty (patrz
-		## _update_frame), gdy nie ma nic do pokazania; sam zapis tekstu, bez
-		## odkrycia etykiety, zostałby niewidoczny.
 		player_frames[index]["status_label"].text = tr("Za mało gotówki na taką ofertę.")
-		player_frames[index]["status_label"].visible = true
 		return
 	current_bid = next_bid
 	current_leader = "player:%d" % index
@@ -558,28 +560,24 @@ func _update_labels() -> void:
 
 
 ## Odświeża ramkę JEDNEGO obecnego gracza: własna gotówka, status
-## (rezygnacja / ostrzeżenie o podróbce) i czy jego przyciski są aktywne.
-## Bez osobnego "Prowadzi!" w ramce (zgłoszone przez użytkownika) — kto
-## prowadzi widać już w centralnej skrzynce oferty (_update_labels,
-## bid_label), dublowanie tej informacji w ramce byłoby zbędne. is_leader
-## nadal liczone niżej — prowadzący nie może podbić samego siebie.
+## (TYLKO ostrzeżenie o podróbce — patrz niżej) i czy jego przyciski są
+## aktywne. Bez osobnego "Prowadzi!" (kto prowadzi widać już w centralnej
+## skrzynce oferty, _update_labels/bid_label) i bez "Zrezygnował(a)"
+## (zgłoszone przez użytkownika: zablokowane przyciski wystarczą, osobny
+## napis niepotrzebny) — is_leader/withdrawn nadal liczone niżej, tylko do
+## blokowania przycisków, nie do wyświetlania.
+##
+## status_label_frame ma STAŁĄ wysokość (custom_minimum_size w
+## _build_player_frame) i NIGDY nie jest chowana (visible zawsze true) —
+## zgłoszone przez użytkownika: rozmiar ramki nie może się nigdy zmieniać,
+## więc pusty/niepusty tekst nie może wpływać na wysokość.
 func _update_frame(index: int) -> void:
 	var frame: Dictionary = player_frames[index]
 	frame["money_label"].text = tr("Gotówka: %.0f M") % Players.get_player_money(index)
 
 	var withdrawn: bool = withdrawn_players.get(index, false)
 	var is_leader := current_leader == "player:%d" % index
-	var status := ""
-	if withdrawn:
-		status = tr("Zrezygnował(a)")
-	elif player_forgery_warning.get(index, false):
-		status = tr("⚠ możliwa podróbka!")
-	frame["status_label"].text = status
-	## visible = false (nie tylko pusty tekst) — zgłoszone przez użytkownika:
-	## pusta linijka statusu zostawiała martwe miejsce nad przyciskami,
-	## wydłużając ramkę bez potrzeby (patrz zrzut ekranu — "pod gotówką jest
-	## miejsce do guzików").
-	frame["status_label"].visible = status != ""
+	frame["status_label"].text = tr("⚠ możliwa podróbka!") if (not withdrawn and player_forgery_warning.get(index, false)) else ""
 
 	## Prowadzący nie może "podbić samego siebie" — ta sama zasada co dla
 	## rywali w _apply_best_rival_counter_bid.
