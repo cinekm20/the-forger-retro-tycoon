@@ -783,6 +783,18 @@ Ta sama zasada anty-diorama co przy §7 (model lubi dorysować aksamitną
 kurtynę/cokół zamiast płaskiego płótna) — prompty niżej mają to już
 naprawione.
 
+⚠ **Zgłoszone przez użytkownika (Symbolizm)** — model zamiast płaskiego
+płótna dorysował ozdobną złotą ramę w stylu Art Nouveau dookoła całej sceny.
+Winna fraza to prawdopodobnie "decorative ornamental detail" w prompcie
+Symbolizmu — miała opisywać ZDOBIENIA WEWNĄTRZ sceny (jak u Klimta), ale
+model zinterpretował ją jako ramę. Prompt Symbolizmu niżej już poprawiony
+(fraza zamieniona + explicit "no ornamental border/frame"). Jeśli mimo to
+któryś z 8 promptów (nie tylko Symbolizm) znowu doda ramę, dopisz do Negative
+Prompt (oprócz stałego z sekcji "Ustawienia techniczne" na górze dokumentu):
+```
+ornamental frame, gold frame, art nouveau frame border, decorative border, picture frame, framed artwork, vignette border
+```
+
 **Vermeer**
 ```
 17th century Dutch Golden Age genre painting, domestic interior scene, soft window light, muted earthy palette, oil painting texture, flat single painting filling the entire square canvas edge to edge, no curtain, no pedestal, no display stand, no surrounding objects, not a staged museum display, subject: a woman standing at a sunlit window reading a letter, quiet domestic moment
@@ -810,7 +822,7 @@ Impressionist oil painting, loose visible brushstrokes, dappled natural light, o
 
 **Symbolizm**
 ```
-Symbolist oil painting, dreamlike mysterious mood, decorative ornamental detail, muted jewel-tone palette, oil painting texture, flat single painting filling the entire square canvas edge to edge, no curtain, no pedestal, no display stand, no surrounding objects, not a staged museum display, subject: a solitary robed figure gazing at a glowing moon over a still, dark lake
+Symbolist oil painting, dreamlike mysterious mood, rich symbolic imagery, muted jewel-tone palette, oil painting texture, flat single painting filling the entire square canvas edge to edge, no ornamental border, no gold frame, no picture frame, painting reaches all four edges of the canvas with no decorative border of any kind, no curtain, no pedestal, no display stand, no surrounding objects, not a staged museum display, subject: a solitary robed figure gazing at a glowing moon over a still, dark lake
 ```
 
 **Ekspresjonizm**
