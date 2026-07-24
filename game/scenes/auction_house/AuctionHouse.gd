@@ -255,17 +255,34 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 
 
 ## Buduje boczne kolumny ramek graczy (make_root_side — ta sama, stała
-## szerokość co paski boczne Hub.gd/TravelAnimation.gd) i rozdziela obecnych
-## graczy naprzemiennie lewo/prawo — dla 4 graczy daje dokładnie 2+2
-## (zgłoszone przez użytkownika), dla mniejszej liczby rozkłada się możliwie
-## równo (2 graczy = 1+1, 3 graczy = 2+1).
+## szerokość co paski boczne Hub.gd/TravelAnimation.gd), każda podzielona na
+## GÓRNY i DOLNY slot rozdzielony rozpychającym spacerem. Kolejność
+## zajmowania miejsc (zgłoszone przez użytkownika): 1. gracz -> prawy dół,
+## 2. gracz -> lewy dół, 3. gracz -> prawy góra, 4. gracz -> lewy góra. Sloty
+## budowane ZAWSZE wszystkie cztery, niezależnie od liczby obecnych graczy —
+## dzięki temu np. przy jednym graczu jego ramka zawsze ląduje w prawym
+## dole, a nie na środku kolumny.
 func _build_player_frames() -> void:
 	var left_root := ScreenHelpers.make_root_side(self, false, false, SIDE_FRAMES_TOP_OFFSET)
 	var right_root := ScreenHelpers.make_root_side(self, true, false, SIDE_FRAMES_TOP_OFFSET)
+	left_root.alignment = BoxContainer.ALIGNMENT_BEGIN
+	right_root.alignment = BoxContainer.ALIGNMENT_BEGIN
+
+	var left_top := VBoxContainer.new()
+	left_root.add_child(left_top)
+	left_root.add_child(_make_expand_spacer())
+	var left_bottom := VBoxContainer.new()
+	left_root.add_child(left_bottom)
+
+	var right_top := VBoxContainer.new()
+	right_root.add_child(right_top)
+	right_root.add_child(_make_expand_spacer())
+	var right_bottom := VBoxContainer.new()
+	right_root.add_child(right_bottom)
+
+	var slots: Array[VBoxContainer] = [right_bottom, left_bottom, right_top, left_top]
 	for i in present_players.size():
-		var index: int = present_players[i]
-		var target_root: VBoxContainer = left_root if i % 2 == 0 else right_root
-		_build_player_frame(target_root, index)
+		_build_player_frame(slots[i], present_players[i])
 
 
 ## Jedna ramka gracza: awatar + imię (identyfikacja, zgłoszone przez
