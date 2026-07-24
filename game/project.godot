@@ -31,6 +31,7 @@ Players="*res://scripts/autoload/Players.gd"
 GameState="*res://scripts/autoload/GameState.gd"
 SaveGame="*res://scripts/autoload/SaveGame.gd"
 Localization="*res://scripts/autoload/Localization.gd"
+Music="*res://scripts/autoload/Music.gd"
 
 [display]
 

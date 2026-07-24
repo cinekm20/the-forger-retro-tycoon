@@ -268,7 +268,7 @@ game/scripts
   /autoload  (SceneRouter, Calendar, Cities, Travel, Crops, Economy,
               PlayerPlantations, Paintings, Auctions, ShippingCompanies,
               ForwardContracts, AIPlayers, Security, Players, GameState,
-              SaveGame, Localization)
+              SaveGame, Localization, Music)
   /ui  (screen_helpers.gd — wspólne budowniczowie UI; MapPin.gd, MenuFrame.gd,
         VaultIcon.gd, TravelVehicle.gd, PlantationTileIcon.gd — natywnie
         rysowane ikonki tam, gdzie Leonardo.ai uparcie generowało pełne sceny
@@ -313,7 +313,10 @@ mobile.
    wzrostu upraw, mini-gra autentykacji, ryzyko regionalne na plantacjach,
    powiadomienia push)
 6. ⏳ Dźwięk/muzyka, dalszy polish, testy na urządzeniu — częściowo w toku
-   (build Android już działa, patrz punkt 7)
+   (build Android już działa, patrz punkt 7). Pierwszy utwór (`hub.mp3`)
+   już podpięty jako wspólna muzyka w tle na WSZYSTKICH ekranach
+   (`Music.gd` autoload, gra w pętli) — placeholder do czasu, aż powstaną
+   osobne ścieżki per ekran z `docs/MUZYKA_PROMPTY.md`.
 7. ✅ Eksport APK działa (`android-build.yml`, debug keystore) — podpisywanie
    pod Google Play i AAB wciąż do zrobienia
 
