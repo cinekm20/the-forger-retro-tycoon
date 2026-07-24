@@ -276,7 +276,8 @@ game/scripts
 game/art        — grafiki z Leonardo.ai (docs/GRAFIKA_LEONARDO.md), większość
                   teł/obrazów już podpięta — status w tabeli "Plan produkcji"
   /ui, /characters, /paintings, /backgrounds, /icons
-game/audio      — puste, do wypełnienia
+game/audio      — puste, do wypełnienia — prompty na muzykę już gotowe w
+                  docs/MUZYKA_PROMPTY.md
 ```
 
 Autoloady mają wpięte realne dane źródłowe (miasta i czasy podróży, plony
