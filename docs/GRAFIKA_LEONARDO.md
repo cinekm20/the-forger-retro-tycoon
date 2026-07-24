@@ -769,19 +769,33 @@ hanging paintings, soft gallery lighting, elegant benches, game background
 art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
-⚠ **Zgłoszone przez użytkownika** — wygenerowany obrazek wyszedł ZBYT
-wypełniony (ściany już obwieszone własnymi obrazami w ramach, ławki,
-żyrandol, cokoły z rzeźbami), więc konkuruje wizualnie z kafelkami/dużym
-podglądem, które gra i tak nakłada na wierzchu (patrz Gallery.gd
-_build_framed_image). Potrzebny PROŚCIEJSZY wariant, nazwany osobno
-(`gallery_empty.jpg`, patrz konwencja nazw niżej) — kod (`Gallery.gd`)
-próbuje najpierw tego wariantu, a jeśli pliku jeszcze nie ma, po cichu
-spada z powrotem na zwykły `gallery.jpg` powyżej, więc podmiana jest
-bezpieczna do wgrania w dowolnym momencie.
+⚠ **Zgłoszone przez użytkownika** — obrazek z promptu wyżej wychodzi ZBYT
+wypełniony (ściany obwieszone własnymi obrazami w ramach, ławki, żyrandol,
+rośliny), więc konkuruje wizualnie z kafelkami/dużym podglądem, które gra i
+tak nakłada na wierzchu (patrz Gallery.gd _build_framed_image). Potrzebny
+PROŚCIEJSZY wariant, nazwany osobno (`gallery_empty.jpg`, patrz konwencja
+nazw niżej) — kod (`Gallery.gd`) próbuje najpierw tego wariantu, a jeśli
+pliku jeszcze nie ma, po cichu spada z powrotem na zwykły `gallery.jpg`
+powyżej, więc podmiana jest bezpieczna do wgrania w dowolnym momencie.
 
-**Prompt (wariant pusty, bez obrazów na ścianach):**
+⚠ **UWAGA przy generowaniu wariantu pustego** — pierwsza próba z "no
+paintings/no benches/no chandelier" WPROST w opisie i tak wyszła pełna tych
+elementów (ten sam mechanizm co ostrzeżenie przy §7: samo wymienienie
+obiektu w prompcie, nawet zaprzeczone, potrafi go przywołać — model łapie
+rzeczownik, nie zaprzeczenie). Prompt NIŻEJ jest już poprawiony pod tym
+kątem — użyj GO, nie żadnej wcześniejszej wersji z historii generacji w
+Leonardo (jeśli edytujesz istniejący node z poprzednią próbą, upewnij się,
+że CAŁY tekst promptu został nadpisany, nie tylko dopisany na końcu).
+
+**Prompt (wariant pusty — jedyny właściwy, nie wymienia zakazanych obiektów):**
 ```
-Art Deco private gallery hall interior, plain flat wall panels with NO paintings hanging, no benches, no pedestals, no sculptures, no chandelier, minimal empty floor, soft ambient lighting, uncluttered negative space in the center and lower half of the frame, game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+Empty Art Deco room interior background, blank flat wall panels in muted teal and gold tones, polished marble floor with geometric inlay, soft warm ambient lighting, completely bare and uncluttered, large open negative space filling the center and lower half of the frame, minimalist architecture, game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation on cornices only, mobile game asset, clean silhouette, no photorealism
+```
+
+**Negative Prompt DODATKOWY dla tego promptu** (wklej OBOK stałego z sekcji
+"Ustawienia techniczne" na górze dokumentu, nie zamiast niego):
+```
+paintings, framed artwork, picture frames, art on wall, wall decorations, benches, seating, furniture, pedestals, plinths, sculptures, statues, chandelier, hanging lamp, ceiling light fixture, potted plants, vases, people, crowd, figures
 ```
 
 ### 9b. Ikony kategorii stylistycznych w Galerii (8 sztuk)
