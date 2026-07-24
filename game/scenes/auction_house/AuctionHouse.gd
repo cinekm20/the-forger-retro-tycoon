@@ -96,15 +96,14 @@ func _ready() -> void:
 	## ekran (ta sama co w Hub/TravelMap) tu tylko przeszkadzała.
 	var root := ScreenHelpers.make_root(self, false)
 	ScreenHelpers.make_title(root, "Dom aukcyjny")
-	ScreenHelpers.make_turn_indicator(root)
 
-	schedule_label = ScreenHelpers.make_info_box(root, "")
-	## SIZE_SHRINK_CENTER — bez tego skrzynka rozciąga się na PEŁNĄ szerokość
-	## VBoxContainera (custom_minimum_size to tylko MINIMUM, nie maksimum),
-	## co przy bocznych ramkach graczy (patrz _build_player_frames) chowało
-	## się pod nimi zamiast zostać wyśrodkowaną w wolnym pasie na środku
-	## (zgłoszone przez użytkownika, zrzut ekranu: teksty zachodziły pod ramki).
-	schedule_label.get_parent().size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	## "Tura: Gracz X" i termin aukcji (miasto + data) w lewym górnym rogu
+	## (patrz _build_top_left_corner), NIE w głównej, wyśrodkowanej kolumnie
+	## — zgłoszone przez użytkownika: ta kolumna jest już wysoka (obraz +
+	## pasek czasu + skrzynka oferty), a każdy dodatkowy wiersz na górze
+	## spychał skrzynkę oferty na dole poza widoczny ekran. Róg ma zapas
+	## miejsca i niczego innego nie przesuwa.
+	_build_top_left_corner()
 
 	if not Auctions.is_open(Travel.current_city):
 		ScreenHelpers.make_label(root, tr("W tym mieście nie odbywa się teraz żadna aukcja.\nWróć w podanym terminie."))
@@ -116,6 +115,22 @@ func _ready() -> void:
 	_build_active_auction_ui(root)
 	_build_player_frames()
 	_start_new_auction()
+
+
+## Mała skrzynka w lewym górnym rogu ekranu — "Tura: Gracz X" (jak wszędzie
+## indziej, ScreenHelpers.make_turn_indicator, puste w trybie solo) i termin
+## aukcji (schedule_label). Pozycjonowana bezpośrednio (position), nie przez
+## Container-owy layout — te same wartości offsetu co make_corner_status_row
+## (16, 12) dla spójności z resztą gry.
+func _build_top_left_corner() -> void:
+	var corner := VBoxContainer.new()
+	corner.position = Vector2(16, 12)
+	corner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	corner.add_theme_constant_override("separation", 6)
+	add_child(corner)
+
+	ScreenHelpers.make_turn_indicator(corner)
+	schedule_label = ScreenHelpers.make_info_box(corner, "")
 
 
 ## Buduje UI aktywnej licytacji BEZ ramek graczy (patrz _build_player_frames
