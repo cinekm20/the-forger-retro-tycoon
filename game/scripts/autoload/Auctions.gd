@@ -58,6 +58,19 @@ func is_open(city_id: String) -> bool:
 	return city_id == next_auction_city and Players.active_day() >= next_auction_day
 
 
+## Indeksy WSZYSTKICH graczy fizycznie obecnych na TEJ aukcji (nie tylko
+## aktywnego) — własne miasto ORAZ własny dzień (Tor B, patrz Players.gd)
+## muszą się zgadzać z zaplanowanym terminem. Kilku graczy może dotrzeć do
+## tej samej aukcji niezależnym tempem (patrz GDD.md pkt. 11) — AuctionHouse.gd
+## pokazuje dla każdego z nich osobną ramkę do licytacji.
+func get_present_players() -> Array[int]:
+	var result: Array[int] = []
+	for i in Players.player_count:
+		if Players.get_player_city(i) == next_auction_city and Players.get_player_day(i) >= next_auction_day:
+			result.append(i)
+	return result
+
+
 func get_current_painting_number() -> int:
 	if current_painting_number == -1:
 		current_painting_number = 1 + randi() % Paintings.CATALOG.size()

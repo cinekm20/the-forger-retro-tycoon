@@ -42,6 +42,7 @@ func _ready() -> void:
 	_test_travel_completes_in_one_animation()
 	_test_auctions_schedule()
 	_test_auctions_cap_turn_advance()
+	_test_auctions_present_players()
 	_test_ship_and_sell_all_across_plantations()
 	_test_find_plantation_index()
 	_test_plantation_grows_multiple_crops_at_once()
@@ -579,6 +580,39 @@ func _test_auctions_cap_turn_advance() -> void:
 		Auctions.cap_turn_advance(7, Auctions.next_auction_city) == 7,
 		"gdy termin już nadszedł (gracz jest na miejscu), skok dni nie jest już capowany",
 	)
+
+
+## Zgłoszone przez użytkownika: aukcja ma pokazywać osobną ramkę dla KAŻDEGO
+## gracza fizycznie obecnego w mieście na termin, nie dla wszystkich
+## skonfigurowanych graczy. get_present_players() musi wymagać OBU warunków
+## naraz (właściwe miasto ORAZ własny dzień >= termin) dla KAŻDEGO gracza
+## osobno — snapshots[i]["current_city"] ustawiane ręcznie tu, tak jak inne
+## testy poking snapshot state bezpośrednio (patrz np. _test_river_adjacency_detection).
+func _test_auctions_present_players() -> void:
+	print("-- Auctions: get_present_players zwraca tylko graczy fizycznie obecnych na aukcji --")
+	Calendar.reset_new_game()
+	Players.reset_new_game(3)
+	Auctions.reset_new_game()
+	Travel.reset_new_game()
+
+	# Gracz 1 (aktywny): właściwe miasto i termin już nadszedł.
+	Travel.current_city = Auctions.next_auction_city
+	Players.player_days[0] = Auctions.next_auction_day
+
+	# Gracz 2: to samo miasto, ale jeszcze nie dotarł do właściwego dnia.
+	Players.snapshots[1]["current_city"] = Auctions.next_auction_city
+	Players.player_days[1] = Auctions.next_auction_day - 1
+
+	# Gracz 3: właściwy dzień, ale stoi w INNYM mieście.
+	var other_city: String = Cities.get_auction_cities().filter(func(c): return c != Auctions.next_auction_city)[0]
+	Players.snapshots[2]["current_city"] = other_city
+	Players.player_days[2] = Auctions.next_auction_day
+
+	var present := Auctions.get_present_players()
+	_assert(present.has(0), "gracz 1 (właściwe miasto i dzień) jest obecny")
+	_assert(not present.has(1), "gracz 2 (właściwe miasto, ZA WCZEŚNIE) NIE jest obecny")
+	_assert(not present.has(2), "gracz 3 (właściwy dzień, INNE miasto) NIE jest obecny")
+	_assert(present.size() == 1, "tylko jeden gracz spełnia oba warunki naraz")
 
 
 func _test_yearly_report_populated_on_new_year() -> void:

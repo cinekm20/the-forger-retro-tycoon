@@ -394,6 +394,31 @@ static func make_boxed_row(root: Container) -> HBoxContainer:
 	return row
 
 
+## Jak make_boxed_row, ale PIONOWA skrzynka (VBoxContainer) — dla treści,
+## która ma być listą wierszy w jednej ramce (np. ramka gracza na aukcji:
+## awatar, imię, gotówka, status, przyciski — patrz AuctionHouse.gd).
+static func make_boxed_column(root: Container) -> VBoxContainer:
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(COLOR_BURGUNDY_DARK.r, COLOR_BURGUNDY_DARK.g, COLOR_BURGUNDY_DARK.b, 0.85)
+	box.border_color = COLOR_GOLD
+	box.set_border_width_all(2)
+	box.set_corner_radius_all(4)
+	box.content_margin_left = 12
+	box.content_margin_right = 12
+	box.content_margin_top = 10
+	box.content_margin_bottom = 10
+
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", box)
+	root.add_child(panel)
+
+	var column := VBoxContainer.new()
+	column.alignment = BoxContainer.ALIGNMENT_CENTER
+	column.add_theme_constant_override("separation", 6)
+	panel.add_child(column)
+	return column
+
+
 ## Przyciski w stylu art déco (ciemny burgund + złota ramka) zamiast
 ## domyślnego szarego wyglądu Godota — jeden wspólny styl dla całej gry.
 static func _style_button(btn: Button) -> void:

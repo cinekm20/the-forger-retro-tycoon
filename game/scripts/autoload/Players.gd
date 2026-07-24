@@ -232,6 +232,67 @@ func pass_turn_to_earliest_player() -> void:
 	turn_changed.emit(active_index)
 
 
+## Miasto DANEGO gracza (nie tylko aktywnego) — potrzebne do sprawdzenia, kto
+## fizycznie jest w mieście aukcyjnym w danym momencie (AuctionHouse.gd,
+## Auctions.get_present_players), skoro kilku graczy może dotrzeć do tej
+## samej aukcji niezależnie (patrz GDD.md pkt. 11).
+func get_player_city(index: int) -> String:
+	if index == active_index:
+		return Travel.current_city
+	return snapshots[index].get("current_city", Travel.START_CITY)
+
+
+func get_player_money(index: int) -> float:
+	if index == active_index:
+		return Economy.player_money
+	return snapshots[index].get("money", Economy.STARTING_MONEY)
+
+
+func player_can_afford(index: int, amount: float) -> bool:
+	return get_player_money(index) >= amount
+
+
+## Odejmuje kwotę z konta DANEGO gracza, jeśli go na to stać — zwraca false
+## bez żadnego efektu, jeśli nie. Używane przez AuctionHouse.gd, gdzie
+## licytować i wygrywać może każdy gracz fizycznie obecny na aukcji, nie
+## tylko aktualnie aktywny.
+func spend_player_money(index: int, amount: float) -> bool:
+	if index == active_index:
+		return Economy.spend(amount)
+	if snapshots[index].get("money", 0.0) < amount:
+		return false
+	snapshots[index]["money"] -= amount
+	return true
+
+
+func get_player_expertise(index: int) -> float:
+	if index == active_index:
+		return Paintings.expertise
+	return snapshots[index].get("expertise", 0.0)
+
+
+## Czy DANY gracz (nie tylko aktywny) ma już ten numer skatalogowany —
+## podstawa wykrywania fałszywki (Paintings.is_forgery_by_duplicate liczy to
+## tylko dla aktywnego gracza, tu potrzebna wersja per gracz dla aukcji z
+## wieloma jednoczesnymi licytującymi).
+func player_has_number(index: int, number: int) -> bool:
+	if index == active_index:
+		return Paintings.catalogued_numbers.has(number)
+	return snapshots[index].get("catalogued_numbers", []).has(number)
+
+
+## Katalogowanie obrazu na konto DANEGO gracza — patrz spend_player_money,
+## ten sam powód (aukcja z wieloma obecnymi graczami).
+func catalogue_for_player(index: int, number: int) -> void:
+	if index == active_index:
+		Paintings.catalogue(number)
+		return
+	var numbers: Array = snapshots[index].get("catalogued_numbers", [])
+	if not numbers.has(number):
+		numbers.append(number)
+		snapshots[index]["catalogued_numbers"] = numbers
+
+
 func get_painting_count(index: int) -> int:
 	if index == active_index:
 		return Paintings.owned_count()

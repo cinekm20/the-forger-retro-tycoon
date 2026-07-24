@@ -9,16 +9,45 @@ extends Control
 ## tylko w wybranym czasie, nie żeby mogę ileś obrazów na raz kupić") —
 ## jeśli gracz jest w mieście aukcyjnym poza terminem, widzi tylko
 ## informację, kiedy i gdzie jest następna aukcja.
+##
+## Zgłoszone przez użytkownika: skoro kilku graczy może niezależnym tempem
+## dotrzeć do TEJ SAMEJ aukcji (patrz GDD.md pkt. 11, Auctions.get_present_players),
+## ekran pokazuje osobną ramkę dla KAŻDEGO fizycznie obecnego gracza (do 4,
+## 2 po lewej i 2 po prawej) — z własnym przyciskiem podbicia i rezygnacji.
+## Czas na reakcję jest jeden, wspólny dla wszystkich (jeden zegar odliczania
+## na całą rundę), tak jak w oryginale ("gracze siedzący przed jednym
+## komputerem C64 po kolei wpisują swoje oferty").
 
 const BID_INCREMENT_RATIO := 0.1  ## gracz podbija o 10% szacunkowej wartości
 const BID_TIME_LIMIT := 20.0  ## sekundy realnego czasu na podbicie oferty
 
 var current_number: int = -1
 var current_bid: float = 0.0
-var current_leader: String = ""  ## "" = nikt, "player", albo id rywala
-var current_forgery_warning: bool = false  ## losowane raz na aukcję w _start_new_auction
+## "" = nikt, "player:<idx>" = gracz o indeksie <idx> (może być KAŻDY
+## fizycznie obecny gracz, nie tylko aktywny), albo id rywala.
+var current_leader: String = ""
 
-var auction_active: bool = false  ## true = odlicza czas na kolejny ruch gracza
+## Indeksy graczy fizycznie obecnych na TEJ aukcji (Auctions.get_present_players)
+## — liczone RAZ przy wejściu na ekran, bo obecność (miasto + własny dzień)
+## nie zmienia się w trakcie samej licytacji.
+var present_players: Array[int] = []
+## index -> bool, czy DANY gracz zrezygnował z TEJ rundy — reset co nowy
+## obraz w _start_new_auction. Rezygnacja jest per gracz: pozostali obecni
+## mogą dalej licytować, dopóki nie zrezygnują wszyscy (wtedy runda
+## rozstrzyga się od razu, tak jak dawniej przy jednym graczu).
+var withdrawn_players: Dictionary = {}
+## index -> bool, czy DANY numer jest dla NIEGO duplikatem — losowane raz na
+## aukcję w _start_new_auction (każdy obecny gracz ma OSOBNĄ kolekcję).
+var player_forgery_duplicate: Dictionary = {}
+## index -> bool, czy Szkoła Sztuki zdążyła OSTRZEC akurat TEGO gracza —
+## zależy od jego własnej eksperckości (Players.get_player_expertise).
+var player_forgery_warning: Dictionary = {}
+## index -> {"money_label", "status_label", "bid_btn", "resign_btn"} — węzły
+## ramki KAŻDEGO obecnego gracza, budowane raz w _build_player_frame,
+## odświeżane w _update_frame.
+var player_frames: Dictionary = {}
+
+var auction_active: bool = false  ## true = odlicza czas na kolejny ruch
 var bid_time_remaining: float = 0.0
 ## Rywal nie czeka już zawsze do samego końca licznika, żeby ewentualnie
 ## podbić — losowy moment w trakcie odliczania, w którym sprawdzamy, czy
@@ -29,50 +58,36 @@ var rival_checked_this_round: bool = false
 var schedule_label: Label
 var painting_label: Label
 var bid_label: Label
-var money_label: Label
-var warning_label: Label
 var status_label: Label
 var timer_label: Label
 var timer_bar: ProgressBar
 var painting_texture_rect: TextureRect
 var leader_portrait_rect: TextureRect
-var bid_btn: Button
-var resolve_btn: Button
 var back_btn: Button
 
 ## 268 = 190 (poprzedni rozmiar samego obrazu, patrz historia komentarza w
 ## _build_active_auction_ui) powiększone tak, żeby po doliczeniu ramki
-## (art/icons/frame.png) WNĘTRZE ramki znów wychodziło na ~190×190 — ekran
-## nie ma już ramki na CAŁY ekran + ScrollContainer (użytkownik: "nie ma być
-## ramki na cały ekran"), więc treść musi zmieścić się w jednym,
-## niescrollowanym widoku bez przycinania dolnych przycisków.
+## (art/icons/frame.png) WNĘTRZE ramki znów wychodziło na ~190×190.
 const FRAME_HOLDER_SIZE := Vector2(268, 268)
 const FRAME_TEXTURE_PATH := "res://art/icons/frame.png"
 ## Ułamek FRAME_HOLDER_SIZE zajęty przez sam brzeg ramy z każdej strony —
 ## zmierzone na art/icons/frame.png (kwadratowy plik, kwadratowy otwór w
 ## środku, przezroczyste tło dookoła ramy — patrz poprawiony prompt w
-## docs/GRAFIKA_LEONARDO.md §6). painting_texture_rect jest zakotwiczony
-## dokładnie w tym ułamku, więc kwadratowy obraz (896×896) wypełnia otwór
-## idealnie, bez żadnych pustych pasów.
+## docs/GRAFIKA_LEONARDO.md §6).
 const FRAME_INNER_INSET := 0.145
+
+## Szerokość ramek graczy po bokach ekranu (make_root_side) — patrz
+## _build_player_frames. Środkowa treść (obraz + opis) zwężona odpowiednio
+## (patrz painting_label/bid_label niżej), żeby zmieściła się między dwiema
+## takimi kolumnami.
+const SIDE_FRAMES_TOP_OFFSET := 130.0
 
 
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/auction_house.jpg")
 
-	## Gotówka w stałej skrzynce w prawym górnym rogu (jak w Hubie/Giełdzie),
-	## NIE w wierszu z ofertą — użytkownik zgłosił, że powinna zostać na górze,
-	## niezależnie od reszty licytacji. Lewa skrzynka (nieużywana tu) jest po
-	## prostu ukryta, zamiast pokazywać pustą ramkę bez treści.
-	var corner := ScreenHelpers.make_corner_status_row(self, "", "")
-	corner["left"].get_parent().visible = false
-	money_label = corner["right"]
-
 	## use_menu_frame=false: użytkownik zgłosił, że ozdobna ramka na cały
-	## ekran (ta sama co w Hub/TravelMap) tu tylko przeszkadzała — ma zostać
-	## WYŁĄCZNIE oprawiona skrzynka do podbijania oferty w prawym dolnym rogu
-	## (make_root_bottom w _build_active_auction_ui, osobny wywołanie, dalej
-	## z use_menu_frame=true), reszta ekranu leży bezpośrednio na tle.
+	## ekran (ta sama co w Hub/TravelMap) tu tylko przeszkadzała.
 	var root := ScreenHelpers.make_root(self, false)
 	ScreenHelpers.make_title(root, "Dom aukcyjny")
 	ScreenHelpers.make_turn_indicator(root)
@@ -85,34 +100,29 @@ func _ready() -> void:
 		ScreenHelpers.make_back_button(root)
 		return
 
+	present_players = Auctions.get_present_players()
 	_build_active_auction_ui(root)
+	_build_player_frames()
 	_start_new_auction()
 
 
-## Buduje UI aktywnej licytacji. Nazwa/opis obrazu to oprawiona skrzynka
-## PRZY GÓRZE ekranu (obok skrzynki terminu aukcji) — użytkownik zgłosił, że
-## nieoprawiony tekst pod obrazem nachodził na pasek akcji w prawym dolnym
-## rogu. Sam obraz ma teraz cienką ozdobną ramę (art/icons/frame.png,
-## dostarczona przez użytkownika) — WCZEŚNIEJ obraz w ogóle nie miał ramki
-## (użytkownik zgłosił wtedy, że natywnie rysowana rama wychodziła "ogromna"),
-## ale ta grafika ma celowo cienki brzeg i duży kwadratowy otwór w środku
-## (patrz docs/GRAFIKA_LEONARDO.md §6), więc nie zajmuje dużo miejsca. Malejący
-## czas na podbicie + przyciski są w OSOBNYM pasku przyklejonym do prawego
-## dolnego rogu ekranu (make_root_bottom) — zgodnie z prośbą użytkownika, żeby
-## akcje licytacji nie leżały wymieszane w pionowej liście opisów.
+## Buduje UI aktywnej licytacji BEZ ramek graczy (patrz _build_player_frames
+## niżej, budowane osobno na bokach ekranu). Nazwa/opis obrazu i skrzynka
+## "kto prowadzi" zostają jako wspólne, centralne podsumowanie — po bokach
+## dochodzą osobne ramki per gracz z ich WŁASNYMI przyciskami (patrz
+## _build_player_frame). Malejący czas + przycisk powrotu zostają w pasku
+## przyklejonym do prawego dolnego rogu, tak jak dawniej — ale bez przycisków
+## podbicia/rezygnacji, które teraz są w ramkach graczy.
 func _build_active_auction_ui(root: VBoxContainer) -> void:
-	## make_root(false) domyślnie centruje wszystkie dzieci jako jedną grupę
-	## (ALIGNMENT_CENTER) — użytkownik zgłosił, że górne skrzynki (termin +
-	## nazwa obrazu) mają być na SAMEJ górze ekranu, a dolne (oferta/gotówka +
-	## status + powrót) na SAMYM dole, z obrazem gdzieś pośrodku. BEGIN +
-	## dwa rozciągliwe spacery (jeden przed obrazem, jeden przed dolnym
-	## klastrem) rozpychają te trzy grupy do krawędzi zamiast trzymać je
-	## zbite na środku.
 	root.alignment = BoxContainer.ALIGNMENT_BEGIN
 
 	painting_label = ScreenHelpers.make_info_box(root, "")
 	painting_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	painting_label.custom_minimum_size = Vector2(760, 0)
+	## 500 (nie 760 jak wcześniej) — ekran ma teraz dwie boczne kolumny ramek
+	## graczy (patrz _build_player_frames, SIDE_PANEL_WIDTH=380 każda), więc
+	## środkowa treść musi się zwęzić, żeby wszystko zmieściło się w 1280px
+	## szerokości viewportu (project.godot).
+	painting_label.custom_minimum_size = Vector2(500, 0)
 
 	root.add_child(_make_expand_spacer())
 
@@ -125,19 +135,11 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	painting_center.add_child(frame_holder)
 
 	## Rama dodana PIERWSZA (rysuje się pod spodem) — jej wnętrze na
-	## frame.png jest w całości nieprzezroczyste (płaskie "puste płótno"),
-	## więc dopiero obraz DODANY PO NIEJ (rysuje się na wierzchu, dokładnie w
-	## ułamku FRAME_INNER_INSET) w pełni je zasłania, zostawiając widoczny
-	## tylko ozdobny brzeg dookoła — bez tego kolejność odwrotna: rama
-	## zasłoniłaby obraz.
+	## frame.png jest w całości nieprzezroczyste, więc dopiero obraz DODANY
+	## PO NIEJ (rysuje się na wierzchu) w pełni je zasłania.
 	var frame_rect := TextureRect.new()
 	frame_rect.texture = load(FRAME_TEXTURE_PATH)
 	frame_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	## EXPAND_IGNORE_SIZE: bez tego minimalny rozmiar TextureRect to naturalny
-	## rozmiar tekstury (frame.png = 1024×1024 px), który wygrywa z małym
-	## FRAME_HOLDER_SIZE i rama renderuje się w swoim naturalnym, ogromnym
-	## rozmiarze zamiast się zmniejszyć — zgłoszone przez użytkownika na
-	## zrzucie ekranu (rama "jakby w ogóle nie zmniejszona").
 	frame_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	frame_rect.stretch_mode = TextureRect.STRETCH_SCALE
 	frame_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -155,52 +157,36 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 
 	root.add_child(_make_expand_spacer())
 
-	warning_label = ScreenHelpers.make_label(root, "")
-
-	## Jedna wspólna, oprawiona skrzynka (make_boxed_row) na portret PROWADZĄCEGO
-	## rywala + tekst oferty — użytkownik zgłosił, że portret ma być W ŚRODKU
-	## tej ramki (nie osobno, obok niej) i trochę większy.
+	## Jedna wspólna, oprawiona skrzynka na portret PROWADZĄCEGO (może być
+	## KTÓRYKOLWIEK z obecnych graczy, nie tylko "Ty") + tekst oferty.
 	var bid_row := ScreenHelpers.make_boxed_row(root)
 
 	leader_portrait_rect = TextureRect.new()
 	leader_portrait_rect.custom_minimum_size = Vector2(84, 84)
 	leader_portrait_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	leader_portrait_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	## visible ZAWSZE true (patrz _update_labels) — tylko modulate.a
-	## przełącza widoczność OBRAZKA, żeby bid_row miał zawsze tę samą
-	## szerokość niezależnie od tego, kto akurat prowadzi.
+	## visible ZAWSZE true — tylko modulate.a przełącza widoczność OBRAZKA,
+	## żeby bid_row miał zawsze tę samą szerokość niezależnie od tego, kto
+	## akurat prowadzi.
 	leader_portrait_rect.modulate.a = 0.0
 	bid_row.add_child(leader_portrait_rect)
 
-	## font_size 26 (zamiast domyślnych 19) — użytkownik zgłosił, że oferta i
-	## informacja "kto prowadzi" powinny być trochę większe. autowrap +
-	## custom_minimum_size (SZEROKOŚĆ i WYSOKOŚĆ oba stałe): druga linijka
-	## ("(prowadzi: NAZWISKO)") ma zawsze zmieścić się na JEDNEJ linii, żeby
-	## cały label zawsze miał dokładnie 2 linie — inaczej zawijał się na
-	## dodatkową (trzecią) linię przy dłuższych nazwiskach rywali (np. "Baron
-	## Heinrich von Falkenstein"), zmieniając wysokość skrzynki i przesuwając
-	## layout (zgłoszone przez użytkownika: "ramka skacze"). Szerokość 700
-	## (było 340) z zapasem mieści najdłuższe nazwisko z AIPlayers.gd
-	## GENERIC_RIVAL_POOL na jednej linii — root na tym ekranie nie ma wąskiej
-	## kolumny (make_root(self, false), patrz _ready), więc jest miejsce.
-	## Stała wysokość (zawsze 2 pełne linie przy font_size 26) gwarantuje, że
-	## skrzynka nigdy się nie rusza, niezależnie od długości nazwiska.
 	bid_label = Label.new()
 	bid_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	bid_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
 	bid_label.add_theme_font_size_override("font_size", 26)
 	bid_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	bid_label.custom_minimum_size = Vector2(700, 70)
+	bid_label.custom_minimum_size = Vector2(500, 70)
 	bid_row.add_child(bid_label)
 
 	status_label = ScreenHelpers.make_label(root, "")
 
-	var action_root := ScreenHelpers.make_root_bottom(self, true, 380.0, true)
+	var action_root := ScreenHelpers.make_root_bottom(self, true, 300.0, true)
 	timer_label = ScreenHelpers.make_label(action_root, "")
 	timer_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
 
 	timer_bar = ProgressBar.new()
-	timer_bar.custom_minimum_size = Vector2(280, 20)
+	timer_bar.custom_minimum_size = Vector2(220, 20)
 	timer_bar.show_percentage = false
 	timer_bar.min_value = 0.0
 	timer_bar.max_value = BID_TIME_LIMIT
@@ -217,19 +203,62 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	timer_bar.add_theme_stylebox_override("fill", bar_fill)
 	action_root.add_child(timer_bar)
 
-	bid_btn = ScreenHelpers.make_button(action_root, tr("Podbij (+10%)"), _on_bid_pressed)
-	resolve_btn = ScreenHelpers.make_button(action_root, tr("Rezygnuję z aukcji"), _on_resolve_round_pressed)
-
-	## W TYM SAMYM, zawsze widocznym pasku co przyciski licytacji (nie w
-	## środkowej kolumnie z opisem — tam przy dłuższym statusie/dłuższym
-	## opisie obrazu potrafił wypaść poza dolną krawędź ekranu, bo root(false)
-	## nie ma ScrollContainera, patrz zgłoszenie użytkownika ze zrzutem
-	## ekranu: "nie widać klawisza powrót"). Podmienia się z bid_btn/resolve_btn
-	## dopiero po rozstrzygnięciu aukcji (patrz _resolve_auction) — do tego
-	## momentu ukryty, żeby nie dało się wyjść i wrócić do wciąż otwartej
-	## aukcji (zgłoszone wcześniej przez użytkownika).
+	## Zastępuje przyciski Podbij/Rezygnuj (teraz w ramkach graczy) dopiero
+	## po rozstrzygnięciu aukcji — do tego momentu ukryty.
 	back_btn = ScreenHelpers.make_back_button(action_root)
 	back_btn.visible = false
+
+
+## Buduje boczne kolumny ramek graczy (make_root_side — ta sama, stała
+## szerokość co paski boczne Hub.gd/TravelAnimation.gd) i rozdziela obecnych
+## graczy naprzemiennie lewo/prawo — dla 4 graczy daje dokładnie 2+2
+## (zgłoszone przez użytkownika), dla mniejszej liczby rozkłada się możliwie
+## równo (2 graczy = 1+1, 3 graczy = 2+1).
+func _build_player_frames() -> void:
+	var left_root := ScreenHelpers.make_root_side(self, false, false, SIDE_FRAMES_TOP_OFFSET)
+	var right_root := ScreenHelpers.make_root_side(self, true, false, SIDE_FRAMES_TOP_OFFSET)
+	for i in present_players.size():
+		var index: int = present_players[i]
+		var target_root: VBoxContainer = left_root if i % 2 == 0 else right_root
+		_build_player_frame(target_root, index)
+
+
+## Jedna ramka gracza: awatar + imię (identyfikacja, zgłoszone przez
+## użytkownika: "w ramkach powinna być informacja który to jest gracz"),
+## własna gotówka, status (prowadzi/zrezygnował/ostrzeżenie o podróbce) i
+## własne przyciski Podbij/Rezygnuję — .bind(index) wiąże każdy przycisk z
+## KONKRETNYM graczem, więc _on_bid_pressed/_on_resign_pressed zawsze wiedzą,
+## w czyim imieniu działają, niezależnie od tego, kto jest aktualnie
+## "aktywnym" graczem hot-seatu (Players.active_index).
+func _build_player_frame(parent: Container, index: int) -> void:
+	var column := ScreenHelpers.make_boxed_column(parent)
+
+	var name_suffix := tr(" (aktywny)") if index == Players.active_index else ""
+	ScreenHelpers.make_label(column, Players.player_names[index] + name_suffix)
+
+	var avatar_center := CenterContainer.new()
+	column.add_child(avatar_center)
+	var avatar_rect := TextureRect.new()
+	avatar_rect.custom_minimum_size = Vector2(64, 64)
+	avatar_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	avatar_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var avatar_path := Players.get_avatar_path(index)
+	if ResourceLoader.exists(avatar_path):
+		avatar_rect.texture = load(avatar_path)
+	avatar_center.add_child(avatar_rect)
+
+	var money_label := ScreenHelpers.make_label(column, "")
+	var status_label_frame := ScreenHelpers.make_label(column, "")
+
+	var bid_btn := ScreenHelpers.make_button(column, tr("Podbij (+10%)"), _on_bid_pressed.bind(index), 260.0)
+	var resign_btn := ScreenHelpers.make_button(column, tr("Rezygnuję"), _on_resign_pressed.bind(index), 260.0)
+
+	player_frames[index] = {
+		"money_label": money_label,
+		"status_label": status_label_frame,
+		"bid_btn": bid_btn,
+		"resign_btn": resign_btn,
+	}
 
 
 static func _make_expand_spacer() -> Control:
@@ -276,18 +305,14 @@ func _on_time_expired() -> void:
 
 ## Sama logika "czy ktoś z rywali podbija current_bid" — liczy najlepszą
 ## ofertę i, jeśli jest wyższa, STOSUJE ją (current_bid/current_leader), ale
-## NIE decyduje, co dalej (nowa runda czy rozstrzygnięcie od razu) — to
-## zależy od wywołującego: _try_rival_counter_bid (jeszcze jedna runda) albo
-## _on_resolve_round_pressed (rezygnacja gracza, rozstrzygnięcie od razu).
+## NIE decyduje, co dalej — to zależy od wywołującego.
 func _apply_best_rival_counter_bid() -> bool:
 	var estimated_value := Paintings.get_estimated_value(current_number)
 	var best_rival_id := ""
 	var best_rival_bid := current_bid
 	for rival in AIPlayers.rivals:
 		## Rywal, który już prowadzi, nie może "podbić samego siebie" —
-		## zgłoszone przez użytkownika: ten sam przeciwnik nie powinien
-		## podbijać ofertę pod rząd, musi ustąpić miejsca komuś innemu (albo
-		## nikomu, jeśli nikt inny nie chce przebić).
+		## musi ustąpić miejsca komuś innemu (albo nikomu).
 		if rival["id"] == current_leader:
 			continue
 		var rival_bid: float = AIPlayers.decide_bid(rival["id"], current_bid, estimated_value)
@@ -305,13 +330,8 @@ func _apply_best_rival_counter_bid() -> bool:
 
 ## Wywoływane z losowego, wcześniejszego momentu w trakcie odliczania
 ## (_process) i z wygaśnięcia czasu (_on_time_expired) — jeśli rywal
-## podbija, runda się NIE kończy, tylko zaczyna nową (gracz dostaje kolejne
-## 20 sekund na reakcję). Zwraca true, jeśli ktoś podbił.
-## Bez komunikatu w status_label o tym, KTO podbił — zgłoszone przez
-## użytkownika (zrzut ekranu): ramka oferty (bid_label, _update_labels) już
-## pokazuje "(prowadzi: ...)", więc osobny status dublował tę samą
-## informację i na ekranie bez ScrollContainera wypychał layout poza dolną
-## krawędź ekranu.
+## podbija, runda się NIE kończy, tylko zaczyna nową (wspólny czas wraca do
+## BID_TIME_LIMIT dla wszystkich obecnych graczy).
 func _try_rival_counter_bid() -> bool:
 	if not _apply_best_rival_counter_bid():
 		return false
@@ -325,61 +345,75 @@ func _start_new_auction() -> void:
 	var estimated_value := Paintings.get_estimated_value(current_number)
 	current_bid = estimated_value * 0.2
 	current_leader = ""
-	current_forgery_warning = Paintings.warns_about_forgery(current_number)
+	withdrawn_players.clear()
+
+	## Duplikat/ostrzeżenie o podróbce to teraz stan PER GRACZ (każdy obecny
+	## ma własną kolekcję i własną eksperckość) — losowane raz na aukcję,
+	## tak jak dawniej current_forgery_warning dla jedynego gracza.
+	player_forgery_duplicate.clear()
+	player_forgery_warning.clear()
+	for index in present_players:
+		var is_duplicate := Players.player_has_number(index, current_number)
+		player_forgery_duplicate[index] = is_duplicate
+		player_forgery_warning[index] = is_duplicate and randf() < Players.get_player_expertise(index)
+
 	_update_labels()
 	_start_bid_timer()
 
 
-func _on_bid_pressed() -> void:
+## Podbicie w imieniu KONKRETNEGO gracza (index, przypięty przez .bind() w
+## _build_player_frame) — sprawdzane jest WŁASNE stać go na to (Players.
+## player_can_afford), nie stać AKTYWNEGO gracza, bo licytować może każdy
+## fizycznie obecny.
+func _on_bid_pressed(index: int) -> void:
 	var estimated_value := Paintings.get_estimated_value(current_number)
 	var next_bid := current_bid + estimated_value * BID_INCREMENT_RATIO
-	if not Economy.can_afford(next_bid):
-		status_label.text = tr("Za mało gotówki na taką ofertę.")
+	if not Players.player_can_afford(index, next_bid):
+		player_frames[index]["status_label"].text = tr("Za mało gotówki na taką ofertę.")
 		return
 	current_bid = next_bid
-	current_leader = "player"
+	current_leader = "player:%d" % index
 	_update_labels()
 	_start_bid_timer()
 
 
-## Rezygnacja to JEDNORAZOWA, natychmiastowa akcja — zgłoszone przez
-## użytkownika: po kliknięciu gracz nie może już podbić, licznik czasu
-## przestaje lecieć, a wynik przelicza się OD RAZU do najwyższej oferty
-## rywali (jeśli w ogóle ktoś chce przebić) — w przeciwieństwie do
-## _try_rival_counter_bid (używanego, gdy czas naturalnie wygaśnie), tu nie
-## ma kolejnej rundy z nowym czasem.
-func _on_resolve_round_pressed() -> void:
-	_apply_best_rival_counter_bid()
-	_resolve_auction()
+## Rezygnacja jest PER GRACZ (zgłoszone przez użytkownika): ten konkretny
+## gracz nie może już podbijać w tej rundzie, ale pozostali obecni licytują
+## dalej. Dopiero gdy WSZYSCY obecni zrezygnują, runda rozstrzyga się od
+## razu (ten sam mechanizm co dawniej przy jednym graczu — jeszcze jedno
+## sprawdzenie kontrofert rywali, potem wynik).
+func _on_resign_pressed(index: int) -> void:
+	withdrawn_players[index] = true
+	_update_labels()
+	if _all_present_withdrawn():
+		_apply_best_rival_counter_bid()
+		_resolve_auction()
+
+
+func _all_present_withdrawn() -> bool:
+	for index in present_players:
+		if not withdrawn_players.get(index, false):
+			return false
+	return true
 
 
 func _resolve_auction() -> void:
 	auction_active = false
-	## Ukryte (nie tylko disabled) — zastępowane przez back_btn w tym samym
-	## miejscu, zamiast zostawiać dwa wyszarzałe, bezużyteczne przyciski na
-	## ekranie (zgłoszone przez użytkownika: po zakończeniu aukcji powinien
-	## pojawić się tu klawisz powrotu ZAMIAST "Podbij"/"Rezygnuję z aukcji").
-	bid_btn.visible = false
-	resolve_btn.visible = false
-	back_btn.visible = true
 	timer_label.text = ""
-	## visible = false (nie tylko value = 0) — zgłoszone przez użytkownika:
-	## pusty pasek czasu nie powinien już wisieć na ekranie po rozstrzygnięciu.
+	## visible = false (nie tylko value = 0) — pusty pasek czasu nie
+	## powinien już wisieć na ekranie po rozstrzygnięciu.
 	timer_bar.visible = false
+	back_btn.visible = true
 
-	## "Kto wygrał" NIE jest już tu powtarzane tekstem — zgłoszone przez
-	## użytkownika: ta informacja jest już widoczna w ramce oferty
-	## ("Oferta: X M (prowadzi: ...)", patrz _update_labels/bid_label), więc
-	## status_label pokazuje TYLKO to, czego w tamtej ramce nie widać: czy to
-	## była podróbka, o ile urosła kolekcja, albo że obraz zostaje niesprzedany.
-	if current_leader == "player":
-		Economy.spend(current_bid)
-		if Paintings.is_forgery_by_duplicate(current_number):
-			status_label.text = tr("To była FAŁSZYWKA! Pieniądze przepadły, obraz nie trafia do kolekcji.")
+	if current_leader.begins_with("player:"):
+		var winner_index := int(current_leader.substr(7))
+		Players.spend_player_money(winner_index, current_bid)
+		if Players.player_has_number(winner_index, current_number):
+			status_label.text = tr("%s kupuje FAŁSZYWKĘ! Pieniądze przepadają, obraz nie trafia do kolekcji.") % Players.player_names[winner_index]
 		else:
-			Paintings.catalogue(current_number)
-			status_label.text = tr("Obraz trafia do kolekcji (%d/%d).") % [
-				Paintings.owned_count(), Paintings.win_threshold,
+			Players.catalogue_for_player(winner_index, current_number)
+			status_label.text = tr("%s: obraz trafia do kolekcji (%d/%d).") % [
+				Players.player_names[winner_index], Players.get_painting_count(winner_index), Paintings.win_threshold,
 			]
 	elif current_leader == "":
 		status_label.text = tr("Nikt nie licytował — obraz zostaje niesprzedany.")
@@ -388,9 +422,6 @@ func _resolve_auction() -> void:
 		status_label.text = ""
 	_update_labels()
 
-	## Termin kolejnej aukcji NIE jest już dublowany tu drugi raz — zgłoszone
-	## przez użytkownika: ta sama informacja już aktualizuje się w
-	## schedule_label na samej górze ekranu (patrz linijka niżej).
 	Auctions.resolve_and_reschedule()
 	schedule_label.text = Auctions.get_schedule_string()
 
@@ -399,7 +430,11 @@ func _resolve_auction() -> void:
 
 
 func _update_labels() -> void:
-	schedule_label.text = tr("Aukcja w toku: %s — %s") % [Cities.get_city_name(Travel.current_city), Calendar.format_day(Players.active_day())]
+	## Data pokazuje TERMIN aukcji (Auctions.next_auction_day), nie
+	## Players.active_day() jednego konkretnego gracza — przy kilku obecnych
+	## graczach na różnych własnych dniach (byle >= termin) sam termin jest
+	## jedyną datą wspólną i jednoznaczną dla całej rundy.
+	schedule_label.text = tr("Aukcja w toku: %s — %s") % [Cities.get_city_name(Travel.current_city), Calendar.format_day(Auctions.next_auction_day)]
 
 	var category: String = Paintings.get_category(current_number)
 	var category_name: String = Paintings.CATEGORY_NAMES.get(category, category)
@@ -413,38 +448,27 @@ func _update_labels() -> void:
 			current_number, category_name, Paintings.get_estimated_value(current_number),
 		]
 
-	## Grafika obrazu opcjonalna — jeśli plik danego numeru jeszcze nie
-	## istnieje (docs/GRAFIKA_LEONARDO.md §7), ramka zostaje pusta zamiast
-	## crashować na load() brakującego pliku. is_fake: prawdziwa fałszywość
-	## (Paintings.is_forgery_by_duplicate), NIEZALEŻNIE od tego, czy
-	## ekspertyza akurat wyświetliła ostrzeżenie (warns_about_forgery) — więc
-	## bystry gracz może rozpoznać podróbkę "na oko", nawet bez ostrzeżenia.
-	var texture_path := Paintings.get_texture_path(current_number, Paintings.is_forgery_by_duplicate(current_number))
+	## Wariant graficzny "podróbka" pokazywany, jeśli KTÓRYKOLWIEK z obecnych
+	## graczy już ma ten numer skatalogowany — bez jednego "aktywnego gracza"
+	## nie ma jednej perspektywy, z której dobieralibyśmy grafikę, więc
+	## bierzemy sumę ryzyka wszystkich obecnych (per gracz i tak widać
+	## własne ostrzeżenie w jego ramce, patrz _update_frame).
+	var any_present_has_duplicate := false
+	for index in present_players:
+		if player_forgery_duplicate.get(index, false):
+			any_present_has_duplicate = true
+			break
+	var texture_path := Paintings.get_texture_path(current_number, any_present_has_duplicate)
 	painting_texture_rect.texture = load(texture_path) if ResourceLoader.exists(texture_path) else null
 
-	## visible = false (nie tylko pusty tekst) — bez ramki+ScrollContainer ten
-	## ekran ma ograniczoną wysokość, więc pusty wiersz niepotrzebnie zabierałby
-	## miejsce (separacja VBoxContainer nadal by się liczyła).
-	warning_label.visible = current_forgery_warning
-	if current_forgery_warning:
-		warning_label.text = tr("⚠ Szkoła Sztuki ostrzega: ten numer już masz w kolekcji — to może być podróbka!")
-
-	## leader_portrait_rect zostaje ZAWSZE visible=true (rezerwuje swoje
-	## miejsce w bid_row) — zgłoszone przez użytkownika: ramka oferty była
-	## węższa, gdy prowadził gracz (portret ukryty, więc znikał z layoutu) i
-	## szersza, gdy prowadził rywal (portret dochodził) — ta sama ramka miała
-	## dwie różne szerokości zależnie od tego, kto prowadzi. Teraz zmienia
-	## się tylko WIDOCZNOŚĆ OBRAZKA (modulate.a), nie obecność w layoucie —
-	## szerokość bid_row jest więc zawsze taka sama. Gdy prowadzi gracz,
-	## pokazuje jego własny awatar (Players.active_avatar_path, ten sam
-	## system co Hub.gd) zamiast portretu rywala.
 	var leader_text := tr("nikt")
 	leader_portrait_rect.visible = true
 	leader_portrait_rect.modulate.a = 0.0
 	leader_portrait_rect.texture = null
-	if current_leader == "player":
-		leader_text = tr("Ty")
-		var avatar_path := Players.active_avatar_path()
+	if current_leader.begins_with("player:"):
+		var leader_index := int(current_leader.substr(7))
+		leader_text = Players.player_names[leader_index]
+		var avatar_path := Players.get_avatar_path(leader_index)
 		if ResourceLoader.exists(avatar_path):
 			leader_portrait_rect.texture = load(avatar_path)
 			leader_portrait_rect.modulate.a = 1.0
@@ -454,9 +478,31 @@ func _update_labels() -> void:
 		if ResourceLoader.exists(portrait_path):
 			leader_portrait_rect.texture = load(portrait_path)
 			leader_portrait_rect.modulate.a = 1.0
-	## Bez dopisku "jeśli nikt Cię nie przebije — wygrywasz" — użytkownik
-	## zgłosił, że ta trzecia linijka (widoczna tylko gdy prowadzi gracz)
-	## zmieniała wysokość skrzynki i przesuwała layout; ma zawsze zostać
-	## dokładnie dwuwierszowa, niezależnie od tego, kto prowadzi.
 	bid_label.text = tr("Oferta: %.0f M\n(prowadzi: %s)") % [current_bid, leader_text]
-	money_label.text = tr("Gotówka: %.0f M") % Economy.player_money
+
+	for index in present_players:
+		_update_frame(index)
+
+
+## Odświeża ramkę JEDNEGO obecnego gracza: własna gotówka, status
+## (rezygnacja / prowadzi / ostrzeżenie o podróbce — w tej kolejności
+## pierwszeństwa) i czy jego przyciski są aktywne.
+func _update_frame(index: int) -> void:
+	var frame: Dictionary = player_frames[index]
+	frame["money_label"].text = tr("Gotówka: %.0f M") % Players.get_player_money(index)
+
+	var withdrawn: bool = withdrawn_players.get(index, false)
+	var is_leader := current_leader == "player:%d" % index
+	var status := ""
+	if withdrawn:
+		status = tr("Zrezygnował(a)")
+	elif is_leader:
+		status = tr("Prowadzi!")
+	elif player_forgery_warning.get(index, false):
+		status = tr("⚠ możliwa podróbka!")
+	frame["status_label"].text = status
+
+	## Prowadzący nie może "podbić samego siebie" — ta sama zasada co dla
+	## rywali w _apply_best_rival_counter_bid.
+	frame["bid_btn"].disabled = withdrawn or is_leader or not auction_active
+	frame["resign_btn"].disabled = withdrawn or not auction_active
