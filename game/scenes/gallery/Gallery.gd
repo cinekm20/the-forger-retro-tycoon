@@ -225,8 +225,13 @@ func _on_category_pressed(category_id: String) -> void:
 	_rebuild_content()
 
 
-## Widok pośredni: miniaturki WŁASNYCH obrazów w wybranej kategorii —
-## klikalne, otwierają duży podgląd (patrz _build_painting_detail_view).
+## Widok pośredni: miniaturki WŁASNYCH obrazów w wybranej kategorii, w tej
+## samej ramie co Dom aukcyjny — klikalne, otwierają duży podgląd (patrz
+## _build_painting_detail_view). Układ zawsze WYŚRODKOWANY, w kształcie
+## odwróconej piramidy (zgłoszone przez użytkownika) — każda kategoria ma z
+## założenia dokładnie 5 obrazów (GDD.md pkt. 4.7: "8 kategorii × 5 slotów"),
+## więc liczba miniatur tu to zawsze 1-5, stąd zamknięty podział na wiersze
+## zamiast ogólnej siatki (patrz _split_into_centered_rows).
 func _build_category_detail_view() -> void:
 	var category_name: String = Paintings.CATEGORY_NAMES.get(selected_category, selected_category)
 	ScreenHelpers.make_title(content_root, category_name)
@@ -237,38 +242,58 @@ func _build_category_detail_view() -> void:
 			owned_numbers.append(number)
 	owned_numbers.sort()
 
-	var grid := GridContainer.new()
-	grid.columns = 4
-	grid.add_theme_constant_override("h_separation", 12)
-	grid.add_theme_constant_override("v_separation", 12)
-	content_root.add_child(grid)
+	var rows_root := VBoxContainer.new()
+	rows_root.alignment = BoxContainer.ALIGNMENT_CENTER
+	rows_root.add_theme_constant_override("separation", 12)
+	content_root.add_child(rows_root)
 
-	for number in owned_numbers:
-		_build_painting_thumbnail(grid, number)
+	for row_numbers in _split_into_centered_rows(owned_numbers):
+		var row := HBoxContainer.new()
+		row.alignment = BoxContainer.ALIGNMENT_CENTER
+		row.add_theme_constant_override("separation", 12)
+		rows_root.add_child(row)
+		for number in row_numbers:
+			_build_painting_thumbnail(row, number)
 
 	ScreenHelpers.make_button(content_root, tr("« Wróć do galerii"), _on_back_to_categories_pressed)
 
 
-## Miniaturka JEDNEGO obrazu — flat=true (bez zwykłego tła/ramki przycisku,
-## widoczna tylko ikonka), TextureRect jako dziecko wypełniające cały
-## przycisk (ten sam trik co kafelki Plantation.gd _rebuild_grid).
+## Dzieli listę numerów (1-5 elementów) na wiersze do wyśrodkowanej
+## "piramidy": 1/2/3 -> jeden wiersz (HBoxContainer z ALIGNMENT_CENTER sam
+## wyśrodkuje 1 element na środku, 2 elementy tak, że środek wypada MIĘDZY
+## nimi, 3 elementy tak, że środkowy trafia na środek — zgłoszone przez
+## użytkownika, dokładnie te trzy przypadki); 4 -> [3, 1] (3 u góry, 1 na
+## dole na środku); 5 -> [3, 2] (3 u góry, 2 na dole, środek między nimi).
+## Domyślna gałąź (>5) nie powinna wystąpić przy obecnym katalogu (5/kategoria),
+## ale defensywnie dzieli po 3, żeby funkcja nigdy nie ucięła obrazów.
+func _split_into_centered_rows(numbers: Array[int]) -> Array:
+	match numbers.size():
+		1, 2, 3:
+			return [numbers]
+		4:
+			return [numbers.slice(0, 3), numbers.slice(3, 4)]
+		5:
+			return [numbers.slice(0, 3), numbers.slice(3, 5)]
+		_:
+			var rows: Array = []
+			var i := 0
+			while i < numbers.size():
+				rows.append(numbers.slice(i, mini(i + 3, numbers.size())))
+				i += 3
+			return rows
+
+
+## Miniaturka JEDNEGO obrazu w tej samej ramie co Dom aukcyjny/okładki
+## kategorii (_build_framed_image) — flat Button jako najbardziej
+## zewnętrzny węzeł (ten sam trik co kafelki kategorii/Plantation.gd
+## _rebuild_grid), więc cały kafelek jest klikalny.
 func _build_painting_thumbnail(parent: Container, number: int) -> void:
 	var btn := Button.new()
 	btn.custom_minimum_size = THUMBNAIL_SIZE
 	btn.flat = true
 	btn.pressed.connect(_on_painting_pressed.bind(number))
-
-	var thumb_rect := TextureRect.new()
-	thumb_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	thumb_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	thumb_rect.stretch_mode = TextureRect.STRETCH_SCALE
-	thumb_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var texture_path := Paintings.get_texture_path(number)
-	if ResourceLoader.exists(texture_path):
-		thumb_rect.texture = load(texture_path)
-	btn.add_child(thumb_rect)
-
 	parent.add_child(btn)
+	_build_framed_image(btn, Paintings.get_texture_path(number), THUMBNAIL_SIZE)
 
 
 func _on_painting_pressed(number: int) -> void:
