@@ -35,6 +35,10 @@ const LOCATION_GATED_DESTINATIONS := {
 }
 const FREE_DESTINATIONS := {
 	"Wyścigi konne": "res://scenes/races/Races.tscn",
+	## Zgłoszone przez użytkownika: ochroniarz/gangster nie mają nic wspólnego
+	## z konkretnym miastem, więc "Ochrona" (dawniej część Gallery.gd) jest
+	## dostępna z każdej lokalizacji, tak jak Wyścigi konne.
+	"Ochrona": "res://scenes/security/SecurityScreen.tscn",
 }
 
 const MapPinScript := preload("res://scripts/ui/MapPin.gd")

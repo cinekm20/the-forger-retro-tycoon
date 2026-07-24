@@ -1,6 +1,5 @@
 extends Control
 ## Docelowo 8 sekcji stylistycznych, po 5 slotów. Patrz GDD.md pkt. 4.7.
-## Ochrona/kradzieże: docs/DODATKOWE_MECHANIKI.md.
 ##
 ## Zgłoszone przez użytkownika: "reaktywna Galeria" — oświetlenie sali
 ## (nakładka na tło) i głośność muzyki w tle reagują na to, jak bardzo
@@ -15,12 +14,20 @@ extends Control
 ## liczb. Trzy poziomy nawigacji w tym samym ekranie (bez osobnych scen,
 ## content_root czyszczony/odbudowywany przy zmianie widoku — ten sam
 ## wzorzec co ArtSchool.gd _start_quiz/_close_quiz):
-## 1. CATEGORIES — kafelek na styl/epokę (obrazek reprezentujący epokę,
-##    docs/GRAFIKA_LEONARDO.md §9b), klikalny TYLKO jeśli gracz ma już choć
-##    jeden obraz w tej kategorii.
+## 1. CATEGORIES — kafelek na styl/epokę, w tej samej ozdobnej ramie co
+##    obrazy w Domu aukcyjnym (obrazek reprezentujący epokę, docs/
+##    GRAFIKA_LEONARDO.md §9b), klikalny TYLKO jeśli gracz ma już choć
+##    jeden obraz w tej kategorii. Kafelki rozciągnięte równomiernie na
+##    całą szerokość ekranu (SIZE_EXPAND_FILL) — zgłoszone przez użytkownika.
 ## 2. CATEGORY_DETAIL — miniaturki WŁASNYCH obrazów w wybranej kategorii.
-## 3. PAINTING_DETAIL — duży obraz w tej samej ramie co Dom aukcyjny +
-##    tytuł/autor/rok/muzeum (Paintings.PAINTING_INFO).
+## 3. PAINTING_DETAIL — duży obraz w tej samej ramie + tytuł/autor/rok/
+##    muzeum (Paintings.PAINTING_INFO).
+##
+## Ochrona (ochroniarz) i Rywale (gangster) NIE są już częścią tego ekranu —
+## zgłoszone przez użytkownika: to nie ma nic wspólnego z przeglądaniem
+## kolekcji, więc dostały własny ekran (scenes/security/SecurityScreen.gd),
+## osiągalny z Huba niezależnie od Galerii. Ta sama zmiana usunęła też
+## ozdobną ramkę na cały ekran (make_root(self, false), jak Dom aukcyjny).
 
 enum ViewState { CATEGORIES, CATEGORY_DETAIL, PAINTING_DETAIL }
 
@@ -31,18 +38,17 @@ const LIT_OVERLAY_COLOR := Color(0.55, 0.4, 0.1, 0.05)
 ## Maks. podbicie głośności muzyki w tle przy pełnej kolekcji (patrz Music.gd).
 const MAX_MUSIC_VOLUME_BOOST_DB := 6.0
 
-const CATEGORY_CARD_SIZE := Vector2(150, 170)
-const CATEGORY_COVER_SIZE := Vector2(110, 110)
+const CATEGORY_CARD_SIZE := Vector2(160, 190)
+const CATEGORY_FRAME_SIZE := Vector2(140, 140)
 const THUMBNAIL_SIZE := Vector2(120, 120)
-## Mniejsza niż w AuctionHouse.gd (268) — tu nie ma bocznych ramek graczy do
-## zmieszczenia, więc obraz może być większy, wypełniając środek ekranu.
-const PAINTING_FRAME_HOLDER_SIZE := Vector2(340, 340)
+## Większa niż okładka kategorii — tu nie ma siatki, tylko jeden obraz
+## wypełniający środek ekranu.
+const PAINTING_FRAME_SIZE := Vector2(340, 340)
 ## Ta sama rama co Dom aukcyjny (art/icons/frame.png) — patrz jej komentarz
 ## tam co do ułamka INNER_INSET (zmierzony na samej grafice ramy).
-const PAINTING_FRAME_INNER_INSET := 0.145
+const FRAME_INNER_INSET := 0.145
 const FRAME_TEXTURE_PATH := "res://art/icons/frame.png"
 
-var security_label: Label
 var overlay: ColorRect
 var content_root: VBoxContainer
 
@@ -59,7 +65,9 @@ func _ready() -> void:
 	overlay.color = DIM_OVERLAY_COLOR.lerp(LIT_OVERLAY_COLOR, fill_ratio)
 	Music.set_volume_offset(fill_ratio * MAX_MUSIC_VOLUME_BOOST_DB)
 
-	var root := ScreenHelpers.make_root(self)
+	## use_menu_frame=false: zgłoszone przez użytkownika — ozdobna ramka na
+	## cały ekran ma zniknąć (ten sam fix co wcześniej w AuctionHouse.gd).
+	var root := ScreenHelpers.make_root(self, false)
 	ScreenHelpers.make_title(root, "Galeria")
 	ScreenHelpers.make_turn_indicator(root)
 
@@ -94,9 +102,9 @@ func _rebuild_content() -> void:
 			_build_painting_detail_view()
 
 
-## Widok domyślny: siatka 8 kategorii (kafelek = okładka epoki + "Nazwa:
-## X/5"), klikalna TYLKO gdy gracz ma tam już choć jeden obraz — plus reszta
-## Galerii (postęp graczy w multiplayer, ochrona, rywale), tak jak dawniej.
+## Widok domyślny: siatka 8 kategorii (kafelek = okładka epoki w ramie +
+## "Nazwa: X/5"), klikalna TYLKO gdy gracz ma tam już choć jeden obraz —
+## plus krótkie podsumowanie postępu innych graczy w multiplayer.
 func _build_categories_view() -> void:
 	ScreenHelpers.make_label(content_root, tr("Twoja kolekcja: %d/%d (próg zwycięstwa)") % [
 		Paintings.owned_count(), Paintings.win_threshold,
@@ -104,6 +112,7 @@ func _build_categories_view() -> void:
 
 	var grid := GridContainer.new()
 	grid.columns = 4
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	content_root.add_child(grid)
@@ -119,41 +128,55 @@ func _build_categories_view() -> void:
 				Players.player_names[i], marker, Players.get_painting_count(i),
 			])
 
-	ScreenHelpers.make_title(content_root, "Ochrona")
-	security_label = ScreenHelpers.make_label(content_root, "")
-	var bodyguard_btn := ScreenHelpers.make_button(
-		content_root,
-		tr("Zatrudnij ochroniarza (%.0f M)") % Security.BODYGUARD_COST,
-		_on_hire_bodyguard_pressed,
-	)
-	bodyguard_btn.disabled = Security.has_bodyguard
-	_update_security_label()
-
-	ScreenHelpers.make_title(content_root, "Rywale")
-	for rival in AIPlayers.rivals:
-		var rival_row := HBoxContainer.new()
-		rival_row.alignment = BoxContainer.ALIGNMENT_CENTER
-		content_root.add_child(rival_row)
-		var rival_label := Label.new()
-		rival_label.text = tr("%s: %d obrazów") % [rival["name"], AIPlayers.get_rival_painting_count(rival["id"])]
-		rival_row.add_child(rival_label)
-		var gangster_btn := Button.new()
-		gangster_btn.text = tr("Wyślij gangstera (%.0f M)") % Security.GANGSTER_COST
-		gangster_btn.pressed.connect(_on_send_gangster_pressed.bind(rival["id"]))
-		rival_row.add_child(gangster_btn)
-
 	ScreenHelpers.make_back_button(content_root)
 
 
-## Jeden kafelek kategorii: okładka epoki (art/categories/<id>.jpg, docs/
-## GRAFIKA_LEONARDO.md §9b — po cichu pusta, jeśli plik jeszcze nie istnieje,
-## jak wszystkie opcjonalne grafiki w tej grze) + nazwa + "X/5". Klikalny
-## TYLKO jeśli owned_in_category > 0 (zgłoszone przez użytkownika: "po
-## kliknięciu jak są tam jakieś obrazy") — niewidzialny, płaski Button
+## Rama identyczna jak w Domu aukcyjnym (art/icons/frame.png) wokół
+## dowolnego kwadratowego obrazka — dodana PIERWSZA (rysuje się pod spodem,
+## jej wnętrze jest w całości nieprzezroczyste), obraz DODANY PO NIEJ
+## zasłania je w pełni. dim=true wygasza WEWNĘTRZNY obraz (nie samą ramę) —
+## używane dla kategorii bez żadnego skatalogowanego obrazu, jako wizualna
+## podpowiedź "jeszcze nieklikalne".
+func _build_framed_image(parent: Container, texture_path: String, holder_size: Vector2, dim: bool = false) -> void:
+	var frame_holder := Control.new()
+	frame_holder.custom_minimum_size = holder_size
+	frame_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(frame_holder)
+
+	var frame_rect := TextureRect.new()
+	frame_rect.texture = load(FRAME_TEXTURE_PATH)
+	frame_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	frame_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	frame_rect.stretch_mode = TextureRect.STRETCH_SCALE
+	frame_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	frame_holder.add_child(frame_rect)
+
+	var inner_rect := TextureRect.new()
+	inner_rect.anchor_left = FRAME_INNER_INSET
+	inner_rect.anchor_top = FRAME_INNER_INSET
+	inner_rect.anchor_right = 1.0 - FRAME_INNER_INSET
+	inner_rect.anchor_bottom = 1.0 - FRAME_INNER_INSET
+	inner_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	inner_rect.stretch_mode = TextureRect.STRETCH_SCALE
+	inner_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if ResourceLoader.exists(texture_path):
+		inner_rect.texture = load(texture_path)
+	inner_rect.modulate = Color(0.35, 0.35, 0.35) if dim else Color(1, 1, 1)
+	frame_holder.add_child(inner_rect)
+
+
+## Jeden kafelek kategorii: okładka epoki w ramie (art/categories/<id>.jpg,
+## docs/GRAFIKA_LEONARDO.md §9b — po cichu pusta, jeśli plik jeszcze nie
+## istnieje, jak wszystkie opcjonalne grafiki w tej grze) + nazwa + "X/5".
+## Klikalny TYLKO jeśli owned_in_category > 0 (zgłoszone przez użytkownika:
+## "po kliknięciu jak są tam jakieś obrazy") — niewidzialny, płaski Button
 ## dodany NA WIERZCH całej skrzynki (ten sam trik co Plantation.gd
 ## _rebuild_grid: PanelContainer daje WSZYSTKIM dzieciom tę samą wypełnioną
 ## powierzchnię, więc button-na-wierzchu przechwytuje kliknięcia z całego
-## kafelka, nie tylko samego obrazka).
+## kafelka, nie tylko samego obrazka). size_flags_horizontal na PANELU
+## (nie tylko custom_minimum_size) — zgłoszone przez użytkownika: kafelki
+## mają się rozłożyć równomiernie na całą szerokość ekranu, nie zbić w
+## ciasną grupkę po lewej.
 func _build_category_card(parent: Container, category_id: String) -> void:
 	var owned_in_category := 0
 	for number in Paintings.catalogued_numbers:
@@ -162,21 +185,12 @@ func _build_category_card(parent: Container, category_id: String) -> void:
 
 	var column := ScreenHelpers.make_boxed_column(parent)
 	column.custom_minimum_size = CATEGORY_CARD_SIZE
+	column.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	var cover_center := CenterContainer.new()
 	column.add_child(cover_center)
-	var cover_rect := TextureRect.new()
-	cover_rect.custom_minimum_size = CATEGORY_COVER_SIZE
-	cover_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	cover_rect.stretch_mode = TextureRect.STRETCH_SCALE
-	cover_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var cover_path := "res://art/categories/%s.jpg" % category_id
-	if ResourceLoader.exists(cover_path):
-		cover_rect.texture = load(cover_path)
-	## Wyszarzona okładka, gdy nic jeszcze nie skatalogowano w tej kategorii
-	## — wizualna podpowiedź, że kafelek NIE jest (jeszcze) klikalny.
-	cover_rect.modulate = Color(1, 1, 1) if owned_in_category > 0 else Color(0.35, 0.35, 0.35)
-	cover_center.add_child(cover_rect)
+	_build_framed_image(cover_center, cover_path, CATEGORY_FRAME_SIZE, owned_in_category == 0)
 
 	var category_name: String = Paintings.CATEGORY_NAMES[category_id]
 	var name_label := ScreenHelpers.make_label(column, tr("%s: %d/5") % [category_name, owned_in_category])
@@ -258,12 +272,12 @@ func _on_back_to_category_detail_pressed() -> void:
 	_rebuild_content()
 
 
-## Widok końcowy: duży obraz w tej samej ozdobnej ramie co Dom aukcyjny
-## (art/icons/frame.png) + pełne informacje (tytuł/autor/rok/muzeum,
-## Paintings.PAINTING_INFO). Zawsze prawdziwa grafika (is_fake=false) — obraz
-## trafia do catalogued_numbers TYLKO gdy nie jest fałszywką (patrz
-## AuctionHouse.gd _resolve_auction: podróbka nigdy nie wchodzi do kolekcji),
-## więc w Galerii nie ma czego rozróżniać.
+## Widok końcowy: duży obraz w tej samej ozdobnej ramie co kafelki kategorii
+## + pełne informacje (tytuł/autor/rok/muzeum, Paintings.PAINTING_INFO).
+## Zawsze prawdziwa grafika (is_fake=false) — obraz trafia do
+## catalogued_numbers TYLKO gdy nie jest fałszywką (patrz AuctionHouse.gd
+## _resolve_auction: podróbka nigdy nie wchodzi do kolekcji), więc w
+## Galerii nie ma czego rozróżniać.
 func _build_painting_detail_view() -> void:
 	var number := selected_number
 	var category: String = Paintings.get_category(number)
@@ -272,36 +286,7 @@ func _build_painting_detail_view() -> void:
 
 	var frame_center := CenterContainer.new()
 	content_root.add_child(frame_center)
-
-	var frame_holder := Control.new()
-	frame_holder.custom_minimum_size = PAINTING_FRAME_HOLDER_SIZE
-	frame_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	frame_center.add_child(frame_holder)
-
-	## Rama dodana PIERWSZA (rysuje się pod spodem) — jej wnętrze na
-	## frame.png jest w całości nieprzezroczyste, więc dopiero obraz DODANY
-	## PO NIEJ (rysuje się na wierzchu) w pełni je zasłania (ten sam
-	## dwuwarstwowy układ co AuctionHouse.gd _build_active_auction_ui).
-	var frame_rect := TextureRect.new()
-	frame_rect.texture = load(FRAME_TEXTURE_PATH)
-	frame_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	frame_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	frame_rect.stretch_mode = TextureRect.STRETCH_SCALE
-	frame_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	frame_holder.add_child(frame_rect)
-
-	var painting_rect := TextureRect.new()
-	painting_rect.anchor_left = PAINTING_FRAME_INNER_INSET
-	painting_rect.anchor_top = PAINTING_FRAME_INNER_INSET
-	painting_rect.anchor_right = 1.0 - PAINTING_FRAME_INNER_INSET
-	painting_rect.anchor_bottom = 1.0 - PAINTING_FRAME_INNER_INSET
-	painting_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	painting_rect.stretch_mode = TextureRect.STRETCH_SCALE
-	painting_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var texture_path := Paintings.get_texture_path(number)
-	if ResourceLoader.exists(texture_path):
-		painting_rect.texture = load(texture_path)
-	frame_holder.add_child(painting_rect)
+	_build_framed_image(frame_center, Paintings.get_texture_path(number), PAINTING_FRAME_SIZE)
 
 	if not info.is_empty():
 		ScreenHelpers.make_label(content_root, tr("„%s” — %s, %s") % [tr(info["title"]), info["artist"], info["year"]])
@@ -310,26 +295,3 @@ func _build_painting_detail_view() -> void:
 		ScreenHelpers.make_label(content_root, tr("Obraz nr %d — %s") % [number, category_name])
 
 	ScreenHelpers.make_button(content_root, tr("« Wróć"), _on_back_to_category_detail_pressed)
-
-
-func _on_hire_bodyguard_pressed() -> void:
-	if Security.hire_bodyguard():
-		_update_security_label()
-		SceneRouter.goto_scene(SceneRouter.GALLERY)  # przeładuj, żeby odświeżyć stan przycisku
-
-
-func _on_send_gangster_pressed(rival_id: String) -> void:
-	var success := Security.send_gangster(rival_id)
-	security_label.text = (
-		tr("Gangster wraca z obrazem!") if success else tr("Gangster wraca z pustymi rękami — pieniądze przepadły.")
-	)
-
-
-func _update_security_label() -> void:
-	security_label.text = (
-		tr("Masz ochroniarza — obrazy chronione przed kradzieżą.")
-		if Security.has_bodyguard
-		else tr("Bez ochrony — Twoja kolekcja jest narażona na kradzież (~%.0f%% szans/tydzień).") % [
-			Security.WEEKLY_THEFT_CHANCE_UNPROTECTED * 100.0,
-		]
-	)
