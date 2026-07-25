@@ -36,9 +36,15 @@ func _ready() -> void:
 	location_label = corner["left"]
 	money_label = corner["right"]
 
-	var root := ScreenHelpers.make_root(self)
+	## use_menu_frame=false + ALIGNMENT_BEGIN + rozpychacze: zgłoszone przez
+	## użytkownika — ozdobna ramka znika, nazwa ekranu zostaje przypięta na
+	## samej górze, przycisk powrotu na samym dole (ten sam wzorzec co
+	## Gallery.gd _build_category_detail_view).
+	var root := ScreenHelpers.make_root(self, false)
+	root.alignment = BoxContainer.ALIGNMENT_BEGIN
 	ScreenHelpers.make_title(root, "Giełda")
 	ScreenHelpers.make_turn_indicator(root)
+	root.add_child(ScreenHelpers.make_expand_spacer())
 
 	## HFlowContainer zamiast HBoxContainer: na wąskim (portretowym) ekranie
 	## 4 sejfy obok siebie by się nie zmieściły — FlowContainer sam
@@ -62,6 +68,7 @@ func _ready() -> void:
 	root.add_child(shipping_chart)
 	_build_chart_legend(root, ShippingCompanies.COMPANIES.keys(), func(id): return ShippingCompanies.COMPANIES[id]["name"], SHIPPING_COLORS)
 
+	root.add_child(ScreenHelpers.make_expand_spacer())
 	ScreenHelpers.make_back_button(root)
 
 	_rebuild_rows()

@@ -25,9 +25,15 @@ var quiz_painting_number: int = -1
 
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/art_school.jpg")
-	var root := ScreenHelpers.make_root(self)
+	## use_menu_frame=false + ALIGNMENT_BEGIN + rozpychacze: zgłoszone przez
+	## użytkownika — ozdobna ramka znika, nazwa ekranu zostaje przypięta na
+	## samej górze, przycisk powrotu na samym dole (ten sam wzorzec co
+	## Gallery.gd _build_category_detail_view).
+	var root := ScreenHelpers.make_root(self, false)
+	root.alignment = BoxContainer.ALIGNMENT_BEGIN
 	ScreenHelpers.make_title(root, "Szkoła sztuki")
 	ScreenHelpers.make_turn_indicator(root)
+	root.add_child(ScreenHelpers.make_expand_spacer())
 
 	info_label = ScreenHelpers.make_label(root, "")
 	## autowrap + custom_minimum_size (SZEROKOŚĆ i WYSOKOŚĆ oba stałe) —
@@ -54,6 +60,7 @@ func _ready() -> void:
 	quiz_section.visible = false
 	root.add_child(quiz_section)
 
+	root.add_child(ScreenHelpers.make_expand_spacer())
 	ScreenHelpers.make_back_button(root)
 	_update_info()
 

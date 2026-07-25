@@ -24,9 +24,15 @@ func _ready() -> void:
 	location_label.text = tr("%s\n%s") % [Cities.get_city_name(Travel.current_city), Calendar.format_day(Players.active_day())]
 	money_label.text = tr("%.0f M") % Economy.player_money
 
-	var root := ScreenHelpers.make_root(self)
+	## use_menu_frame=false + ALIGNMENT_BEGIN + rozpychacze: zgłoszone przez
+	## użytkownika — ozdobna ramka znika, nazwa ekranu zostaje przypięta na
+	## samej górze, przycisk powrotu na samym dole (ten sam wzorzec co
+	## Gallery.gd _build_category_detail_view).
+	var root := ScreenHelpers.make_root(self, false)
+	root.alignment = BoxContainer.ALIGNMENT_BEGIN
 	ScreenHelpers.make_title(root, "Spichlerz")
 	ScreenHelpers.make_turn_indicator(root)
+	root.add_child(ScreenHelpers.make_expand_spacer())
 
 	var silo_row := HBoxContainer.new()
 	silo_row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -38,6 +44,7 @@ func _ready() -> void:
 
 	status_label = ScreenHelpers.make_label(root, "")
 
+	root.add_child(ScreenHelpers.make_expand_spacer())
 	ScreenHelpers.make_back_button(root)
 
 	_update_info()

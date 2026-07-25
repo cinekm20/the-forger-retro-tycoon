@@ -188,7 +188,7 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	painting_label.custom_minimum_size = Vector2(500, 0)
 	painting_label.get_parent().size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 
-	root.add_child(_make_expand_spacer())
+	root.add_child(ScreenHelpers.make_expand_spacer())
 
 	var painting_center := CenterContainer.new()
 	root.add_child(painting_center)
@@ -219,7 +219,7 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	painting_texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	frame_holder.add_child(painting_texture_rect)
 
-	root.add_child(_make_expand_spacer())
+	root.add_child(ScreenHelpers.make_expand_spacer())
 
 	## Jedna wspólna, oprawiona skrzynka na portret PROWADZĄCEGO (może być
 	## KTÓRYKOLWIEK z obecnych graczy, nie tylko "Ty") + tekst oferty.
@@ -302,13 +302,13 @@ func _build_player_frames() -> void:
 
 	var left_top := VBoxContainer.new()
 	left_root.add_child(left_top)
-	left_root.add_child(_make_expand_spacer())
+	left_root.add_child(ScreenHelpers.make_expand_spacer())
 	var left_bottom := VBoxContainer.new()
 	left_root.add_child(left_bottom)
 
 	var right_top := VBoxContainer.new()
 	right_root.add_child(right_top)
-	right_root.add_child(_make_expand_spacer())
+	right_root.add_child(ScreenHelpers.make_expand_spacer())
 	var right_bottom := VBoxContainer.new()
 	right_root.add_child(right_bottom)
 
@@ -373,13 +373,6 @@ func _build_player_frame(parent: Container, index: int) -> void:
 		"bid_btn": bid_btn,
 		"resign_btn": resign_btn,
 	}
-
-
-static func _make_expand_spacer() -> Control:
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return spacer
 
 
 func _process(delta: float) -> void:

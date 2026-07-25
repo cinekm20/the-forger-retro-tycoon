@@ -15,10 +15,16 @@ func _ready() -> void:
 	report = YearlyReport.consume_pending()
 
 	ScreenHelpers.make_background(self, "res://art/backgrounds/stock_market.jpg")
-	var root := ScreenHelpers.make_root(self)
+	## use_menu_frame=false + ALIGNMENT_BEGIN + rozpychacze: zgłoszone przez
+	## użytkownika — ozdobna ramka znika, nazwa ekranu zostaje przypięta na
+	## samej górze, przycisk "Kontynuuj" na samym dole (ten sam wzorzec co
+	## Gallery.gd _build_category_detail_view).
+	var root := ScreenHelpers.make_root(self, false)
+	root.alignment = BoxContainer.ALIGNMENT_BEGIN
 
 	ScreenHelpers.make_title(root, tr("Podsumowanie roku %d") % int(report.get("year", Calendar.get_year() - 1)))
 	ScreenHelpers.make_turn_indicator(root)
+	root.add_child(ScreenHelpers.make_expand_spacer())
 
 	ScreenHelpers.make_label(root, tr("Linie żeglugowe"))
 	var shipping_row := HBoxContainer.new()
@@ -54,4 +60,5 @@ func _ready() -> void:
 		float(report.get("dollar_rate", Economy.dollar_rate)),
 	])
 
+	root.add_child(ScreenHelpers.make_expand_spacer())
 	ScreenHelpers.make_button(root, tr("Kontynuuj »"), func(): SceneRouter.goto_hub())

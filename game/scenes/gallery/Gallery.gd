@@ -248,7 +248,7 @@ func _build_category_detail_view() -> void:
 	## górze ekranu, przycisk powrotu ZAWSZE na samym dole, i oba nigdy nie
 	## powinny się ruszać niezależnie od liczby miniatur pomiędzy nimi.
 	## ALIGNMENT_BEGIN + rozpychacz SIZE_EXPAND_FILL po obu stronach środkowej
-	## zawartości — ten sam wzorzec co AuctionHouse.gd _make_expand_spacer.
+	## zawartości — ten sam wzorzec co ScreenHelpers.make_expand_spacer.
 	## Samo ALIGNMENT_BEGIN NIE WYSTARCZY: content_root domyślnie (SIZE_FILL)
 	## kurczy się do naturalnego rozmiaru własnej treści, więc cały ten blok
 	## (tytuł+rozpychacze+przycisk) i tak wypadał wyśrodkowany na środku
@@ -264,7 +264,7 @@ func _build_category_detail_view() -> void:
 	var category_name: String = Paintings.CATEGORY_NAMES.get(selected_category, selected_category)
 	ScreenHelpers.make_title(content_root, category_name)
 
-	content_root.add_child(_make_expand_spacer())
+	content_root.add_child(ScreenHelpers.make_expand_spacer())
 
 	var owned_numbers: Array[int] = []
 	for number in Paintings.catalogued_numbers:
@@ -285,7 +285,7 @@ func _build_category_detail_view() -> void:
 		for number in row_numbers:
 			_build_painting_thumbnail(row, number)
 
-	content_root.add_child(_make_expand_spacer())
+	content_root.add_child(ScreenHelpers.make_expand_spacer())
 
 	ScreenHelpers.make_button(content_root, tr("« Wróć do galerii"), _on_back_to_categories_pressed)
 
@@ -374,16 +374,6 @@ func _build_painting_detail_view() -> void:
 	else:
 		ScreenHelpers.make_label(content_root, tr("Obraz nr %d — %s") % [number, category_name])
 
-	content_root.add_child(_make_expand_spacer())
+	content_root.add_child(ScreenHelpers.make_expand_spacer())
 
 	ScreenHelpers.make_button(content_root, tr("« Wróć"), _on_back_to_category_detail_pressed)
-
-
-## Rozpychacz SIZE_EXPAND_FILL do przypinania stałej zawartości do góry/dołu
-## VBoxContainera z ALIGNMENT_BEGIN — identyczny wzorzec co
-## AuctionHouse.gd _make_expand_spacer.
-static func _make_expand_spacer() -> Control:
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return spacer

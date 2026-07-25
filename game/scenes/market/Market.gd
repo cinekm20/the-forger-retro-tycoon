@@ -34,9 +34,15 @@ func _ready() -> void:
 	location_label = corner["left"]
 	money_label = corner["right"]
 
-	var root := ScreenHelpers.make_root(self)
+	## use_menu_frame=false + ALIGNMENT_BEGIN + rozpychacze: zgłoszone przez
+	## użytkownika — ozdobna ramka znika, nazwa ekranu zostaje przypięta na
+	## samej górze, przycisk powrotu na samym dole (ten sam wzorzec co
+	## Gallery.gd _build_category_detail_view).
+	var root := ScreenHelpers.make_root(self, false)
+	root.alignment = BoxContainer.ALIGNMENT_BEGIN
 	ScreenHelpers.make_title(root, "Rynek")
 	ScreenHelpers.make_turn_indicator(root)
+	root.add_child(ScreenHelpers.make_expand_spacer())
 
 	ScreenHelpers.make_title(root, "Ceny towarów")
 	crop_rows_container = VBoxContainer.new()
@@ -71,6 +77,7 @@ func _ready() -> void:
 
 	contracts_label = ScreenHelpers.make_label(root, "")
 
+	root.add_child(ScreenHelpers.make_expand_spacer())
 	ScreenHelpers.make_back_button(root)
 
 	_rebuild_crop_rows()

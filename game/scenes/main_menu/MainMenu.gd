@@ -13,7 +13,13 @@ var root: VBoxContainer
 
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/main_menu_title.jpg")
-	root = ScreenHelpers.make_root(self)
+	## use_menu_frame=false: zgłoszone przez użytkownika — ozdobna ramka na
+	## cały ekran ma zniknąć na wszystkich ekranach (ten sam fix co wcześniej
+	## w AuctionHouse.gd/Gallery.gd). Menu główne nie ma przycisku powrotu
+	## (to pierwszy ekran gry), więc bez dodatkowego przypinania tytułu/
+	## przycisku do krawędzi — samo logo pełni rolę tytułu i zostaje
+	## wyśrodkowane jak dotychczas (root.alignment domyślnie CENTER).
+	root = ScreenHelpers.make_root(self, false)
 
 	var subtitle_label := ScreenHelpers.make_label(root, "Ekonomiczna gra strategiczna — lata 20. XX wieku")
 
@@ -78,9 +84,14 @@ func _ready() -> void:
 ## viewportu przy starcie), a użytkownik i tak chce jawny, przewidywalny
 ## sufit rozmiaru, nie wyliczaną resztę.
 func _build_logo(subtitle_label: Label, setup_section_ref: VBoxContainer) -> void:
+	## Bez ozdobnej ramki (use_menu_frame=false, zgłoszone przez użytkownika)
+	## root wypełnia CAŁY ekran bez wcięcia (patrz plain_root w
+	## screen_helpers.gd), więc liczone wprost z viewport_size — wcześniejsze
+	## 0.9 * ekran - 2×CONTENT_INSET_WITH_FRAME odpowiadało geometrii ramki,
+	## która już nie istnieje.
 	var viewport_size := get_viewport_rect().size
-	var frame_content_width := viewport_size.x * 0.9 - ScreenHelpers.CONTENT_INSET_WITH_FRAME * 2.0
-	var frame_content_height := viewport_size.y * 0.9 - ScreenHelpers.CONTENT_INSET_WITH_FRAME * 2.0
+	var frame_content_width := viewport_size.x
+	var frame_content_height := viewport_size.y
 
 	var logo_texture: Texture2D = load("res://art/backgrounds/logo.jpg")
 	var logo_aspect := logo_texture.get_width() / float(logo_texture.get_height())
@@ -99,10 +110,12 @@ func _build_logo(subtitle_label: Label, setup_section_ref: VBoxContainer) -> voi
 	root.add_child(logo)
 	root.move_child(logo, 0)
 
-	## Kontrola przy debugowaniu: jeśli logo + reszta menu i tak nie
-	## mieszczą się w ramce, ScrollContainer z make_root() zostaje jako
-	## zabezpieczenie (patrz komentarz w screen_helpers.gd) — ale przy
-	## twardym limicie 1/3 wysokości na logo nie powinno do tego dochodzić.
+	## Kontrola przy debugowaniu: bez ozdobnej ramki (use_menu_frame=false)
+	## root NIE MA już ScrollContainera jako zabezpieczenia (patrz plain_root
+	## w screen_helpers.gd) — gdyby logo + reszta menu i tak nie mieściły się
+	## na ekranie, po prostu by się obcięły. Twardy limit 1/3 wysokości na
+	## logo nie powinien do tego dopuścić, ale ostrzeżenie zostaje jako
+	## kontrola przy debugowaniu.
 	var root_separation := root.get_theme_constant("separation")
 	var total_height := logo_height + subtitle_label.get_minimum_size().y + setup_section_ref.get_minimum_size().y + root_separation * 2.0
 	if total_height > frame_content_height:

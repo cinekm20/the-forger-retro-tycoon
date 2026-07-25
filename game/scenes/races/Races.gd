@@ -18,9 +18,15 @@ var info_label: Label
 
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/races.jpg")
-	var root := ScreenHelpers.make_root(self)
+	## use_menu_frame=false + ALIGNMENT_BEGIN + rozpychacze: zgłoszone przez
+	## użytkownika — ozdobna ramka znika, nazwa ekranu zostaje przypięta na
+	## samej górze, przycisk powrotu na samym dole (ten sam wzorzec co
+	## Gallery.gd _build_category_detail_view).
+	var root := ScreenHelpers.make_root(self, false)
+	root.alignment = BoxContainer.ALIGNMENT_BEGIN
 	ScreenHelpers.make_title(root, "Wyścigi konne")
 	ScreenHelpers.make_turn_indicator(root)
+	root.add_child(ScreenHelpers.make_expand_spacer())
 
 	for horse in HORSES:
 		ScreenHelpers.make_label(root, tr("%s — kurs ×%.1f") % [horse["name"], horse["odds"]])
@@ -45,6 +51,8 @@ func _ready() -> void:
 
 	result_label = ScreenHelpers.make_label(root, "")
 	info_label = ScreenHelpers.make_label(root, "")
+
+	root.add_child(ScreenHelpers.make_expand_spacer())
 	ScreenHelpers.make_back_button(root)
 
 	_update_info()

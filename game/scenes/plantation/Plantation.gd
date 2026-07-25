@@ -35,27 +35,32 @@ var legend_text_width: float = 200.0
 
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/plantation.jpg")
-	var root := ScreenHelpers.make_root(self)
+	## use_menu_frame=false: zgłoszone przez użytkownika — ozdobna ramka na
+	## cały ekran ma zniknąć na wszystkich ekranach (ten sam fix co wcześniej
+	## w AuctionHouse.gd/Gallery.gd). "Plantacje" u góry info_column i
+	## "Powrót" u dołu legend_column (patrz niżej) już PRZED tą zmianą
+	## realizowały dokładnie ten wzorzec przypięcia do krawędzi, więc tu nie
+	## trzeba nic dodatkowo spinać na poziomie root — tylko poprawić liczenie
+	## rozmiaru siatki, bo zakładało DOKŁADNIE geometrię usuniętej ramki.
+	var root := ScreenHelpers.make_root(self, false)
 
 	var main_row := HBoxContainer.new()
 	main_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	main_row.add_theme_constant_override("separation", int(COLUMN_SEPARATION))
 	root.add_child(main_row)
 
-	## Siatka ma wypełniać CAŁĄ wysokość ramki ekranu, a szerokość dostosowuje
-	## się tak, żeby siatka zostawała KWADRATEM (16×16 pól) — zgłoszone przez
+	## Siatka ma wypełniać CAŁĄ wysokość ekranu, a szerokość dostosowuje się
+	## tak, żeby siatka zostawała KWADRATEM (16×16 pól) — zgłoszone przez
 	## użytkownika. Liczone z get_viewport_rect() (nie ze stałej liczby
 	## pikseli w kodzie), tak jak inne miejsca w grze zależne od
 	## rozdzielczości (patrz TravelMap.gd/_build_pins, TravelAnimation.gd).
-	## 0.9 i CONTENT_INSET_WITH_FRAME odpowiadają DOKŁADNIE temu, co robi
-	## ScreenHelpers.make_root (ramka zajmuje 90% ekranu, treść ma dodatkowe
-	## wcięcie od narysowanej krawędzi) — bez tego siatka na "pełną wysokość"
-	## nie zostawiałaby wystarczająco miejsca na 2 kolumny obok niej i by je
-	## rozpychała poza ekran (ScrollContainer z make_root nie ma poziomego
-	## przewijania, więc przycięłoby to na stałe, nie do odzyskania scrollem).
+	## Bez ozdobnej ramki (use_menu_frame=false) root wypełnia CAŁY ekran bez
+	## wcięcia (patrz plain_root w screen_helpers.gd), więc liczone wprost z
+	## viewport_size — wcześniejsze 0.9 * ekran - 2×CONTENT_INSET_WITH_FRAME
+	## odpowiadało geometrii ramki, która już nie istnieje.
 	var viewport_size := get_viewport_rect().size
-	var frame_content_width := viewport_size.x * 0.9 - ScreenHelpers.CONTENT_INSET_WITH_FRAME * 2.0
-	var frame_content_height := viewport_size.y * 0.9 - ScreenHelpers.CONTENT_INSET_WITH_FRAME * 2.0
+	var frame_content_width := viewport_size.x
+	var frame_content_height := viewport_size.y
 
 	var grid_total_size := frame_content_height
 	cell_size = (
@@ -190,7 +195,7 @@ func _ready() -> void:
 	## te pod legendą. status_label MUSI być PRZED spacerem (nie po guzikach,
 	## jak poprzednio) — inaczej to on, nie guzik, byłby ostatnim elementem
 	## kolumny i guziki kończyłyby się wyżej niż w legend_column.
-	info_column.add_child(_make_expand_spacer())
+	info_column.add_child(ScreenHelpers.make_expand_spacer())
 
 	## Guziki akcji jeden POD drugim (nie obok siebie w jednym rzędzie, jak
 	## poprzednio) — w węższej kolumnie (połowa "reszty" obok siatki, zamiast
@@ -234,7 +239,7 @@ func _ready() -> void:
 	## kolumny i usuwa potrzebę scrolla. Spacer przed nimi (jak w info_column
 	## wyżej) — WYRÓWNANE OD DOŁU, na tej samej wysokości co guziki w drugiej
 	## kolumnie, niezależnie od tego, ile pól ma akurat obsianych każda uprawa.
-	legend_column.add_child(_make_expand_spacer())
+	legend_column.add_child(ScreenHelpers.make_expand_spacer())
 	ScreenHelpers.make_button(legend_column, "Spichlerz »", func(): SceneRouter.goto_scene(SceneRouter.WAREHOUSE), column_width)
 	ScreenHelpers.make_button(legend_column, "« Powrót", func(): SceneRouter.goto_hub(), column_width)
 
@@ -277,13 +282,6 @@ func _add_legend_row(parent: Container, kind: int, crop: String, river_adjacent:
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	label.custom_minimum_size = Vector2(legend_text_width, 0)
 	row.add_child(label)
-
-
-static func _make_expand_spacer() -> Control:
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return spacer
 
 
 func _setup_current_plantation() -> void:

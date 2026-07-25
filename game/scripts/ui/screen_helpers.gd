@@ -483,3 +483,23 @@ static func make_turn_indicator(root: VBoxContainer) -> Label:
 	if not Players.is_multiplayer():
 		return null
 	return make_label(root, TranslationServer.translate("Tura: %s") % Players.active_name())
+
+
+## Rozpychacz SIZE_EXPAND_FILL do przypinania stałej zawartości do krawędzi
+## ekranu wewnątrz VBoxContainera z ALIGNMENT_BEGIN — wstawiany PRZED i PO
+## zmiennej zawartości środkowej (np. tytuł ekranu / nazwa miejsca -> ten
+## rozpychacz -> zmienna treść -> drugi taki sam rozpychacz -> przycisk
+## powrotu). Oba rozpychacze dostają RÓWNY udział w zostającej przestrzeni,
+## więc środek zostaje wyśrodkowany, a skrajne elementy przyklejone do
+## górnej/dolnej krawędzi niezależnie od tego, ile jest treści pomiędzy.
+## Wyodrębnione tu (wcześniej osobne kopie w AuctionHouse.gd/Gallery.gd/
+## Plantation.gd) po tym, jak ten sam wzorzec zaczął być potrzebny na
+## wszystkich ekranach bez ozdobnej ramki (zgłoszone przez użytkownika:
+## "wszystkie miejsca powinny mieć usunięta ta ramka i zrobione że nazwa
+## miejsca na samej górze a powrót na samym dole tak jak to zrobiliśmy w
+## galerii w konkretnej kategorii").
+static func make_expand_spacer() -> Control:
+	var spacer := Control.new()
+	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return spacer

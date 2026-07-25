@@ -4,8 +4,14 @@ extends Control
 
 
 func _ready() -> void:
-	var root := ScreenHelpers.make_root(self)
+	## use_menu_frame=false + ALIGNMENT_BEGIN + rozpychacze: zgłoszone przez
+	## użytkownika — ozdobna ramka znika, nazwa ekranu zostaje przypięta na
+	## samej górze, przycisk powrotu na samym dole (ten sam wzorzec co
+	## Gallery.gd _build_category_detail_view).
+	var root := ScreenHelpers.make_root(self, false)
+	root.alignment = BoxContainer.ALIGNMENT_BEGIN
 	ScreenHelpers.make_title(root, "Ustawienia")
+	root.add_child(ScreenHelpers.make_expand_spacer())
 
 	ScreenHelpers.make_label(root, "Język / Language / Sprache")
 
@@ -19,4 +25,5 @@ func _ready() -> void:
 	lang_option.item_selected.connect(func(index: int) -> void: Localization.set_language(lang_codes[index]))
 	root.add_child(lang_option)
 
+	root.add_child(ScreenHelpers.make_expand_spacer())
 	ScreenHelpers.make_button(root, "« Powrót", func(): SceneRouter.goto_scene(SceneRouter.MAIN_MENU))

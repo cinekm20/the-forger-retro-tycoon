@@ -6,7 +6,15 @@ extends Control
 ## konkretnego źródła.
 
 func _ready() -> void:
-	var root := ScreenHelpers.make_root(self)
+	## use_menu_frame=false + ALIGNMENT_BEGIN + rozpychacze: zgłoszone przez
+	## użytkownika — ozdobna ramka znika, tytuł zakończenia zostaje przypięty
+	## na samej górze, przycisk powrotu na samym dole (ten sam wzorzec co
+	## Gallery.gd _build_category_detail_view). Rozpychacz po tytule dodaje
+	## każda z gałęzi _build_win/_build_bankrupt/_build_rival_win zaraz po
+	## swoim make_title (patrz tam) — inaczej narracja pod tytułem nie byłaby
+	## "środkiem" między dwoma rozpychaczami.
+	var root := ScreenHelpers.make_root(self, false)
+	root.alignment = BoxContainer.ALIGNMENT_BEGIN
 
 	var outcome := GameState.last_outcome
 	if outcome.begins_with("win:"):
@@ -17,7 +25,9 @@ func _ready() -> void:
 		_build_rival_win(root, outcome.substr(10))
 	else:
 		ScreenHelpers.make_title(root, "Koniec gry")
+		root.add_child(ScreenHelpers.make_expand_spacer())
 
+	root.add_child(ScreenHelpers.make_expand_spacer())
 	ScreenHelpers.make_button(root, "Powrót do menu głównego", func(): SceneRouter.goto_scene(SceneRouter.MAIN_MENU))
 
 
@@ -39,6 +49,7 @@ const NARRATIVE_LABEL_WIDTH := 900.0
 func _build_win(root: VBoxContainer, player_index: int) -> void:
 	var name_prefix := (Players.player_names[player_index] + ": ") if Players.is_multiplayer() else ""
 	ScreenHelpers.make_title(root, "Kolekcja kompletna")
+	root.add_child(ScreenHelpers.make_expand_spacer())
 	_make_narrative_label(
 		root,
 		name_prefix + tr("Ostatni obraz trafia do gabloty. Posłaniec przynosi wiadomość: wuj Walther chce Cię widzieć natychmiast."),
@@ -62,6 +73,7 @@ func _build_win(root: VBoxContainer, player_index: int) -> void:
 func _build_bankrupt(root: VBoxContainer, player_index: int) -> void:
 	var name_prefix := (Players.player_names[player_index] + ": ") if Players.is_multiplayer() else ""
 	ScreenHelpers.make_title(root, "Bankructwo")
+	root.add_child(ScreenHelpers.make_expand_spacer())
 	_make_narrative_label(
 		root,
 		name_prefix + tr("Wierzyciele stracili cierpliwość. Twoje interesy zostają przejęte, a marzenie o spadku po wuju Waltherze przechodzi na innego, sprawniejszego kandydata."),
@@ -74,6 +86,7 @@ func _build_bankrupt(root: VBoxContainer, player_index: int) -> void:
 func _build_rival_win(root: VBoxContainer, rival_id: String) -> void:
 	var rival_name: String = AIPlayers.get_rival(rival_id).get("name", rival_id)
 	ScreenHelpers.make_title(root, "Przegrana")
+	root.add_child(ScreenHelpers.make_expand_spacer())
 	_make_narrative_label(
 		root,
 		tr("%s dociera do ostatniego brakującego obrazu pierwszy/-a. Testament wuja Walthera zostaje spisany na czyjeś inne nazwisko.") % rival_name,
