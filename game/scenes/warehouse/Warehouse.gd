@@ -24,15 +24,15 @@ func _ready() -> void:
 	location_label.text = tr("%s\n%s") % [Cities.get_city_name(Travel.current_city), Calendar.format_day(Players.active_day())]
 	money_label.text = tr("%.0f M") % Economy.player_money
 
-	## use_menu_frame=false + ALIGNMENT_BEGIN + rozpychacze: zgłoszone przez
-	## użytkownika — ozdobna ramka znika, nazwa ekranu zostaje przypięta na
-	## samej górze, przycisk powrotu na samym dole (ten sam wzorzec co
-	## Gallery.gd _build_category_detail_view).
+	## use_menu_frame=false + ALIGNMENT_BEGIN + JEDEN rozpychacz na końcu:
+	## zgłoszone przez użytkownika — ozdobna ramka znika, nazwa ekranu zostaje
+	## przypięta na samej górze, przycisk powrotu na samym dole. Treść leci
+	## zaraz pod tytułem (bez rozpychacza między nimi) — patrz Races.gd po
+	## szczegółowe uzasadnienie, czemu JEDEN rozpychacz (nie dwa).
 	var root := ScreenHelpers.make_root(self, false)
 	root.alignment = BoxContainer.ALIGNMENT_BEGIN
 	ScreenHelpers.make_title(root, "Spichlerz")
 	ScreenHelpers.make_turn_indicator(root)
-	root.add_child(ScreenHelpers.make_expand_spacer())
 
 	var silo_row := HBoxContainer.new()
 	silo_row.alignment = BoxContainer.ALIGNMENT_CENTER

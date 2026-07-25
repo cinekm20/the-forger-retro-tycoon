@@ -19,7 +19,7 @@ const CROP_CHART_COLORS := {
 	"cocoa": Color(0.75, 0.28, 0.18),
 }
 
-var crop_rows_container: VBoxContainer
+var crop_rows_container: HBoxContainer
 var contracts_label: Label
 var location_label: Label
 var money_label: Label
@@ -34,18 +34,27 @@ func _ready() -> void:
 	location_label = corner["left"]
 	money_label = corner["right"]
 
-	## use_menu_frame=false + ALIGNMENT_BEGIN + rozpychacze: zgłoszone przez
-	## użytkownika — ozdobna ramka znika, nazwa ekranu zostaje przypięta na
-	## samej górze, przycisk powrotu na samym dole (ten sam wzorzec co
-	## Gallery.gd _build_category_detail_view).
+	## use_menu_frame=false + ALIGNMENT_BEGIN + JEDEN rozpychacz na końcu:
+	## zgłoszone przez użytkownika — ozdobna ramka znika, nazwa ekranu zostaje
+	## przypięta na samej górze, przycisk powrotu na samym dole. Treść leci
+	## zaraz pod tytułem (bez rozpychacza między nimi) — patrz Races.gd po
+	## szczegółowe uzasadnienie, czemu JEDEN rozpychacz (nie dwa).
 	var root := ScreenHelpers.make_root(self, false)
 	root.alignment = BoxContainer.ALIGNMENT_BEGIN
 	ScreenHelpers.make_title(root, "Rynek")
 	ScreenHelpers.make_turn_indicator(root)
-	root.add_child(ScreenHelpers.make_expand_spacer())
 
 	ScreenHelpers.make_title(root, "Ceny towarów")
-	crop_rows_container = VBoxContainer.new()
+	## HBoxContainer (nie VBoxContainer): zgłoszone przez użytkownika —
+	## przycisk powrotu wychodził poza ekran ("za nisko"), bo bez ozdobnej
+	## ramki ten ekran nie ma już ScrollContainera jako zabezpieczenia (patrz
+	## plain_root w screen_helpers.gd), a suma wysokości WSZYSTKICH sekcji
+	## (4 ceny towarów pod sobą + wykres + legenda + kontrakty) przekraczała
+	## 720px. Jeden poziomy rząd zamiast 4 osobnych wierszy oszczędza
+	## najwięcej miejsca bez utraty żadnej informacji.
+	crop_rows_container = HBoxContainer.new()
+	crop_rows_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	crop_rows_container.add_theme_constant_override("separation", 24)
 	root.add_child(crop_rows_container)
 
 	## Wykres cen towarów w czasie (Crops.price_history) — rysowany natywnie

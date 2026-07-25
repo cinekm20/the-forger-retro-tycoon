@@ -119,8 +119,17 @@ func _rebuild_content() -> void:
 ## "Nazwa: X/5"), klikalna TYLKO gdy gracz ma tam już choć jeden obraz —
 ## plus krótkie podsumowanie postępu innych graczy w multiplayer.
 func _build_categories_view() -> void:
-	content_root.alignment = BoxContainer.ALIGNMENT_CENTER
-	content_root.size_flags_vertical = Control.SIZE_FILL
+	## Zgłoszone przez użytkownika: ten sam ekran ("Galeria") też ma mieć
+	## przycisk powrotu przypięty do samego dołu — wcześniej content_root
+	## (ALIGNMENT_CENTER + domyślne SIZE_FILL, czyli kurczy się do naturalnego
+	## rozmiaru treści) tylko WYGLĄDAŁ na przypięty, kiedy siatka 8 kategorii
+	## akurat wypełniała prawie cały ekran; przy mniejszej treści (np. mniej
+	## kategorii, krótsza lista graczy) przycisk floatowałby wyżej. "Galeria"
+	## u góry jest już przypięte NA ZEWNĄTRZ content_root (patrz _ready), więc
+	## tu wystarczy JEDEN rozpychacz na samym końcu — treść zaczyna się od
+	## razu pod nagłówkiem, przycisk zostaje przyklejony do dołu.
+	content_root.alignment = BoxContainer.ALIGNMENT_BEGIN
+	content_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	ScreenHelpers.make_label(content_root, tr("Twoja kolekcja: %d/%d (próg zwycięstwa)") % [
 		Paintings.owned_count(), Paintings.win_threshold,
 	])
@@ -143,6 +152,7 @@ func _build_categories_view() -> void:
 				Players.player_names[i], marker, Players.get_painting_count(i),
 			])
 
+	content_root.add_child(ScreenHelpers.make_expand_spacer())
 	ScreenHelpers.make_back_button(content_root)
 
 
