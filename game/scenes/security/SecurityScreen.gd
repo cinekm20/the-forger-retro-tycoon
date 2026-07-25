@@ -18,7 +18,15 @@ var security_label: Label
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/gallery.jpg")
 
+	## ALIGNMENT_BEGIN + JEDEN rozpychacz na końcu: zgłoszone przez
+	## użytkownika — ten ekran miał już usuniętą ozdobną ramkę, ale nie
+	## dostał przypięcia tytułu/przycisku jak reszta ("dalej ochrona nie ma
+	## tak zrobione jak wszystkie"), bo w poprzednim przeglądzie wszystkich
+	## ekranów pominięto go (już wcześniej wywoływał make_root z false, więc
+	## nie pasował do wyszukiwania miejsc z jeszcze WŁĄCZONĄ ramką). Patrz
+	## Races.gd po uzasadnienie, czemu JEDEN rozpychacz (nie dwa).
 	var root := ScreenHelpers.make_root(self, false)
+	root.alignment = BoxContainer.ALIGNMENT_BEGIN
 	ScreenHelpers.make_title(root, "Ochrona")
 	ScreenHelpers.make_turn_indicator(root)
 
@@ -44,6 +52,7 @@ func _ready() -> void:
 		gangster_btn.pressed.connect(_on_send_gangster_pressed.bind(rival["id"]))
 		rival_row.add_child(gangster_btn)
 
+	root.add_child(ScreenHelpers.make_expand_spacer())
 	ScreenHelpers.make_back_button(root)
 
 
