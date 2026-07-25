@@ -40,7 +40,10 @@ const MAX_MUSIC_VOLUME_BOOST_DB := 6.0
 
 const CATEGORY_CARD_SIZE := Vector2(160, 190)
 const CATEGORY_FRAME_SIZE := Vector2(140, 140)
-const THUMBNAIL_SIZE := Vector2(120, 120)
+## Zgłoszone przez użytkownika: miniaturki w widoku kategorii mają być
+## większe (poprzednio 120x120) — do 3 w rzędzie mieszczą się wygodnie w
+## logicznej szerokości ekranu razem z odstępami z _build_category_detail_view.
+const THUMBNAIL_SIZE := Vector2(210, 210)
 ## Większa niż okładka kategorii — tu nie ma siatki, tylko jeden obraz
 ## wypełniający środek ekranu.
 const PAINTING_FRAME_SIZE := Vector2(340, 340)
@@ -115,6 +118,7 @@ func _rebuild_content() -> void:
 ## "Nazwa: X/5"), klikalna TYLKO gdy gracz ma tam już choć jeden obraz —
 ## plus krótkie podsumowanie postępu innych graczy w multiplayer.
 func _build_categories_view() -> void:
+	content_root.alignment = BoxContainer.ALIGNMENT_CENTER
 	ScreenHelpers.make_label(content_root, tr("Twoja kolekcja: %d/%d (próg zwycięstwa)") % [
 		Paintings.owned_count(), Paintings.win_threshold,
 	])
@@ -238,8 +242,17 @@ func _on_category_pressed(category_id: String) -> void:
 ## więc liczba miniatur tu to zawsze 1-5, stąd zamknięty podział na wiersze
 ## zamiast ogólnej siatki (patrz _split_into_centered_rows).
 func _build_category_detail_view() -> void:
+	## Zgłoszone przez użytkownika: tytuł kategorii ma być ZAWSZE na samej
+	## górze ekranu, przycisk powrotu ZAWSZE na samym dole, i oba nigdy nie
+	## powinny się ruszać niezależnie od liczby miniatur pomiędzy nimi.
+	## ALIGNMENT_BEGIN + rozpychacz SIZE_EXPAND_FILL po obu stronach środkowej
+	## zawartości — ten sam wzorzec co AuctionHouse.gd _make_expand_spacer.
+	content_root.alignment = BoxContainer.ALIGNMENT_BEGIN
+
 	var category_name: String = Paintings.CATEGORY_NAMES.get(selected_category, selected_category)
 	ScreenHelpers.make_title(content_root, category_name)
+
+	content_root.add_child(_make_expand_spacer())
 
 	var owned_numbers: Array[int] = []
 	for number in Paintings.catalogued_numbers:
@@ -259,6 +272,8 @@ func _build_category_detail_view() -> void:
 		rows_root.add_child(row)
 		for number in row_numbers:
 			_build_painting_thumbnail(row, number)
+
+	content_root.add_child(_make_expand_spacer())
 
 	ScreenHelpers.make_button(content_root, tr("« Wróć do galerii"), _on_back_to_categories_pressed)
 
@@ -324,6 +339,7 @@ func _on_back_to_category_detail_pressed() -> void:
 ## _resolve_auction: podróbka nigdy nie wchodzi do kolekcji), więc w
 ## Galerii nie ma czego rozróżniać.
 func _build_painting_detail_view() -> void:
+	content_root.alignment = BoxContainer.ALIGNMENT_CENTER
 	var number := selected_number
 	var category: String = Paintings.get_category(number)
 	var category_name: String = Paintings.CATEGORY_NAMES.get(category, category)
@@ -340,3 +356,13 @@ func _build_painting_detail_view() -> void:
 		ScreenHelpers.make_label(content_root, tr("Obraz nr %d — %s") % [number, category_name])
 
 	ScreenHelpers.make_button(content_root, tr("« Wróć"), _on_back_to_category_detail_pressed)
+
+
+## Rozpychacz SIZE_EXPAND_FILL do przypinania stałej zawartości do góry/dołu
+## VBoxContainera z ALIGNMENT_BEGIN — identyczny wzorzec co
+## AuctionHouse.gd _make_expand_spacer.
+static func _make_expand_spacer() -> Control:
+	var spacer := Control.new()
+	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return spacer
