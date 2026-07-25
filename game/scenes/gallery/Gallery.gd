@@ -45,8 +45,9 @@ const CATEGORY_FRAME_SIZE := Vector2(140, 140)
 ## logicznej szerokości ekranu razem z odstępami z _build_category_detail_view.
 const THUMBNAIL_SIZE := Vector2(210, 210)
 ## Większa niż okładka kategorii — tu nie ma siatki, tylko jeden obraz
-## wypełniający środek ekranu.
-const PAINTING_FRAME_SIZE := Vector2(340, 340)
+## wypełniający środek ekranu. Zgłoszone przez użytkownika: obraz w
+## podglądzie ma być większy (poprzednio 340x340).
+const PAINTING_FRAME_SIZE := Vector2(480, 480)
 ## Ta sama rama co Dom aukcyjny (art/icons/frame.png) — patrz jej komentarz
 ## tam co do ułamka INNER_INSET (zmierzony na samej grafice ramy).
 const FRAME_INNER_INSET := 0.145
@@ -350,8 +351,14 @@ func _on_back_to_category_detail_pressed() -> void:
 ## _resolve_auction: podróbka nigdy nie wchodzi do kolekcji), więc w
 ## Galerii nie ma czego rozróżniać.
 func _build_painting_detail_view() -> void:
-	content_root.alignment = BoxContainer.ALIGNMENT_CENTER
-	content_root.size_flags_vertical = Control.SIZE_FILL
+	## Ten sam wzorzec przypięcia co _build_category_detail_view (zgłoszone
+	## przez użytkownika: "w podglądzie jednego obrazu tak samo trzeba
+	## zrobić") — content_root wypełnia całą dostępną wysokość, obraz+opis
+	## trzymają się góry (zaraz pod "Galeria"/wskaźnikiem tury), przycisk
+	## "Wróć" zawsze na samym dole, niezależnie od długości podpisu.
+	content_root.alignment = BoxContainer.ALIGNMENT_BEGIN
+	content_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
 	var number := selected_number
 	var category: String = Paintings.get_category(number)
 	var category_name: String = Paintings.CATEGORY_NAMES.get(category, category)
@@ -366,6 +373,8 @@ func _build_painting_detail_view() -> void:
 		ScreenHelpers.make_label(content_root, tr("%s — %s") % [category_name, info["museum"]])
 	else:
 		ScreenHelpers.make_label(content_root, tr("Obraz nr %d — %s") % [number, category_name])
+
+	content_root.add_child(_make_expand_spacer())
 
 	ScreenHelpers.make_button(content_root, tr("« Wróć"), _on_back_to_category_detail_pressed)
 
