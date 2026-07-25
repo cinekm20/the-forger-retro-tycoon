@@ -106,8 +106,16 @@ func _ready() -> void:
 	_build_top_left_corner()
 
 	if not Auctions.is_open(Travel.current_city):
+		## ALIGNMENT_BEGIN + rozpychacz: zgłoszone przez użytkownika ("jeszcze
+		## tak nie ma dom aukcyjny jak nie ma aukcji") — ten wczesny return
+		## (brak aukcji akurat teraz) nigdy nie dochodzi do
+		## _build_active_auction_ui, gdzie root.alignment jest normalnie
+		## ustawiane na BEGIN, więc zostawał na domyślnym CENTER i przycisk
+		## powrotu unosił się na środku zamiast być przyklejony do dołu.
+		root.alignment = BoxContainer.ALIGNMENT_BEGIN
 		ScreenHelpers.make_label(root, tr("W tym mieście nie odbywa się teraz żadna aukcja.\nWróć w podanym terminie."))
 		schedule_label.text = Auctions.get_schedule_string()
+		root.add_child(ScreenHelpers.make_expand_spacer())
 		ScreenHelpers.make_back_button(root)
 		return
 
