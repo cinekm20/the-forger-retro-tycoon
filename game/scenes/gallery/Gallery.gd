@@ -146,7 +146,12 @@ func _build_categories_view() -> void:
 ## zasłania je w pełni. dim=true wygasza WEWNĘTRZNY obraz (nie samą ramę) —
 ## używane dla kategorii bez żadnego skatalogowanego obrazu, jako wizualna
 ## podpowiedź "jeszcze nieklikalne".
-func _build_framed_image(parent: Container, texture_path: String, holder_size: Vector2, dim: bool = false) -> void:
+## parent: Control (NIE Container) — wywoływane zarówno z Containerów
+## (CenterContainer w _build_category_card/_build_painting_detail_view) jak
+## i z płaskiego Button (_build_painting_thumbnail, Button NIE dziedziczy po
+## Container), a funkcja tylko dodaje dziecko, więc wystarczy najszerszy
+## wspólny typ.
+func _build_framed_image(parent: Control, texture_path: String, holder_size: Vector2, dim: bool = false) -> void:
 	var frame_holder := Control.new()
 	frame_holder.custom_minimum_size = holder_size
 	frame_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
