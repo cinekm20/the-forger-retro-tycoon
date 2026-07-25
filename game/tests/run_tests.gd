@@ -55,6 +55,7 @@ func _ready() -> void:
 	_test_catching_up_player_does_not_double_world_drift()
 	_test_catching_up_player_gets_full_personal_consequences()
 	_test_catching_up_player_completes_travel()
+	_test_all_scene_scripts_parse_without_error()
 
 	print("\n=== Wynik: %d/%d testów przeszło ===" % [total - failures, total])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -802,3 +803,42 @@ func _test_catching_up_player_completes_travel() -> void:
 
 	_assert(not Travel.is_traveling(), "podróż gracza 2 kończy się mimo że Tor A (Calendar.current_day) się nie rusza")
 	_assert(Travel.current_city == "london", "Travel.current_city gracza 2 poprawnie zaktualizowany na miasto docelowe")
+
+
+## Zgłoszone przez użytkownika: literówka typu (Container zamiast Control w
+## parametrze funkcji) w Gallery.gd przeszła całe CI bez wykrycia — boot
+## headless (patrz nagłówek pliku) parsuje tylko autoloady + GŁÓWNĄ scenę,
+## więc skrypty POZOSTAŁYCH ekranów (Gallery.gd, AuctionHouse.gd, ...) nigdy
+## nie są odwiedzane, chyba że akurat są sceną startową. Błąd wyszedł dopiero
+## przy ręcznym uruchomieniu w edytorze. Ten test ładuje KAŻDY skrypt sceny
+## wprost przez load() — błąd parsera (Godot loguje "Parse Error" i load()
+## zwraca null) wykryje się więc już tutaj, w CI.
+func _test_all_scene_scripts_parse_without_error() -> void:
+	print("-- Sanity: wszystkie skrypty scen (scenes/**/*.gd) ładują się bez błędu parsera --")
+	var script_paths := _find_gd_scripts("res://scenes")
+	_assert(script_paths.size() > 0, "znaleziono przynajmniej jeden skrypt sceny do sprawdzenia")
+	for path in script_paths:
+		var script: Script = load(path)
+		_assert(script != null, "ładuje się bez błędu parsera: %s" % path)
+
+
+## Rekurencyjne przejście katalogu w poszukiwaniu plików .gd — DirAccess
+## zamiast statycznej listy, żeby nowe ekrany automatycznie wchodziły pod
+## powyższy test bez pamiętania o dopisaniu ich ręcznie.
+func _find_gd_scripts(dir_path: String) -> Array[String]:
+	var result: Array[String] = []
+	var dir := DirAccess.open(dir_path)
+	if dir == null:
+		return result
+	dir.list_dir_begin()
+	var entry := dir.get_next()
+	while entry != "":
+		if entry != "." and entry != "..":
+			var full_path := dir_path + "/" + entry
+			if dir.current_is_dir():
+				result.append_array(_find_gd_scripts(full_path))
+			elif entry.ends_with(".gd"):
+				result.append(full_path)
+		entry = dir.get_next()
+	dir.list_dir_end()
+	return result
