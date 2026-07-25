@@ -119,6 +119,7 @@ func _rebuild_content() -> void:
 ## plus krótkie podsumowanie postępu innych graczy w multiplayer.
 func _build_categories_view() -> void:
 	content_root.alignment = BoxContainer.ALIGNMENT_CENTER
+	content_root.size_flags_vertical = Control.SIZE_FILL
 	ScreenHelpers.make_label(content_root, tr("Twoja kolekcja: %d/%d (próg zwycięstwa)") % [
 		Paintings.owned_count(), Paintings.win_threshold,
 	])
@@ -247,7 +248,17 @@ func _build_category_detail_view() -> void:
 	## powinny się ruszać niezależnie od liczby miniatur pomiędzy nimi.
 	## ALIGNMENT_BEGIN + rozpychacz SIZE_EXPAND_FILL po obu stronach środkowej
 	## zawartości — ten sam wzorzec co AuctionHouse.gd _make_expand_spacer.
+	## Samo ALIGNMENT_BEGIN NIE WYSTARCZY: content_root domyślnie (SIZE_FILL)
+	## kurczy się do naturalnego rozmiaru własnej treści, więc cały ten blok
+	## (tytuł+rozpychacze+przycisk) i tak wypadał wyśrodkowany na środku
+	## ekranu przez ALIGNMENT_CENTER nadrzędnego root (zgłoszone przez
+	## użytkownika po poprzedniej, niepełnej poprawce: "napis miał być na
+	## samej górze ekranu w guzik na samym dole"). SIZE_EXPAND_FILL sprawia,
+	## że content_root wypełnia CAŁĄ dostępną wysokość poniżej "Galeria"/
+	## wskaźnika tury w root — dopiero wtedy rozpychacze w środku mają czym
+	## rozepchnąć tytuł i przycisk do prawdziwych krawędzi ekranu.
 	content_root.alignment = BoxContainer.ALIGNMENT_BEGIN
+	content_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
 
 	var category_name: String = Paintings.CATEGORY_NAMES.get(selected_category, selected_category)
 	ScreenHelpers.make_title(content_root, category_name)
@@ -340,6 +351,7 @@ func _on_back_to_category_detail_pressed() -> void:
 ## Galerii nie ma czego rozróżniać.
 func _build_painting_detail_view() -> void:
 	content_root.alignment = BoxContainer.ALIGNMENT_CENTER
+	content_root.size_flags_vertical = Control.SIZE_FILL
 	var number := selected_number
 	var category: String = Paintings.get_category(number)
 	var category_name: String = Paintings.CATEGORY_NAMES.get(category, category)
