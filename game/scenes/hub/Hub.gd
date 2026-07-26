@@ -63,6 +63,17 @@ var turn_summary_button: Button
 
 
 func _ready() -> void:
+	## Karty wydarzeń (WorldEvents.gd — reforma walutowa / strajk / zamieszki
+	## na plantacji, zgłoszone przez użytkownika: "w formie gazety i popup
+	## między turami") mają pierwszeństwo przed Podsumowaniem roku — obie
+	## sprawdzane PRZED zbudowaniem reszty Huba, ten sam wzorzec. Kolejka
+	## może mieć więcej niż jedno zdarzenie (patrz WorldEvents.gd); każda
+	## karta po "Kontynuuj" wraca tutaj i to samo sprawdzenie odpala się od
+	## nowa, więc kolejne karty pokazują się jedna po drugiej same z siebie.
+	if WorldEvents.has_pending():
+		SceneRouter.goto_scene(SceneRouter.WORLD_EVENT)
+		return
+
 	## Podsumowanie roku (patrz YearlyReport.gd) — jeśli od ostatniego wejścia
 	## do Huba minął Sylwester w grze, pokaż je NAJPIERW, zamiast budować
 	## resztę Huba pod spodem (i tak zostanie natychmiast odsłonięty

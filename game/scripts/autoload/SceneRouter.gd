@@ -17,6 +17,7 @@ const TRAVEL_MAP := "res://scenes/travel_map/TravelMap.tscn"
 const TRAVEL_ANIMATION := "res://scenes/travel_animation/TravelAnimation.tscn"
 const SETTINGS := "res://scenes/settings/Settings.tscn"
 const YEAR_SUMMARY := "res://scenes/year_summary/YearSummary.tscn"
+const WORLD_EVENT := "res://scenes/world_event/WorldEventCard.tscn"
 
 
 func goto_scene(path: String) -> void:

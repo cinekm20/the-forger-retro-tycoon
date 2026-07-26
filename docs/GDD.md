@@ -79,10 +79,19 @@ i **pory roku**, tabela sezonowej wydajności w `MECHANIKI_EKONOMICZNE.md`),
 zatrudnianie robotników (plon skaluje się liniowo z ich liczbą), zbiory i
 wysyłka towaru do magazynu (Nowy Jork).
 
-⏳ **Zaplanowane, jeszcze niezaimplementowane:** ryzyko regionalne (strajki
-przy braku wypłat, zamieszki/wywłaszczenia w niestabilnych regionach) i
-animacja wzrostu upraw (etapy graficzne: zasiew → wzrost → zbiory) — na razie
-zbiory liczą się natychmiast po upływie czasu, bez animowanych faz.
+✅ **Ryzyko regionalne — zaimplementowane** (`PlayerPlantations._apply_crisis_hit`,
+`Cities.REGION_UNREST_CHANCE_PER_WEEK`): strajk (brak wypłat robotnikom —
+gotówka na minusie PRZY zatrudnionej załodze) i zamieszki (losowane co
+tydzień wg niestabilności regionu — dziś Afryka i postimperialna Azja, reszta
+świata bez ryzyka) mają te same konsekwencje: zabrane zapasy z magazynu tej
+plantacji + ucieczka połowy załogi. Jeden wspólny licznik uderzeń na
+plantację (niezależnie od przyczyny) — po 3 uderzeniach kolejne zabiera CAŁĄ
+plantację. Zgłaszane jako karta gazety między turami (patrz 4.3 niżej,
+`WorldEvents.gd`).
+
+⏳ **Zaplanowane, jeszcze niezaimplementowane:** animacja wzrostu upraw
+(etapy graficzne: zasiew → wzrost → zbiory) — na razie zbiory liczą się
+natychmiast po upływie czasu, bez animowanych faz.
 
 ### 4.2.1 Spichlerz
 Osobny ekran (dostępny tak jak Plantacje, tylko w miastach typu plantacyjnego)
@@ -105,12 +114,21 @@ Zgłoszone przez użytkownika: ceny towarów i kontrakty terminowe, wcześniej
 druga część tego samego ekranu, mają teraz **osobny ekran — Rynek** (patrz
 4.3a), dostępny z Huba obok Giełdy.
 
-⏳ **Zaplanowane, jeszcze niezaimplementowane:** wydarzenia makro (krach 1929,
-hiperinflacja, reformy walutowe) jako osobne karty zdarzeń z ilustracją
-gazety/nagłówka epoki — reformy/inflacja na razie działają jako ciche zmiany
-liczbowe z jedną tekstową etykietą ostrzegawczą w Hubie (patrz 4.3.1), bez
-własnego ekranu/karty. Prompty na karty zdarzeń już czekają gotowe w
-`docs/GRAFIKA_LEONARDO.md` §4.
+✅ **Karta zdarzenia dla reformy walutowej — zaimplementowana** (`WorldEvents.gd`,
+`scenes/world_event/WorldEventCard.gd`): reforma (patrz 4.3.1 niżej) trafiała
+dotąd jako cicha zmiana liczbowa z jedną etykietą ostrzegawczą w Hubie —
+teraz zamiast/obok tego pokazuje się pełnoekranowa "karta gazety" MIĘDZY
+TURAMI (Hub sprawdza kolejkę WorldEvents PRZED zbudowaniem normalnego
+widoku, ten sam wzorzec co Podsumowanie roku). Ta sama karta pokazuje też
+kryzysy na plantacjach (patrz 4.2 wyżej). Ilustracja nagłówka gazety po
+cichu spada na tło Giełdy, dopóki `events/reform.jpg` nie zostanie wgrane
+(prompt w `docs/GRAFIKA_LEONARDO.md` §4).
+
+⏳ **Zaplanowane, jeszcze niezaimplementowane:** krach giełdowy (np. krach
+1929) i hiperinflacja jako osobne, nowe typy zdarzeń (nie tylko oprawa
+istniejącej reformy) — prompty na te dwie dodatkowe karty ("Krach"/"Hossa")
+już czekają gotowe w `docs/GRAFIKA_LEONARDO.md` §4, ale bez własnej
+mechaniki w kodzie.
 
 ### 4.3a Rynek
 Osobny ekran (wydzielony z dawnej Giełdy) z cenami towarów (kawa/tytoń/

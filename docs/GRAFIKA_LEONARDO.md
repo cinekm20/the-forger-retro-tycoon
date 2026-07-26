@@ -301,21 +301,37 @@ game background art, Art Deco 1920s illustration style, warm sepia and gold pale
 ```
 1920s commodity trading hall, burlap sacks of coffee beans and cocoa pods, stacked wooden crates of tobacco leaves and tea chests along the walls, large weighing scales, a chalkboard listing crop prices, port warehouse atmosphere, bustling traders and dockworkers in background (silhouettes only, no detailed faces), game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
-**Prompty (3 karty zdarzeń gospodarczych, gotowe do wklejenia):**
+**Prompty (karty zdarzeń gospodarczych):** zgłoszone przez użytkownika —
+karty wydarzeń "w formie gazety" pokazywane jako popup MIĘDZY TURAMI (patrz
+`scenes/world_event/WorldEventCard.gd`, `WorldEvents.gd`). Reforma walutowa i
+kryzys na plantacji (strajk/zamieszki, docs/GDD.md pkt. 4.2) są już PODPIĘTE
+w kodzie — po cichu spadają na tło Giełdy, dopóki te trzy pliki nie zostaną
+wgrane. "Krach"/"Hossa" NIE mają jeszcze żadnej mechaniki w kodzie (żaden
+ekran ich nie wywołuje) — prompty czekają na przyszłość, nie generować teraz.
 
-**Krach**
+**Reforma walutowa** — `events/reform.jpg`
+```
+Vintage newspaper front page illustration, headline about stock market currency reform, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Strajk (plantacja)** — `events/strike.jpg`
+```
+Vintage newspaper front page illustration, headline about a workers' strike on a tropical plantation, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Zamieszki (plantacja)** — `events/riot.jpg`
+```
+Vintage newspaper front page illustration, headline about civil unrest in a colonial trading region, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Krach** (jeszcze niepodpięte w kodzie)
 ```
 Vintage newspaper front page illustration, headline about stock market crash, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
-**Hossa**
+**Hossa** (jeszcze niepodpięte w kodzie)
 ```
 Vintage newspaper front page illustration, headline about stock market boom, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
-```
-
-**Reforma walutowa**
-```
-Vintage newspaper front page illustration, headline about stock market currency reform, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 ### 5. Tor wyścigów konnych
@@ -989,6 +1005,7 @@ Leonardo, żeby mieć z czego wybrać).
 | 12 | 7 (opcjonalnie) | Warianty "fałszywka" wybranych obrazów (do szkoły sztuki) | ~8–10 | 1:1, jak oryginał | §7, §8 | ✅ 10/~8–10 zrobione i podpięte — obrazy 7, 10, 11, 16, 21, 25, 29, 30, 32, 33 (`painting_NN_fake.jpg`); reszta katalogu dalej pokazuje zwykłą grafikę przy fałszywce (`Paintings.get_texture_path` po cichu spada na oryginał, gdy wariantu brak) |
 | 13 | 6 | Ikony 8 kategorii stylistycznych (okładki kafelków w Galerii) | 8 | 1:1, min. 1024×1024 | §9b | ✅ zrobione i podpięte — wszystkie 8 (`vermeer.jpg`, `baroque.jpg`, `classicism.jpg`, `romanticism.jpg`, `impressionism.jpg`, `symbolism.jpg`, `expressionism.jpg`, `modern.jpg`) |
 | 14 | 2 | Pusty wariant tła Galerii (bez obrazów/ławek/żyrandola na ścianach) | 1 | 16:9, 1920×1080 | §9 | ✅ zrobione i podpięte (`gallery_empty.jpg`) — zwykły `gallery.jpg` zostaje jako czysty fallback, gdyby plik kiedyś zniknął |
+| 15 | 4 | Karty wydarzeń: reforma walutowa, strajk, zamieszki (docs/GDD.md pkt. 4.2, 4.3.1) | 3 | 16:9, 1920×1080 | §4 | ⬜ do zrobienia — mechanika i ekran (`WorldEvents.gd`, `scenes/world_event/WorldEventCard.gd`) już podpięte w kodzie, po cichu spadają na tło Giełdy, dopóki `events/reform.jpg`/`events/strike.jpg`/`events/riot.jpg` nie zostaną wgrane |
 
 **Zasada dla wierszy oznaczonych "uwaga" (7 i 9):** jeśli Leonardo znowu
 zacznie robić pełne sceny zamiast wyizolowanych ikon/sprite'ów mimo
@@ -1035,3 +1052,8 @@ liczy tę ścieżkę wprost ze wzoru (`"res://art/categories/%s.jpg" % category_
 **Pusty wariant tła Galerii (§9) — konwencja nazwy:** `backgrounds/gallery_empty.jpg`
 — `Gallery.gd` próbuje go NAJPIERW, z fallbackiem na zwykły
 `backgrounds/gallery.jpg`, jeśli plik jeszcze nie istnieje.
+
+**Karty wydarzeń (§4) — konwencja nazw:** nowy podfolder `events/<id>.jpg`,
+gdzie `<id>` to `reform`/`strike`/`riot` — `WorldEventCard.gd` liczy tę
+ścieżkę wprost ze wzoru, z fallbackiem na `backgrounds/stock_market.jpg`,
+jeśli plik jeszcze nie istnieje.

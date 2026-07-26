@@ -23,6 +23,19 @@ const CITIES := {
 	"st_louis": {"name": "St. Louis", "type": "plantation", "region": "north_america"},
 }
 
+## Ryzyko regionalne na plantacjach — szansa/tydzień na zamieszki/wywłaszczenie
+## (patrz PlayerPlantations._apply_crisis_hit, docs/GDD.md pkt. 4.2:
+## "ryzyko regionalne... zamieszki/wywłaszczenia w niestabilnych regionach").
+## Realia lat 20.: kolonialna Afryka i postimperialna Azja (Turcja, Indie
+## Brytyjskie, Cejlon) niestabilniejsze niż reszta świata w tym uproszczonym
+## modelu. Regiony bez wpisu (europe, north_america, south_america,
+## central_america) = brak ryzyka zamieszek — tylko strajk z zaległych
+## wypłat (ta sama konsekwencja, ale niezależny wyzwalacz) tam nadal grozi.
+const REGION_UNREST_CHANCE_PER_WEEK := {
+	"africa": 0.05,
+	"asia": 0.04,
+}
+
 ## Macierz trójkątna (symetryczna) — każda para podana raz.
 const TRAVEL_DAYS := {
 	"berlin": {"ankara": 5.1, "london": 3.0, "lisbon": 5.5, "amsterdam": 1.5, "paris": 2.3},

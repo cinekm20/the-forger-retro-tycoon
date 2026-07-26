@@ -47,6 +47,9 @@ func _ready() -> void:
 	_test_find_plantation_index()
 	_test_plantation_grows_multiple_crops_at_once()
 	_test_plant_tile_requires_ownership()
+	_test_plantation_crisis_from_unpaid_wages()
+	_test_plantation_lost_after_repeated_crisis_hits()
+	_test_world_events_reform_queued()
 	_test_yearly_report_populated_on_new_year()
 	_test_players_gender_and_avatar_selection()
 	_test_price_history_for_charts()
@@ -199,6 +202,61 @@ func _test_plant_tile_requires_ownership() -> void:
 	var idx := PlayerPlantations.found_plantation("richmond")
 	PlayerPlantations.plantations[idx]["river"].fill(false)
 	_assert(not PlayerPlantations.plant_tile(idx, 0, "tobacco"), "nie da się zasadzić na polu, którego gracz jeszcze nie kupił")
+
+
+## "richmond" (region north_america) celowo — Cities.REGION_UNREST_CHANCE_PER_WEEK
+## nie ma dla niego wpisu, więc zamieszki nigdy nie ingerują w ten test:
+## sprawdzamy WYŁĄCZNIE strajk z zaległych wypłat, deterministycznie, bez
+## żadnego randf() w grze (ten sam powód, dla którego _test_security_bodyguard_and_gangster
+## nigdy nie wywołuje apply_player_days_elapsed — realne, losowe zdarzenia
+## tygodniowe nie powinny wpływać na wynik testu).
+func _test_plantation_crisis_from_unpaid_wages() -> void:
+	print("-- PlayerPlantations: strajk (brak wypłat) zabiera zapasy i połowę robotników --")
+	PlayerPlantations.reset_new_game()
+	Economy.reset_new_game()
+	WorldEvents.reset_new_game()
+	var idx := PlayerPlantations.found_plantation("richmond")
+	PlayerPlantations.hire_workers(idx, 10)
+	PlayerPlantations.plantations[idx]["stored_goods"]["tobacco"] = 50
+	Economy.player_money = -1.0  # już na minusie — jedna dowolna płaca utrzyma dług
+
+	PlayerPlantations.apply_player_days_elapsed(1)
+
+	_assert(int(PlayerPlantations.plantations[idx]["stored_goods"].get("tobacco", 0)) == 0, "zapasy skonfiskowane po strajku")
+	_assert(int(PlayerPlantations.plantations[idx]["workers"]) == 5, "połowa robotników uciekła (10 -> 5)")
+	_assert(int(PlayerPlantations.plantations[idx]["crisis_hits"]) == 1, "licznik uderzeń kryzysu wzrósł do 1")
+	_assert(WorldEvents.has_pending(), "zdarzenie trafiło do kolejki WorldEvents")
+	var reported_event := WorldEvents.consume_next()
+	_assert(reported_event.get("kind", "") == "crisis" and reported_event.get("cause", "") == "wages", "zdarzenie oznaczone jako kryzys z przyczyny 'wages'")
+	_assert(not reported_event.get("plantation_lost", true), "pojedynczy strajk NIE zabiera jeszcze całej plantacji")
+
+
+func _test_plantation_lost_after_repeated_crisis_hits() -> void:
+	print("-- PlayerPlantations: powtarzające się strajki zabierają całą plantację --")
+	PlayerPlantations.reset_new_game()
+	Economy.reset_new_game()
+	WorldEvents.reset_new_game()
+	var idx := PlayerPlantations.found_plantation("richmond")
+	PlayerPlantations.hire_workers(idx, 10)
+
+	for i in PlayerPlantations.CRISIS_HITS_TO_LOSE_PLANTATION:
+		Economy.player_money = -1.0  # utrzymaj dług przed każdym kolejnym uderzeniem
+		PlayerPlantations.apply_player_days_elapsed(1)
+
+	_assert(PlayerPlantations.find_plantation_index("richmond") == -1, "po %d uderzeniach kryzysu plantacja znika z tablicy" % PlayerPlantations.CRISIS_HITS_TO_LOSE_PLANTATION)
+
+
+func _test_world_events_reform_queued() -> void:
+	print("-- WorldEvents: reforma walutowa trafia do kolejki karty gazety --")
+	WorldEvents.reset_new_game()
+	Economy.reset_new_game()
+
+	Economy.apply_currency_reform(5.0)
+
+	_assert(WorldEvents.has_pending(), "reforma trafia do kolejki")
+	var reported_event := WorldEvents.consume_next()
+	_assert(reported_event.get("kind", "") == "reform" and is_equal_approx(reported_event.get("ratio", 0.0), 5.0), "zdarzenie to reforma z ratio=5.0")
+	_assert(not WorldEvents.has_pending(), "kolejka pusta po skonsumowaniu jedynego zdarzenia")
 
 
 func _test_ship_and_sell_all_across_plantations() -> void:

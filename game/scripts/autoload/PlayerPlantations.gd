@@ -11,6 +11,17 @@ const WORKER_DAILY_WAGE := 1.0
 const MAX_WORKERS := 500
 const REFERENCE_TILE_COUNT := 50.0  ## odniesienie do tabeli plonów (ok. 50 ha przy rzece)
 
+## Ryzyko regionalne (zgłoszone przez użytkownika, docs/GDD.md pkt. 4.2):
+## strajk (brak wypłat robotnikom) i zamieszki/wywłaszczenie w niestabilnym
+## regionie (Cities.REGION_UNREST_CHANCE_PER_WEEK) mają TE SAME konsekwencje
+## — zabrane zapasy + ucieczka części załogi (patrz _apply_crisis_hit) —
+## dzielone przez jeden wspólny licznik "crisis_hits" na plantację,
+## niezależnie od przyczyny. Po CRISIS_HITS_TO_LOSE_PLANTATION kolejne
+## uderzenie (obojętnie jakiej przyczyny) zabiera CAŁĄ plantację: "jak
+## dłużej trwa to zabieranie plantacji" (zgłoszone przez użytkownika).
+const CRISIS_HITS_TO_LOSE_PLANTATION := 3
+const CRISIS_WORKER_LOSS_RATIO := 0.5  ## ucieka połowa aktualnej załogi za każdym uderzeniem
+
 var plantations: Array[Dictionary] = []
 
 
@@ -18,17 +29,66 @@ func reset_new_game() -> void:
 	plantations.clear()
 
 
-## Tor B — osobiste dla aktywnego gracza: płaca robotników nalicza się
-## cyklicznie za każdy dzień pracy (nie jednorazowo przy zatrudnieniu) — brak
-## pieniędzy nie blokuje pracy, tylko pogłębia dług gracza (spójne z
-## mechaniką bankructwa w Economy.gd). Wywoływane wprost przez
+## Tor B — osobiste dla aktywnego gracza: płaca robotników + ryzyko
+## regionalne (strajk/zamieszki, patrz stała komentarz wyżej) naliczają się
+## cyklicznie za każdy dzień pracy. Wywoływane wprost przez
 ## Players.advance_active_player_time (NIE podłączone do Calendar.day_advanced
-## — to osobisty koszt TEGO gracza, nie zjawisko globalne).
+## — to osobisty koszt/ryzyko TEGO gracza, nie zjawisko globalne).
+## Iteracja przez indeks (nie `for plantation in plantations`) — plantacja
+## utracona w trakcie pętli (_apply_crisis_hit zwraca true) musi zniknąć z
+## `plantations` OD RAZU, więc trzeba nią bezpiecznie manipulować w locie.
 func apply_player_days_elapsed(days_elapsed: int) -> void:
-	for plantation in plantations:
+	var weeks: float = float(days_elapsed) / 7.0
+	var i := 0
+	while i < plantations.size():
+		var plantation: Dictionary = plantations[i]
 		var wage_cost: float = int(plantation["workers"]) * WORKER_DAILY_WAGE * days_elapsed
 		if wage_cost > 0.0:
 			Economy.player_money -= wage_cost
+
+		## Strajk: brak wypłat (gotówka na minusie) PRZY zatrudnionej załodze —
+		## zgłoszone przez użytkownika. Sprawdzane PO odjęciu tej płacy, żeby
+		## strajk reagował na FAKTYCZNY, bieżący stan konta, nie sprzed niej.
+		var lost := int(plantation["workers"]) > 0 and Economy.player_money < 0.0 and _apply_crisis_hit(plantation, "wages")
+
+		## Zamieszki: niezależne od wypłat, losowane wg niestabilności REGIONU
+		## tej plantacji (Cities.REGION_UNREST_CHANCE_PER_WEEK) — pominięte,
+		## jeśli strajk w tym samym kroku już i tak zabrał plantację.
+		if not lost:
+			var region: String = Cities.CITIES[plantation["city"]]["region"]
+			var chance_per_week: float = Cities.REGION_UNREST_CHANCE_PER_WEEK.get(region, 0.0)
+			if chance_per_week > 0.0 and randf() < chance_per_week * weeks:
+				lost = _apply_crisis_hit(plantation, "unrest")
+
+		if lost:
+			plantations.remove_at(i)
+		else:
+			i += 1
+
+
+## Jedno "uderzenie" kryzysu (strajk albo zamieszki, patrz apply_player_days_elapsed
+## wyżej) — zabiera WSZYSTKIE zebrane zapasy tej plantacji i połowę aktualnej
+## załogi (CRISIS_WORKER_LOSS_RATIO), zgłasza zdarzenie do WorldEvents
+## (pokazywane jako karta gazety w Hubie, patrz WorldEvents.gd) i zwraca
+## true, jeśli licznik uderzeń (crisis_hits) właśnie osiągnął próg utraty
+## CAŁEJ plantacji — wywołujący usuwa ją wtedy z `plantations`.
+func _apply_crisis_hit(plantation: Dictionary, cause: String) -> bool:
+	plantation["crisis_hits"] = int(plantation.get("crisis_hits", 0)) + 1
+
+	var stored: Dictionary = plantation["stored_goods"]
+	var had_crops := false
+	for crop in stored.keys().duplicate():
+		if int(stored[crop]) > 0:
+			had_crops = true
+		stored[crop] = 0
+
+	var workers_before: int = int(plantation["workers"])
+	var workers_lost: int = int(workers_before * CRISIS_WORKER_LOSS_RATIO)
+	plantation["workers"] = workers_before - workers_lost
+
+	var plantation_lost: bool = int(plantation["crisis_hits"]) >= CRISIS_HITS_TO_LOSE_PLANTATION
+	WorldEvents.report_plantation_crisis(cause, plantation["city"], workers_lost, had_crops, plantation_lost)
+	return plantation_lost
 
 
 ## Indeks plantacji gracza w danym mieście, albo -1, jeśli gracz nie ma tam
@@ -59,6 +119,7 @@ func found_plantation(city_id: String) -> int:
 		"workers": 0,
 		"stored_goods": {},  ## uprawa -> ilość w magazynie (osobno per uprawa)
 		"last_harvest_day": Players.active_day(),
+		"crisis_hits": 0,  ## ile razy strajk/zamieszki uderzyły w tę plantację — patrz _apply_crisis_hit
 	})
 	return plantations.size() - 1
 
