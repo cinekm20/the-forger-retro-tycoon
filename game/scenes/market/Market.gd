@@ -60,12 +60,15 @@ func _ready() -> void:
 	## Wykres cen towarów w czasie (Crops.price_history) — rysowany natywnie
 	## (PriceChart.gd), tak jak sejfy/pinezki/ramki indziej w tej grze
 	## (Leonardo.ai generuje pełne sceny zamiast czystego wykresu). Legenda
-	## pod wykresem: kolorowy kwadracik + nazwa towaru.
+	## pod wykresem: kolorowy kwadracik + nazwa towaru. Oba w jednej złotej
+	## ramce (ScreenHelpers.make_framed_box) — zgłoszone przez użytkownika:
+	## "w rynku i giełdzie pod samym wykresem z legendą powinna być ramka".
+	var chart_frame := ScreenHelpers.make_framed_box(root)
 	crop_chart = PriceChartScript.new()
 	crop_chart.custom_minimum_size = Vector2(420, 140)
 	crop_chart.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	root.add_child(crop_chart)
-	_build_chart_legend(root, Crops.CROPS, func(id): return Crops.CROP_NAMES[id], CROP_CHART_COLORS)
+	chart_frame.add_child(crop_chart)
+	_build_chart_legend(chart_frame, Crops.CROPS, func(id): return Crops.CROP_NAMES[id], CROP_CHART_COLORS)
 
 	ScreenHelpers.make_title(root, "Kontrakty terminowe")
 	ScreenHelpers.make_label(

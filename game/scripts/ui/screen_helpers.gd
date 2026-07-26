@@ -511,3 +511,32 @@ static func make_expand_spacer() -> Control:
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return spacer
+
+
+## Oprawiona "skrzynka" (złota ramka + ciemne tło) na dowolną zawartość —
+## ten sam wzorzec co grid_frame w Plantation.gd i silo frame w
+## Warehouse.gd, tu wydzielony jako współdzielony helper na potrzeby ramki
+## pod wykresem cen + legendą w Market.gd/StockMarket.gd (zgłoszone przez
+## użytkownika: "w rynku i giełdzie pod samym wykresem z legendą powinna
+## być ramka"). Zwraca WEWNĘTRZNY VBoxContainer — wołający dokłada do
+## niego dzieci (wykres, legendę), nie do zwróconego PanelContainera.
+static func make_framed_box(root: Container) -> VBoxContainer:
+	var panel := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.05, 0.1, 0.6)
+	style.border_color = COLOR_GOLD
+	style.set_border_width_all(3)
+	style.set_corner_radius_all(6)
+	style.content_margin_left = 14
+	style.content_margin_right = 14
+	style.content_margin_top = 10
+	style.content_margin_bottom = 10
+	panel.add_theme_stylebox_override("panel", style)
+	panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	root.add_child(panel)
+
+	var inner := VBoxContainer.new()
+	inner.alignment = BoxContainer.ALIGNMENT_CENTER
+	inner.add_theme_constant_override("separation", 8)
+	panel.add_child(inner)
+	return inner

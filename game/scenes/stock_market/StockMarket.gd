@@ -61,12 +61,16 @@ func _ready() -> void:
 	## Wykres kursu linii żeglugowych w czasie (ShippingCompanies.price_history)
 	## — rysowany natywnie (PriceChart.gd), tak jak sejfy/pinezki/ramki
 	## indziej w tej grze (Leonardo.ai generuje pełne sceny zamiast czystego
-	## wykresu). Legenda pod wykresem: kolorowy kwadracik + nazwa spółki.
+	## wykresu). Legenda pod wykresem: kolorowy kwadracik + nazwa spółki. Oba
+	## w jednej złotej ramce (ScreenHelpers.make_framed_box) — zgłoszone przez
+	## użytkownika: "w rynku i giełdzie pod samym wykresem z legendą powinna
+	## być ramka".
+	var chart_frame := ScreenHelpers.make_framed_box(root)
 	shipping_chart = PriceChartScript.new()
 	shipping_chart.custom_minimum_size = Vector2(420, 140)
 	shipping_chart.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	root.add_child(shipping_chart)
-	_build_chart_legend(root, ShippingCompanies.COMPANIES.keys(), func(id): return ShippingCompanies.COMPANIES[id]["name"], SHIPPING_COLORS)
+	chart_frame.add_child(shipping_chart)
+	_build_chart_legend(chart_frame, ShippingCompanies.COMPANIES.keys(), func(id): return ShippingCompanies.COMPANIES[id]["name"], SHIPPING_COLORS)
 
 	root.add_child(ScreenHelpers.make_expand_spacer())
 	ScreenHelpers.make_back_button(root)
