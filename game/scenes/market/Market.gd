@@ -81,6 +81,7 @@ func _ready() -> void:
 	for crop in Crops.CROPS:
 		var propose_btn := Button.new()
 		propose_btn.text = tr("Zawrzyj: %s") % Crops.CROP_NAMES[crop]
+		propose_btn.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		propose_btn.pressed.connect(_on_propose_contract_pressed.bind(crop))
 		contract_row.add_child(propose_btn)
 
@@ -100,6 +101,7 @@ func _rebuild_crop_rows() -> void:
 		var label := Label.new()
 		label.text = tr("%s: %.1f M / jednostkę") % [Crops.CROP_NAMES[crop], Crops.get_price(crop)]
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		crop_rows_container.add_child(label)
 
 
@@ -144,6 +146,7 @@ func _build_chart_legend(parent: Container, ids: Array, get_name: Callable, colo
 		var label := Label.new()
 		label.text = get_name.call(id)
 		label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
+		label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		entry.add_child(label)
 
 

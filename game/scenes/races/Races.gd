@@ -38,11 +38,13 @@ func _ready() -> void:
 	root.add_child(bet_row)
 
 	horse_option = OptionButton.new()
+	horse_option.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 	for horse in HORSES:
 		horse_option.add_item(horse["name"])
 	bet_row.add_child(horse_option)
 
 	bet_spin = SpinBox.new()
+	bet_spin.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 	bet_spin.min_value = 100
 	bet_spin.max_value = 50000
 	bet_spin.step = 100

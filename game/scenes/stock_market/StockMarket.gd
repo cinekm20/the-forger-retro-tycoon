@@ -96,7 +96,10 @@ func _rebuild_rows() -> void:
 		name_label.text = company_name.to_upper()
 		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		name_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
-		name_label.add_theme_font_size_override("font_size", 16)
+		## ScreenHelpers.BODY_FONT_SIZE (dawniej 16) — zgłoszone przez
+		## użytkownika: żadna czcionka w grze nie powinna być mniejsza niż w
+		## Plantacjach.
+		name_label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		column.add_child(name_label)
 
 		var price := ShippingCompanies.get_price(company_id)
@@ -105,6 +108,7 @@ func _rebuild_rows() -> void:
 		price_label.text = tr("%.1f M (masz: %d)") % [price, owned]
 		price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		price_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
+		price_label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		column.add_child(price_label)
 
 		var btn_row := HBoxContainer.new()
@@ -113,11 +117,13 @@ func _rebuild_rows() -> void:
 
 		var buy_btn := Button.new()
 		buy_btn.text = "Kup 10"
+		buy_btn.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		buy_btn.pressed.connect(_on_buy_pressed.bind(company_id))
 		btn_row.add_child(buy_btn)
 
 		var sell_btn := Button.new()
 		sell_btn.text = "Sprzedaj 10"
+		sell_btn.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		sell_btn.pressed.connect(_on_sell_pressed.bind(company_id))
 		btn_row.add_child(sell_btn)
 
@@ -173,6 +179,7 @@ func _build_chart_legend(parent: Container, ids: Array, get_name: Callable, colo
 		var label := Label.new()
 		label.text = get_name.call(id)
 		label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
+		label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		entry.add_child(label)
 
 

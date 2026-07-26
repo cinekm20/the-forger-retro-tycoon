@@ -87,16 +87,19 @@ func _build_silo(crop: String) -> VBoxContainer:
 	name_label.text = Crops.CROP_NAMES[crop].to_upper()
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
+	name_label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 	column.add_child(name_label)
 
 	var amount_label := Label.new()
 	amount_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	amount_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
+	amount_label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 	column.add_child(amount_label)
 	amount_labels[crop] = amount_label
 
 	var sell_btn := Button.new()
 	sell_btn.text = tr("Wyślij i sprzedaj")
+	sell_btn.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 	sell_btn.pressed.connect(_on_sell_pressed.bind(crop))
 	column.add_child(sell_btn)
 

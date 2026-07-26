@@ -258,6 +258,13 @@ const COLOR_GOLD_BRIGHT := Color(1.0, 0.83, 0.4)
 const COLOR_CREAM := Color(0.95, 0.88, 0.72)
 const COLOR_BURGUNDY_DARK := Color(0.13, 0.04, 0.06)
 
+## Zgłoszone przez użytkownika: w Plantacjach fonty zostały powiększone do
+## 22px (patrz dawne Plantation.gd BODY_FONT_SIZE) — ten sam rozmiar ma być
+## teraz WSZĘDZIE w grze, żadne pole tekstowe nie powinno być mniejsze.
+## Jedno wspólne źródło prawdy zamiast rozrzuconych osobnych stałych po
+## poszczególnych ekranach.
+const BODY_FONT_SIZE := 22
+
 
 static func make_title(root: VBoxContainer, text: String) -> Label:
 	var label := Label.new()
@@ -276,9 +283,10 @@ static func make_label(root: VBoxContainer, text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	## 19 zamiast domyślnych ~16px Godota — tester zgłosił, że teksty w
-	## całej grze mogłyby być trochę większe.
-	label.add_theme_font_size_override("font_size", 19)
+	## BODY_FONT_SIZE (22, dawniej 19) — zgłoszone przez użytkownika: fonty w
+	## Plantacjach zostały powiększone do 22px, ten sam rozmiar ma być
+	## wszędzie w grze, żadne pole tekstowe nie powinno być mniejsze.
+	label.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 	label.add_theme_color_override("font_color", COLOR_CREAM)
 	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
 	label.add_theme_constant_override("shadow_offset_x", 1)
@@ -321,9 +329,9 @@ static func make_info_box(root: Container, text: String, min_width: float = 0.0,
 	label.text = text
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.add_theme_color_override("font_color", COLOR_CREAM)
-	## 19 = domyślny większy rozmiar (patrz make_label), zamiast pozostawiać
-	## niepodbite skrzynki na ciut mniejszym, domyślnym rozmiarze Godota.
-	label.add_theme_font_size_override("font_size", font_size if font_size > 0 else 19)
+	## BODY_FONT_SIZE domyślnie (patrz make_label) — żadna skrzynka nie
+	## powinna zostać na mniejszym rozmiarze.
+	label.add_theme_font_size_override("font_size", font_size if font_size > 0 else BODY_FONT_SIZE)
 	if min_width > 0.0:
 		label.custom_minimum_size = Vector2(min_width - box.content_margin_left - box.content_margin_right, 0)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD
@@ -453,7 +461,7 @@ static func _style_button(btn: Button) -> void:
 	btn.add_theme_color_override("font_hover_color", COLOR_GOLD_BRIGHT)
 	btn.add_theme_color_override("font_pressed_color", COLOR_GOLD_BRIGHT)
 	btn.add_theme_color_override("font_disabled_color", Color(0.6, 0.6, 0.6))
-	btn.add_theme_font_size_override("font_size", 21)
+	btn.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 
 
 ## Rozmiar/czcionka podniesione z (280, 46)/18px — tester zgłosił, że

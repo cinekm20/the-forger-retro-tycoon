@@ -159,6 +159,7 @@ func _ready() -> void:
 	crop_caption.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 	crop_row.add_child(crop_caption)
 	crop_option = OptionButton.new()
+	crop_option.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 	for crop in Crops.CROPS:
 		crop_option.add_item(Crops.CROP_NAMES[crop])
 	crop_row.add_child(crop_option)
@@ -171,6 +172,7 @@ func _ready() -> void:
 	worker_caption.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 	worker_row.add_child(worker_caption)
 	worker_spin = SpinBox.new()
+	worker_spin.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
 	worker_spin.min_value = 0
 	worker_spin.max_value = PlayerPlantations.MAX_WORKERS
 	worker_spin.step = 10

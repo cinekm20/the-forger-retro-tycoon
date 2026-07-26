@@ -39,6 +39,7 @@ func _ready() -> void:
 		label.text = "%s\n%.1f M" % [company_name.to_upper(), float(shipping.get(company_id, ShippingCompanies.STARTING_PRICE))]
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
+		label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		box.add_child(label)
 
 	ScreenHelpers.make_label(root, tr("Ceny towarów"))
@@ -53,6 +54,7 @@ func _ready() -> void:
 		label.text = "%s\n%.1f M" % [Crops.CROP_NAMES[crop], float(crops.get(crop, Crops.BASE_CROP_PRICE.get(crop, 0.0)))]
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
+		label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		box.add_child(label)
 
 	ScreenHelpers.make_label(root, tr("Inflacja: %.1f%%\nKurs dolara: %.2f M") % [

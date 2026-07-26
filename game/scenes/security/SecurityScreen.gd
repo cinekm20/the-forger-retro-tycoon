@@ -46,9 +46,11 @@ func _ready() -> void:
 		root.add_child(rival_row)
 		var rival_label := Label.new()
 		rival_label.text = tr("%s: %d obrazów") % [rival["name"], AIPlayers.get_rival_painting_count(rival["id"])]
+		rival_label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		rival_row.add_child(rival_label)
 		var gangster_btn := Button.new()
 		gangster_btn.text = tr("Wyślij gangstera (%.0f M)") % Security.GANGSTER_COST
+		gangster_btn.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		gangster_btn.pressed.connect(_on_send_gangster_pressed.bind(rival["id"]))
 		rival_row.add_child(gangster_btn)
 

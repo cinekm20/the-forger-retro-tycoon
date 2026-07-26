@@ -16,6 +16,7 @@ func _ready() -> void:
 	ScreenHelpers.make_label(root, "Język / Language / Sprache")
 
 	var lang_option := OptionButton.new()
+	lang_option.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 	var lang_codes: Array[String] = []
 	for code in Localization.LANGUAGES.keys():
 		lang_option.add_item(Localization.LANGUAGES[code])

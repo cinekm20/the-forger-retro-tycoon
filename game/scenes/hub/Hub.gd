@@ -199,7 +199,7 @@ func _build_top_row() -> HBoxContainer:
 	location_label = Label.new()
 	location_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	location_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
-	location_label.add_theme_font_size_override("font_size", 22)
+	location_label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 	location_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	location_label.custom_minimum_size = Vector2(230, 0)
 	location_row.add_child(location_label)
@@ -266,6 +266,7 @@ func _build_turn_summary() -> void:
 	turn_summary_label = Label.new()
 	turn_summary_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	turn_summary_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
+	turn_summary_label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 	turn_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	turn_summary_label.custom_minimum_size = Vector2(300, 0)
 	row.add_child(turn_summary_label)

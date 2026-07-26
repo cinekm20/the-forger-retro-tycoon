@@ -31,14 +31,17 @@ func _ready() -> void:
 	setup_section.add_child(player_row)
 	var player_caption := Label.new()
 	player_caption.text = "Liczba graczy (hot-seat):"
+	player_caption.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 	player_row.add_child(player_caption)
 	player_count_option = OptionButton.new()
+	player_count_option.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 	for count in range(1, Players.MAX_PLAYERS + 1):
 		player_count_option.add_item(str(count))
 	player_row.add_child(player_count_option)
 
 	easy_mode_check = CheckBox.new()
 	easy_mode_check.text = tr("Tryb łatwy (%d/%d obrazów do wygranej)") % [Paintings.EASY_WIN_THRESHOLD, Paintings.CATALOG.size()]
+	easy_mode_check.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 	setup_section.add_child(easy_mode_check)
 
 	ScreenHelpers.make_button(setup_section, "Nowa gra", _show_name_entry)
@@ -181,11 +184,13 @@ func _show_name_entry() -> void:
 
 		var caption := Label.new()
 		caption.text = tr("Gracz %d:") % (i + 1)
+		caption.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		name_row.add_child(caption)
 
 		var edit := LineEdit.new()
 		edit.placeholder_text = tr("Gracz %d") % (i + 1)
 		edit.custom_minimum_size = Vector2(160, 0)
+		edit.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		name_row.add_child(edit)
 		name_edits.append(edit)
 
@@ -194,6 +199,7 @@ func _show_name_entry() -> void:
 		column.add_child(choice_row)
 
 		var gender_option := OptionButton.new()
+		gender_option.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		for gender in Players.GENDERS:
 			gender_option.add_item(Players.GENDER_NAMES[gender])
 		gender_option.item_selected.connect(_on_avatar_choice_changed.bind(i))
@@ -201,6 +207,7 @@ func _show_name_entry() -> void:
 		gender_options.append(gender_option)
 
 		var avatar_option := OptionButton.new()
+		avatar_option.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		for variant in Players.AVATAR_VARIANTS:
 			avatar_option.add_item(Players.AVATAR_VARIANT_NAMES[variant])
 		avatar_option.item_selected.connect(_on_avatar_choice_changed.bind(i))
