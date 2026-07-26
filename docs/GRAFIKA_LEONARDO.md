@@ -988,7 +988,7 @@ Leonardo, żeby mieć z czego wybrać).
 | 11 | 6 | 40 obrazów kolekcji (na końcu, seriami po 5 per kategoria) | 40 | 1:1, min. 1024×1024 | §7 | ✅ zrobione i podpięte — wszystkie 40 (`painting_01.jpg`…`painting_40.jpg`, patrz `Paintings.get_texture_path`) |
 | 12 | 7 (opcjonalnie) | Warianty "fałszywka" wybranych obrazów (do szkoły sztuki) | ~8–10 | 1:1, jak oryginał | §7, §8 | ✅ 10/~8–10 zrobione i podpięte — obrazy 7, 10, 11, 16, 21, 25, 29, 30, 32, 33 (`painting_NN_fake.jpg`); reszta katalogu dalej pokazuje zwykłą grafikę przy fałszywce (`Paintings.get_texture_path` po cichu spada na oryginał, gdy wariantu brak) |
 | 13 | 6 | Ikony 8 kategorii stylistycznych (okładki kafelków w Galerii) | 8 | 1:1, min. 1024×1024 | §9b | ✅ zrobione i podpięte — wszystkie 8 (`vermeer.jpg`, `baroque.jpg`, `classicism.jpg`, `romanticism.jpg`, `impressionism.jpg`, `symbolism.jpg`, `expressionism.jpg`, `modern.jpg`) |
-| 14 | 2 | Pusty wariant tła Galerii (bez obrazów/ławek/żyrandola na ścianach) | 1 | 16:9, 1920×1080 | §9 | ⬜ do zrobienia — zwykły `gallery.jpg` wyszedł zbyt wypełniony, konkuruje wizualnie z kafelkami/podglądem nakładanymi w kodzie; `Gallery.gd` po cichu spada na `gallery.jpg`, dopóki `gallery_empty.jpg` nie istnieje |
+| 14 | 2 | Pusty wariant tła Galerii (bez obrazów/ławek/żyrandola na ścianach) | 1 | 16:9, 1920×1080 | §9 | ✅ zrobione i podpięte (`gallery_empty.jpg`) — zwykły `gallery.jpg` zostaje jako czysty fallback, gdyby plik kiedyś zniknął |
 
 **Zasada dla wierszy oznaczonych "uwaga" (7 i 9):** jeśli Leonardo znowu
 zacznie robić pełne sceny zamiast wyizolowanych ikon/sprite'ów mimo
