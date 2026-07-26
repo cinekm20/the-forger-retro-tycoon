@@ -22,6 +22,7 @@ func save_game() -> void:
 		"shipping_shares": ShippingCompanies.shares_owned,
 		"shipping_price_history": ShippingCompanies.price_history,
 		"plantations": PlayerPlantations.plantations,
+		"city_grids": PlayerPlantations.city_grids,
 		"crop_prices": Crops.market_price,
 		"crop_price_history": Crops.price_history,
 		"forward_contracts": ForwardContracts.active_contracts,
@@ -74,6 +75,17 @@ func load_game() -> void:
 	ShippingCompanies.price_history = data.get("shipping_price_history", default_shipping_history)
 	var loaded_plantations: Array = data.get("plantations", [])
 	PlayerPlantations.plantations.assign(loaded_plantations)
+	## Zapisy sprzed wspólnej siatki miast (city_grids) nie mają tego klucza —
+	## zamiast zgadywać stary, per-gracz teren, generujemy świeży, w pełni
+	## wolny teren dla wszystkich miast (ten sam efekt co nowa gra), skoro i
+	## tak nie da się wiarygodnie odtworzyć, kto co wcześniej posiadał w
+	## starym modelu. Jednorazowa, akceptowalna utrata przy migracji — ten
+	## sam kompromis co gdzie indziej w tym pliku (np. next_auction_city).
+	var loaded_city_grids: Dictionary = data.get("city_grids", {})
+	if loaded_city_grids.is_empty():
+		PlayerPlantations.generate_all_city_grids()
+	else:
+		PlayerPlantations.city_grids = loaded_city_grids
 	Crops.market_price = data.get("crop_prices", {})
 	var default_crop_history := {}
 	for crop in Crops.CROPS:

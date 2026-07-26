@@ -66,18 +66,33 @@ zawsze dostępnym (Wyścigi), z przyciskiem "« Powrót". Ten dwupoziomowy ukła
 przewijaną listę — przewijanie dotykiem na telefonie okazało się niewiarygodne.
 
 ### 4.2 Plantacje
-Widok siatkowy (grid) **16×16 pól** pojedynczej plantacji, płaski od góry (nie
-izometryczny), z rzeką przebiegającą przez pole jako losowo wygenerowana,
-wijąca się ścieżka (błądzenie losowe kolumnami, inna przy każdym założeniu
-plantacji) — **pola przylegające do rzeki dają ×2 plonu** (patrz
-`MECHANIKI_EKONOMICZNE.md` pkt. 3–4), co zachęca do zwartego, przemyślanego
-układania upraw zamiast maksymalizowania powierzchni. Każde pole to natywnie
-rysowana ikonka (rzeka/dzika ziemia do kupienia/zaorana ziemia/roślinka w
-kolorze zależnym od uprawy), nie tekst czy zewnętrzna grafika. Mechaniki:
-wybór uprawy (kawa/tytoń/herbata/kakao — profil plonu zależny od lokalizacji
-i **pory roku**, tabela sezonowej wydajności w `MECHANIKI_EKONOMICZNE.md`),
+Widok siatkowy (grid) **16×16 pól** plantacji danego miasta, płaski od góry
+(nie izometryczny), z rzeką przebiegającą przez pole jako losowo
+wygenerowana, wijąca się ścieżka (błądzenie losowe kolumnami) — **pola
+przylegające do rzeki dają ×2 plonu** (patrz `MECHANIKI_EKONOMICZNE.md`
+pkt. 3–4), co zachęca do zwartego, przemyślanego układania upraw zamiast
+maksymalizowania powierzchni. Każde pole to natywnie rysowana ikonka
+(rzeka/dzika ziemia do kupienia/zaorana ziemia/roślinka w kolorze zależnym
+od uprawy), nie tekst czy zewnętrzna grafika. Mechaniki: wybór uprawy
+(kawa/tytoń/herbata/kakao — profil plonu zależny od lokalizacji i **pory
+roku**, tabela sezonowej wydajności w `MECHANIKI_EKONOMICZNE.md`),
 zatrudnianie robotników (plon skaluje się liniowo z ich liczbą), zbiory i
 wysyłka towaru do magazynu (Nowy Jork).
+
+✅ **Siatka jest wspólna dla wszystkich graczy, wygenerowana raz na początku
+gry — zaimplementowane** (`PlayerPlantations.city_grids`, zgłoszone przez
+użytkownika: "plantacje w danym mieście powinny być wygenerowane na
+początku gry i powinny być wspólne dla wszystkich graczy, czyli ten który
+zasieje w lepszym miejscu będzie miał lepsze plony"). Rzeka + WŁASNOŚĆ
+każdego pola żyją w jednym, wspólnym magazynie danych per miasto (NIE
+migawkowane per gracz, w odróżnieniu od robotników/zapasów tego gracza) —
+kto pierwszy kupi dane pole (zwłaszcza przy rzece), blokuje je reszcie
+graczy do końca gry albo do utraty całej plantacji (patrz ryzyko regionalne
+niżej). Cena pola płaska (500 M, jak dotąd) niezależnie od pozycji — jedyną
+przewagą jest to, KTO PIERWSZY zajmie dobre miejsce. W siatce (ekran
+Plantacje) pole zajęte przez innego gracza pokazuje jego kolor + inicjał
+imienia (`PlantationTileIcon.Kind.OWNED_BY_OTHER`), widoczne tylko w
+hot-seat multiplayer.
 
 ✅ **Ryzyko regionalne — zaimplementowane** (`PlayerPlantations._apply_crisis_hit`,
 `Cities.REGION_UNREST_CHANCE_PER_WEEK`): strajk (brak wypłat robotnikom —

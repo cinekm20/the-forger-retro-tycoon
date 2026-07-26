@@ -49,6 +49,7 @@ func _ready() -> void:
 	_test_plant_tile_requires_ownership()
 	_test_plantation_crisis_from_unpaid_wages()
 	_test_plantation_lost_after_repeated_crisis_hits()
+	_test_plantation_tiles_are_exclusive_between_players()
 	_test_world_events_reform_queued()
 	_test_yearly_report_populated_on_new_year()
 	_test_players_gender_and_avatar_selection()
@@ -97,14 +98,15 @@ func _test_river_adjacency_detection() -> void:
 	print("-- PlayerPlantations: wykrywanie sąsiedztwa z rzeką --")
 	PlayerPlantations.reset_new_game()
 	var idx := PlayerPlantations.found_plantation("richmond")
-	# Rzeka jest teraz losowa (patrz _generate_river) — dla deterministycznego
-	# testu logiki sąsiedztwa nadpisujemy ją ręcznie: prosta kolumna x=2,
-	# GRID_SIZE = 16 -> tile_index = y*16+x.
+	# Rzeka jest teraz losowa (patrz _generate_river) i wspólna dla całego
+	# miasta (PlayerPlantations.city_grids, nie per gracz) — dla
+	# deterministycznego testu logiki sąsiedztwa nadpisujemy ją ręcznie:
+	# prosta kolumna x=2, GRID_SIZE = 16 -> tile_index = y*16+x.
 	var river: Array[bool] = []
 	river.resize(PlayerPlantations.GRID_SIZE * PlayerPlantations.GRID_SIZE)
 	river.fill(false)
 	river[2] = true  # pole (2,0)
-	PlayerPlantations.plantations[idx]["river"] = river
+	PlayerPlantations.city_grids["richmond"]["river"] = river
 
 	_assert(PlayerPlantations.is_river_tile(idx, 2), "pole (2,0) to sama rzeka")
 	_assert(not PlayerPlantations.is_adjacent_to_river(idx, 2), "rzeka nie jest 'sąsiadem samej siebie' (nieistotne w grze — rzeka i tak nie do kupienia)")
@@ -120,7 +122,7 @@ func _test_harvest_requires_elapsed_time() -> void:
 	Economy.reset_new_game()
 	Players.reset_new_game(1)
 	var idx := PlayerPlantations.found_plantation("richmond")
-	PlayerPlantations.plantations[idx]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
+	PlayerPlantations.city_grids["richmond"]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
 	PlayerPlantations.buy_tile(idx, 0)
 	PlayerPlantations.plant_tile(idx, 0, "tobacco")
 	PlayerPlantations.hire_workers(idx, 500)
@@ -142,7 +144,7 @@ func _test_harvest_scales_with_time() -> void:
 	Economy.reset_new_game()
 	Players.reset_new_game(1)
 	var idx := PlayerPlantations.found_plantation("richmond")
-	PlayerPlantations.plantations[idx]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
+	PlayerPlantations.city_grids["richmond"]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
 	PlayerPlantations.buy_tile(idx, 0)
 	PlayerPlantations.plant_tile(idx, 0, "tobacco")
 	PlayerPlantations.hire_workers(idx, 500)
@@ -154,7 +156,7 @@ func _test_harvest_scales_with_time() -> void:
 	Economy.reset_new_game()
 	Players.reset_new_game(1)
 	idx = PlayerPlantations.found_plantation("richmond")
-	PlayerPlantations.plantations[idx]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
+	PlayerPlantations.city_grids["richmond"]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
 	PlayerPlantations.buy_tile(idx, 0)
 	PlayerPlantations.plant_tile(idx, 0, "tobacco")
 	PlayerPlantations.hire_workers(idx, 500)
@@ -178,7 +180,7 @@ func _test_plantation_grows_multiple_crops_at_once() -> void:
 	## Rio ma wysoki bazowy plon OBU upraw (kawa 220, tytoń 396), więc nawet
 	## po 1 polu każdej z nich wynik zaokrągla się w górę od zera.
 	var idx := PlayerPlantations.found_plantation("rio")
-	PlayerPlantations.plantations[idx]["river"].fill(false)
+	PlayerPlantations.city_grids["rio"]["river"].fill(false)
 	PlayerPlantations.hire_workers(idx, 500)
 
 	PlayerPlantations.buy_tile(idx, 0)
@@ -199,8 +201,9 @@ func _test_plantation_grows_multiple_crops_at_once() -> void:
 func _test_plant_tile_requires_ownership() -> void:
 	print("-- PlayerPlantations: plant_tile wymaga wcześniejszego kupienia pola --")
 	PlayerPlantations.reset_new_game()
+	Players.reset_new_game(1)
 	var idx := PlayerPlantations.found_plantation("richmond")
-	PlayerPlantations.plantations[idx]["river"].fill(false)
+	PlayerPlantations.city_grids["richmond"]["river"].fill(false)
 	_assert(not PlayerPlantations.plant_tile(idx, 0, "tobacco"), "nie da się zasadzić na polu, którego gracz jeszcze nie kupił")
 
 
@@ -215,6 +218,7 @@ func _test_plantation_crisis_from_unpaid_wages() -> void:
 	PlayerPlantations.reset_new_game()
 	Economy.reset_new_game()
 	WorldEvents.reset_new_game()
+	Players.reset_new_game(1)
 	var idx := PlayerPlantations.found_plantation("richmond")
 	PlayerPlantations.hire_workers(idx, 10)
 	PlayerPlantations.plantations[idx]["stored_goods"]["tobacco"] = 50
@@ -232,11 +236,14 @@ func _test_plantation_crisis_from_unpaid_wages() -> void:
 
 
 func _test_plantation_lost_after_repeated_crisis_hits() -> void:
-	print("-- PlayerPlantations: powtarzające się strajki zabierają całą plantację --")
+	print("-- PlayerPlantations: powtarzające się strajki zabierają całą plantację i zwalniają jej pola --")
 	PlayerPlantations.reset_new_game()
 	Economy.reset_new_game()
 	WorldEvents.reset_new_game()
+	Players.reset_new_game(1)
 	var idx := PlayerPlantations.found_plantation("richmond")
+	PlayerPlantations.city_grids["richmond"]["river"].fill(false)
+	PlayerPlantations.buy_tile(idx, 0)
 	PlayerPlantations.hire_workers(idx, 10)
 
 	for i in PlayerPlantations.CRISIS_HITS_TO_LOSE_PLANTATION:
@@ -244,6 +251,42 @@ func _test_plantation_lost_after_repeated_crisis_hits() -> void:
 		PlayerPlantations.apply_player_days_elapsed(1)
 
 	_assert(PlayerPlantations.find_plantation_index("richmond") == -1, "po %d uderzeniach kryzysu plantacja znika z tablicy" % PlayerPlantations.CRISIS_HITS_TO_LOSE_PLANTATION)
+	_assert(int(PlayerPlantations.city_grids["richmond"]["tile_owner"][0]) == -1, "utracone pole wraca do wspólnej puli (wolne dla kogokolwiek)")
+
+
+## Zgłoszone przez użytkownika: "plantacje w danym mieście powinny być
+## wygenerowane na początku gry i powinny być wspólne dla wszystkich
+## graczy, czyli ten który zasieje w lepszym miejscu będzie miał lepsze
+## plony" — sedno tego wymagania: pole zajęte przez JEDNEGO gracza musi
+## być niedostępne dla RESZTY, dopóki go nie straci.
+func _test_plantation_tiles_are_exclusive_between_players() -> void:
+	print("-- PlayerPlantations: pola siatki miasta są na wyłączność między graczami --")
+	PlayerPlantations.reset_new_game()
+	Players.reset_new_game(2)
+	PlayerPlantations.city_grids["richmond"]["river"].fill(false)
+
+	# Gracz 1 (aktywny domyślnie, active_index=0) zajmuje pole 0.
+	var idx_p1 := PlayerPlantations.found_plantation("richmond")
+	_assert(PlayerPlantations.buy_tile(idx_p1, 0), "gracz 1 kupuje pole 0")
+
+	# Przesuń dzień gracza 1 do przodu, żeby pass_turn_to_earliest_player
+	# faktycznie oddał ruch graczowi 2 (remis 0=0 zostawiłby aktywnym
+	# gracza o niższym indeksie, czyli tego samego gracza 1).
+	Players.player_days[0] = 10
+	Players.pass_turn_to_earliest_player()
+	_assert(Players.active_index == 1, "gracz 2 jest teraz aktywny")
+
+	var idx_p2 := PlayerPlantations.found_plantation("richmond")
+	_assert(not PlayerPlantations.buy_tile(idx_p2, 0), "gracz 2 NIE MOŻE kupić pola 0 — już należy do gracza 1")
+	_assert(PlayerPlantations.buy_tile(idx_p2, 1), "gracz 2 kupuje inne, wolne pole 1")
+	_assert(PlayerPlantations.get_owned_tile_count(idx_p2) == 1, "gracz 2 widzi TYLKO swoje własne pole (1), nie pole gracza 1")
+
+	# Wróć do gracza 1 (jego snapshot z buy_tile(idx_p1, 0) musi przetrwać
+	# przełączenie tury nietknięty) i sprawdź, że wciąż widzi TYLKO swoje pole.
+	Players.player_days[1] = 20
+	Players.pass_turn_to_earliest_player()
+	_assert(Players.active_index == 0, "gracz 1 jest znów aktywny")
+	_assert(PlayerPlantations.get_owned_tile_count(idx_p1) == 1, "gracz 1 nadal widzi TYLKO swoje pole (0), nie pole gracza 2")
 
 
 func _test_world_events_reform_queued() -> void:

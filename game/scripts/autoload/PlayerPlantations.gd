@@ -1,9 +1,35 @@
 extends Node
-## Plantacje gracza: siatka pól z rzeką, uprawa, robotnicy, zbiory.
+## Plantacje: siatka pól z rzeką, uprawa, robotnicy, zbiory.
 ## Uproszczony model — patrz docs/MECHANIKI_EKONOMICZNE.md pkt. 3–4.
 ## Dokładny wzór plonu z oryginału nie jest odtwarzalny 1:1 (zależał od
 ## wielu nieudokumentowanych czynników), więc formuła niżej jest świadomie
 ## uproszczonym, tunowalnym placeholderem do dalszego balansowania.
+##
+## Zgłoszone przez użytkownika: "plantacje w danym mieście powinny być
+## wygenerowane na początku gry i powinny być wspólne dla wszystkich
+## graczy, czyli ten który zasieje w lepszym miejscu będzie miał lepsze
+## plony". Stąd DWA osobne magazyny danych:
+## 1. `city_grids` — WSPÓLNY teren KAŻDEGO miasta plantacyjnego (rzeka +
+##    WŁASNOŚĆ każdego pola), wygenerowany RAZ w reset_new_game() dla
+##    całej gry. Celowo NIE jest migawkowany przez Players.gd (w
+##    odróżnieniu od `plantations` niżej) — to fakt świata widoczny dla
+##    WSZYSTKICH graczy jednocześnie, nie stan jednego z nich. Pole raz
+##    kupione przez gracza X jest od tej pory niedostępne dla reszty aż do
+##    końca gry (albo aż X je straci, patrz _apply_crisis_hit) — to
+##    właśnie realizuje "kto zasieje w lepszym miejscu, ten ma lepsze
+##    plony": kto pierwszy zajmie pola przy rzece, blokuje je reszcie.
+## 2. `plantations` — WŁASNE (per gracz) rekordy "mam tu jakąś obecność":
+##    robotnicy/zapasy/dzień ostatnich zbiorów/licznik kryzysów. Te SĄ
+##    migawkowane przez Players.gd (Players._capture_active/_apply_snapshot
+##    duplikują/przywracają tę tablicę przy zmianie aktywnego gracza) —
+##    ilu robotników zatrudnia dany gracz i ile ma w magazynie to JEGO
+##    własna sprawa, nie widoczna dla reszty.
+## Funkcje odczytujące/zmieniające WŁASNOŚĆ konkretnego pola (buy_tile,
+## plant_tile, get_owned_tile_count, get_planted_tile_count,
+## calculate_harvest) zawsze odnoszą się do Players.active_index — bo
+## `plantations` to i tak zawsze lista TYLKO aktywnego gracza (Players.gd
+## zamienia całą tablicę przy przełączeniu tury, patrz komentarz w
+## Players.gd), więc "który gracz pyta" jest zawsze jednoznaczne.
 
 const GRID_SIZE := 16
 const TILE_COST := 500.0
@@ -18,15 +44,49 @@ const REFERENCE_TILE_COUNT := 50.0  ## odniesienie do tabeli plonów (ok. 50 ha 
 ## dzielone przez jeden wspólny licznik "crisis_hits" na plantację,
 ## niezależnie od przyczyny. Po CRISIS_HITS_TO_LOSE_PLANTATION kolejne
 ## uderzenie (obojętnie jakiej przyczyny) zabiera CAŁĄ plantację: "jak
-## dłużej trwa to zabieranie plantacji" (zgłoszone przez użytkownika).
+## dłużej trwa to zabieranie plantacji" (zgłoszone przez użytkownika) —
+## łącznie ze zwolnieniem WSZYSTKICH pól tego gracza z powrotem do puli
+## wspólnej (patrz _release_player_tiles), żeby ktoś inny mógł je zająć.
 const CRISIS_HITS_TO_LOSE_PLANTATION := 3
 const CRISIS_WORKER_LOSS_RATIO := 0.5  ## ucieka połowa aktualnej załogi za każdym uderzeniem
 
 var plantations: Array[Dictionary] = []
 
+## city_id -> {"river": Array[bool], "tile_owner": Array[int] (-1 = wolne,
+## inaczej indeks gracza-właściciela), "tile_crops": Array[String]}.
+## Wspólne dla WSZYSTKICH graczy — patrz komentarz nagłówkowy pliku.
+var city_grids: Dictionary = {}
+
 
 func reset_new_game() -> void:
 	plantations.clear()
+	generate_all_city_grids()
+
+
+## Generuje ŚWIEŻY, w pełni niezajęty teren dla KAŻDEGO miasta typu
+## "plantation" (Cities.CITIES) — wywoływane RAZ na nową grę (reset_new_game)
+## i jako fallback przy wczytaniu zapisu sprzed tej funkcji (patrz
+## SaveGame.gd), żeby stare zapisy dostały jakikolwiek teren zamiast
+## pustego city_grids.
+func generate_all_city_grids() -> void:
+	city_grids.clear()
+	for city_id in Cities.CITIES.keys():
+		if Cities.CITIES[city_id]["type"] == "plantation":
+			city_grids[city_id] = _generate_city_grid()
+
+
+func _generate_city_grid() -> Dictionary:
+	var tile_owner: Array[int] = []
+	tile_owner.resize(GRID_SIZE * GRID_SIZE)
+	tile_owner.fill(-1)
+	var tile_crops: Array[String] = []
+	tile_crops.resize(GRID_SIZE * GRID_SIZE)
+	tile_crops.fill("")
+	return {
+		"river": _generate_river(),
+		"tile_owner": tile_owner,
+		"tile_crops": tile_crops,
+	}
 
 
 ## Tor B — osobiste dla aktywnego gracza: płaca robotników + ryzyko
@@ -71,7 +131,9 @@ func apply_player_days_elapsed(days_elapsed: int) -> void:
 ## załogi (CRISIS_WORKER_LOSS_RATIO), zgłasza zdarzenie do WorldEvents
 ## (pokazywane jako karta gazety w Hubie, patrz WorldEvents.gd) i zwraca
 ## true, jeśli licznik uderzeń (crisis_hits) właśnie osiągnął próg utraty
-## CAŁEJ plantacji — wywołujący usuwa ją wtedy z `plantations`.
+## CAŁEJ plantacji — wywołujący usuwa wtedy REKORD gracza z `plantations`,
+## a tu ZWALNIAMY jego pola we wspólnej siatce miasta (_release_player_tiles),
+## żeby ktoś inny mógł je zająć od nowa.
 func _apply_crisis_hit(plantation: Dictionary, cause: String) -> bool:
 	plantation["crisis_hits"] = int(plantation.get("crisis_hits", 0)) + 1
 
@@ -87,8 +149,23 @@ func _apply_crisis_hit(plantation: Dictionary, cause: String) -> bool:
 	plantation["workers"] = workers_before - workers_lost
 
 	var plantation_lost: bool = int(plantation["crisis_hits"]) >= CRISIS_HITS_TO_LOSE_PLANTATION
+	if plantation_lost:
+		_release_player_tiles(plantation["city"], Players.active_index)
 	WorldEvents.report_plantation_crisis(cause, plantation["city"], workers_lost, had_crops, plantation_lost)
 	return plantation_lost
+
+
+## Zwalnia WSZYSTKIE pola danego gracza we wspólnej siatce miasta z powrotem
+## do puli "wolne" (-1) i czyści ich uprawę — wywoływane, gdy gracz traci
+## całą plantację (patrz _apply_crisis_hit wyżej).
+func _release_player_tiles(city_id: String, player_index: int) -> void:
+	var grid: Dictionary = city_grids[city_id]
+	var tile_owner: Array = grid["tile_owner"]
+	var tile_crops: Array = grid["tile_crops"]
+	for i in tile_owner.size():
+		if tile_owner[i] == player_index:
+			tile_owner[i] = -1
+			tile_crops[i] = ""
 
 
 ## Indeks plantacji gracza w danym mieście, albo -1, jeśli gracz nie ma tam
@@ -101,21 +178,12 @@ func find_plantation_index(city_id: String) -> int:
 	return -1
 
 
+## Zaczyna śledzić WŁASNĄ obecność gracza w mieście (robotnicy/zapasy/
+## kryzysy) — teren (rzeka + własność pól) już istnieje we wspólnym
+## city_grids od reset_new_game(), więc tu NIE generujemy żadnej siatki.
 func found_plantation(city_id: String) -> int:
-	var grid: Array[bool] = []
-	grid.resize(GRID_SIZE * GRID_SIZE)
-	grid.fill(false)
-	## tile_crops: uprawa PER POLE, nie jedna uprawa całej plantacji (zgłoszone
-	## przez użytkownika: jedna plantacja ma jednocześnie uprawiać wszystkie
-	## możliwe rośliny) — "" = pole kupione, ale jeszcze niezasiane.
-	var tile_crops: Array[String] = []
-	tile_crops.resize(GRID_SIZE * GRID_SIZE)
-	tile_crops.fill("")
 	plantations.append({
 		"city": city_id,
-		"grid": grid,
-		"river": _generate_river(),
-		"tile_crops": tile_crops,
 		"workers": 0,
 		"stored_goods": {},  ## uprawa -> ilość w magazynie (osobno per uprawa)
 		"last_harvest_day": Players.active_day(),
@@ -139,8 +207,12 @@ func _generate_river() -> Array[bool]:
 	return river
 
 
+## plantation_index odnosi się do rekordu AKTYWNEGO gracza (patrz komentarz
+## nagłówkowy pliku) — używany tylko żeby ustalić, o KTÓRE miasto chodzi;
+## sama rzeka/własność żyje we wspólnym city_grids[city], nie w tym rekordzie.
 func is_river_tile(plantation_index: int, tile_index: int) -> bool:
-	return plantations[plantation_index]["river"][tile_index]
+	var city: String = plantations[plantation_index]["city"]
+	return city_grids[city]["river"][tile_index]
 
 
 ## Pole rzeki samo nie jest "sąsiadem rzeki" — bez tego wczesnego wyjścia
@@ -152,7 +224,8 @@ func is_river_tile(plantation_index: int, tile_index: int) -> bool:
 func is_adjacent_to_river(plantation_index: int, tile_index: int) -> bool:
 	if is_river_tile(plantation_index, tile_index):
 		return false
-	var river: Array = plantations[plantation_index]["river"]
+	var city: String = plantations[plantation_index]["city"]
+	var river: Array = city_grids[city]["river"]
 	var x := tile_index % GRID_SIZE
 	@warning_ignore("integer_division")  ## celowe: y to indeks wiersza w siatce
 	var y := tile_index / GRID_SIZE
@@ -167,34 +240,48 @@ func is_adjacent_to_river(plantation_index: int, tile_index: int) -> bool:
 	return false
 
 
+## Zajmuje pole we WSPÓLNEJ siatce miasta na rzecz AKTYWNEGO gracza
+## (Players.active_index) — zwraca false, jeśli pole jest rzeką albo już
+## należy do KOGOKOLWIEK (siebie samego albo innego gracza — pola są na
+## wyłączność, zgłoszone przez użytkownika: "ten który zasieje w lepszym
+## miejscu będzie miał lepsze plony"). Cena płaska (TILE_COST), niezależna
+## od jakości pola — jedyną przewagą jest to, KTO PIERWSZY je zajmie.
 func buy_tile(plantation_index: int, tile_index: int) -> bool:
-	var plantation: Dictionary = plantations[plantation_index]
-	if is_river_tile(plantation_index, tile_index) or plantation["grid"][tile_index]:
+	var city: String = plantations[plantation_index]["city"]
+	var grid: Dictionary = city_grids[city]
+	if grid["river"][tile_index] or int(grid["tile_owner"][tile_index]) != -1:
 		return false
 	if not Economy.spend(TILE_COST):
 		return false
-	plantation["grid"][tile_index] = true
+	grid["tile_owner"][tile_index] = Players.active_index
 	return true
 
 
 ## Sadzi (albo zmienia) uprawę na WŁASNYM, niebędącym rzeką polu — każde pole
 ## plantacji może mieć inną uprawę, więc jedna plantacja może jednocześnie
 ## uprawiać wszystkie 4 rodzaje towaru naraz (zgłoszone przez użytkownika).
-## Zwraca false, jeśli pole nie jest (jeszcze) własnością gracza.
+## Zwraca false, jeśli pole nie jest własnością AKTYWNEGO gracza (ani wolne,
+## ani cudze).
 func plant_tile(plantation_index: int, tile_index: int, crop: String) -> bool:
-	var plantation: Dictionary = plantations[plantation_index]
-	if not plantation["grid"][tile_index]:
+	var city: String = plantations[plantation_index]["city"]
+	var grid: Dictionary = city_grids[city]
+	if int(grid["tile_owner"][tile_index]) != Players.active_index:
 		return false
-	plantation["tile_crops"][tile_index] = crop
+	grid["tile_crops"][tile_index] = crop
 	return true
 
 
-## Ile pól tej plantacji jest obsianych daną uprawą — patrz legenda w
+## Ile pól NALEŻĄCYCH DO AKTYWNEGO GRACZA (nie do kogokolwiek innego we
+## wspólnej siatce) jest obsianych daną uprawą — patrz legenda w
 ## Plantation.gd (zgłoszone przez użytkownika).
 func get_planted_tile_count(plantation_index: int, crop: String) -> int:
+	var city: String = plantations[plantation_index]["city"]
+	var grid: Dictionary = city_grids[city]
+	var tile_owner: Array = grid["tile_owner"]
+	var tile_crops: Array = grid["tile_crops"]
 	var count := 0
-	for tile_crop in plantations[plantation_index]["tile_crops"]:
-		if tile_crop == crop:
+	for i in tile_crops.size():
+		if int(tile_owner[i]) == Players.active_index and tile_crops[i] == crop:
 			count += 1
 	return count
 
@@ -205,10 +292,15 @@ func hire_workers(plantation_index: int, count: int) -> void:
 	plantations[plantation_index]["workers"] = clampi(count, 0, MAX_WORKERS)
 
 
+## Ile pól we wspólnej siatce miasta NALEŻY DO AKTYWNEGO GRACZA — pola
+## zajęte przez innych graczy się NIE liczą (patrz komentarz nagłówkowy
+## pliku: pola są na wyłączność).
 func get_owned_tile_count(plantation_index: int) -> int:
+	var city: String = plantations[plantation_index]["city"]
+	var grid: Dictionary = city_grids[city]
 	var count := 0
-	for owned in plantations[plantation_index]["grid"]:
-		if owned:
+	for owner in grid["tile_owner"]:
+		if int(owner) == Players.active_index:
 			count += 1
 	return count
 
@@ -221,10 +313,14 @@ const REFERENCE_PERIOD_DAYS := 30.0  ## REFERENCE_YIELD w Crops.gd to plon za 30
 ## może uprawiać kilka różnych roślin naraz (patrz plant_tile), więc plon
 ## liczy się OSOBNO dla każdej uprawy obecnej na polach, sumując tylko jej
 ## własne pola (robotnicy/czas/sezon są wspólne dla całej plantacji, ale
-## liczba i rodzaj pól — już nie). Zwraca słownik uprawa -> ilość (tylko
-## uprawy z plonem > 0).
+## liczba i rodzaj pól — już nie). Liczy WYŁĄCZNIE pola AKTYWNEGO gracza we
+## wspólnej siatce miasta — pola innych graczy (choćby i tej samej uprawy)
+## się nie wliczają, to właśnie jest sedno rywalizacji o dobre miejsca.
+## Zwraca słownik uprawa -> ilość (tylko uprawy z plonem > 0).
 func calculate_harvest(plantation_index: int) -> Dictionary:
 	var plantation: Dictionary = plantations[plantation_index]
+	var city: String = plantation["city"]
+	var grid: Dictionary = city_grids[city]
 	var days_since_harvest: int = Players.active_day() - int(plantation["last_harvest_day"])
 	var result: Dictionary = {}
 	if days_since_harvest <= 0:
@@ -232,12 +328,13 @@ func calculate_harvest(plantation_index: int) -> Dictionary:
 	var worker_factor: float = float(plantation["workers"]) / 500.0
 	var seasonal_factor: float = Crops.SEASONAL_YIELD_FACTOR[Calendar.get_month_for_day(Players.active_day())]
 	var time_factor: float = days_since_harvest / REFERENCE_PERIOD_DAYS
-	var tile_crops: Array = plantation["tile_crops"]
+	var tile_owner: Array = grid["tile_owner"]
+	var tile_crops: Array = grid["tile_crops"]
 	for crop in Crops.CROPS:
 		var normal_tiles := 0
 		var river_tiles := 0
 		for i in tile_crops.size():
-			if tile_crops[i] != crop:
+			if int(tile_owner[i]) != Players.active_index or tile_crops[i] != crop:
 				continue
 			if is_adjacent_to_river(plantation_index, i):
 				river_tiles += 1
@@ -245,7 +342,7 @@ func calculate_harvest(plantation_index: int) -> Dictionary:
 				normal_tiles += 1
 		if normal_tiles == 0 and river_tiles == 0:
 			continue
-		var reference: int = Crops.get_reference_yield(plantation["city"], crop)
+		var reference: int = Crops.get_reference_yield(city, crop)
 		if reference == 0:
 			continue
 		var effective_tiles: float = normal_tiles + river_tiles * Crops.RIVER_YIELD_MULTIPLIER

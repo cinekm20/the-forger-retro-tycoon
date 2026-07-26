@@ -220,6 +220,13 @@ func _ready() -> void:
 	_add_legend_row(legend_column, PlantationTileIconScript.Kind.VACANT, "", false, tr("Wolne pole (do kupienia)"))
 	_add_legend_row(legend_column, PlantationTileIconScript.Kind.SOIL, "", false, tr("Twoje pole (niezasiane)"))
 	_add_legend_row(legend_column, PlantationTileIconScript.Kind.SOIL, "", true, tr("Sąsiaduje z rzeką (większy plon)"))
+	## Siatka miasta jest teraz wspólna dla wszystkich graczy (zgłoszone przez
+	## użytkownika: "ten który zasieje w lepszym miejscu będzie miał lepsze
+	## plony") — tylko w hot-seat multiplayer w ogóle może dojść do tego, że
+	## pole jest zajęte przez KOGOŚ INNEGO (kolor + inicjał imienia, patrz
+	## PlantationTileIcon.gd), więc wpis legendy tylko wtedy.
+	if Players.is_multiplayer():
+		_add_legend_row(legend_column, PlantationTileIconScript.Kind.OWNED_BY_OTHER, "", false, tr("Zajęte przez innego gracza (kolor/inicjał = kto)"))
 
 	## Uprawy mają WŁASNY, dynamiczny podzbiór legendy (ikonka koloru danej
 	## uprawy + ile pól nią obsianych) — jedyna część legendy, która się
@@ -306,17 +313,22 @@ func _setup_current_plantation() -> void:
 
 ## Kafelki rysowane jako ikonki (PlantationTileIcon) zamiast tekstu ~/+/✓/✓+.
 ## btn.flat = true: zwykłe tło/ramka przycisku wyłączone, widoczna jest tylko
-## ikonka wypełniająca cały kafelek. Trzy klikalne stany: "+" (kup pole),
-## goła ziemia (kup, ale jeszcze nie zasiane — dotknij, żeby zasadzić
-## wybraną w dropdownie uprawę) i rzeka/obsiane pole (nieklikalne). Jedna
-## plantacja może mieć różne uprawy na różnych polach naraz (zgłoszone przez
-## użytkownika) — kolor/ikonka zależy od uprawy TEGO konkretnego pola.
+## ikonka wypełniająca cały kafelek. Cztery klikalne/nieklikalne stany: "+"
+## (kup pole), goła ziemia (kup, ale jeszcze nie zasiane — dotknij, żeby
+## zasadzić wybraną w dropdownie uprawę), rzeka/obsiane pole (nieklikalne) i
+## pole zajęte przez INNEGO gracza (nieklikalne — zgłoszone przez
+## użytkownika: siatka miasta jest teraz wspólna dla wszystkich graczy,
+## patrz PlayerPlantations.city_grids). Jedna plantacja może mieć różne
+## uprawy na różnych polach naraz (zgłoszone przez użytkownika) — kolor/
+## ikonka zależy od uprawy TEGO konkretnego pola.
 func _rebuild_grid() -> void:
 	for child in grid_container.get_children():
 		child.queue_free()
-	var plantation: Dictionary = PlayerPlantations.plantations[plantation_index]
-	var tile_crops: Array = plantation["tile_crops"]
-	for tile_index in plantation["grid"].size():
+	var city: String = PlayerPlantations.plantations[plantation_index]["city"]
+	var grid: Dictionary = PlayerPlantations.city_grids[city]
+	var tile_owner: Array = grid["tile_owner"]
+	var tile_crops: Array = grid["tile_crops"]
+	for tile_index in tile_owner.size():
 		var btn := Button.new()
 		btn.custom_minimum_size = Vector2(cell_size, cell_size)
 		btn.flat = true
@@ -328,7 +340,7 @@ func _rebuild_grid() -> void:
 		if PlayerPlantations.is_river_tile(plantation_index, tile_index):
 			icon.kind = PlantationTileIconScript.Kind.RIVER
 			btn.disabled = true
-		elif plantation["grid"][tile_index]:
+		elif int(tile_owner[tile_index]) == Players.active_index:
 			icon.river_adjacent = PlayerPlantations.is_adjacent_to_river(plantation_index, tile_index)
 			var tile_crop: String = tile_crops[tile_index]
 			if tile_crop != "":
@@ -338,6 +350,10 @@ func _rebuild_grid() -> void:
 			else:
 				icon.kind = PlantationTileIconScript.Kind.SOIL
 				btn.pressed.connect(_on_plant_tile_pressed.bind(tile_index))
+		elif int(tile_owner[tile_index]) != -1:
+			icon.kind = PlantationTileIconScript.Kind.OWNED_BY_OTHER
+			icon.owner_index = int(tile_owner[tile_index])
+			btn.disabled = true
 		else:
 			icon.kind = PlantationTileIconScript.Kind.VACANT
 			btn.pressed.connect(_on_tile_pressed.bind(tile_index))

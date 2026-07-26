@@ -121,26 +121,38 @@ puzzle/optymalizacyjny mikro-management niż czysty grind powierzchni.
 
 ## 4. Robotnicy i ryzyko regionalne
 
-⚠ **Status w remake'u:** z tego punktu zaimplementowana jest tylko podstawowa
-płaca dzienna (`PlayerPlantations.WORKER_DAILY_WAGE`, naliczana codziennie i
-pogłębiająca dług gracza, jeśli brak gotówki — patrz `Economy.gd`) oraz
-liniowe skalowanie plonu liczbą robotników. **Strajk, podkupywanie robotników
-i niestabilność polityczna/wywłaszczenia opisane niżej NIE są jeszcze
-zaimplementowane** — brak pieniędzy na płace po prostu pogłębia dług, bez
-utraty zbiorów czy odrębnej mechaniki strajku.
+✅ **Status w remake'u:** podstawowa płaca dzienna (`PlayerPlantations.WORKER_DAILY_WAGE`,
+naliczana codziennie i pogłębiająca dług gracza, jeśli brak gotówki — patrz
+`Economy.gd`), liniowe skalowanie plonu liczbą robotników, **strajk** i
+**niestabilność polityczna/wywłaszczenia** (patrz niżej) są zaimplementowane —
+patrz `PlayerPlantations._apply_crisis_hit`/`Cities.REGION_UNREST_CHANCE_PER_WEEK`,
+zgłoszone przez użytkownika. **Podkupywanie robotników** (osobna sub-mechanika
+opisana niżej) NIE jest jeszcze zaimplementowane.
 
 - Robotnicy pracują za dniówkę; płaca rośnie wraz z inflacją w grze — warto ją
   podnosić (opłaca się przez rosnące ceny sprzedaży).
-- **Strajk:** jeśli gracz nie stać na wypłatę (np. po reformie walutowej),
-  robotnicy strajkują — traci się bieżące zbiory, ale nie trzeba płacić
-  zaległości; można później zatrudnić nowych taniej.
-- **Podkupywanie robotników:** przy współdzielonej plantacji między graczami,
-  wyższa płaca = trudniej podkupić Twoich robotników konkurencji. Ładny,
-  pośredni PvP bez bezpośredniej walki.
-- **Niestabilność polityczna / wywłaszczenia:** trudniejsze regiony (Ankara,
-  Afryka) niosą ryzyko zamieszek/wywłaszczeń plantacji — kompensowane
-  potencjalnie lepszym plonem herbaty/kawy. Dobry haczyk risk/reward osadzony
-  w fabule (lata 20./30., niestabilność kolonialna/gospodarcza).
+- **Strajk:** jeśli gracz nie stać na wypłatę (gotówka na minusie PRZY
+  zatrudnionej załodze), strajk zabiera WSZYSTKIE zebrane zapasy tej
+  plantacji i połowę aktualnej załogi (`CRISIS_WORKER_LOSS_RATIO`).
+- ⏳ **Podkupywanie robotników:** przy współdzielonej plantacji między
+  graczami, wyższa płaca = trudniej podkupić Twoich robotników konkurencji —
+  jeszcze NIEZAIMPLEMENTOWANE (dziś każdy gracz płaci/zarządza WYŁĄCZNIE
+  swoimi własnymi robotnikami na WŁASNYCH polach, patrz siatka współdzielona
+  niżej — nie ma jeszcze mechaniki podkupywania cudzej załogi).
+- **Niestabilność polityczna / wywłaszczenia:** trudniejsze regiony (dziś
+  Afryka i postimperialna Azja — Ankara/Bombaj/Colombo, `Cities.REGION_UNREST_CHANCE_PER_WEEK`)
+  niosą ryzyko zamieszek/wywłaszczeń plantacji, te same konsekwencje co
+  strajk (zabrane zapasy + połowa załogi), z eskalacją do utraty CAŁEJ
+  plantacji po 3 uderzeniach (strajk lub zamieszki łącznie).
+- ✅ **Siatka plantacji jest współdzielona między graczami** (`PlayerPlantations.city_grids`,
+  zgłoszone przez użytkownika: "plantacje w danym mieście powinny być
+  wygenerowane na początku gry i powinny być wspólne dla wszystkich graczy,
+  czyli ten który zasieje w lepszym miejscu będzie miał lepsze plony") —
+  wygenerowana RAZ na nową grę, WŁASNOŚĆ każdego pola (kto pierwszy kupi,
+  ten ma) jest wspólnym faktem świata widocznym dla wszystkich graczy, nie
+  osobną kopią per gracz. Cena pola płaska (500 M), niezależna od pozycji —
+  jedyną przewagą jest to, kto pierwszy zajmie dobre miejsce (zwłaszcza przy
+  rzece).
 
 ## 5. Kontrakty terminowe (forward contracts) — osobny system finansowy
 
