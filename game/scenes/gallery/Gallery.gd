@@ -116,8 +116,10 @@ func _rebuild_content() -> void:
 
 
 ## Widok domyślny: siatka 8 kategorii (kafelek = okładka epoki w ramie +
-## "Nazwa: X/5"), klikalna TYLKO gdy gracz ma tam już choć jeden obraz —
-## plus krótkie podsumowanie postępu innych graczy w multiplayer.
+## "Nazwa: X/5"), klikalna TYLKO gdy gracz ma tam już choć jeden obraz.
+## BEZ podsumowania postępu innych graczy (zgłoszone przez użytkownika: to
+## jest galeria WŁASNYCH obrazów, nie ma tu co pokazywać, kto ile ma —
+## wcześniej pokazywane w multiplayer, teraz usunięte na każdym ekranie).
 func _build_categories_view() -> void:
 	## Zgłoszone przez użytkownika: ten sam ekran ("Galeria") też ma mieć
 	## przycisk powrotu przypięty do samego dołu — wcześniej content_root
@@ -143,14 +145,6 @@ func _build_categories_view() -> void:
 
 	for category_id in Paintings.CATEGORIES:
 		_build_category_card(grid, category_id)
-
-	if Players.is_multiplayer():
-		ScreenHelpers.make_title(content_root, "Gracze")
-		for i in Players.player_count:
-			var marker := tr(" (Ty)") if i == Players.active_index else ""
-			ScreenHelpers.make_label(content_root, tr("%s%s: %d obrazów") % [
-				Players.player_names[i], marker, Players.get_painting_count(i),
-			])
 
 	content_root.add_child(ScreenHelpers.make_expand_spacer())
 	ScreenHelpers.make_back_button(content_root)
