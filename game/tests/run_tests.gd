@@ -262,6 +262,7 @@ func _test_plantation_lost_after_repeated_crisis_hits() -> void:
 func _test_plantation_tiles_are_exclusive_between_players() -> void:
 	print("-- PlayerPlantations: pola siatki miasta są na wyłączność między graczami --")
 	PlayerPlantations.reset_new_game()
+	Economy.reset_new_game()
 	Players.reset_new_game(2)
 	PlayerPlantations.city_grids["richmond"]["river"].fill(false)
 
