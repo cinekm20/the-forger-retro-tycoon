@@ -34,8 +34,11 @@ func _ready() -> void:
 	body_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	body_label.custom_minimum_size = Vector2(700, 0)
 
-	root.add_child(ScreenHelpers.make_expand_spacer())
-	ScreenHelpers.make_button(root, tr("Kontynuuj »"), func(): SceneRouter.goto_hub())
+	## Ozdobna skrzynka Art Deco w prawym dolnym rogu, TA SAMA co boczny
+	## panel na TravelMap.gd/Hub.gd — zgłoszone przez użytkownika: przycisk
+	## powrotu ma wyglądać tak samo na wszystkich ekranach (oprócz Plantacji).
+	## Zakotwiczona niezależnie od `root`, więc bez rozpychacza.
+	ScreenHelpers.make_button(ScreenHelpers.make_root_bottom(self, true), tr("Kontynuuj »"), func(): SceneRouter.goto_hub())
 
 
 func _background_path() -> String:

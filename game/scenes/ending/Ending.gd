@@ -28,7 +28,14 @@ func _ready() -> void:
 		root.add_child(ScreenHelpers.make_expand_spacer())
 
 	root.add_child(ScreenHelpers.make_expand_spacer())
-	ScreenHelpers.make_button(root, "Powrót do menu głównego", func(): SceneRouter.goto_scene(SceneRouter.MAIN_MENU))
+
+	## Ozdobna skrzynka Art Deco w prawym dolnym rogu, TA SAMA co boczny
+	## panel na TravelMap.gd/Hub.gd — zgłoszone przez użytkownika: przycisk
+	## powrotu ma wyglądać tak samo na wszystkich ekranach (oprócz Plantacji).
+	## Rozpychacz wyżej ZOSTAJE (w przeciwieństwie do "flat listing" ekranów)
+	## — bez niego narracja straciłaby drugi z dwóch rozpychaczy, które ją
+	## wyśrodkowują między tytułem a dołem ekranu (patrz komentarz w _ready).
+	ScreenHelpers.make_button(ScreenHelpers.make_root_bottom(self, true), "Powrót do menu głównego", func(): SceneRouter.goto_scene(SceneRouter.MAIN_MENU))
 
 
 ## player_index wskazuje, KTO wygrał — w multiplayerze może to nie być ten

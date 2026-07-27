@@ -55,6 +55,14 @@ const FRAME_TEXTURE_PATH := "res://art/icons/frame.png"
 
 var overlay: ColorRect
 var content_root: VBoxContainer
+## Przycisk powrotu we WSPÓLNEJ, ozdobnej skrzynce Art Deco (patrz
+## ScreenHelpers.make_boxed_back_button) — zgłoszone przez użytkownika:
+## wygląda tak samo jak wszędzie indziej w grze. Budowany RAZ w _ready()
+## (poza content_root, który sam jest czyszczony/odbudowywany przy każdej
+## zmianie widoku), tekst/cel podmieniany w _rebuild_content() zależnie od
+## view_state — inaczej trzy osobne widoki próbowałyby dokładać trzy osobne
+## takie skrzynki jedna na drugą.
+var boxed_back_btn: Button
 
 var view_state: ViewState = ViewState.CATEGORIES
 var selected_category: String = ""
@@ -93,6 +101,8 @@ func _ready() -> void:
 	content_root.add_theme_constant_override("separation", 16)
 	root.add_child(content_root)
 
+	boxed_back_btn = ScreenHelpers.make_button(ScreenHelpers.make_root_bottom(self, true), "", _on_boxed_back_pressed)
+
 	_rebuild_content()
 
 
@@ -109,10 +119,27 @@ func _rebuild_content() -> void:
 	match view_state:
 		ViewState.CATEGORIES:
 			_build_categories_view()
+			boxed_back_btn.text = "« Powrót"
 		ViewState.CATEGORY_DETAIL:
 			_build_category_detail_view()
+			boxed_back_btn.text = tr("« Wróć do galerii")
 		ViewState.PAINTING_DETAIL:
 			_build_painting_detail_view()
+			boxed_back_btn.text = tr("« Wróć")
+
+
+## Dispatcher jednego wspólnego przycisku (boxed_back_btn, patrz _ready) —
+## co dokładnie robi zależy od AKTUALNEGO view_state w momencie kliknięcia,
+## nie od tego, jaki widok był aktywny, gdy przycisk zbudowano (budowany
+## tylko RAZ, patrz komentarz przy zmiennej).
+func _on_boxed_back_pressed() -> void:
+	match view_state:
+		ViewState.CATEGORIES:
+			SceneRouter.goto_hub()
+		ViewState.CATEGORY_DETAIL:
+			_on_back_to_categories_pressed()
+		ViewState.PAINTING_DETAIL:
+			_on_back_to_category_detail_pressed()
 
 
 ## Widok domyślny: siatka 8 kategorii (kafelek = okładka epoki w ramie +
@@ -145,9 +172,6 @@ func _build_categories_view() -> void:
 
 	for category_id in Paintings.CATEGORIES:
 		_build_category_card(grid, category_id)
-
-	content_root.add_child(ScreenHelpers.make_expand_spacer())
-	ScreenHelpers.make_back_button(content_root)
 
 
 ## Rama identyczna jak w Domu aukcyjnym (art/icons/frame.png) wokół
@@ -291,8 +315,6 @@ func _build_category_detail_view() -> void:
 
 	content_root.add_child(ScreenHelpers.make_expand_spacer())
 
-	ScreenHelpers.make_button(content_root, tr("« Wróć do galerii"), _on_back_to_categories_pressed)
-
 
 ## Dzieli listę numerów (1-5 elementów) na wiersze do wyśrodkowanej
 ## "piramidy": 1/2/3 -> jeden wiersz (HBoxContainer z ALIGNMENT_CENTER sam
@@ -379,5 +401,3 @@ func _build_painting_detail_view() -> void:
 		ScreenHelpers.make_label(content_root, tr("Obraz nr %d — %s") % [number, category_name])
 
 	content_root.add_child(ScreenHelpers.make_expand_spacer())
-
-	ScreenHelpers.make_button(content_root, tr("« Wróć"), _on_back_to_category_detail_pressed)

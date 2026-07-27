@@ -72,8 +72,11 @@ func _ready() -> void:
 	chart_frame.add_child(shipping_chart)
 	_build_chart_legend(chart_frame, ShippingCompanies.COMPANIES.keys(), func(id): return ShippingCompanies.COMPANIES[id]["name"], SHIPPING_COLORS)
 
-	root.add_child(ScreenHelpers.make_expand_spacer())
-	ScreenHelpers.make_back_button(root)
+	## Ozdobna skrzynka Art Deco w prawym dolnym rogu, TA SAMA co boczny
+	## panel na TravelMap.gd/Hub.gd — zgłoszone przez użytkownika: przycisk
+	## powrotu ma wyglądać tak samo na wszystkich ekranach (oprócz Plantacji).
+	## Zakotwiczona niezależnie od `root`, więc bez rozpychacza.
+	ScreenHelpers.make_boxed_back_button(self)
 
 	_rebuild_rows()
 	_update_info()

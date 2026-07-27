@@ -54,8 +54,11 @@ func _ready() -> void:
 		gangster_btn.pressed.connect(_on_send_gangster_pressed.bind(rival["id"]))
 		rival_row.add_child(gangster_btn)
 
-	root.add_child(ScreenHelpers.make_expand_spacer())
-	ScreenHelpers.make_back_button(root)
+	## Ozdobna skrzynka Art Deco w prawym dolnym rogu, TA SAMA co boczny
+	## panel na TravelMap.gd/Hub.gd — zgłoszone przez użytkownika: przycisk
+	## powrotu ma wyglądać tak samo na wszystkich ekranach (oprócz Plantacji).
+	## Zakotwiczona niezależnie od `root`, więc bez rozpychacza.
+	ScreenHelpers.make_boxed_back_button(self)
 
 
 func _on_hire_bodyguard_pressed() -> void:

@@ -60,8 +60,11 @@ func _ready() -> void:
 	quiz_section.visible = false
 	root.add_child(quiz_section)
 
-	root.add_child(ScreenHelpers.make_expand_spacer())
-	ScreenHelpers.make_back_button(root)
+	## Ozdobna skrzynka Art Deco w prawym dolnym rogu, TA SAMA co boczny
+	## panel na TravelMap.gd/Hub.gd — zgłoszone przez użytkownika: przycisk
+	## powrotu ma wyglądać tak samo na wszystkich ekranach (oprócz Plantacji).
+	## Zakotwiczona niezależnie od `root`, więc bez rozpychacza.
+	ScreenHelpers.make_boxed_back_button(self)
 	_update_info()
 
 

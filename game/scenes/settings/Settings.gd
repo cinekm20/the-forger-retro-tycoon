@@ -26,5 +26,8 @@ func _ready() -> void:
 	lang_option.item_selected.connect(func(index: int) -> void: Localization.set_language(lang_codes[index]))
 	root.add_child(lang_option)
 
-	root.add_child(ScreenHelpers.make_expand_spacer())
-	ScreenHelpers.make_button(root, "« Powrót", func(): SceneRouter.goto_scene(SceneRouter.MAIN_MENU))
+	## Ozdobna skrzynka Art Deco w prawym dolnym rogu, TA SAMA co boczny
+	## panel na TravelMap.gd/Hub.gd — zgłoszone przez użytkownika: przycisk
+	## powrotu ma wyglądać tak samo na wszystkich ekranach (oprócz Plantacji).
+	## Zakotwiczona niezależnie od `root`, więc bez rozpychacza.
+	ScreenHelpers.make_button(ScreenHelpers.make_root_bottom(self, true), "« Powrót", func(): SceneRouter.goto_scene(SceneRouter.MAIN_MENU))

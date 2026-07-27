@@ -484,6 +484,19 @@ static func make_back_button(root: Container) -> Button:
 	return make_button(root, "« Powrót", func(): SceneRouter.goto_hub())
 
 
+## Przycisk powrotu w TYM SAMYM stylu co boczny panel na TravelMap.gd/Hub.gd
+## (make_root_bottom: ozdobna ramka Art Deco, bez żadnego tytułu/opisu) —
+## zgłoszone przez użytkownika po wprowadzeniu tego stylu w AuctionHouse.gd:
+## "to teraz powrót ma tak samo wyglądać w galerii, w szkole sztuki, giełda,
+## rynek i wszystkie inne oprócz plantacji" (tam zostaje węższy przycisk
+## dopasowany do kolumny legendy, patrz Plantation.gd). `parent` to CAŁY
+## ekran (zwykle `self`), NIE `root` danego ekranu — skrzynka jest
+## zakotwiczona NIEZALEŻNIE od głównej kolumny treści, więc nie trzeba już
+## rozpychacza wypychającego przycisk na sam dół (pozycja jest stała).
+static func make_boxed_back_button(parent: Control) -> Button:
+	return make_back_button(make_root_bottom(parent, true))
+
+
 ## W hot-seat multiplayer pokazuje, czyja jest tura — ważne, żeby osoba
 ## trzymająca telefon wiedziała, w czyim imieniu działa. W solo nic nie
 ## dodaje (zwraca null).
