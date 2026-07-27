@@ -113,8 +113,14 @@ zdanie — modele obrazkowe renderują krótkie hasła dużo wierniej. **Usuń
 dla tego jednego promptu** (patrz sekcja "Negative prompt" na górze
 dokumentu) — inaczej model będzie aktywnie unikać rysowania tytułu, którego
 tu właśnie chcemy.
+
+Poprawka (zgłoszenie użytkownika po pierwszych próbach, patrz zrzuty
+ekranu): "spanning the full width across the top" model potraktował zbyt
+swobodnie — tytuł wychodził wyśrodkowany pionowo albo w górnej połowie, z
+dużym pasem samej mapy NAD nim. Prompt teraz wprost wymusza górną
+KRAWĘDŹ kadru (nie "górną część"), z jawnym zakazem centrowania:
 ```
-1920s art collector's study, world maps on the walls, a brass compass and a globe in the corner, a city skyline silhouette along the bottom edge, huge bold Art Deco masthead title in capital letters reading "THE FORGER: RETRO TYCOON" spanning the full width across the top of the scene, game title screen background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+1920s art collector's study, world maps on the walls, a brass compass and a globe in the corner, a city skyline silhouette along the bottom edge, huge bold Art Deco masthead title banner in capital letters reading "THE FORGER: RETRO TYCOON" positioned at the very top edge of the frame, touching the top border, spanning the full width, NOT centered vertically, no empty space above the title, game title screen background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Prompt logo.jpg (nieużywane, zapis historyczny — patrz wyżej, dlaczego
