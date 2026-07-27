@@ -61,34 +61,51 @@ func _ready() -> void:
 
 	horse_ids.assign(Horses.HORSES.keys())
 
-	## Portret konia (wgrany, docs/GRAFIKA_LEONARDO.md §5) obok kursu — po
-	## cichu bez obrazka, jeśli plik jeszcze nie istnieje, tak jak wszystkie
-	## opcjonalne grafiki w tej grze. Kurs czytany z Horses.current_odds PRZY
-	## BUDOWANIU ekranu — nie musi się odświeżać w trakcie stania na tym
-	## ekranie, bo Kalendarz i tak przesuwa się tylko przy akcjach na innych
-	## ekranach (Koniec tury/podróż/Szkoła sztuki).
+	## Zgłoszenie użytkownika: konie mają stać OBOK SIEBIE (nie jeden pod
+	## drugim), z większym portretem, a pod nim nazwa i jeszcze niżej kurs —
+	## zamiast poprzedniego pionowego rzędu "portret + jeden napis z obojgiem
+	## naraz". Portret (wgrany, docs/GRAFIKA_LEONARDO.md §5) po cichu bez
+	## obrazka, jeśli plik jeszcze nie istnieje, tak jak wszystkie opcjonalne
+	## grafiki w tej grze. Kurs czytany z Horses.current_odds PRZY BUDOWANIU
+	## ekranu — nie musi się odświeżać w trakcie stania na tym ekranie, bo
+	## Kalendarz i tak przesuwa się tylko przy akcjach na innych ekranach
+	## (Koniec tury/podróż/Szkoła sztuki).
+	var horses_row := HBoxContainer.new()
+	horses_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	horses_row.add_theme_constant_override("separation", 28)
+	root.add_child(horses_row)
+
 	for horse_id in horse_ids:
 		var horse: Dictionary = Horses.HORSES[horse_id]
-		var row := HBoxContainer.new()
-		row.alignment = BoxContainer.ALIGNMENT_CENTER
-		row.add_theme_constant_override("separation", 10)
-		root.add_child(row)
+		var card := VBoxContainer.new()
+		card.alignment = BoxContainer.ALIGNMENT_CENTER
+		card.add_theme_constant_override("separation", 4)
+		horses_row.add_child(card)
 
 		var portrait := TextureRect.new()
-		portrait.custom_minimum_size = Vector2(56, 56)
+		portrait.custom_minimum_size = Vector2(96, 96)
 		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		portrait.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		var image_path: String = horse["image"]
 		if ResourceLoader.exists(image_path):
 			portrait.texture = load(image_path)
-		row.add_child(portrait)
+		card.add_child(portrait)
 
-		var label := Label.new()
-		label.text = tr("%s — kurs ×%.1f") % [horse["name"], Horses.get_odds(horse_id)]
-		label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
-		label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
-		row.add_child(label)
+		var name_label := Label.new()
+		name_label.text = horse["name"]
+		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		name_label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
+		name_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
+		card.add_child(name_label)
+
+		var odds_label := Label.new()
+		odds_label.text = tr("kurs ×%.1f") % Horses.get_odds(horse_id)
+		odds_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		odds_label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
+		odds_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
+		card.add_child(odds_label)
 
 	var bet_row := HBoxContainer.new()
 	bet_row.alignment = BoxContainer.ALIGNMENT_CENTER
