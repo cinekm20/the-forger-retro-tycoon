@@ -119,7 +119,7 @@ func _ready() -> void:
 		root.alignment = BoxContainer.ALIGNMENT_BEGIN
 		ScreenHelpers.make_label(root, tr("W tym mieście nie odbywa się teraz żadna aukcja.\nWróć w podanym terminie."))
 		schedule_label.text = Auctions.get_schedule_string()
-		_build_bottom_back_button()
+		_build_bottom_menu_box(false)
 		return
 
 	present_players = Auctions.get_present_players()
@@ -144,24 +144,26 @@ func _build_top_left_corner() -> void:
 	schedule_label = ScreenHelpers.make_info_box(corner, "")
 
 
-## Przycisk powrotu we WŁASNYM, niezależnie zakotwiczonym pasku u samego
-## dołu ekranu — NIE ostatnie dziecko `root` (jak wcześniej). Zgłoszone
-## przez użytkownika: mimo kilku wcześniejszych poprawek przycisk i tak
-## potrafił wypaść poza widoczny ekran, gdy treść nad nim (obraz, skrzynka
-## oferty, status) była wyższa niż się spodziewano — np. bardzo długa nazwa
-## rywala AI (GENERIC_RIVAL_POOL w AIPlayers.gd) rozpychająca bid_row. Zamiast
-## dalej gonić dokładną wysokość reszty treści, przycisk dostaje ten sam
-## trik co boczne ramki graczy (_make_side_column) — stały pasek zakotwiczony
-## bezpośrednio do dołu ekranu, całkiem niezależny od tego, ile miejsca
-## zajmie wszystko inne w `root`.
-func _build_bottom_back_button() -> void:
-	var bar := CenterContainer.new()
-	bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	bar.offset_top = -74.0
-	bar.offset_bottom = -12.0
-	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(bar)
-	back_btn = ScreenHelpers.make_back_button(bar)
+## Skrzynka z przyciskiem(-ami) powrotu, w TYM SAMYM stylu co boczny panel
+## na TravelMap.gd/Hub.gd (ScreenHelpers.make_root_bottom, ozdobna ramka Art
+## Deco, bez żadnego tytułu/opisu — zgłoszone przez użytkownika: "jak tu, bez
+## tekstu u góry, żeby to było jakby menu", z odniesieniem do zrzutu ekranu
+## TravelMap). Budowana DOPIERO gdy naprawdę ma się pokazać (wywołania: raz w
+## _ready() dla "brak aukcji dziś", raz w _resolve_auction() po rozstrzygnięciu)
+## — NIE budowana z góry z ukrytymi przyciskami jak poprzednia wersja, bo
+## make_root_bottom zawsze rysuje samą ramkę (MenuFrame._draw(), niezależnie
+## od widoczności przycisków w środku), co podczas trwającej licytacji
+## wisiałoby jako pusta złota skrzynka w prawym dolnym rogu, akurat tam gdzie
+## w tym momencie są jeszcze widoczne ramki graczy (right_frames_column).
+##
+## show_gallery_button: zgłoszone przez użytkownika — po WYGRANEJ aukcji
+## (obraz trafia do kolekcji, nie fałszywka/nie rywal AI/nie brak ofert)
+## dodatkowo pokazuje przycisk "Galeria »", żeby od razu zobaczyć nowy obraz.
+func _build_bottom_menu_box(show_gallery_button: bool) -> void:
+	var box := ScreenHelpers.make_root_bottom(self, true)
+	if show_gallery_button:
+		ScreenHelpers.make_button(box, tr("Galeria »"), func(): SceneRouter.goto_scene(SceneRouter.GALLERY))
+	back_btn = ScreenHelpers.make_back_button(box)
 
 
 ## Buduje UI aktywnej licytacji BEZ ramek graczy (patrz _build_player_frames
@@ -300,17 +302,9 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	bid_label.custom_minimum_size = Vector2(520, 115)
 	bid_row.add_child(bid_label)
 
-	## Zastępuje przyciski Podbij/Rezygnuj (teraz w ramkach graczy) dopiero
-	## po rozstrzygnięciu aukcji — do tego momentu ukryty. Pasek czasu
-	## zbudowany wcześniej, na samej górze tej funkcji.
-	##
-	## Przycisk NIE jest już ostatnim dzieckiem `root` (patrz
-	## _build_bottom_back_button) — zgłoszone przez użytkownika: mimo
-	## poprzednich poprawek "Powrót" i tak potrafił zniknąć poza dolną
-	## krawędzią ekranu, gdy treść nad nim (obraz + skrzynka oferty + status)
-	## była wyższa niż się spodziewano.
-	_build_bottom_back_button()
-	back_btn.visible = false
+	## Skrzynka z przyciskiem powrotu (i ewentualnie "Galeria »") budowana
+	## DOPIERO w _resolve_auction() — patrz komentarz przy
+	## _build_bottom_menu_box, dlaczego nie tutaj z góry.
 
 
 ## Boczna kolumna ramek graczy — TA SAMA szerokość/pozycja co
@@ -598,7 +592,6 @@ func _resolve_auction() -> void:
 	## visible = false (nie tylko value = 0) — pusty pasek czasu nie
 	## powinien już wisieć na ekranie po rozstrzygnięciu.
 	timer_bar.visible = false
-	back_btn.visible = true
 
 	## Zgłoszone przez użytkownika: po zakończeniu aukcji ramki WSZYSTKICH
 	## graczy mają zniknąć, zostawiając tylko przycisk powrotu — dalsze
@@ -612,14 +605,20 @@ func _resolve_auction() -> void:
 	## napis (patrz wcześniejsze usunięcie "Zabrakło czasu..." w
 	## _on_time_expired) — wynik rundy i tak widać w bid_label (kto
 	## prowadzi/za ile), więc osobne zdanie podsumowujące jest zbędne.
+	## won_for_collection: TYLKO gdy obraz naprawdę trafił do kolekcji
+	## gracza (nie fałszywka, nie rywal AI, nie brak licytujących) — steruje
+	## przyciskiem "Galeria »" w _build_bottom_menu_box niżej.
+	var won_for_collection := false
 	if current_leader.begins_with("player:"):
 		var winner_index := int(current_leader.substr(7))
 		Players.spend_player_money(winner_index, current_bid)
 		if not Players.player_has_number(winner_index, current_number):
 			Players.catalogue_for_player(winner_index, current_number)
+			won_for_collection = true
 	elif current_leader != "":
 		AIPlayers.award_painting(current_leader, current_number, current_bid)
 	_update_labels()
+	_build_bottom_menu_box(won_for_collection)
 
 	Auctions.resolve_and_reschedule()
 	schedule_label.text = Auctions.get_schedule_string()
