@@ -81,24 +81,44 @@ silhouette, no photorealism
 
 ## Lista assetów wg ekranu
 
-### 1. Ekran startowy / logo
+### 1. Ekran startowy / tło menu głównego
 Zgłoszone przez użytkownika: gra zmieniła tytuł na **"The Forger: Retro
 Tycoon"** (wcześniej *Vermeer*, po tytule oryginału z 1987) — powód: niepewny
 status nazwy "Vermeer" jako marki. Katalog obrazów i kategoria "vermeer"
 (prawdziwy malarz Jan Vermeer) **zostają bez zmian** — to osobna sprawa od
 tytułu gry.
 
-- ✅ **Logo — dostarczone przez użytkownika i podpięte**
-  (`art/backgrounds/logo.jpg`, używane w `MainMenu.gd`) — kinowa scena z
-  kurtynami, złotą rozetą i wypukłym napisem "THE FORGER" / "RETRO TYCOON"
-  w stylu art déco.
+✅ **Tytuł wpisany bezpośrednio w tło — zaimplementowane** (`MainMenu.gd`):
+zgłoszone przez użytkownika — zamiast dwóch osobnych obrazów (pełnoekranowe
+tło + osobno dogrywana grafika logo na wierzchu), `main_menu_title.jpg`
+teraz SAM ma zawierać duży napis "THE FORGER: RETRO TYCOON" u góry. Dawne
+`logo.jpg` (kinowa scena z kurtynami i wypukłym napisem, oddzielnie
+kompozytowana w kodzie) i cała logika `_build_logo` (limit 1/3 wysokości
+ekranu, wyliczanie rozmiaru z opóźnieniem o dwie klatki) zostały usunięte —
+`logo.jpg` nie jest już używane nigdzie w kodzie, plik można zostawić w
+repo jako martwy zasób albo usunąć.
 - Opcjonalny motyw (nadal aktualny, niezależnie od zmiany tytułu): własna,
   stylizowana reinterpretacja "Dziewczyny z perłą" Jana Vermeera (obraz z
   ok. 1665, domena publiczna) — subtelne mrugnięcie do oryginalnej gry,
   która miała podobny motyw na ekranie tytułowym. To ma być **inspirowana
   reinterpretacja w naszym stylu art déco**, nie kopia obrazu.
 
-**Prompt (zastąpiony dostarczoną grafiką, zapis na wypadek regeneracji):**
+**Prompt (`main_menu_title.jpg`, regeneracja z tytułem wpisanym w tło)** —
+scena zachowuje dotychczasowy motyw (gabinet kolekcjonera z mapami świata na
+ścianach, kompas, globus, sylwetka miasta u dołu), z dużym, pogrubionym
+napisem tytułu u góry. TA SAMA zasada co przy kartach wydarzeń
+(docs/GRAFIKA_LEONARDO.md §4): krótki tytuł w cudzysłowie, nie opisowe
+zdanie — modele obrazkowe renderują krótkie hasła dużo wierniej. **Usuń
+"text, watermark, signature, logo" ze standardowego Negative Prompt TYLKO
+dla tego jednego promptu** (patrz sekcja "Negative prompt" na górze
+dokumentu) — inaczej model będzie aktywnie unikać rysowania tytułu, którego
+tu właśnie chcemy.
+```
+1920s art collector's study, world maps on the walls, a brass compass and a globe in the corner, a city skyline silhouette along the bottom edge, huge bold Art Deco masthead title in capital letters reading "THE FORGER: RETRO TYCOON" spanning the full width across the top of the scene, game title screen background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Prompt logo.jpg (nieużywane, zapis historyczny — patrz wyżej, dlaczego
+zrezygnowano):**
 ```
 Art Deco game logo title screen, elegant gold typography reading "THE FORGER: RETRO TYCOON",
 1920s art collector silhouette standing before an easel, world map background,
@@ -989,8 +1009,8 @@ Leonardo, żeby mieć z czego wybrać).
 
 | # | Priorytet | Asset | Szt. | Format / proporcje | Sekcja promptu | Status |
 |---|---|---|---|---|---|---|
-| 1 | 1 | Obraz referencyjny stylu / tło menu głównego | 1 | 16:9, docelowo 1920×1080 | §1 | ✅ zrobione (`main_menu_title.jpg`) |
-| 2 | 1 | Logo "The Forger: Retro Tycoon" | 1 | dowolne, JPG | §1 | ✅ dostarczone przez użytkownika i podpięte (`logo.jpg`) |
+| 1 | 1 | Obraz referencyjny stylu / tło menu głównego (docelowo z tytułem wpisanym w tło) | 1 | 16:9, docelowo 1920×1080 | §1 | ⬜ do regeneracji — obecny `main_menu_title.jpg` jeszcze bez wpisanego tytułu; `MainMenu.gd` nie dogrywa już osobnego logo, więc do czasu regeneracji ekran startowy jest bez napisu tytułowego |
+| 2 | 1 | ~~Logo "The Forger: Retro Tycoon"~~ | 1 | dowolne, JPG | §1 | ⛔ wycofane — zastąpione tytułem wpisanym w tło (wiersz 1), `logo.jpg` nieużywane w kodzie |
 | 3a | 2 | Tło Plantacji | 1 | 16:9, 1920×1080 | §3 | ✅ zrobione i podpięte (`plantation.jpg`) |
 | 3b | 2 | Tło Domu aukcyjnego | 1 | 16:9, 1920×1080 | §6 | ✅ zrobione i podpięte (`auction_house.jpg`) |
 | 3c | 2 | Tło Giełdy | 1 | 16:9, 1920×1080 | §4 | ✅ zrobione i podpięte (`stock_market.jpg`) |
