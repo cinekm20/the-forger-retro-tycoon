@@ -248,7 +248,13 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	bid_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	bid_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
 	bid_label.add_theme_font_size_override("font_size", 26)
-	bid_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	## AUTOWRAP_ARBITRARY (nie WORD) — patrz ten sam komentarz w
+	## _build_player_frame: "(prowadzi: %s)" wstawia nazwę gracza, więc bez
+	## twardego łamania w dowolnym miejscu bardzo długa nazwa mogłaby
+	## poszerzyć tę skrzynkę ponad 500px i, pośrednio, dodatkową wysokością
+	## zepchnąć przycisk "Powrót" (na samym dole, brak ScrollContainera na
+	## tym ekranie) poza widoczny ekran.
+	bid_label.autowrap_mode = TextServer.AUTOWRAP_ARBITRARY
 	bid_label.custom_minimum_size = Vector2(500, 70)
 	bid_row.add_child(bid_label)
 
@@ -343,7 +349,18 @@ func _build_player_frame(parent: Container, index: int) -> void:
 	var column := ScreenHelpers.make_boxed_column(parent)
 
 	var name_suffix := tr(" (aktywny)") if index == Players.active_index else ""
-	ScreenHelpers.make_label(column, Players.player_names[index] + name_suffix)
+	var name_label := ScreenHelpers.make_label(column, Players.player_names[index] + name_suffix)
+	## Zgłoszone przez użytkownika: bardzo długa nazwa gracza rozpychała całą
+	## ramkę (boxed_column) szerzej niż SIDE_PANEL_WIDTH, więc widocznie
+	## "pływała" w szerokości między rundami zależnie od tego, czyja akurat
+	## ramka się przebudowywała. MainMenu.gd teraz ogranicza długość nazwy
+	## przy wpisywaniu (MAX_PLAYER_NAME_LENGTH), ale to tu i tak zostaje jako
+	## twarde zabezpieczenie na wypadek starszego zapisu gry sprzed tego
+	## limitu — AUTOWRAP_ARBITRARY (nie WORD) łamie tekst w DOWOLNYM miejscu,
+	## więc nawet jeden długi ciąg znaków bez spacji nigdy nie przekroczy
+	## zadanej szerokości (WORD nie potrafiłby go złamać w ogóle).
+	name_label.autowrap_mode = TextServer.AUTOWRAP_ARBITRARY
+	name_label.custom_minimum_size = Vector2(ScreenHelpers.SIDE_PANEL_WIDTH - 24.0, 0)
 
 	var avatar_center := CenterContainer.new()
 	column.add_child(avatar_center)

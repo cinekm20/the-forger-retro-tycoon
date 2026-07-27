@@ -1,5 +1,14 @@
 extends Control
 
+## Zgłoszenie użytkownika: bardzo długa nazwa gracza rozpychała ramkę
+## gracza na Domu aukcyjnym (AuctionHouse.gd — szerokość skrzynki rosła i
+## malała zależnie od tego, czyja ramka akurat się przebudowywała) i
+## przesuwała przycisk "Powrót" poza ekran (dłuższy tekst "prowadzi: <imię>"
+## zajmował więcej linii). Twarde ograniczenie TU, przy wpisywaniu — żadne
+## pojedyncze miejsce wyświetlające nazwę gracza w grze nie musi już samo
+## bronić się przed dowolnie długim wejściem.
+const MAX_PLAYER_NAME_LENGTH := 16
+
 var easy_mode_check: CheckBox
 var player_count_option: OptionButton
 var setup_section: VBoxContainer
@@ -190,6 +199,7 @@ func _show_name_entry() -> void:
 		var edit := LineEdit.new()
 		edit.placeholder_text = tr("Gracz %d") % (i + 1)
 		edit.custom_minimum_size = Vector2(160, 0)
+		edit.max_length = MAX_PLAYER_NAME_LENGTH
 		edit.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		name_row.add_child(edit)
 		name_edits.append(edit)
