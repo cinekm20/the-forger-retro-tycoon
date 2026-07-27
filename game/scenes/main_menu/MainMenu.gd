@@ -25,6 +25,13 @@ var gender_options: Array[OptionButton] = []
 var avatar_options: Array[OptionButton] = []
 var avatar_previews: Array[TextureRect] = []
 var root: VBoxContainer
+## Boczne, narożne kolumny z ramką KAŻDEGO gracza (patrz
+## _build_player_corner_frames) — zgłoszone przez użytkownika: ekran
+## wpisywania imion ma pokazywać każdego gracza tak jak w Domu aukcyjnym
+## (AuctionHouse.gd _make_side_column), nie w rzędzie boksów na środku.
+## Dzieci `self`, NIE name_section — więc trzeba je jawnie sprzątać osobno
+## przy każdej przebudowie/anulowaniu ekranu wpisywania imion.
+var player_corner_columns: Array[Control] = []
 
 
 func _ready() -> void:
@@ -105,19 +112,13 @@ func _show_name_entry() -> void:
 
 	ScreenHelpers.make_title(name_section, "Podaj imiona graczy")
 
-	## HFlowContainer zamiast pionowego stosu boksów per gracz — zgłoszone
-	## przez użytkownika: przy 2+ graczach boksy stackowały się jeden pod
-	## drugim, a w orientacji poziomej (mało miejsca w pionie) ekran nie
-	## mieścił wszystkiego do przycisku "Rozpocznij grę" bez przewijania,
-	## które na tym ekranie (tak jak wcześniej na Hub.gd) zawodzi dotykiem.
-	## Boksy graczy obok siebie w POZIOMIE (do 4, Players.MAX_PLAYERS,
-	## mieszczą się swobodnie na szerokim ekranie) — wysokość rośnie tylko o
-	## wysokość JEDNEGO boksu, niezależnie od liczby graczy.
-	var players_row := HFlowContainer.new()
-	players_row.alignment = FlowContainer.ALIGNMENT_CENTER
-	players_row.add_theme_constant_override("h_separation", 20)
-	players_row.add_theme_constant_override("v_separation", 16)
-	name_section.add_child(players_row)
+	## Zgłoszone przez użytkownika: gracze mają być pokazani tak jak w Domu
+	## aukcyjnym — każdy w OSOBNEJ ramce w rogu ekranu (1 -> prawy dół,
+	## 2 -> lewy dół, 3 -> prawy góra, 4 -> lewy góra), zamiast rzędu boksów
+	## na środku. _build_player_corner_frames zwraca te 4 sloty w TEJ
+	## kolejności (ten sam patent co AuctionHouse.gd _build_player_frames).
+	var count := player_count_option.selected + 1
+	var slots := _build_player_corner_frames()
 
 	## Każdy gracz dostaje: DUŻY podgląd awatara na górze (96×96, było 48×48,
 	## stłoczone w jednym rzędzie z resztą — zgłoszone przez użytkownika, że
@@ -127,13 +128,8 @@ func _show_name_entry() -> void:
 	## patrz Players.GENDERS/AVATAR_VARIANTS) — nie trzeba generować nowej
 	## grafiki, chyba że kiedyś zabraknie wariantów (wtedy dopisać kolejne
 	## prompty w docs/GRAFIKA_LEONARDO.md §6).
-	var count := player_count_option.selected + 1
 	for i in count:
-		var box := ScreenHelpers.make_boxed_row(players_row)
-		var column := VBoxContainer.new()
-		column.alignment = BoxContainer.ALIGNMENT_CENTER
-		column.add_theme_constant_override("separation", 8)
-		box.add_child(column)
+		var column := ScreenHelpers.make_boxed_column(slots[i])
 
 		var avatar_preview := TextureRect.new()
 		avatar_preview.custom_minimum_size = Vector2(96, 96)
@@ -187,10 +183,70 @@ func _show_name_entry() -> void:
 	ScreenHelpers.make_button(name_section, "Anuluj", func():
 		name_box.visible = false
 		setup_box.visible = true
+		_clear_player_corner_frames()
 	)
 
 	setup_box.visible = false
 	name_box.visible = true
+
+
+## Boczne kolumny na ramki graczy — dokładnie ten sam mechanizm co
+## AuctionHouse.gd _make_side_column/_build_player_frames (dwie
+## pełnowysokościowe kolumny, każda podzielona rozpychaczem na GÓRNY/DOLNY
+## slot), tylko top_offset=0 (MainMenu, w przeciwieństwie do Domu
+## aukcyjnego, nie ma żadnej skrzynki w lewym górnym rogu, z którą trzeba by
+## nie kolidować). Zwraca sloty w kolejności [prawy_dół, lewy_dół,
+## prawy_góra, lewy_góra] — patrz komentarz w _show_name_entry, czemu
+## akurat ta kolejność.
+func _build_player_corner_frames() -> Array[VBoxContainer]:
+	_clear_player_corner_frames()
+
+	var left_root := _make_corner_column(false)
+	var right_root := _make_corner_column(true)
+	player_corner_columns = [left_root, right_root]
+
+	var left_top := VBoxContainer.new()
+	left_root.add_child(left_top)
+	left_root.add_child(ScreenHelpers.make_expand_spacer())
+	var left_bottom := VBoxContainer.new()
+	left_root.add_child(left_bottom)
+
+	var right_top := VBoxContainer.new()
+	right_root.add_child(right_top)
+	right_root.add_child(ScreenHelpers.make_expand_spacer())
+	var right_bottom := VBoxContainer.new()
+	right_root.add_child(right_bottom)
+
+	var slots: Array[VBoxContainer] = [right_bottom, left_bottom, right_top, left_top]
+	return slots
+
+
+func _make_corner_column(on_right: bool) -> VBoxContainer:
+	var column := VBoxContainer.new()
+	column.anchor_top = 0.0
+	column.anchor_bottom = 1.0
+	if on_right:
+		column.anchor_left = 1.0
+		column.anchor_right = 1.0
+		column.offset_left = -ScreenHelpers.SIDE_PANEL_WIDTH
+		column.offset_right = 0.0
+	else:
+		column.anchor_left = 0.0
+		column.anchor_right = 0.0
+		column.offset_left = 0.0
+		column.offset_right = ScreenHelpers.SIDE_PANEL_WIDTH
+	column.alignment = BoxContainer.ALIGNMENT_BEGIN
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(column)
+	return column
+
+
+## Dzieci `self`, NIE name_section — więc _show_name_entry (które czyści
+## tylko name_section.get_children()) i "Anuluj" muszą je sprzątać osobno.
+func _clear_player_corner_frames() -> void:
+	for column in player_corner_columns:
+		column.queue_free()
+	player_corner_columns.clear()
 
 
 func _on_avatar_choice_changed(_selected_index: int, player_index: int) -> void:
