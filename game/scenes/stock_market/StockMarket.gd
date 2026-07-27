@@ -164,7 +164,7 @@ func _update_info() -> void:
 
 ## Kolorowy kwadracik + nazwa dla każdej serii, pod wykresem — czysty tekst
 ## wygodniej zrobić zwykłymi Labelami niż draw_string() w środku PriceChart.
-func _build_chart_legend(parent: Container, ids: Array, get_name: Callable, colors: Dictionary) -> void:
+func _build_chart_legend(parent: Container, ids: Array, name_for_id: Callable, colors: Dictionary) -> void:
 	var legend_row := HBoxContainer.new()
 	legend_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	legend_row.add_theme_constant_override("separation", 16)
@@ -181,7 +181,7 @@ func _build_chart_legend(parent: Container, ids: Array, get_name: Callable, colo
 		entry.add_child(swatch)
 
 		var label := Label.new()
-		label.text = get_name.call(id)
+		label.text = name_for_id.call(id)
 		label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
 		label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		entry.add_child(label)

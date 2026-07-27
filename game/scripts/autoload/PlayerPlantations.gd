@@ -299,8 +299,8 @@ func get_owned_tile_count(plantation_index: int) -> int:
 	var city: String = plantations[plantation_index]["city"]
 	var grid: Dictionary = city_grids[city]
 	var count := 0
-	for owner in grid["tile_owner"]:
-		if int(owner) == Players.active_index:
+	for owner_index in grid["tile_owner"]:
+		if int(owner_index) == Players.active_index:
 			count += 1
 	return count
 
