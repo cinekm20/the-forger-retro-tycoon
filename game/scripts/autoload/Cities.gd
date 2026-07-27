@@ -110,73 +110,39 @@ func get_auction_cities() -> Array:
 
 
 ## Pozycje pinezek na mapie świata — ułamek szerokości/wysokości ekranu
-## (0,0 = lewy górny róg). Skalibrowane bezpośrednio na pikselach
-## game/art/backgrounds/hub_map.jpg (1368×768) — dla każdego miasta
-## znaleziono piksel leżący na właściwym lądzie na TYM konkretnym obrazku
-## (analiza kolorów: ląd = odcienie niebiesko-turkusowe, morze = beż/sepia),
-## nie na czystej geografii w oderwaniu od grafiki. Poprzednie wartości były
-## szacowane "na ślepo" bez podglądu grafiki i wypadały w oceanie/złym
-## miejscu (zgłoszone przez użytkownika na zrzucie ekranu).
-##
-## Zweryfikowane ponownie programowo (próbkowanie koloru piksela pod każdą
-## z tych współrzędnych) po kolejnym zgłoszeniu użytkownika — berlin i
-## st_louis faktycznie wypadały na kolorze morza (beż), mimo że reszta miast
-## była poprawna; poprawione na najbliższy ląd w promieniu kilku pikseli od
-## oryginalnej pozycji (patrz też TravelMap.gd — pinezki są teraz zakotwiczone
-## na tych ułamkach przez anchor_left/right/top/bottom, więc RAZ dobrze
-## skalibrowane współrzędne zostają poprawne przy każdej rozdzielczości).
-##
-## Kolejna poprawka: berlin/paryż/amsterdam/londyn (region "europe") leżały
-## wszystkie na wąskim, wysuniętym na północ półwyspie przypominającym
-## Norwegię/Skandynawię (zgłoszone przez użytkownika: "londyn, paryż i
-## amsterdam lądują w norwegii") — przesunięte wtedy w dół, ale za daleko: na
-## szeroki ląd, który jest wizualnie Afryką (zgłoszone: "a teraz są w
-## Afryce"). Przesunięte na wąski pas lądu POMIĘDZY tymi dwoma skrajnościami,
-## a potem jeszcze trochę wyżej (bliżej nasady półwyspu, ale wciąż na
-## jednoznacznie kontynentalnym lądzie, nie na samej wąskiej odnodze) —
-## zgłoszone przez użytkownika: "jeszcze trochę wyżej te europejskie". Nadal
-## wymagając "głębokiego lądu" (margines koloru ląd/morze dodatni w całym
-## promieniu ~6px wokół punktu, nie tylko w jednym pikselu), żeby nie trafić
-## na wąski przesmyk/zatoczkę widoczny dokładnie w tym pasie.
-##
-## Kolejna poprawka (zgłoszenie użytkownika: "już to poprawialiśmy ale nadal
-## nie w tych miejscach są znaczniki", ze zrzutem ekranu z gry): programowe
-## próbkowanie koloru ujawniło, że new_york/richmond/st_louis lądowały w
-## KANADYJSKIEJ ARKTYCE (rozdrobnione wysepki archipelagu widoczne na
-## hub_map.jpg), nie na kontynentalnych Stanach Zjednoczonych — jednolity,
-## niepofragmentowany ląd niżej na tym samym kontynencie (między Arktyką a
-## przesmykiem do Ameryki Środkowej) to faktyczne "USA" na tej grafice.
-## guatemala i rio wypadały wprost w morzu (kolor beżowy, nie ląd) — guatemala
-## przesunięta na wąski, ale jednoznacznie lądowy fragment przesmyku
-## środkowoamerykańskiego kawałek na wschód/południe od poprzedniej pozycji;
-## rio przesunięte w lewo, bo poprzednia pozycja lądowała w otwartym oceanie
-## na wschód od wybrzeża Brazylii. lisbon leżała dokładnie na granicy ląd/
-## morze (część sąsiednich pikseli już w morzu) — przesunięta kawałek w
-## prawo, w głąb lądu. Reszta miast (w tym bombay/colombo) zweryfikowana
-## jako poprawna: subkontynent indyjski na tej konkretnej grafice jest
-## namalowany w cieplejszym, piaskowym odcieniu zamiast niebiesko-turkusowym
-## jak reszta lądów — kolor sam w sobie nie jest tu wiarygodnym testem, liczy
-## się rozpoznawalny kształt kontynentu (zweryfikowane wizualnie, nie tylko
-## programowo).
+## (0,0 = lewy górny róg). Zgłoszenie użytkownika: kontynenty na POPRZEDNIEJ
+## wersji hub_map.jpg nie były geograficznie dobrze odwzorowane (rozdrobniony
+## archipelag zamiast kontynentalnych USA, prawie niewidoczny przesmyk
+## Ameryki Środkowej, subkontynent indyjski w innym kolorze niż reszta lądów)
+## — wygenerowano NOWĄ grafikę (prawdziwa, rozpoznawalna projekcja
+## Merkatora-podobna) i przekalibrowano wszystkie współrzędne od zera pod nią.
+## Ląd w tej grafice ma DWA odcienie zależnie od szerokości geograficznej
+## (kremowy/turkusowy na północy, złoto-brązowy bliżej równika) — kolor sam
+## w sobie nie jest tu wiarygodnym testem "ląd czy morze", liczy się
+## rozpoznawalny kształt kontynentu (każda współrzędna zweryfikowana
+## wizualnie na powiększonych wycinkach z siatką co 0.01, nie tylko
+## programowym próbkowaniem koloru piksela). Współrzędne pinezek są
+## zakotwiczone przez anchor_left/right/top/bottom (patrz TravelMap.gd), więc
+## raz dobrze skalibrowane zostają poprawne przy każdej rozdzielczości.
 const MAP_POSITION := {
-	"berlin": Vector2(0.55, 0.327),
-	"paris": Vector2(0.493, 0.405),
-	"amsterdam": Vector2(0.539, 0.361),
-	"lisbon": Vector2(0.49, 0.415),
-	"london": Vector2(0.526, 0.367),
-	"ankara": Vector2(0.60, 0.31),
-	"bombay": Vector2(0.66, 0.49),
-	"colombo": Vector2(0.67, 0.53),
-	"mombasa": Vector2(0.59, 0.58),
-	"duala": Vector2(0.52, 0.54),
-	"abidjan": Vector2(0.48, 0.52),
-	"rio": Vector2(0.378, 0.68),
-	"bogota": Vector2(0.36, 0.55),
-	"guatemala": Vector2(0.332, 0.509),
-	"mexico": Vector2(0.29, 0.46),
-	"new_york": Vector2(0.356, 0.345),
-	"richmond": Vector2(0.352, 0.400),
-	"st_louis": Vector2(0.275, 0.378),
+	"berlin": Vector2(0.575, 0.30),
+	"paris": Vector2(0.535, 0.345),
+	"amsterdam": Vector2(0.545, 0.315),
+	"lisbon": Vector2(0.475, 0.41),
+	"london": Vector2(0.475, 0.325),
+	"ankara": Vector2(0.575, 0.345),
+	"bombay": Vector2(0.665, 0.50),
+	"colombo": Vector2(0.688, 0.555),
+	"mombasa": Vector2(0.605, 0.60),
+	"duala": Vector2(0.515, 0.545),
+	"abidjan": Vector2(0.475, 0.535),
+	"rio": Vector2(0.38, 0.665),
+	"bogota": Vector2(0.30, 0.565),
+	"guatemala": Vector2(0.245, 0.47),
+	"mexico": Vector2(0.19, 0.415),
+	"new_york": Vector2(0.30, 0.345),
+	"richmond": Vector2(0.295, 0.375),
+	"st_louis": Vector2(0.225, 0.375),
 }
 
 
