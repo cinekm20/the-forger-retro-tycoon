@@ -49,6 +49,16 @@ var snapshots: Array[Dictionary] = []  ## stan graczy, którzy NIE są właśnie
 ## płaska tablica wystarcza.
 var player_days: Array[int] = [0]
 
+## Ostatni dzień (Players.player_days), w którym DANY gracz postawił zakład
+## na Wyścigach konnych (Races.gd) — zgłoszone przez użytkownika: wyścigi nie
+## mogą być dostępne bez ograniczeń w obrębie jednej tury, tylko "co jakiś
+## czas". Płaska tablica jak player_days (ten sam powód — nikt nie potrzebuje
+## "aktualnej wartości" cudzego ostatniego wyścigu, tylko wartości spod
+## dowolnego indeksu), NIE migawkowana. Sentinel -DAYS_PER_TURN (nie 0) na
+## starcie nowej gry, żeby PIERWSZY zakład był od razu możliwy, zamiast
+## czekać na "upływ" nieistniejącej poprzedniej tury.
+var last_race_day: Array[int] = [-DAYS_PER_TURN]
+
 
 func reset_new_game(count: int) -> void:
 	player_count = clampi(count, 1, MAX_PLAYERS)
@@ -58,12 +68,14 @@ func reset_new_game(count: int) -> void:
 	player_avatar_variants.clear()
 	snapshots.clear()
 	player_days.clear()
+	last_race_day.clear()
 	for i in player_count:
 		player_names.append("Gracz %d" % (i + 1))
 		player_genders.append(GENDERS[0])
 		player_avatar_variants.append(AVATAR_VARIANTS[0])
 		snapshots.append(_empty_snapshot())
 		player_days.append(0)
+		last_race_day.append(-DAYS_PER_TURN)
 
 
 func is_multiplayer() -> bool:
@@ -115,6 +127,17 @@ func active_day() -> int:
 
 func get_player_day(index: int) -> int:
 	return player_days[index]
+
+
+## Ile dni upłynęło (Tor B, WŁASNY czas aktywnego gracza) od jego ostatniego
+## zakładu na wyścigach — patrz last_race_day wyżej i Races.gd, gdzie próg
+## DAYS_PER_TURN blokuje przycisk "Postaw zakład" dopóki nie minie.
+func days_since_last_race() -> int:
+	return active_day() - last_race_day[active_index]
+
+
+func record_race() -> void:
+	last_race_day[active_index] = active_day()
 
 
 func _empty_snapshot() -> Dictionary:

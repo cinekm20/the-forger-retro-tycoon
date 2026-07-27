@@ -168,9 +168,16 @@ rosnący kurs dolara). Doświadczeni gracze mogą się zabezpieczyć kontraktami
 terminowymi zawartymi tuż przed reformą.
 
 ### 4.4 Tor wyścigów konnych
-Prosty ekran zakładów: lista koni z kursami, animowana scena wyścigu (można
-zacząć od uproszczonej animacji 2D — sylwetki koni przesuwające się po torze),
-wynik i wypłata.
+Prosty ekran zakładów: lista koni (z portretami, `art/horses/`) z kursami,
+wynik i wypłata od razu po postawieniu zakładu (bez animowanej sceny wyścigu
+na razie — ⏳ zaplanowane, jeszcze niezaimplementowane).
+
+✅ **Limit zakładów — zaimplementowany** (`Players.last_race_day`/
+`days_since_last_race`, `Races.gd`): zgłoszone przez użytkownika — bez
+ograniczenia dało się postawić nieskończenie wiele zakładów w obrębie jednej
+tury. Kolejny zakład możliwy dopiero po upływie `Players.DAYS_PER_TURN`
+(7 dni, TA SAMA stała co skok "Koniec tury") WŁASNEGO czasu gracza (Tor B),
+licząc od jego poprzedniego zakładu.
 
 ### 4.5 Dom aukcyjny
 Najbardziej "grafozależny" ekran. Prezentacja obrazu (w pełnej krasie, na

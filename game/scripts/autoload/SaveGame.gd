@@ -37,6 +37,7 @@ func save_game() -> void:
 		"player_avatar_variants": Players.player_avatar_variants,
 		"player_snapshots": Players.snapshots,
 		"player_days": Players.player_days,
+		"last_race_day": Players.last_race_day,
 		"has_bodyguard": Security.has_bodyguard,
 		"next_auction_city": Auctions.next_auction_city,
 		"next_auction_day": Auctions.next_auction_day,
@@ -129,6 +130,18 @@ func load_game() -> void:
 	var player_days: Array[int] = []
 	player_days.assign(loaded_days)
 	Players.player_days = player_days
+	## Zapisy sprzed dodania limitu wyścigów (albo po zmianie liczby graczy)
+	## nie mają "last_race_day" — sentinel -DAYS_PER_TURN pozwala od razu
+	## postawić zakład, tak samo jak na starcie nowej gry (patrz
+	## Players.reset_new_game).
+	var loaded_race_days: Array = data.get("last_race_day", [])
+	if loaded_race_days.size() != Players.player_count:
+		loaded_race_days.clear()
+		for i in Players.player_count:
+			loaded_race_days.append(-Players.DAYS_PER_TURN)
+	var last_race_day: Array[int] = []
+	last_race_day.assign(loaded_race_days)
+	Players.last_race_day = last_race_day
 	Security.has_bodyguard = data.get("has_bodyguard", false)
 	Auctions.next_auction_city = data.get("next_auction_city", "")
 	Auctions.next_auction_day = data.get("next_auction_day", 0)

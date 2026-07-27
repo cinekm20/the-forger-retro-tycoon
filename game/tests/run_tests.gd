@@ -56,6 +56,7 @@ func _ready() -> void:
 	_test_players_gender_and_avatar_selection()
 	_test_price_history_for_charts()
 	_test_players_days_diverge()
+	_test_races_cooldown_between_bets()
 	_test_shared_price_by_day()
 	_test_catching_up_player_does_not_double_world_drift()
 	_test_catching_up_player_gets_full_personal_consequences()
@@ -837,6 +838,25 @@ func _test_players_days_diverge() -> void:
 	_assert(Players.get_player_day(0) == 10, "gracz 1 (aktywny) ma dzień 10 po własnej akcji")
 	_assert(Players.get_player_day(1) == 0, "gracz 2 pozostaje na dniu 0 (nie wykonał żadnej akcji)")
 	_assert(Players.get_player_day(0) != Players.get_player_day(1), "linie czasu graczy się rozjeżdżają")
+
+
+## Zgłoszone przez użytkownika: wyścigi konne (Races.gd) nie mogą być dostępne
+## bez ograniczeń w obrębie jednej tury — limit Players.DAYS_PER_TURN między
+## zakładami, liczony WŁASNYM czasem aktywnego gracza (Tor B).
+func _test_races_cooldown_between_bets() -> void:
+	print("-- Players: limit między zakładami na wyścigach (DAYS_PER_TURN) --")
+	Calendar.reset_new_game()
+	Players.reset_new_game(1)
+
+	_assert(Players.days_since_last_race() >= Players.DAYS_PER_TURN, "na starcie nowej gry pierwszy zakład jest od razu możliwy")
+	Players.record_race()
+	_assert(Players.days_since_last_race() == 0, "zaraz po zakładzie licznik wraca do zera")
+
+	Players.advance_active_player_time(3)
+	_assert(Players.days_since_last_race() == 3 and Players.days_since_last_race() < Players.DAYS_PER_TURN, "po 3 dniach limit jeszcze nie minął")
+
+	Players.advance_active_player_time(Players.DAYS_PER_TURN - 3)
+	_assert(Players.days_since_last_race() >= Players.DAYS_PER_TURN, "po pełnym DAYS_PER_TURN limit minął, kolejny zakład znów możliwy")
 
 
 ## Zgłoszone przez użytkownika: ceny na Giełdzie/Rynku mają być WSPÓLNE — ten
