@@ -168,9 +168,22 @@ rosnący kurs dolara). Doświadczeni gracze mogą się zabezpieczyć kontraktami
 terminowymi zawartymi tuż przed reformą.
 
 ### 4.4 Tor wyścigów konnych
-Prosty ekran zakładów: lista koni (z portretami, `art/horses/`) z kursami,
-wynik i wypłata od razu po postawieniu zakładu (bez animowanej sceny wyścigu
-na razie — ⏳ zaplanowane, jeszcze niezaimplementowane).
+Ekran zakładów: lista koni (z portretami, `art/horses/`) z kursami.
+
+✅ **Animowany wyścig — zaimplementowany** (`scripts/ui/RaceTrackView.gd`):
+zgłoszone przez użytkownika — wynik nie może być oczywisty od razu, wyścig ma
+trwać min. 30 sekund (`DURATION := 32.0`), z przewijanym torem 2D (banery
+reklamowe u góry, trawa u dołu — obie warstwy kafelkowo przewijane, standardowy
+trik na nieskończone przewijanie bez shaderów) i realnymi zmianami prowadzenia.
+Zwycięzca jest ustalany OD RAZU (`Races._pick_winner_index()`, bez zmian) —
+animacja tylko go wizualizuje: każdy koń dostaje krzywą losowego "błądzenia"
+(kilka fal sinusoidalnych), która zanika w ostatniej ćwiartce wyścigu na rzecz
+"ciągnięcia" w stronę z góry ustalonej finałowej kolejności, więc zwycięzca
+zawsze przybiega pierwszy, niezależnie jak wyglądały zmiany prowadzenia po
+drodze. Jeden losowy NIE-zwycięski koń może dodatkowo dostać "kontuzję"
+(gwałtowny dołek na krzywej + przechył ikony + podpis) — bezpieczne dla
+uczciwości wyniku. Przycisk "Pomiń »" (ten sam wzorzec co `TravelAnimation.gd`)
+pozwala przeskoczyć od razu do wyniku.
 
 ✅ **Limit zakładów — zaimplementowany** (`Players.last_race_day`/
 `days_since_last_race`, `Races.gd`): zgłoszone przez użytkownika — bez

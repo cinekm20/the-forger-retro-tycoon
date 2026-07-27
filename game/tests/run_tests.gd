@@ -19,6 +19,8 @@ extends Node
 var failures: int = 0
 var total: int = 0
 
+const RaceTrackScript := preload("res://scripts/ui/RaceTrackView.gd")
+
 
 func _ready() -> void:
 	print("=== The Forger: Retro Tycoon — testy autoloadów ===")
@@ -59,6 +61,7 @@ func _ready() -> void:
 	_test_races_cooldown_between_bets()
 	_test_horses_odds_drift_and_bounds()
 	_test_horses_odds_shared_by_day()
+	_test_race_track_winner_finishes_first()
 	_test_shared_price_by_day()
 	_test_catching_up_player_does_not_double_world_drift()
 	_test_catching_up_player_gets_full_personal_consequences()
@@ -903,6 +906,35 @@ func _test_horses_odds_shared_by_day() -> void:
 	Players.advance_active_player_time(15)  # gracz 2 dogania do dnia 15 — już zasymulowanego
 
 	_assert(is_equal_approx(Horses.get_odds("wicher"), odds_after_player_1), "gracz 2, docierając do TEGO SAMEGO dnia, widzi ten sam kurs Wicher")
+
+
+## Zgłoszenie użytkownika: wynik wyścigu nie może być oczywisty od razu, więc
+## RaceTrackView daje każdemu koniowi losowe "błądzenie" po drodze — ale
+## kluczowa gwarancja uczciwości MUSI się trzymać niezależnie od tego
+## losowania: przy t=1 (meta) zwycięzca (ustalony PRZED animacją, patrz
+## komentarz w RaceTrackView.gd) ma ściśle najwyższą wartość krzywej pozycji
+## ze wszystkich koni, więc wizualnie zawsze przybiega pierwszy. Powtarzamy
+## z wieloma losowymi zwycięzcami, żeby złapać ewentualny błąd we wzorze
+## niezależnie od tego, który koń akurat wygrywa.
+func _test_race_track_winner_finishes_first() -> void:
+	print("-- RaceTrackView: zwycięzca ma ściśle najwyższą pozycję na mecie (t=1), niezależnie od losowego błądzenia --")
+	var image_paths: Array[String] = [
+		"res://art/horses/komet.jpg", "res://art/horses/grom.jpg", "res://art/horses/cyklon.jpg",
+		"res://art/horses/blyskawica.jpg", "res://art/horses/wicher.jpg",
+	]
+	for trial in 20:
+		var winner_idx := randi() % image_paths.size()
+		var view: Control = RaceTrackScript.new()
+		add_child(view)
+		view.setup(image_paths, winner_idx, Vector2(1280.0, 720.0))
+
+		var winner_offset: float = view._curve_offset(winner_idx, 1.0)
+		var winner_is_highest := true
+		for i in image_paths.size():
+			if i != winner_idx and view._curve_offset(i, 1.0) >= winner_offset:
+				winner_is_highest = false
+		_assert(winner_is_highest, "próba %d: zwycięzca (koń %d) ma najwyższą pozycję na mecie" % [trial, winner_idx])
+		view.queue_free()
 
 
 ## Zgłoszone przez użytkownika: ceny na Giełdzie/Rynku mają być WSPÓLNE — ten

@@ -1,6 +1,14 @@
 extends Control
-## Wyścigi konne — zakłady rozstrzygane od razu (bez animacji, którą podepniemy
-## po dojściu grafiki). Patrz GDD.md pkt. 4.4.
+## Wyścigi konne. Patrz GDD.md pkt. 4.4.
+##
+## Zgłoszenie użytkownika: wynik nie może być oczywisty od razu, wyścig ma
+## trwać min. 30 sekund, z przewijanym torem 2D i realnymi zmianami
+## prowadzenia — cała ta animacja jest w RaceTrackView.gd (scripts/ui/),
+## Races.gd tylko: (1) ustala zwycięzcę OD RAZU przez _pick_winner_index(),
+## dokładnie jak wcześniej, (2) buduje RaceTrackView i czeka na jego sygnał
+## `finished`, (3) DOPIERO wtedy nalicza wypłatę/tekst wyniku — czyli ta sama
+## logika ekonomiczna co przedtem, tylko przesunięta na koniec animacji
+## zamiast natychmiast po kliknięciu.
 ##
 ## Zgłoszone przez użytkownika: limit Players.DAYS_PER_TURN (7 dni, TA SAMA
 ## stała co skok "Koniec tury") między zakładami — bez tego dało się postawić
@@ -18,12 +26,23 @@ extends Control
 ## od tego, co się dzieje z Horses.HORSES).
 var horse_ids: Array[String] = []
 
+const RaceTrackScript := preload("res://scripts/ui/RaceTrackView.gd")
+
 var horse_option: OptionButton
 var bet_spin: SpinBox
 var bet_button: Button
 var result_label: Label
 var cooldown_label: Label
 var info_label: Label
+var back_btn: Button
+
+## Widok animacji, budowany dopiero w _on_bet_pressed (ten sam powód co
+## AuctionHouse.gd _build_bottom_menu_box — nie trzymamy pustego węzła
+## czekającego bezczynnie, tylko tworzymy go w momencie, gdy faktycznie jest
+## potrzebny). is_racing to DODATKOWE zabezpieczenie przed drugim zakładem w
+## trakcie animacji (bet_button i tak jest disabled, patrz _on_bet_pressed).
+var race_track: Control
+var is_racing: bool = false
 
 
 func _ready() -> void:
@@ -98,8 +117,11 @@ func _ready() -> void:
 	## Ozdobna skrzynka Art Deco w prawym dolnym rogu, TA SAMA co boczny
 	## panel na TravelMap.gd/Hub.gd — zgłoszone przez użytkownika: przycisk
 	## powrotu ma wyglądać tak samo na wszystkich ekranach (oprócz Plantacji).
-	## Zakotwiczona niezależnie od `root`, więc bez rozpychacza.
-	ScreenHelpers.make_boxed_back_button(self)
+	## Zakotwiczona niezależnie od `root`, więc bez rozpychacza. Zmienna (nie
+	## lokalny wywołanie) — disabled na czas animacji wyścigu, patrz
+	## _on_bet_pressed/_on_race_finished, żeby nie dało się wyjść z ekranu w
+	## trakcie.
+	back_btn = ScreenHelpers.make_boxed_back_button(self)
 
 	_update_info()
 	_update_cooldown_status()
@@ -124,9 +146,10 @@ func _pick_winner_index() -> int:
 
 func _on_bet_pressed() -> void:
 	## Podwójne zabezpieczenie — przycisk i tak jest disabled w trakcie
-	## odliczania (patrz _update_cooldown_status), ale gdyby coś odświeżyło
-	## stan między kliknięciami, zakład i tak nie powinien przejść.
-	if Players.days_since_last_race() < Players.DAYS_PER_TURN:
+	## odliczania (patrz _update_cooldown_status) I w trakcie animacji (patrz
+	## niżej), ale gdyby coś odświeżyło stan między kliknięciami, zakład i tak
+	## nie powinien przejść.
+	if Players.days_since_last_race() < Players.DAYS_PER_TURN or is_racing:
 		return
 
 	var bet: float = bet_spin.value
@@ -134,8 +157,37 @@ func _on_bet_pressed() -> void:
 		result_label.text = tr("Za mało gotówki na taki zakład.")
 		return
 
+	## Zwycięzca ustalony OD RAZU, dokładnie jak przed dodaniem animacji —
+	## RaceTrackView tylko wizualizuje ten JUŻ ustalony wynik, nigdy go nie
+	## zmienia. Wypłata/tekst wyniku czekają na _on_race_finished.
 	var chosen_index := horse_option.selected
 	var winner_index := _pick_winner_index()
+
+	result_label.text = ""
+	is_racing = true
+	bet_button.disabled = true
+	horse_option.disabled = true
+	bet_spin.editable = false
+	back_btn.disabled = true
+
+	var image_paths: Array[String] = []
+	for horse_id in horse_ids:
+		image_paths.append(Horses.HORSES[horse_id]["image"])
+
+	race_track = RaceTrackScript.new()
+	add_child(race_track)
+	race_track.finished.connect(_on_race_finished.bind(winner_index, chosen_index, bet))
+	race_track.setup(image_paths, winner_index, get_viewport_rect().size)
+
+
+func _on_race_finished(winner_index: int, chosen_index: int, bet: float) -> void:
+	race_track.queue_free()
+	race_track = null
+	is_racing = false
+	horse_option.disabled = false
+	bet_spin.editable = true
+	back_btn.disabled = false
+
 	var winner_id: String = horse_ids[winner_index]
 	var winner: Dictionary = Horses.HORSES[winner_id]
 
