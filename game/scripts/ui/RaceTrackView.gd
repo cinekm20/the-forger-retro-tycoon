@@ -136,12 +136,30 @@ func _generate_curves() -> void:
 
 
 func _build_visuals() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	## Zgłoszenie użytkownika (ze zrzutem ekranu): tło/banery/trawa w ogóle
+	## się nie pokazywały, tylko ikony koni na wierzchu oryginalnego ekranu —
+	## zweryfikowane debugowaniem (Godot headless + Xvfb, patrz
+	## game/tests_debug/): `self` dodane do drzewa w trakcie działania gry
+	## (nie przy starcie sceny) miało size=(0,0) MIMO set_anchors_preset
+	## (FULL_RECT) — węzły zależne od anchorów (ColorRect/Control z
+	## anchor_right=1 itp.) dziedziczyły to zerowe rozmiar, więc były
+	## niewidoczne, podczas gdy ikony koni/meta (jawnie ustawiane .size/
+	## .position, patrz niżej) i tak renderowały się poprawnie. Zamiast
+	## anchorów: JAWNY, stały rozmiar na podstawie viewport_size przekazanego
+	## z Races.gd — niezawodne niezależnie od tego, kiedy węzeł trafia do
+	## drzewa.
+	anchor_left = 0.0
+	anchor_top = 0.0
+	anchor_right = 0.0
+	anchor_bottom = 0.0
+	position = Vector2.ZERO
+	size = view_size
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
 	var backdrop := ColorRect.new()
-	backdrop.color = Color(0.04, 0.07, 0.05, 0.97)
-	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	backdrop.color = Color(0.04, 0.07, 0.05, 1.0)
+	backdrop.position = Vector2.ZERO
+	backdrop.size = view_size
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(backdrop)
 
@@ -155,16 +173,16 @@ func _build_visuals() -> void:
 
 func _build_banner_strip() -> void:
 	var strip := Control.new()
-	strip.anchor_left = 0.0
-	strip.anchor_right = 1.0
-	strip.offset_bottom = BANNER_HEIGHT
+	strip.position = Vector2.ZERO
+	strip.size = Vector2(view_size.x, BANNER_HEIGHT)
 	strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	strip.clip_contents = true
 	add_child(strip)
 
 	var strip_bg := ColorRect.new()
 	strip_bg.color = Color(0.15, 0.1, 0.06)
-	strip_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	strip_bg.position = Vector2.ZERO
+	strip_bg.size = strip.size
 	strip_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	strip.add_child(strip_bg)
 
@@ -192,18 +210,16 @@ func _build_banner_strip() -> void:
 
 func _build_ground_strip() -> void:
 	var strip := Control.new()
-	strip.anchor_left = 0.0
-	strip.anchor_right = 1.0
-	strip.anchor_top = 1.0
-	strip.anchor_bottom = 1.0
-	strip.offset_top = -GROUND_HEIGHT
+	strip.position = Vector2(0.0, view_size.y - GROUND_HEIGHT)
+	strip.size = Vector2(view_size.x, GROUND_HEIGHT)
 	strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	strip.clip_contents = true
 	add_child(strip)
 
 	var strip_bg := ColorRect.new()
 	strip_bg.color = Color(0.16, 0.32, 0.14)
-	strip_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	strip_bg.position = Vector2.ZERO
+	strip_bg.size = strip.size
 	strip_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	strip.add_child(strip_bg)
 
@@ -271,14 +287,8 @@ func _build_skip_button() -> void:
 	skip_button.text = tr("Pomiń »")
 	skip_button.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 	skip_button.pressed.connect(skip)
-	skip_button.anchor_left = 1.0
-	skip_button.anchor_right = 1.0
-	skip_button.anchor_top = 1.0
-	skip_button.anchor_bottom = 1.0
-	skip_button.offset_left = -150.0
-	skip_button.offset_right = -20.0
-	skip_button.offset_top = -56.0
-	skip_button.offset_bottom = -16.0
+	skip_button.size = Vector2(130.0, 40.0)
+	skip_button.position = Vector2(view_size.x - 150.0, view_size.y - 56.0)
 	add_child(skip_button)
 
 
