@@ -1061,7 +1061,7 @@ Leonardo, żeby mieć z czego wybrać).
 | 13 | 6 | Ikony 8 kategorii stylistycznych (okładki kafelków w Galerii) | 8 | 1:1, min. 1024×1024 | §9b | ✅ zrobione i podpięte — wszystkie 8 (`vermeer.jpg`, `baroque.jpg`, `classicism.jpg`, `romanticism.jpg`, `impressionism.jpg`, `symbolism.jpg`, `expressionism.jpg`, `modern.jpg`) |
 | 14 | 2 | Pusty wariant tła Galerii (bez obrazów/ławek/żyrandola na ścianach) | 1 | 16:9, 1920×1080 | §9 | ✅ zrobione i podpięte (`gallery_empty.jpg`) — zwykły `gallery.jpg` zostaje jako czysty fallback, gdyby plik kiedyś zniknął |
 | 15 | 4 | Karty wydarzeń: reforma walutowa, strajk, zamieszki, krach, hossa (docs/GDD.md pkt. 4.2, 4.3, 4.3.1) | 5 | 16:9, 1920×1080 | §4 | ✅ zrobione i podpięte — wszystkie 5 (`events/reform.jpg`/`events/strike.jpg`/`events/riot.jpg`/`events/crash.jpg`/`events/boom.jpg`) wgrane, `WorldEventCard.gd` je wyświetla zamiast fallbacku na tło Giełdy. Krach/hossa: `ShippingCompanies.apply_market_shock` |
-| 16 | 4 | Tło ekranu Ustawień | 1 | 16:9, 1920×1080 | §11 | ⬜ do zrobienia — `Settings.gd` po cichu spada na `stock_market.jpg`, dopóki `settings.jpg` nie zostanie wgrane |
+| 16 | 4 | Tło ekranu Ustawień | 1 | 16:9, 1920×1080 | §11 | ✅ zrobione i podpięte — `settings.jpg` wgrane |
 
 **Zasada dla wierszy oznaczonych "uwaga" (7 i 9):** jeśli Leonardo znowu
 zacznie robić pełne sceny zamiast wyizolowanych ikon/sprite'ów mimo
