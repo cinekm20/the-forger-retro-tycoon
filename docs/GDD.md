@@ -135,9 +135,9 @@ dotąd jako cicha zmiana liczbowa z jedną etykietą ostrzegawczą w Hubie —
 teraz zamiast/obok tego pokazuje się pełnoekranowa "karta gazety" MIĘDZY
 TURAMI (Hub sprawdza kolejkę WorldEvents PRZED zbudowaniem normalnego
 widoku, ten sam wzorzec co Podsumowanie roku). Ta sama karta pokazuje też
-kryzysy na plantacjach (patrz 4.2 wyżej). Ilustracja nagłówka gazety po
-cichu spada na tło Giełdy, dopóki `events/reform.jpg` nie zostanie wgrane
-(prompt w `docs/GRAFIKA_LEONARDO.md` §4).
+kryzysy na plantacjach (patrz 4.2 wyżej). Ilustracje nagłówków gazety
+(`events/reform.jpg`/`events/strike.jpg`/`events/riot.jpg`) wgrane i
+podpięte (prompty w `docs/GRAFIKA_LEONARDO.md` §4).
 
 ⏳ **Zaplanowane, jeszcze niezaimplementowane:** krach giełdowy (np. krach
 1929) i hiperinflacja jako osobne, nowe typy zdarzeń (nie tylko oprawa
