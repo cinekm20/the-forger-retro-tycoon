@@ -172,18 +172,24 @@ Ekran zakładów: lista koni (z portretami, `art/horses/`) z kursami.
 
 ✅ **Animowany wyścig — zaimplementowany** (`scripts/ui/RaceTrackView.gd`):
 zgłoszone przez użytkownika — wynik nie może być oczywisty od razu, wyścig ma
-trwać min. 30 sekund (`DURATION := 32.0`), z przewijanym torem 2D (banery
+trwać min. 30 sekund (`DURATION := 32.0`), start na białej linii z PRAWEJ,
+bieg w LEWO do biało-czerwonej linii mety, z przewijanym torem 2D (banery
 reklamowe u góry, trawa u dołu — obie warstwy kafelkowo przewijane, standardowy
 trik na nieskończone przewijanie bez shaderów) i realnymi zmianami prowadzenia.
 Zwycięzca jest ustalany OD RAZU (`Races._pick_winner_index()`, bez zmian) —
-animacja tylko go wizualizuje: każdy koń dostaje krzywą losowego "błądzenia"
-(kilka fal sinusoidalnych), która zanika w ostatniej ćwiartce wyścigu na rzecz
-"ciągnięcia" w stronę z góry ustalonej finałowej kolejności, więc zwycięzca
-zawsze przybiega pierwszy, niezależnie jak wyglądały zmiany prowadzenia po
-drodze. Jeden losowy NIE-zwycięski koń może dodatkowo dostać "kontuzję"
-(gwałtowny dołek na krzywej + przechył ikony + podpis) — bezpieczne dla
-uczciwości wyniku. Przycisk "Pomiń »" (ten sam wzorzec co `TravelAnimation.gd`)
-pozwala przeskoczyć od razu do wyniku.
+animacja tylko go wizualizuje: każdy koń dostaje WŁASNY moment przekroczenia
+mety (`t_cross`, ułamek `DURATION`) i krzywą potęgową o losowym wykładniku
+między startem a swoim `t_cross` (raz szybki start i zwolnienie, raz wolny
+start i finiszowy sprint) — daje to organiczne zmiany prowadzenia bez
+cofania konia. Zwycięzca ma zawsze NAJMNIEJSZY `t_cross` ze wszystkich koni
+(matematycznie gwarantowane miejsce 1.), niezależnie jak wyglądał bieg po
+drodze. Po przekroczeniu mety każdy koń zatrzymuje się i przed nim (z prawej,
+skąd przybiegł) pojawia się podpis z miejscem i nazwą (np. "1. Wicher").
+Jeden losowy NIE-zwycięski koń może dodatkowo dostać "kontuzję" (tymczasowe,
+zanikające cofnięcie + przechył ikony + podpis, zawsze bezpiecznie przed
+jego własnym `t_cross`) — bezpieczne dla uczciwości wyniku. Przycisk
+"Pomiń »" (ten sam wzorzec co `TravelAnimation.gd`) pozwala przeskoczyć od
+razu do wyniku.
 
 ✅ **Limit zakładów — zaimplementowany** (`Players.last_race_day`/
 `days_since_last_race`, `Races.gd`): zgłoszone przez użytkownika — bez

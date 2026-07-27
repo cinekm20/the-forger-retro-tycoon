@@ -171,13 +171,15 @@ func _on_bet_pressed() -> void:
 	back_btn.disabled = true
 
 	var image_paths: Array[String] = []
+	var names: Array[String] = []
 	for horse_id in horse_ids:
 		image_paths.append(Horses.HORSES[horse_id]["image"])
+		names.append(Horses.HORSES[horse_id]["name"])
 
 	race_track = RaceTrackScript.new()
 	add_child(race_track)
 	race_track.finished.connect(_on_race_finished.bind(winner_index, chosen_index, bet))
-	race_track.setup(image_paths, winner_index, get_viewport_rect().size)
+	race_track.setup(image_paths, names, winner_index, get_viewport_rect().size)
 
 
 func _on_race_finished(winner_index: int, chosen_index: int, bet: float) -> void:

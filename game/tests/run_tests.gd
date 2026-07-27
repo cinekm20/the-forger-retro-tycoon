@@ -908,32 +908,36 @@ func _test_horses_odds_shared_by_day() -> void:
 	_assert(is_equal_approx(Horses.get_odds("wicher"), odds_after_player_1), "gracz 2, docierając do TEGO SAMEGO dnia, widzi ten sam kurs Wicher")
 
 
-## Zgłoszenie użytkownika: wynik wyścigu nie może być oczywisty od razu, więc
-## RaceTrackView daje każdemu koniowi losowe "błądzenie" po drodze — ale
-## kluczowa gwarancja uczciwości MUSI się trzymać niezależnie od tego
-## losowania: przy t=1 (meta) zwycięzca (ustalony PRZED animacją, patrz
-## komentarz w RaceTrackView.gd) ma ściśle najwyższą wartość krzywej pozycji
-## ze wszystkich koni, więc wizualnie zawsze przybiega pierwszy. Powtarzamy
-## z wieloma losowymi zwycięzcami, żeby złapać ewentualny błąd we wzorze
-## niezależnie od tego, który koń akurat wygrywa.
+## Zgłoszenie użytkownika: wynik wyścigu nie może być oczywisty od razu — bieg
+## od startu (prawo) do mety (lewo), każdy koń ma WŁASNY moment przekroczenia
+## mety (t_cross), krzywa potęgowa daje organiczne zmiany prowadzenia po
+## drodze. Kluczowa gwarancja uczciwości MUSI się trzymać niezależnie od tego
+## losowania: zwycięzca (ustalony PRZED animacją, patrz komentarz w
+## RaceTrackView.gd) ma ściśle NAJMNIEJSZY t_cross ze wszystkich koni (a więc
+## miejsce 1.), a przy t=1 (koniec animacji) stoi dokładnie na mecie, tak jak
+## wszyscy pozostali. Powtarzamy z wieloma losowymi zwycięzcami, żeby złapać
+## ewentualny błąd we wzorze niezależnie od tego, który koń akurat wygrywa.
 func _test_race_track_winner_finishes_first() -> void:
-	print("-- RaceTrackView: zwycięzca ma ściśle najwyższą pozycję na mecie (t=1), niezależnie od losowego błądzenia --")
+	print("-- RaceTrackView: zwycięzca ma najmniejszy t_cross (miejsce 1.), niezależnie od losowej krzywej biegu --")
 	var image_paths: Array[String] = [
 		"res://art/horses/komet.jpg", "res://art/horses/grom.jpg", "res://art/horses/cyklon.jpg",
 		"res://art/horses/blyskawica.jpg", "res://art/horses/wicher.jpg",
 	]
+	var names: Array[String] = ["Komet", "Grom", "Cyklon", "Błyskawica", "Wicher"]
 	for trial in 20:
 		var winner_idx := randi() % image_paths.size()
 		var view: Control = RaceTrackScript.new()
 		add_child(view)
-		view.setup(image_paths, winner_idx, Vector2(1280.0, 720.0))
+		view.setup(image_paths, names, winner_idx, Vector2(1280.0, 720.0))
 
-		var winner_offset: float = view._curve_offset(winner_idx, 1.0)
-		var winner_is_highest := true
+		var winner_cross: float = view.t_cross[winner_idx]
+		var winner_is_earliest := true
 		for i in image_paths.size():
-			if i != winner_idx and view._curve_offset(i, 1.0) >= winner_offset:
-				winner_is_highest = false
-		_assert(winner_is_highest, "próba %d: zwycięzca (koń %d) ma najwyższą pozycję na mecie" % [trial, winner_idx])
+			if i != winner_idx and view.t_cross[i] <= winner_cross:
+				winner_is_earliest = false
+		_assert(winner_is_earliest, "próba %d: zwycięzca (koń %d) ma najmniejszy t_cross (miejsce 1.)" % [trial, winner_idx])
+		_assert(view.places[winner_idx] == 1, "próba %d: zwycięzca (koń %d) ma dokładnie miejsce 1." % [trial, winner_idx])
+		_assert(is_equal_approx(view._horse_x(winner_idx, 1.0), view.finish_x), "próba %d: zwycięzca stoi na mecie przy t=1" % trial)
 		view.queue_free()
 
 

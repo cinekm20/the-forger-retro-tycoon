@@ -1,23 +1,25 @@
 class_name RaceTrackView
 extends Control
 ## Animowany tor wyścigowy — przewijane banery reklamowe u góry, przewijana
-## trawa u dołu, konie (reużyte portrety Horses.HORSES) biegnące środkiem z
-## realnymi zmianami prowadzenia i losową kontuzją, meta wjeżdżająca w kadr
-## pod koniec. Zgłoszenie użytkownika: wynik nie może być oczywisty od razu,
-## wyścig ma trwać min. 30 sekund.
+## trawa u dołu, konie (reużyte portrety Horses.HORSES) faktycznie biegnące
+## od PRAWEJ (biała linia startu) do LEWEJ (biało-czerwona linia mety).
+## Zgłoszenie użytkownika: start na białej linii z prawej, bieg w lewo do
+## mety, każdy koń po przekroczeniu mety dostaje podpis z miejscem i nazwą.
+## Wynik nie może być oczywisty od razu, wyścig ma trwać min. 30 sekund.
 ##
 ## KLUCZOWA ZASADA UCZCIWOŚCI: zwycięzca jest znany PRZED zbudowaniem tego
 ## widoku (Races.gd woła _pick_winner_index() i dopiero potem setup()) — ta
-## klasa TYLKO wizualizuje już ustalony wynik w sposób, który go nie zdradza
-## od razu. Każdy koń dostaje krzywą względnej pozycji p_i(t), t=0..1:
-## losowe "błądzenie" (kilka nałożonych fal sinusoidalnych) w pierwszych
-## ~75% wyścigu daje realne zmiany prowadzenia, po czym zanika i ustępuje
-## "ciągnięciu" w stronę finałowej kolejności — zwycięzca ZAWSZE dostaje
-## najwyższą finałową wartość, więc wizualnie przybiega pierwszy, niezależnie
-## jak wyglądało błądzenie po drodze. Jeden losowy nie-zwycięski koń może
-## dostać dodatkowo "kontuzję" (gwałtowny dołek na krzywej + przechył ikony +
-## podpis) — bezpieczne dla uczciwości wyniku, bo dotyczy tylko konia, który
-## i tak nie miał wygrać.
+## klasa TYLKO wizualizuje już ustalony wynik. Każdy koń dostaje WŁASNY
+## moment przekroczenia mety t_cross[i] (ułamek DURATION) — zwycięzca
+## dostaje NAJMNIEJSZĄ wartość ze wszystkich, więc zawsze przybiega
+## pierwszy, niezależnie od tego, jak wygląda bieg po drodze. Między startem
+## a swoim t_cross[i] koń porusza się wg krzywej potęgowej o losowym
+## wykładniku (kilka koni "wychodzi szybko i zwalnia", inne "goni na
+## finiszu") — to daje realne, organiczne zmiany prowadzenia (który koń jest
+## FIZYCZNIE bliżej mety w danej chwili), bez potrzeby cofania konia. Jeden
+## losowy NIE-zwycięski koń może dodatkowo dostać "kontuzję" (tymczasowy,
+## zanikający dołek WSTECZ na jego własnej krzywej, zawsze bezpiecznie przed
+## jego własnym t_cross[i]) — bezpieczne dla uczciwości wyniku.
 ##
 ## Brak shaderów/customowych tekstur do przewijania (ten sam styl co
 ## MapPin.gd/TravelVehicle.gd — proste węzły Control zamiast grafiki) —
@@ -31,21 +33,17 @@ const DURATION := 32.0
 const BANNER_HEIGHT := 70.0
 const GROUND_HEIGHT := 60.0
 const HORSE_ICON_SIZE := Vector2(60.0, 60.0)
-const PACK_CENTER_FRACTION := 0.38  ## ułamek szerokości — stały punkt, wokół którego oscylują konie
+const EDGE_INSET := 90.0  ## odstęp linii startu/mety od krawędzi ekranu
 
-const WANDER_WAVE_COUNT := 3
-const WANDER_AMPLITUDE_RANGE := Vector2(15.0, 45.0)
-const WANDER_FREQ_RANGE := Vector2(1.0, 3.2)  ## cykli na CAŁY wyścig
-const FADE_START := 0.75  ## od tego t błądzenie zaczyna zanikać
-const RAMP_START := 0.55  ## od tego t zaczyna "ciągnąć" w stronę finałowej kolejności
-const RAMP_END := 0.95
-const WINNER_FINAL_OFFSET := 70.0
-const OTHER_FINAL_OFFSET_RANGE := Vector2(-60.0, 50.0)
+const WINNER_CROSS_RANGE := Vector2(0.55, 0.75)  ## kiedy (ułamek DURATION) zwycięzca dobiega do mety
+const OTHER_CROSS_MARGIN := 0.05  ## pozostali muszą przekroczyć metę PÓŹNIEJ niż zwycięzca o co najmniej tyle
+const OTHER_CROSS_MAX := 0.98  ## nigdy dokładnie 1.0 — każdy zdąży dobiec i pokazać podpis przed końcem animacji
+const POWER_RANGE := Vector2(0.6, 1.6)  ## <1: szybki start i zwolnienie, >1: wolny start i final. sprint
 
 const INJURY_CHANCE := 0.25
-const INJURY_DEPTH := 90.0
-const INJURY_WIDTH := 0.05  ## "szerokość" dołka w jednostkach t
-const INJURY_CENTER_RANGE := Vector2(0.25, 0.55)
+const INJURY_DEPTH := 90.0  ## px, tymczasowe cofnięcie (w stronę startu) podczas kontuzji
+const INJURY_WIDTH := 0.06  ## "szerokość" dołka w jednostkach t
+const INJURY_CENTER_FRACTION_RANGE := Vector2(0.3, 0.6)  ## ułamek WŁASNEGO t_cross[i] konia
 
 const BANNER_TEXTS := ["CYGARA CYKLON", "BANK FALKENSTEIN", "PIWO GROM", "PERFUMY COLOMBO", "HOTEL ASHCOMBE"]
 const BANNER_CARD_WIDTH := 200.0
@@ -56,28 +54,34 @@ const GROUND_DASH_WIDTH := 10.0
 const GROUND_DASH_GAP := 50.0
 const GROUND_SCROLL_SPEED := 160.0  ## szybciej niż banery = wrażenie głębi (paralaksa)
 
-const FINISH_FLAG_WIDTH := 16.0
+const LINE_WIDTH := 16.0
 
 var view_size: Vector2 = Vector2(1280.0, 720.0)
-var pack_center_x: float = 0.0
+var start_x: float = 0.0
+var finish_x: float = 0.0
 var lane_height: float = 100.0
 
 var horse_image_paths: Array[String] = []
+var horse_names: Array[String] = []
 var winner_index: int = -1
-var wander_waves: Array = []  ## per koń: Array[Dictionary{freq,phase,amp}]
-var final_offsets: Array[float] = []
+var t_cross: Array[float] = []
+var powers: Array[float] = []
+var places: Array[int] = []  ## places[i] = 1-indeksowane miejsce konia i (wg t_cross rosnąco)
 var injury_horse_index: int = -1
 var injury_center: float = 0.0
 
 var elapsed: float = 0.0
 var banner_scroll_x: float = 0.0
 var ground_scroll_x: float = 0.0
+var crossed: Array[bool] = []
 
 var banner_cards: Array[ColorRect] = []
 var banner_labels: Array[Label] = []
 var ground_dashes: Array[ColorRect] = []
 var horse_icons: Array[TextureRect] = []
-var finish_flag: Control
+var place_labels: Array[Label] = []
+var start_line: Control
+var finish_line: Control
 var injury_label: Label
 var skip_button: Button
 
@@ -86,15 +90,17 @@ func _ready() -> void:
 	set_process(false)
 
 
-## Wołane RAZ przez Races.gd, zaraz po ustaleniu zwycięzcy — image_paths w
-## TEJ SAMEJ kolejności co horse_ids/horse_option w Races.gd, więc
+## Wołane RAZ przez Races.gd, zaraz po ustaleniu zwycięzcy — image_paths/
+## names w TEJ SAMEJ kolejności co horse_ids/horse_option w Races.gd, więc
 ## winner_idx/chosen_idx (przekazywane z powrotem przez `finished` w
 ## Races.gd, bind-owane po stronie wywołującego) trafiają w ten sam koń.
-func setup(image_paths: Array[String], winner_idx: int, viewport_size: Vector2) -> void:
+func setup(image_paths: Array[String], names: Array[String], winner_idx: int, viewport_size: Vector2) -> void:
 	horse_image_paths = image_paths
+	horse_names = names
 	winner_index = winner_idx
 	view_size = viewport_size
-	pack_center_x = view_size.x * PACK_CENTER_FRACTION
+	start_x = view_size.x - EDGE_INSET
+	finish_x = EDGE_INSET
 	lane_height = (view_size.y - BANNER_HEIGHT - GROUND_HEIGHT) / float(horse_image_paths.size())
 
 	_generate_curves()
@@ -105,49 +111,50 @@ func setup(image_paths: Array[String], winner_idx: int, viewport_size: Vector2) 
 
 
 func _generate_curves() -> void:
-	wander_waves.clear()
-	final_offsets.clear()
+	t_cross.clear()
+	powers.clear()
+	crossed.clear()
+	var count := horse_image_paths.size()
+	t_cross.resize(count)
+	powers.resize(count)
 
-	for i in horse_image_paths.size():
-		if i == winner_index:
-			final_offsets.append(WINNER_FINAL_OFFSET)
-		else:
-			final_offsets.append(randf_range(OTHER_FINAL_OFFSET_RANGE.x, OTHER_FINAL_OFFSET_RANGE.y))
+	t_cross[winner_index] = randf_range(WINNER_CROSS_RANGE.x, WINNER_CROSS_RANGE.y)
+	for i in count:
+		if i != winner_index:
+			t_cross[i] = randf_range(t_cross[winner_index] + OTHER_CROSS_MARGIN, OTHER_CROSS_MAX)
+		powers[i] = randf_range(POWER_RANGE.x, POWER_RANGE.y)
+		crossed.append(false)
 
-	for i in horse_image_paths.size():
-		var waves: Array = []
-		for w in WANDER_WAVE_COUNT:
-			waves.append({
-				"freq": randf_range(WANDER_FREQ_RANGE.x, WANDER_FREQ_RANGE.y),
-				"phase": randf_range(0.0, TAU),
-				"amp": randf_range(WANDER_AMPLITUDE_RANGE.x, WANDER_AMPLITUDE_RANGE.y) / WANDER_WAVE_COUNT,
-			})
-		wander_waves.append(waves)
+	## Miejsca 1..N wg rosnącego t_cross (zwycięzca ma najmniejszy, więc
+	## zawsze miejsce 1. — matematycznie gwarantowane, nie tylko losowo).
+	var order: Array[int] = []
+	for i in count:
+		order.append(i)
+	order.sort_custom(func(a, b): return t_cross[a] < t_cross[b])
+	places.resize(count)
+	for rank in order.size():
+		places[order[rank]] = rank + 1
 
 	injury_horse_index = -1
 	if randf() < INJURY_CHANCE:
 		var candidates: Array[int] = []
-		for i in horse_image_paths.size():
+		for i in count:
 			if i != winner_index:
 				candidates.append(i)
 		if not candidates.is_empty():
 			injury_horse_index = candidates[randi() % candidates.size()]
-			injury_center = randf_range(INJURY_CENTER_RANGE.x, INJURY_CENTER_RANGE.y)
+			var frac := randf_range(INJURY_CENTER_FRACTION_RANGE.x, INJURY_CENTER_FRACTION_RANGE.y)
+			injury_center = t_cross[injury_horse_index] * frac
 
 
 func _build_visuals() -> void:
 	## Zgłoszenie użytkownika (ze zrzutem ekranu): tło/banery/trawa w ogóle
 	## się nie pokazywały, tylko ikony koni na wierzchu oryginalnego ekranu —
-	## zweryfikowane debugowaniem (Godot headless + Xvfb, patrz
-	## game/tests_debug/): `self` dodane do drzewa w trakcie działania gry
-	## (nie przy starcie sceny) miało size=(0,0) MIMO set_anchors_preset
-	## (FULL_RECT) — węzły zależne od anchorów (ColorRect/Control z
-	## anchor_right=1 itp.) dziedziczyły to zerowe rozmiar, więc były
-	## niewidoczne, podczas gdy ikony koni/meta (jawnie ustawiane .size/
-	## .position, patrz niżej) i tak renderowały się poprawnie. Zamiast
-	## anchorów: JAWNY, stały rozmiar na podstawie viewport_size przekazanego
-	## z Races.gd — niezawodne niezależnie od tego, kiedy węzeł trafia do
-	## drzewa.
+	## zweryfikowane debugowaniem (Godot headless + Xvfb): `self` dodane do
+	## drzewa w trakcie działania gry (nie przy starcie sceny) miało
+	## size=(0,0) MIMO set_anchors_preset(FULL_RECT). Zamiast anchorów: JAWNY,
+	## stały rozmiar/pozycja na podstawie viewport_size przekazanego z
+	## Races.gd — niezawodne niezależnie od tego, kiedy węzeł trafia do drzewa.
 	anchor_left = 0.0
 	anchor_top = 0.0
 	anchor_right = 0.0
@@ -165,7 +172,8 @@ func _build_visuals() -> void:
 
 	_build_banner_strip()
 	_build_ground_strip()
-	_build_finish_flag()
+	_build_start_line()
+	_build_finish_line()
 	_build_horses()
 	_build_injury_label()
 	_build_skip_button()
@@ -235,26 +243,46 @@ func _build_ground_strip() -> void:
 		ground_dashes.append(dash)
 
 
-func _build_finish_flag() -> void:
-	finish_flag = Control.new()
-	finish_flag.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	finish_flag.size = Vector2(FINISH_FLAG_WIDTH, view_size.y - BANNER_HEIGHT - GROUND_HEIGHT)
-	finish_flag.position = Vector2(view_size.x + 150.0, BANNER_HEIGHT)
-	add_child(finish_flag)
+## Linia startu — jednolita biała, NIERUCHOMA przez cały wyścig (konie
+## faktycznie od niej odjeżdżają, w przeciwieństwie do mety, która stoi w
+## miejscu i czeka na nie — patrz _build_finish_line).
+func _build_start_line() -> void:
+	start_line = Control.new()
+	start_line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	start_line.size = Vector2(LINE_WIDTH, view_size.y - BANNER_HEIGHT - GROUND_HEIGHT)
+	start_line.position = Vector2(start_x - LINE_WIDTH * 0.5, BANNER_HEIGHT)
+	add_child(start_line)
+
+	var bar := ColorRect.new()
+	bar.color = Color.WHITE
+	bar.size = start_line.size
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	start_line.add_child(bar)
+
+
+## Linia mety — biało-czerwona w kratkę, NIERUCHOMA (konie do niej dobiegają,
+## nie odwrotnie).
+func _build_finish_line() -> void:
+	finish_line = Control.new()
+	finish_line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	finish_line.size = Vector2(LINE_WIDTH, view_size.y - BANNER_HEIGHT - GROUND_HEIGHT)
+	finish_line.position = Vector2(finish_x - LINE_WIDTH * 0.5, BANNER_HEIGHT)
+	add_child(finish_line)
 
 	var segment_count := 8
-	var segment_height := finish_flag.size.y / float(segment_count)
+	var segment_height := finish_line.size.y / float(segment_count)
 	for s in segment_count:
 		var seg := ColorRect.new()
 		seg.color = Color.WHITE if s % 2 == 0 else Color(0.75, 0.1, 0.1)
-		seg.size = Vector2(FINISH_FLAG_WIDTH, segment_height)
+		seg.size = Vector2(LINE_WIDTH, segment_height)
 		seg.position = Vector2(0.0, s * segment_height)
 		seg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		finish_flag.add_child(seg)
+		finish_line.add_child(seg)
 
 
 func _build_horses() -> void:
 	horse_icons.clear()
+	place_labels.clear()
 	for path in horse_image_paths:
 		var icon := TextureRect.new()
 		icon.size = HORSE_ICON_SIZE
@@ -267,6 +295,21 @@ func _build_horses() -> void:
 			icon.texture = load(path)
 		add_child(icon)
 		horse_icons.append(icon)
+
+		## Podpis "1. Komet" — zgłoszenie użytkownika: po przekroczeniu mety
+		## ma się pojawić PRZED koniem (w stronę, z której przybiegł, czyli
+		## na prawo od zatrzymanej ikony, patrz _update_horses) jego miejsce
+		## i nazwa. Ukryty do czasu przekroczenia, patrz _update_horses.
+		var label := Label.new()
+		label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
+		label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
+		label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
+		label.add_theme_constant_override("shadow_offset_x", 1)
+		label.add_theme_constant_override("shadow_offset_y", 1)
+		label.visible = false
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(label)
+		place_labels.append(label)
 
 
 func _build_injury_label() -> void:
@@ -300,7 +343,6 @@ func _process(delta: float) -> void:
 	_update_banner_positions()
 	_update_ground_positions()
 	_update_horses(t)
-	_update_finish_line(t)
 	if t >= 1.0:
 		set_process(false)
 		finished.emit()
@@ -332,42 +374,58 @@ func _update_ground_positions() -> void:
 		ground_dashes[i].position.x = fposmod(i * pattern_width - ground_scroll_x, total_width)
 
 
-## Krzywa względnej pozycji konia i (patrz komentarz na górze pliku) —
-## dodatnia wartość = przed stawką, ujemna = za stawką.
-func _curve_offset(i: int, t: float) -> float:
-	var wander := 0.0
-	for wave in wander_waves[i]:
-		wander += sin(t * wave["freq"] * TAU + wave["phase"]) * wave["amp"]
-	var fade: float = 1.0 - smoothstep(FADE_START, 1.0, t)
-	wander *= fade
+## Pozycja pozioma konia i w chwili t — krzywa potęgowa reparametryzowana
+## własnym czasem konia (local_t = t / t_cross[i]), więc START przy t=0 i
+## DOKŁADNIE finish_x w chwili t_cross[i], niezależnie od wykładnika
+## powers[i] (< 1: szybki start, zwolnienie; > 1: wolny start, final. sprint
+## — różne wykładniki na różnych koniach dają organiczne zmiany prowadzenia
+## bez potrzeby cofania konia). Po przekroczeniu mety koń zatrzymuje się
+## dokładnie na niej.
+func _horse_x(i: int, t: float) -> float:
+	var tc: float = t_cross[i]
+	if t >= tc:
+		return finish_x
 
+	var local_t: float = t / tc
+	var prog: float = pow(local_t, powers[i])
+	var x: float = lerp(start_x, finish_x, prog)
+
+	## Kontuzja — tymczasowe, zanikające cofnięcie W STRONĘ STARTU (dodatnie,
+	## bo x rośnie w prawo/wstecz), zawsze scentrowane w ułamku WŁASNEGO
+	## t_cross[i] tego konia, więc zawsze bezpiecznie zanika na długo przed
+	## jego metą — nie wpływa na moment/pewność przekroczenia linii.
 	if i == injury_horse_index:
 		var d: float = t - injury_center
-		wander -= INJURY_DEPTH * exp(-(d * d) / (2.0 * INJURY_WIDTH * INJURY_WIDTH))
+		x += INJURY_DEPTH * exp(-(d * d) / (2.0 * INJURY_WIDTH * INJURY_WIDTH))
 
-	var ramp: float = smoothstep(RAMP_START, RAMP_END, t)
-	return wander + final_offsets[i] * ramp
+	return clampf(x, finish_x, start_x)
 
 
 func _update_horses(t: float) -> void:
 	for i in horse_icons.size():
-		var offset := _curve_offset(i, t)
-		var x: float = pack_center_x + offset
+		var x := _horse_x(i, t)
 		var lane_y: float = BANNER_HEIGHT + i * lane_height + lane_height * 0.5
-		var bob: float = sin(t * 50.0 + i * 1.7) * 4.0
+		var just_crossed := t >= t_cross[i]
+		## Bujanie/wahanie tylko, dopóki koń biegnie — po przekroczeniu mety
+		## stoi nieruchomo obok podpisu z miejscem.
+		var bob: float = 0.0 if just_crossed else sin(t * 50.0 + i * 1.7) * 4.0
 		var icon := horse_icons[i]
 		icon.position = Vector2(x - HORSE_ICON_SIZE.x * 0.5, lane_y - HORSE_ICON_SIZE.y * 0.5 + bob)
-		icon.rotation = deg_to_rad(sin(t * 35.0 + i * 2.3) * 3.0)
+		icon.rotation = 0.0 if just_crossed else deg_to_rad(sin(t * 35.0 + i * 2.3) * 3.0)
 
-		if i == injury_horse_index and absf(t - injury_center) < INJURY_WIDTH * 2.5:
+		if just_crossed and not crossed[i]:
+			crossed[i] = true
+		if crossed[i]:
+			## "Przed koniem" = po prawej od zatrzymanej ikony (skąd
+			## przybiegł), zgłoszenie użytkownika.
+			var label := place_labels[i]
+			label.text = tr("%d. %s") % [places[i], horse_names[i]]
+			label.visible = true
+			label.position = Vector2(x + HORSE_ICON_SIZE.x * 0.5 + 8.0, lane_y - 12.0)
+
+		if i == injury_horse_index and not just_crossed and absf(t - injury_center) < INJURY_WIDTH * 2.5:
 			icon.rotation += deg_to_rad(16.0)
 			injury_label.visible = true
 			injury_label.position = Vector2(x - 36.0, lane_y - HORSE_ICON_SIZE.y * 0.5 - 24.0 + bob)
-		elif i == injury_horse_index and injury_label.visible:
+		elif i == injury_horse_index and injury_label.visible and not just_crossed:
 			injury_label.visible = false
-
-
-func _update_finish_line(t: float) -> void:
-	var start_x := view_size.x + 150.0
-	var end_x := pack_center_x + 30.0
-	finish_flag.position.x = lerp(start_x, end_x, smoothstep(0.0, 1.0, t))
