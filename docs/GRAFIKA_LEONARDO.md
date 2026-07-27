@@ -309,29 +309,38 @@ w kodzie — po cichu spadają na tło Giełdy, dopóki te trzy pliki nie zostan
 wgrane. "Krach"/"Hossa" NIE mają jeszcze żadnej mechaniki w kodzie (żaden
 ekran ich nie wywołuje) — prompty czekają na przyszłość, nie generować teraz.
 
+Poprawka promptu (zgłoszenie użytkownika po pierwszych próbach —
+za mały tytuł i pusta/geometryczna kompozycja bez żadnego tekstu artykułu):
+zamiast opisowego zdania ("headline about...") prompt teraz podaje krótki,
+konkretny nagłówek W CUDZYSŁOWIE (2–3 słowa — modele obrazkowe renderują
+krótkie hasła dużo wierniej niż całe zdania) i wprost każe narysować go
+JAKO OGROMNY, POGRUBIONY tytuł przez całą szerokość strony, a pod nim gęste
+kolumny drobnego tekstu — nawet jeśli nieczytelny, ma wyglądać jak
+prawdziwa kolumna gazety, nie pusty ornament.
+
 **Reforma walutowa** — `events/reform.jpg`
 ```
-Vintage newspaper front page illustration, headline about stock market currency reform, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+Vintage newspaper front page illustration, huge bold Art Deco masthead headline in capital letters reading "CURRENCY REFORM" spanning the full width of the page, dense columns of small newspaper body text filling the rest of the page below the headline, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Strajk (plantacja)** — `events/strike.jpg`
 ```
-Vintage newspaper front page illustration, headline about a workers' strike on a tropical plantation, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+Vintage newspaper front page illustration, huge bold Art Deco masthead headline in capital letters reading "WORKERS STRIKE" spanning the full width of the page, dense columns of small newspaper body text filling the rest of the page below the headline, silhouettes of plantation workers marching in protest, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Zamieszki (plantacja)** — `events/riot.jpg`
 ```
-Vintage newspaper front page illustration, headline about civil unrest in a colonial trading region, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+Vintage newspaper front page illustration, huge bold Art Deco masthead headline in capital letters reading "CIVIL UNREST" spanning the full width of the page, dense columns of small newspaper body text filling the rest of the page below the headline, silhouettes of a crowd clashing in a colonial trading town square, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Krach** (jeszcze niepodpięte w kodzie)
 ```
-Vintage newspaper front page illustration, headline about stock market crash, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+Vintage newspaper front page illustration, huge bold Art Deco masthead headline in capital letters reading "MARKET CRASH" spanning the full width of the page, dense columns of small newspaper body text filling the rest of the page below the headline, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Hossa** (jeszcze niepodpięte w kodzie)
 ```
-Vintage newspaper front page illustration, headline about stock market boom, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+Vintage newspaper front page illustration, huge bold Art Deco masthead headline in capital letters reading "MARKET BOOM" spanning the full width of the page, dense columns of small newspaper body text filling the rest of the page below the headline, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 ### 5. Tor wyścigów konnych
