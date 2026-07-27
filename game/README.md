@@ -29,8 +29,9 @@ rywal wygrywa pierwszy) działają.
 
 ## 1. Instalacja i otwarcie
 
-1. Zainstaluj Godot 4.3+ (stable, wersja "Standard" wystarczy — projekt jest
-   w czystym GDScript, bez C#): https://godotengine.org/download
+1. Zainstaluj Godot 4.7+ (stable, wersja "Standard" wystarczy — projekt jest
+   w czystym GDScript, bez C#; CI (.github/workflows/) używa dokładnie
+   4.7.1): https://godotengine.org/download
 2. W Godot Engine kliknij **Import** (nie "New Project") i wskaż folder
    `game/` w tym repo — to tu jest `project.godot`.
 3. Naciśnij **F5** (albo przycisk Play w prawym górnym rogu). Scena
