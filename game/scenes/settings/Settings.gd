@@ -27,7 +27,7 @@ func _ready() -> void:
 	## Skrzynka Art Deco, TA SAMA co wszędzie indziej (ScreenHelpers.make_boxed_panel)
 	## — zgłoszone przez użytkownika: opcje mają być w ładnym, oprawionym
 	## menu, nie luźno na tle.
-	var options_box := ScreenHelpers.make_boxed_panel(root)["content"]
+	var options_box: VBoxContainer = ScreenHelpers.make_boxed_panel(root)["content"]
 
 	ScreenHelpers.make_label(options_box, "Język / Language / Sprache")
 
