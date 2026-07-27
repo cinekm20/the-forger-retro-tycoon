@@ -130,6 +130,16 @@ pas to scena. Modelowi dużo łatwiej utrzymać podział na dwa bloki niż
 Widescreen game title card split into two horizontal bands. TOP BAND (top 20% of the image, full width): a solid dark green banner strip stretching edge to edge, containing large bold gold Art Deco lettering reading "THE FORGER: RETRO TYCOON", the banner's top edge touches the very top border of the image with zero margin above it. BOTTOM BAND (remaining 80% of the image, below the banner): a 1920s art collector's study, world maps on the walls, a brass compass and a globe in the corner, a city skyline silhouette along the bottom edge. Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
+⚠ **Uwaga na literówki w wygenerowanym napisie** (zgłoszenie użytkownika,
+zrzut ekranu: "THE FROGER RETRO TYCOON" — brak litery, "FORGER" wyszło jako
+"FROGER"): modele obrazkowe regularnie przekręcają litery w dłuższych/
+rzadszych słowach, nawet gdy prompt ma poprawną pisownię w cudzysłowie —
+to nie da się w 100% wyeliminować samym promptem, tylko sprawdzić PO
+wygenerowaniu i ewentualnie wygenerować ponownie (albo poprosić model o
+regenerację/inpainting SAMEGO napisu, jeśli reszta kompozycji już pasuje).
+Przed wgraniem do repo zawsze odczytaj napis na wygenerowanym obrazku
+litera po literze — "FORGER" (nie "FROGER"), z dwukropkiem po "THE FORGER".
+
 **Prompt logo.jpg (nieużywane, zapis historyczny — patrz wyżej, dlaczego
 zrezygnowano):**
 ```
