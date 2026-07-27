@@ -183,12 +183,43 @@ Art Deco 1920s illustration style, warm sepia and gold palette with deep green, 
   Nowy Jork, Londyn, tor wyścigowy, dom aukcyjny, szkoła sztuki)
 - Osobne ikony-pinezki dla każdej lokacji
 
-**Prompt (tło mapy):**
+**Prompt (tło mapy) — nieaktualny, patrz Poprawka niżej:**
 ```
 Stylized vintage world map game board, Art Deco cartography, sepia ocean,
 gold coastlines, decorative compass rose, empty pins slots for cities,
 top-down board game map, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
+
+⚠ **Poprawka (zgłoszenie użytkownika: "kontynenty nie są dobrze
+odzwierciedlone")** — ten prompt nie mówił nic o GEOGRAFICZNEJ dokładności
+kształtów, tylko o stylu, więc model potraktował kontynenty czysto
+dekoracyjnie. Przy kalibrowaniu pinezek miast (`Cities.gd MAP_POSITION`,
+programowe próbkowanie koloru + ręczna weryfikacja na siatce współrzędnych)
+wyszły z tego konkretne usterki na wygenerowanym `hub_map.jpg`:
+Kanada/Arktyka narysowana jako gęsto POFRAGMENTOWANY archipelag wysepek, przez
+co łatwo pomylić ją z kontynentalnymi USA leżącymi niżej; przesmyk Ameryki
+Środkowej ledwo widoczny/przerwany zamiast ciągłego pasa lądu do Ameryki
+Południowej; subkontynent indyjski narysowany w INNYM, cieplejszym
+piaskowym odcieniu niż reszta lądów (które są niebiesko-turkusowe) — więc
+zwykłe rozpoznawanie "ląd = ten kolor" zawodzi akurat w tym miejscu mapy.
+Nowy prompt: (1) wprost wymienia wszystkie kontynenty i ich charakterystyczne,
+rozpoznawalne kształty, (2) explicite wymaga JEDNEGO spójnego koloru lądu na
+całej mapie, bez wyjątków, (3) każe unikać fragmentacji tam, gdzie w
+rzeczywistości jest ciągły ląd:
+```
+Accurate, immediately recognizable stylized world map, Art Deco cartography, top-down flat vector board game map. All continents drawn with their real, geographically correct outlines and proportions, not abstract or fantasy shapes: North America (a single, mostly continuous landmass, not broken into scattered islands), a clearly visible unbroken Central American land bridge connecting down into South America, Europe (clearly separate from but attached to the Eurasian landmass, with recognizable Scandinavia, British Isles and Iberian peninsula), Africa (recognizable wide northern bulge narrowing to a southern tip), Asia including a clearly triangular Indian subcontinent peninsula and the Arabian peninsula, and Australia. Every single landmass on the map, with no exceptions, uses the exact same solid deep teal/turquoise fill color, and every ocean area uses the exact same warm sepia/gold color — no region of the map may use a different color scheme than the rest. Gold coastline outlines, decorative compass rose, thin sepia trade-route lines, subtle paper grain texture, elegant geometric ornamentation, empty pin slots for cities, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, mobile game asset, clean silhouette, no photorealism
+```
+Do promptu negatywnego (oprócz standardowego z góry dokumentu) dopisz:
+`distorted continents, fantasy map, inaccurate geography, fragmented
+islands where mainland should be, inconsistent land color, unrecognizable
+coastlines`.
+
+Po wygenerowaniu: sprawdzić najpierw sam kształt kontynentów (czy każdy da
+się jednoznacznie rozpoznać i nazwać na pierwszy rzut oka), dopiero potem
+wgrywać — po wgraniu WSZYSTKIE współrzędne w `Cities.gd MAP_POSITION` trzeba
+będzie przekalibrować od nowa dla nowego obrazka (stare współrzędne pasują
+tylko do starego `hub_map.jpg`).
+
 **Prompt (ikony pinezek) — ⚠ NIE GENERUJ:** patrz Plan produkcji niżej,
 wiersz 5 — pinezki są już rozwiązane natywnie w kodzie (`MapPin.gd`),
 Leonardo uparcie robiło pełne sceny zamiast wyizolowanych ikon. Zostawione
