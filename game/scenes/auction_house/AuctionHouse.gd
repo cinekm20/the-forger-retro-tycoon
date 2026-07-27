@@ -411,8 +411,14 @@ func _start_bid_timer() -> void:
 	rival_check_threshold = randf_range(2.0, BID_TIME_LIMIT - 3.0)
 
 
+## Zgłoszone przez użytkownika: pod skrzynką oferty (bid_row/bid_label)
+## czasem wisiał napis "Zabrakło czasu..." — ustawiany tu, ale NIC go nie
+## czyściło, gdy rywal akurat podbijał (_try_rival_counter_bid zwraca true i
+## zaczyna NOWĄ, w pełni aktywną rundę z odliczaniem) — napis o zabrakłym
+## czasie zostawał więc wyświetlony przez całą kolejną rundę, mimo że czasu
+## jawnie nie zabrakło. Kto teraz prowadzi widać już w bid_label
+## (_update_labels), więc ten status w ogóle nie jest tu potrzebny.
 func _on_time_expired() -> void:
-	status_label.text = tr("Zabrakło czasu na podbicie — rywale odpowiadają.")
 	if _try_rival_counter_bid():
 		return
 	_resolve_auction()
