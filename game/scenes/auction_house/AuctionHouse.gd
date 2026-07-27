@@ -106,17 +106,15 @@ func _ready() -> void:
 	_build_top_left_corner()
 
 	if not Auctions.is_open(Travel.current_city):
-		## ALIGNMENT_BEGIN + rozpychacz: zgłoszone przez użytkownika ("jeszcze
-		## tak nie ma dom aukcyjny jak nie ma aukcji") — ten wczesny return
-		## (brak aukcji akurat teraz) nigdy nie dochodzi do
-		## _build_active_auction_ui, gdzie root.alignment jest normalnie
-		## ustawiane na BEGIN, więc zostawał na domyślnym CENTER i przycisk
-		## powrotu unosił się na środku zamiast być przyklejony do dołu.
+		## ALIGNMENT_BEGIN: zgłoszone przez użytkownika ("jeszcze tak nie ma
+		## dom aukcyjny jak nie ma aukcji") — ten wczesny return (brak aukcji
+		## akurat teraz) nigdy nie dochodzi do _build_active_auction_ui, gdzie
+		## root.alignment jest normalnie ustawiane na BEGIN, więc zostawał na
+		## domyślnym CENTER.
 		root.alignment = BoxContainer.ALIGNMENT_BEGIN
 		ScreenHelpers.make_label(root, tr("W tym mieście nie odbywa się teraz żadna aukcja.\nWróć w podanym terminie."))
 		schedule_label.text = Auctions.get_schedule_string()
-		root.add_child(ScreenHelpers.make_expand_spacer())
-		ScreenHelpers.make_back_button(root)
+		_build_bottom_back_button()
 		return
 
 	present_players = Auctions.get_present_players()
@@ -139,6 +137,26 @@ func _build_top_left_corner() -> void:
 
 	ScreenHelpers.make_turn_indicator(corner)
 	schedule_label = ScreenHelpers.make_info_box(corner, "")
+
+
+## Przycisk powrotu we WŁASNYM, niezależnie zakotwiczonym pasku u samego
+## dołu ekranu — NIE ostatnie dziecko `root` (jak wcześniej). Zgłoszone
+## przez użytkownika: mimo kilku wcześniejszych poprawek przycisk i tak
+## potrafił wypaść poza widoczny ekran, gdy treść nad nim (obraz, skrzynka
+## oferty, status) była wyższa niż się spodziewano — np. bardzo długa nazwa
+## rywala AI (GENERIC_RIVAL_POOL w AIPlayers.gd) rozpychająca bid_row. Zamiast
+## dalej gonić dokładną wysokość reszty treści, przycisk dostaje ten sam
+## trik co boczne ramki graczy (_make_side_column) — stały pasek zakotwiczony
+## bezpośrednio do dołu ekranu, całkiem niezależny od tego, ile miejsca
+## zajmie wszystko inne w `root`.
+func _build_bottom_back_button() -> void:
+	var bar := CenterContainer.new()
+	bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	bar.offset_top = -74.0
+	bar.offset_bottom = -12.0
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(bar)
+	back_btn = ScreenHelpers.make_back_button(bar)
 
 
 ## Buduje UI aktywnej licytacji BEZ ramek graczy (patrz _build_player_frames
@@ -186,18 +204,23 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 
 	painting_label = ScreenHelpers.make_info_box(root, "")
 	painting_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	## 500 (nie 760 jak wcześniej) — ekran ma teraz dwie boczne kolumny ramek
-	## graczy (patrz _build_player_frames, SIDE_PANEL_WIDTH=380 każda), więc
-	## środkowa treść musi się zwęzić, żeby wszystko zmieściło się w 1280px
-	## szerokości viewportu (project.godot). SIZE_SHRINK_CENTER na PANELU
-	## (nie tylko custom_minimum_size na etykiecie) — bez tego panel i tak
-	## rozciąga się na pełną szerokość VBoxContainera i chowa się pod
-	## bocznymi ramkami (ten sam fix co przy schedule_label wyżej).
-	painting_label.custom_minimum_size = Vector2(500, 0)
+	## 1000 (nie 500 jak wcześniej) — zgłoszone przez użytkownika: ta
+	## skrzynka może być prawie na całą szerokość ekranu. Bezpieczne mimo
+	## bocznych kolumn ramek graczy (SIDE_PANEL_WIDTH=380 każda), bo te
+	## zaczynają się dopiero od SIDE_FRAMES_TOP_OFFSET=200px od góry, a ta
+	## skrzynka siedzi wyżej — szerszy limit oznacza MNIEJ zawijanych linii
+	## (zwykle 1 zamiast 3), co dodatkowo zostawia więcej zapasu w tym
+	## górnym pasie i przesuwa obraz niżej w kodzie = wyżej na ekranie.
+	## SIZE_SHRINK_CENTER na PANELU (nie tylko custom_minimum_size na
+	## etykiecie) — bez tego panel i tak rozciąga się na pełną szerokość
+	## VBoxContainera (ten sam fix co przy schedule_label wyżej).
+	painting_label.custom_minimum_size = Vector2(1000, 0)
 	painting_label.get_parent().size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 
-	root.add_child(ScreenHelpers.make_expand_spacer())
-
+	## BEZ rozpychacza tutaj (był wcześniej) — zgłoszone przez użytkownika:
+	## obraz powinien być wyżej. Obraz teraz leci od razu pod skrzynką opisu,
+	## z samym naturalnym odstępem VBoxContainera (separation=16, patrz
+	## ScreenHelpers.make_root).
 	var painting_center := CenterContainer.new()
 	root.add_child(painting_center)
 
@@ -248,23 +271,42 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	bid_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	bid_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
 	bid_label.add_theme_font_size_override("font_size", 26)
-	## AUTOWRAP_ARBITRARY (nie WORD) — patrz ten sam komentarz w
-	## _build_player_frame: "(prowadzi: %s)" wstawia nazwę gracza, więc bez
-	## twardego łamania w dowolnym miejscu bardzo długa nazwa mogłaby
-	## poszerzyć tę skrzynkę ponad 500px i, pośrednio, dodatkową wysokością
-	## zepchnąć przycisk "Powrót" (na samym dole, brak ScrollContainera na
-	## tym ekranie) poza widoczny ekran.
-	bid_label.autowrap_mode = TextServer.AUTOWRAP_ARBITRARY
-	bid_label.custom_minimum_size = Vector2(500, 70)
+	## Zgłoszone przez użytkownika: ta skrzynka poszerzała się i zwężała
+	## zależnie od długości nazwy aktualnego lidera — "(prowadzi: %s)" może
+	## wstawić nazwę rywala AI (GENERIC_RIVAL_POOL w AIPlayers.gd, do 30
+	## znaków, np. "Baron Heinrich von Falkenstein" — stałe nazwy, nie da
+	## się ich skrócić jak nazwy gracza w MainMenu.gd). Poprzednia próba
+	## (AUTOWRAP_ARBITRARY) trzymała szerokość, ale łamała długie nazwy w
+	## środku słowa ("Falke"/"nstein") — brzydko.
+	##
+	## Trochę szersza (520, nie 500) — NIE dużo więcej, bo ta skrzynka
+	## siedzi MIĘDZY dwiema bocznymi kolumnami ramek graczy (SIDE_PANEL_WIDTH
+	## =380 każda), więc bezpieczny środkowy pas to tylko ok. 520px; szerzej
+	## i skrzynka zaczęłaby wchodzić POD boczne ramki (dodane później w
+	## drzewie, więc rysują się na wierzchu — inaczej niż painting_label
+	## wyżej, która jest bezpieczna do pełnej szerokości WŁAŚNIE dlatego, że
+	## siedzi WYŻEJ niż SIDE_FRAMES_TOP_OFFSET). Zamiast gonić szerokość, by
+	## najdłuższa nazwa zmieściła się w jednej linii (fizycznie niemożliwe w
+	## tym pasie), AUTOWRAP_WORD (łamie tylko na spacjach) + custom_minimum_size.y
+	## na STAŁE 3 linie ("Oferta: X" + do 2 linii "(prowadzi: ...)") —
+	## skrzynka ma więc zawsze TĘ SAMĄ wysokość, niezależnie czy tekst
+	## faktycznie potrzebuje 2 czy 3 linii.
+	bid_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	bid_label.custom_minimum_size = Vector2(520, 115)
 	bid_row.add_child(bid_label)
 
 	status_label = ScreenHelpers.make_label(root, "")
 
 	## Zastępuje przyciski Podbij/Rezygnuj (teraz w ramkach graczy) dopiero
 	## po rozstrzygnięciu aukcji — do tego momentu ukryty. Pasek czasu
-	## zbudowany wcześniej, na samej górze tej funkcji — TU zostaje tylko
-	## przycisk powrotu.
-	back_btn = ScreenHelpers.make_back_button(root)
+	## zbudowany wcześniej, na samej górze tej funkcji.
+	##
+	## Przycisk NIE jest już ostatnim dzieckiem `root` (patrz
+	## _build_bottom_back_button) — zgłoszone przez użytkownika: mimo
+	## poprzednich poprawek "Powrót" i tak potrafił zniknąć poza dolną
+	## krawędzią ekranu, gdy treść nad nim (obraz + skrzynka oferty + status)
+	## była wyższa niż się spodziewano.
+	_build_bottom_back_button()
 	back_btn.visible = false
 
 
