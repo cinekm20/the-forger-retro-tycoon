@@ -1022,7 +1022,7 @@ Leonardo, żeby mieć z czego wybrać).
 
 | # | Priorytet | Asset | Szt. | Format / proporcje | Sekcja promptu | Status |
 |---|---|---|---|---|---|---|
-| 1 | 1 | Obraz referencyjny stylu / tło menu głównego (docelowo z tytułem wpisanym w tło) | 1 | 16:9, docelowo 1920×1080 | §1 | ⬜ do regeneracji — obecny `main_menu_title.jpg` jeszcze bez wpisanego tytułu; `MainMenu.gd` nie dogrywa już osobnego logo, więc do czasu regeneracji ekran startowy jest bez napisu tytułowego |
+| 1 | 1 | Obraz referencyjny stylu / tło menu głównego (z tytułem wpisanym w tło) | 1 | 16:9, docelowo 1920×1080 | §1 | ✅ zrobione i podpięte — `main_menu_title.jpg` wgrane z tytułem wpisanym bezpośrednio w tło |
 | 2 | 1 | ~~Logo "The Forger: Retro Tycoon"~~ | 1 | dowolne, JPG | §1 | ⛔ wycofane — zastąpione tytułem wpisanym w tło (wiersz 1), `logo.jpg` nieużywane w kodzie |
 | 3a | 2 | Tło Plantacji | 1 | 16:9, 1920×1080 | §3 | ✅ zrobione i podpięte (`plantation.jpg`) |
 | 3b | 2 | Tło Domu aukcyjnego | 1 | 16:9, 1920×1080 | §6 | ✅ zrobione i podpięte (`auction_house.jpg`) |
