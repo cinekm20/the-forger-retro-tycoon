@@ -13,6 +13,17 @@ const COMPANIES := {
 const STARTING_PRICE := 100.0  ## zgodnie z realiami startu gry (1918, Londyn)
 const DAILY_DRIFT_RANGE := 0.03  ## losowe wahanie kursu ±3% dziennie
 
+## Krach/hossa — rzadki, losowy wstrząs uderzający jednakowo we WSZYSTKIE
+## spółki naraz (nie per-region jak boost_from_region_activity), zgłoszony
+## przez użytkownika jako uzupełnienie kart wydarzeń (docs/GDD.md pkt. 4.3,
+## karty "Krach"/"Hossa" czekały gotowe od strony grafiki, bez mechaniki).
+## Szansa CELOWO niska (rzadkie, ale zapamiętywalne wydarzenie w ciągu
+## wieloletniej gry) i mutually exclusive w jednym tygodniu (krach sprawdzany
+## pierwszy — realny krach i hossa nie zdarzają się jednocześnie).
+const MARKET_CRASH_CHANCE_PER_WEEK := 0.02
+const MARKET_BOOM_CHANCE_PER_WEEK := 0.02
+const MARKET_SHOCK_RANGE := Vector2(0.25, 0.45)  ## krach/hossa zmienia WSZYSTKIE kursy o 25-45% naraz
+
 ## Historia kursu do wykresu (StockMarket.gd, PriceChart.gd) — jeden punkt na
 ## każde wywołanie _on_day_advanced (czyli raz na "skok" kalendarza, nie co
 ## dzień co do jednego — Koniec tury/podróż/Szkoła sztuki skaczą po kilka-
@@ -82,10 +93,31 @@ func sell_shares(company_id: String, count: int) -> bool:
 
 func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
 	var weeks: float = float(days_elapsed) / 7.0
+	_maybe_trigger_market_shock(weeks)
 	for company_id in COMPANIES.keys():
 		var change_percent := randf_range(-DAILY_DRIFT_RANGE, DAILY_DRIFT_RANGE) * weeks
 		stock_price[company_id] = max(1.0, get_price(company_id) * (1.0 + change_percent))
 		_record_history(company_id)
+
+
+func _maybe_trigger_market_shock(weeks: float) -> void:
+	if randf() < MARKET_CRASH_CHANCE_PER_WEEK * weeks:
+		apply_market_shock("crash", -randf_range(MARKET_SHOCK_RANGE.x, MARKET_SHOCK_RANGE.y))
+	elif randf() < MARKET_BOOM_CHANCE_PER_WEEK * weeks:
+		apply_market_shock("boom", randf_range(MARKET_SHOCK_RANGE.x, MARKET_SHOCK_RANGE.y))
+
+
+## Publiczna (jak Economy.apply_currency_reform) — wywoływana z losowego
+## tygodniowego rzutu w _on_day_advanced, ale też wprost z testów, żeby nie
+## polegać na RNG. Celowo NIE dopisuje własnego punktu do price_history —
+## zaraz potem (albo, przy wywołaniu z testu, przy następnym prawdziwym
+## skoku dni) i tak leci zwykły zapis w _on_day_advanced, więc wynik szoku
+## po prostu wchodzi w NAJBLIŻSZY punkt historii, bez podwajania wpisów.
+## change_ratio ujemny = krach (np. -0.3 = spadek cen o 30%), dodatni = hossa.
+func apply_market_shock(kind: String, change_ratio: float) -> void:
+	for company_id in COMPANIES.keys():
+		stock_price[company_id] = max(1.0, get_price(company_id) * (1.0 + change_ratio))
+	WorldEvents.report_market_shock(kind, change_ratio)
 
 
 func _record_history(company_id: String) -> void:

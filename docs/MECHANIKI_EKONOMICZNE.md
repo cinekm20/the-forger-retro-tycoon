@@ -201,6 +201,13 @@ dobra mechanika sprzężenia zwrotnego do zaimplementowania w remake'u (giełda
 przestaje być osobną minigrą, tylko realnie reaguje na Twoje działania w
 świecie).
 
+✅ **Krach/hossa — zaimplementowane** (`ShippingCompanies.apply_market_shock`):
+rzadki (2%/tydzień szansy na każdy z dwóch, wzajemnie wykluczających się w
+danym tygodniu), losowy wstrząs zmieniający kurs WSZYSTKICH 4 linii naraz o
+25–45% — krach w dół, hossa w górę. Pokazywany jako karta gazety (patrz pkt.
+4.3 w `docs/GDD.md`), niezależny od dziennego dryfu ±3%/regionalnego boostu
+z plantacji opisanych wyżej.
+
 ### 7.1 Koszty transportu towaru (pełna tabela)
 
 Koszt transportu **jednej jednostki towaru** z danego miasta plantacyjnego do

@@ -303,11 +303,10 @@ game background art, Art Deco 1920s illustration style, warm sepia and gold pale
 ```
 **Prompty (karty zdarzeń gospodarczych):** zgłoszone przez użytkownika —
 karty wydarzeń "w formie gazety" pokazywane jako popup MIĘDZY TURAMI (patrz
-`scenes/world_event/WorldEventCard.gd`, `WorldEvents.gd`). Reforma walutowa i
-kryzys na plantacji (strajk/zamieszki, docs/GDD.md pkt. 4.2) są już PODPIĘTE
-w kodzie — po cichu spadają na tło Giełdy, dopóki te trzy pliki nie zostaną
-wgrane. "Krach"/"Hossa" NIE mają jeszcze żadnej mechaniki w kodzie (żaden
-ekran ich nie wywołuje) — prompty czekają na przyszłość, nie generować teraz.
+`scenes/world_event/WorldEventCard.gd`, `WorldEvents.gd`). Wszystkie pięć —
+reforma walutowa, kryzys na plantacji (strajk/zamieszki, docs/GDD.md pkt.
+4.2) i krach/hossa na giełdzie (`ShippingCompanies.apply_market_shock`,
+docs/GDD.md pkt. 4.3) — są PODPIĘTE w kodzie i mają wgrane grafiki.
 
 Poprawka promptu (zgłoszenie użytkownika po pierwszych próbach —
 za mały tytuł i pusta/geometryczna kompozycja bez żadnego tekstu artykułu):
@@ -333,12 +332,12 @@ Vintage newspaper front page illustration, huge bold Art Deco masthead headline 
 Vintage newspaper front page illustration, huge bold Art Deco masthead headline in capital letters reading "CIVIL UNREST" spanning the full width of the page, dense columns of small newspaper body text filling the rest of the page below the headline, silhouettes of a crowd clashing in a colonial trading town square, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
-**Krach** (jeszcze niepodpięte w kodzie)
+**Krach** — `events/crash.jpg`
 ```
 Vintage newspaper front page illustration, huge bold Art Deco masthead headline in capital letters reading "MARKET CRASH" spanning the full width of the page, dense columns of small newspaper body text filling the rest of the page below the headline, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
-**Hossa** (jeszcze niepodpięte w kodzie)
+**Hossa** — `events/boom.jpg`
 ```
 Vintage newspaper front page illustration, huge bold Art Deco masthead headline in capital letters reading "MARKET BOOM" spanning the full width of the page, dense columns of small newspaper body text filling the rest of the page below the headline, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
@@ -1014,7 +1013,7 @@ Leonardo, żeby mieć z czego wybrać).
 | 12 | 7 (opcjonalnie) | Warianty "fałszywka" wybranych obrazów (do szkoły sztuki) | ~8–10 | 1:1, jak oryginał | §7, §8 | ✅ 10/~8–10 zrobione i podpięte — obrazy 7, 10, 11, 16, 21, 25, 29, 30, 32, 33 (`painting_NN_fake.jpg`); reszta katalogu dalej pokazuje zwykłą grafikę przy fałszywce (`Paintings.get_texture_path` po cichu spada na oryginał, gdy wariantu brak) |
 | 13 | 6 | Ikony 8 kategorii stylistycznych (okładki kafelków w Galerii) | 8 | 1:1, min. 1024×1024 | §9b | ✅ zrobione i podpięte — wszystkie 8 (`vermeer.jpg`, `baroque.jpg`, `classicism.jpg`, `romanticism.jpg`, `impressionism.jpg`, `symbolism.jpg`, `expressionism.jpg`, `modern.jpg`) |
 | 14 | 2 | Pusty wariant tła Galerii (bez obrazów/ławek/żyrandola na ścianach) | 1 | 16:9, 1920×1080 | §9 | ✅ zrobione i podpięte (`gallery_empty.jpg`) — zwykły `gallery.jpg` zostaje jako czysty fallback, gdyby plik kiedyś zniknął |
-| 15 | 4 | Karty wydarzeń: reforma walutowa, strajk, zamieszki (docs/GDD.md pkt. 4.2, 4.3.1) | 3 | 16:9, 1920×1080 | §4 | ✅ zrobione i podpięte — `events/reform.jpg`/`events/strike.jpg`/`events/riot.jpg` wgrane, `WorldEventCard.gd` je wyświetla zamiast fallbacku na tło Giełdy. Dodatkowo wgrano `events/crash.jpg`/`events/boom.jpg` na zapas — NIE podpięte w kodzie, mechanika "Krach"/"Hossa" wciąż nieistniejąca (patrz wiersz wyżej w tekście) |
+| 15 | 4 | Karty wydarzeń: reforma walutowa, strajk, zamieszki, krach, hossa (docs/GDD.md pkt. 4.2, 4.3, 4.3.1) | 5 | 16:9, 1920×1080 | §4 | ✅ zrobione i podpięte — wszystkie 5 (`events/reform.jpg`/`events/strike.jpg`/`events/riot.jpg`/`events/crash.jpg`/`events/boom.jpg`) wgrane, `WorldEventCard.gd` je wyświetla zamiast fallbacku na tło Giełdy. Krach/hossa: `ShippingCompanies.apply_market_shock` |
 
 **Zasada dla wierszy oznaczonych "uwaga" (7 i 9):** jeśli Leonardo znowu
 zacznie robić pełne sceny zamiast wyizolowanych ikon/sprite'ów mimo

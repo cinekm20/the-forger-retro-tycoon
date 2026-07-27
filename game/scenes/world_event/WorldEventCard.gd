@@ -1,6 +1,7 @@
 extends Control
-## Karta wydarzenia "gazetowego" — reforma walutowa albo kryzys na plantacji
-## (strajk/zamieszki), pokazywana jako pełnoekranowy popup MIĘDZY TURAMI,
+## Karta wydarzenia "gazetowego" — reforma walutowa, kryzys na plantacji
+## (strajk/zamieszki) albo krach/hossa na giełdzie, pokazywana jako
+## pełnoekranowy popup MIĘDZY TURAMI,
 ## zanim Hub zbuduje normalny widok (patrz Hub.gd _ready, ten sam wzorzec co
 ## YearSummary.gd). Zgłoszone przez użytkownika: "w formie gazety i popup
 ## między turami". Kolejka zdarzeń (WorldEvents.gd) może mieć więcej niż
@@ -43,6 +44,10 @@ func _background_path() -> String:
 			return "res://art/events/reform.jpg"
 		"crisis":
 			return "res://art/events/strike.jpg" if event.get("cause", "") == "wages" else "res://art/events/riot.jpg"
+		"crash":
+			return "res://art/events/crash.jpg"
+		"boom":
+			return "res://art/events/boom.jpg"
 		_:
 			return ""
 
@@ -55,6 +60,10 @@ func _headline() -> String:
 			if event.get("cause", "") == "wages":
 				return tr("Strajk w %s!") % Cities.get_city_name(event.get("city", ""))
 			return tr("Zamieszki w %s!") % Cities.get_city_name(event.get("city", ""))
+		"crash":
+			return tr("Krach giełdowy!")
+		"boom":
+			return tr("Hossa na giełdzie!")
 		_:
 			return tr("Wiadomości")
 
@@ -67,8 +76,17 @@ func _body_text() -> String:
 			]
 		"crisis":
 			return _crisis_body_text()
+		"crash", "boom":
+			return _market_shock_body_text()
 		_:
 			return ""
+
+
+func _market_shock_body_text() -> String:
+	var change_ratio: float = event.get("change_ratio", 0.0)
+	if change_ratio < 0.0:
+		return tr("Panika na parkiecie! Kursy WSZYSTKICH linii żeglugowych spadają naraz o %.0f%%.") % [-change_ratio * 100.0]
+	return tr("Euforia inwestorów! Kursy WSZYSTKICH linii żeglugowych rosną naraz o %.0f%%.") % [change_ratio * 100.0]
 
 
 func _crisis_body_text() -> String:

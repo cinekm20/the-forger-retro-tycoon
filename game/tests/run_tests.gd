@@ -51,6 +51,7 @@ func _ready() -> void:
 	_test_plantation_lost_after_repeated_crisis_hits()
 	_test_plantation_tiles_are_exclusive_between_players()
 	_test_world_events_reform_queued()
+	_test_market_shock_crash_and_boom()
 	_test_yearly_report_populated_on_new_year()
 	_test_players_gender_and_avatar_selection()
 	_test_price_history_for_charts()
@@ -301,6 +302,31 @@ func _test_world_events_reform_queued() -> void:
 	var reported_event := WorldEvents.consume_next()
 	_assert(reported_event.get("kind", "") == "reform" and is_equal_approx(reported_event.get("ratio", 0.0), 5.0), "zdarzenie to reforma z ratio=5.0")
 	_assert(not WorldEvents.has_pending(), "kolejka pusta po skonsumowaniu jedynego zdarzenia")
+
+
+## Krach/hossa — patrz ShippingCompanies.apply_market_shock. Wołane wprost
+## (jak Economy.apply_currency_reform w teście wyżej), NIE przez losowy rzut
+## w _on_day_advanced — inaczej test byłby losowo zawodny (~2%/tydzień
+## szansy nie da się wiarygodnie wymusić przez zwykłe advance_days).
+func _test_market_shock_crash_and_boom() -> void:
+	print("-- ShippingCompanies/WorldEvents: krach i hossa zmieniają WSZYSTKIE kursy naraz i trafiają do kolejki karty gazety --")
+	WorldEvents.reset_new_game()
+	ShippingCompanies.reset_new_game()
+
+	var lloyd_before := ShippingCompanies.get_price("lloyd")
+	var royal_before := ShippingCompanies.get_price("royal")
+	ShippingCompanies.apply_market_shock("crash", -0.3)
+	_assert(is_equal_approx(ShippingCompanies.get_price("lloyd"), lloyd_before * 0.7), "krach obniża kurs Lloyd o 30%")
+	_assert(is_equal_approx(ShippingCompanies.get_price("royal"), royal_before * 0.7), "krach obniża RÓWNIEŻ kurs Royal o 30% — uderza we WSZYSTKIE spółki naraz")
+	_assert(WorldEvents.has_pending(), "krach trafia do kolejki karty gazety")
+	var crash_event := WorldEvents.consume_next()
+	_assert(crash_event.get("kind", "") == "crash" and is_equal_approx(crash_event.get("change_ratio", 0.0), -0.3), "zdarzenie to krach z change_ratio=-0.3")
+
+	var lloyd_before_boom := ShippingCompanies.get_price("lloyd")
+	ShippingCompanies.apply_market_shock("boom", 0.4)
+	_assert(is_equal_approx(ShippingCompanies.get_price("lloyd"), lloyd_before_boom * 1.4), "hossa podnosi kurs Lloyd o 40%")
+	var boom_event := WorldEvents.consume_next()
+	_assert(boom_event.get("kind", "") == "boom" and is_equal_approx(boom_event.get("change_ratio", 0.0), 0.4), "zdarzenie to hossa z change_ratio=0.4")
 
 
 func _test_ship_and_sell_all_across_plantations() -> void:

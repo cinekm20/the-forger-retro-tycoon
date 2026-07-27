@@ -139,11 +139,16 @@ kryzysy na plantacjach (patrz 4.2 wyżej). Ilustracje nagłówków gazety
 (`events/reform.jpg`/`events/strike.jpg`/`events/riot.jpg`) wgrane i
 podpięte (prompty w `docs/GRAFIKA_LEONARDO.md` §4).
 
-⏳ **Zaplanowane, jeszcze niezaimplementowane:** krach giełdowy (np. krach
-1929) i hiperinflacja jako osobne, nowe typy zdarzeń (nie tylko oprawa
-istniejącej reformy) — prompty na te dwie dodatkowe karty ("Krach"/"Hossa")
-już czekają gotowe w `docs/GRAFIKA_LEONARDO.md` §4, ale bez własnej
-mechaniki w kodzie.
+✅ **Krach/hossa na giełdzie — zaimplementowane** (`ShippingCompanies.apply_market_shock`,
+`ShippingCompanies.MARKET_CRASH_CHANCE_PER_WEEK`/`MARKET_BOOM_CHANCE_PER_WEEK`):
+rzadki (2%/tydzień), losowy wstrząs zmieniający WSZYSTKIE 4 kursy linii
+żeglugowych naraz o 25–45% (krach: w dół, hossa: w górę) — nie tylko jedną
+spółkę, jak zwykły dzienny dryf czy `boost_from_region_activity`. Trafia do
+tej samej kolejki kart gazety co reforma/kryzys plantacji (`events/crash.jpg`/
+`events/boom.jpg`, prompty w `docs/GRAFIKA_LEONARDO.md` §4).
+
+⏳ **Zaplanowane, jeszcze niezaimplementowane:** hiperinflacja jako osobny,
+nowy typ zdarzenia (nie tylko oprawa istniejącej reformy).
 
 ### 4.3a Rynek
 Osobny ekran (wydzielony z dawnej Giełdy) z cenami towarów (kawa/tytoń/
