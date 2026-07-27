@@ -252,6 +252,49 @@ static func make_root_bottom(parent: Control, use_menu_frame: bool = false, widt
 	return root
 
 
+## Ta sama skrzynka Art Deco co make_root_bottom (ramka + margines + stała
+## szerokość), ale WEWNĄTRZ istniejącego układu (dokładana zwykłym
+## `parent.add_child`), NIE zakotwiczona niezależnie od reszty ekranu —
+## zgłoszone przez użytkownika: MainMenu.gd ma wyglądać tak samo (ta sama
+## szerokość/ramka co skrzynka powrotu na innych ekranach), ale jego treść
+## (logo + podtytuł + ta skrzynka) jest naturalnie wyśrodkowana pionowo jako
+## JEDNA całość przez ALIGNMENT_CENTER nadrzędnego roota — inaczej niż
+## make_root_bottom, które zawsze zakotwicza się osobno w rogu/na dole
+## ekranu, niezależnie od reszty treści.
+##
+## Zwraca Dictionary {"box", "content"} (ten sam patent co
+## make_corner_status_row) zamiast samego VBoxContainera: "content" to
+## miejsce, gdzie wołający dokłada/czyści swoje przyciski, ale gdy trzeba
+## SCHOWAĆ całą skrzynkę (np. MainMenu.gd przełączające setup_section /
+## name_section), trzeba ukryć "box" (zewnętrzny PanelContainer z ramką),
+## NIE samo "content" — inaczej sama ozdobna ramka (MenuFrame._draw(),
+## rysowana niezależnie od widoczności dzieci) zostałaby wiszącym, pustym
+## prostokątem na ekranie.
+static func make_boxed_panel(parent: Container, width: float = 420.0) -> Dictionary:
+	var content := PanelContainer.new()
+	content.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	content.custom_minimum_size = Vector2(width, 0)
+
+	var frame: Control = MenuFrameScript.new()
+	content.add_child(frame)
+
+	var margin := MarginContainer.new()
+	var m := int(CONTENT_INSET_WITH_FRAME)
+	margin.add_theme_constant_override("margin_left", m)
+	margin.add_theme_constant_override("margin_right", m)
+	margin.add_theme_constant_override("margin_top", m)
+	margin.add_theme_constant_override("margin_bottom", m)
+	content.add_child(margin)
+
+	var root := VBoxContainer.new()
+	root.alignment = BoxContainer.ALIGNMENT_CENTER
+	root.add_theme_constant_override("separation", 14)
+	margin.add_child(root)
+
+	parent.add_child(content)
+	return {"box": content, "content": root}
+
+
 ## Paleta art déco (docs/GRAFIKA_LEONARDO.md — złoto/burgund/sepia).
 const COLOR_GOLD := Color(0.85, 0.65, 0.2)
 const COLOR_GOLD_BRIGHT := Color(1.0, 0.83, 0.4)

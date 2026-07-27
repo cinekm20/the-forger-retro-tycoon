@@ -13,6 +13,13 @@ var easy_mode_check: CheckBox
 var player_count_option: OptionButton
 var setup_section: VBoxContainer
 var name_section: VBoxContainer
+## Zewnętrzne skrzynki (PanelContainer + ramka) opakowujące setup_section/
+## name_section (patrz ScreenHelpers.make_boxed_panel) — przełączanie
+## widoczności musi działać na TYCH, nie na samych VBoxContainerach z
+## przyciskami, inaczej ozdobna ramka zostałaby widoczna nawet po ukryciu
+## zawartości.
+var setup_box: Control
+var name_box: Control
 var name_edits: Array[LineEdit] = []
 var gender_options: Array[OptionButton] = []
 var avatar_options: Array[OptionButton] = []
@@ -32,8 +39,15 @@ func _ready() -> void:
 
 	var subtitle_label := ScreenHelpers.make_label(root, "Ekonomiczna gra strategiczna — lata 20. XX wieku")
 
-	setup_section = VBoxContainer.new()
-	root.add_child(setup_section)
+	## Skrzynka Art Deco, TA SAMA co wszędzie indziej (ScreenHelpers.make_boxed_back_button/
+	## make_root_bottom) — zgłoszone przez użytkownika: te dwa "menu" (wybór
+	## trybu gry i wpisywanie imion graczy) mają wyglądać tak samo. Wariant
+	## "inline" (make_boxed_panel, nie make_root_bottom) — treść ma zostać
+	## naturalnie wyśrodkowana RAZEM z logo/podtytułem, a nie zakotwiczona
+	## osobno w rogu ekranu.
+	var setup_panel := ScreenHelpers.make_boxed_panel(root)
+	setup_box = setup_panel["box"]
+	setup_section = setup_panel["content"]
 
 	var player_row := HBoxContainer.new()
 	player_row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -64,9 +78,10 @@ func _ready() -> void:
 	ScreenHelpers.make_button(setup_section, "Ustawienia", func(): SceneRouter.goto_scene(SceneRouter.SETTINGS))
 	ScreenHelpers.make_button(setup_section, "Wyjdź z gry", func(): get_tree().quit())
 
-	name_section = VBoxContainer.new()
-	name_section.visible = false
-	root.add_child(name_section)
+	var name_panel := ScreenHelpers.make_boxed_panel(root)
+	name_box = name_panel["box"]
+	name_section = name_panel["content"]
+	name_box.visible = false
 
 	## MainMenu to PIERWSZY ekran gry, ładowany od razu przy zimnym starcie —
 	## w przeciwieństwie do Hub.gd/Plantation.gd/TravelAnimation.gd (ten sam
@@ -228,12 +243,12 @@ func _show_name_entry() -> void:
 
 	ScreenHelpers.make_button(name_section, "Rozpocznij grę", _on_start_confirmed)
 	ScreenHelpers.make_button(name_section, "Anuluj", func():
-		name_section.visible = false
-		setup_section.visible = true
+		name_box.visible = false
+		setup_box.visible = true
 	)
 
-	setup_section.visible = false
-	name_section.visible = true
+	setup_box.visible = false
+	name_box.visible = true
 
 
 func _on_avatar_choice_changed(_selected_index: int, player_index: int) -> void:
