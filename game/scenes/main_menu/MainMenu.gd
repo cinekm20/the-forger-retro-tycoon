@@ -45,10 +45,18 @@ func _ready() -> void:
 	## use_menu_frame=false: zgłoszone przez użytkownika — ozdobna ramka na
 	## cały ekran ma zniknąć na wszystkich ekranach (ten sam fix co wcześniej
 	## w AuctionHouse.gd/Gallery.gd). Menu główne nie ma przycisku powrotu
-	## (to pierwszy ekran gry), więc bez dodatkowego przypinania tytułu/
-	## przycisku do krawędzi — treść zostaje wyśrodkowana jak dotychczas
-	## (root.alignment domyślnie CENTER).
+	## (to pierwszy ekran gry).
 	root = ScreenHelpers.make_root(self, false)
+
+	## ALIGNMENT_BEGIN + rozpychacz na SAMYM POCZĄTKU (nie na końcu jak
+	## gdzie indziej w grze) — zgłoszone przez użytkownika: skrzynka menu ma
+	## być przyklejona do SAMEGO DOŁU ekranu, tak jak było wcześniej, zamiast
+	## wyśrodkowana pionowo na środku. Wyśrodkowanie (poprzedni, przejściowy
+	## wygląd) zasłaniało tytuł "THE FORGER: RETRO TYCOON" wpisany teraz w
+	## tło (patrz komentarz o main_menu_title.jpg wyżej) — dół ekranu jest od
+	## niego bezpiecznie z dala.
+	root.alignment = BoxContainer.ALIGNMENT_BEGIN
+	root.add_child(ScreenHelpers.make_expand_spacer())
 
 	ScreenHelpers.make_label(root, "Ekonomiczna gra strategiczna — lata 20. XX wieku")
 
@@ -205,15 +213,22 @@ func _build_player_corner_frames() -> Array[VBoxContainer]:
 	var right_root := _make_corner_column(true)
 	player_corner_columns = [left_root, right_root]
 
+	## Rozpychacz PRZED oboma slotami (nie MIĘDZY nimi jak w AuctionHouse.gd)
+	## — zgłoszone przez użytkownika: ramki gracza 3/4 (górny slot) mają być
+	## obniżone tak, żeby stykały się z ramkami gracza 1/2 (dolny slot), a nie
+	## rozjeżdżać się do samej góry ekranu z dużą pustą przerwą pośrodku.
+	## Rozpychacz na początku pcha OBA sloty razem w dół, do samego dołu
+	## kolumny — dokładnie tak samo, jak przy 1-2 graczach (tam górny slot
+	## jest pusty, więc już wcześniej wyglądało to dobrze).
+	left_root.add_child(ScreenHelpers.make_expand_spacer())
 	var left_top := VBoxContainer.new()
 	left_root.add_child(left_top)
-	left_root.add_child(ScreenHelpers.make_expand_spacer())
 	var left_bottom := VBoxContainer.new()
 	left_root.add_child(left_bottom)
 
+	right_root.add_child(ScreenHelpers.make_expand_spacer())
 	var right_top := VBoxContainer.new()
 	right_root.add_child(right_top)
-	right_root.add_child(ScreenHelpers.make_expand_spacer())
 	var right_bottom := VBoxContainer.new()
 	right_root.add_child(right_bottom)
 
