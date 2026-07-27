@@ -114,13 +114,20 @@ dla tego jednego promptu** (patrz sekcja "Negative prompt" na górze
 dokumentu) — inaczej model będzie aktywnie unikać rysowania tytułu, którego
 tu właśnie chcemy.
 
-Poprawka (zgłoszenie użytkownika po pierwszych próbach, patrz zrzuty
-ekranu): "spanning the full width across the top" model potraktował zbyt
-swobodnie — tytuł wychodził wyśrodkowany pionowo albo w górnej połowie, z
-dużym pasem samej mapy NAD nim. Prompt teraz wprost wymusza górną
-KRAWĘDŹ kadru (nie "górną część"), z jawnym zakazem centrowania:
+Poprawka #1 (zgłoszenie użytkownika, patrz zrzuty ekranu): "spanning the
+full width across the top"/"touching the top border" model dalej
+potraktował zbyt swobodnie — tytuł i tak wychodził wyśrodkowany pionowo w
+środku kadru, z mapami i NAD, i POD nim. Opisowe/przymiotnikowe instrukcje
+pozycji ("at the top", "not centered") okazały się za słabe.
+
+Poprawka #2 — zamiast opisywać SCENĘ i osobno DOKLEJAĆ do niej pozycję
+tytułu, prompt teraz opisuje kompozycję jako DWA WYRAŹNIE ROZDZIELONE
+PASY (skuteczniejszy trik dla modeli obrazkowych niż same przymiotniki
+pozycji): górny pas to OSOBNY, jednolity baner na całą szerokość, dolny
+pas to scena. Modelowi dużo łatwiej utrzymać podział na dwa bloki niż
+"dopilnować", żeby jeden element sceny wylądował akurat przy krawędzi:
 ```
-1920s art collector's study, world maps on the walls, a brass compass and a globe in the corner, a city skyline silhouette along the bottom edge, huge bold Art Deco masthead title banner in capital letters reading "THE FORGER: RETRO TYCOON" positioned at the very top edge of the frame, touching the top border, spanning the full width, NOT centered vertically, no empty space above the title, game title screen background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+Widescreen game title card split into two horizontal bands. TOP BAND (top 20% of the image, full width): a solid dark green banner strip stretching edge to edge, containing large bold gold Art Deco lettering reading "THE FORGER: RETRO TYCOON", the banner's top edge touches the very top border of the image with zero margin above it. BOTTOM BAND (remaining 80% of the image, below the banner): a 1920s art collector's study, world maps on the walls, a brass compass and a globe in the corner, a city skyline silhouette along the bottom edge. Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Prompt logo.jpg (nieużywane, zapis historyczny — patrz wyżej, dlaczego
