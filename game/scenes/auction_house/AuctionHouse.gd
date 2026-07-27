@@ -63,6 +63,12 @@ var timer_bar: ProgressBar
 var painting_texture_rect: TextureRect
 var leader_portrait_rect: TextureRect
 var back_btn: Button
+## Obie boczne kolumny ramek graczy (patrz _build_player_frames) — schowane
+## CAŁKOWICIE po rozstrzygnięciu rundy (patrz _resolve_auction), zgłoszone
+## przez użytkownika: po zakończeniu aukcji ramki graczy powinny zniknąć,
+## zostawiając tylko przycisk powrotu.
+var left_frames_column: VBoxContainer
+var right_frames_column: VBoxContainer
 
 ## 268 = 190 (poprzedni rozmiar samego obrazu, patrz historia komentarza w
 ## _build_active_auction_ui) powiększone tak, żeby po doliczeniu ramki
@@ -352,6 +358,8 @@ func _make_side_column(on_right: bool) -> VBoxContainer:
 func _build_player_frames() -> void:
 	var left_root := _make_side_column(false)
 	var right_root := _make_side_column(true)
+	left_frames_column = left_root
+	right_frames_column = right_root
 
 	var left_top := VBoxContainer.new()
 	left_root.add_child(left_top)
@@ -592,11 +600,18 @@ func _resolve_auction() -> void:
 	timer_bar.visible = false
 	back_btn.visible = true
 
+	## Zgłoszone przez użytkownika: po zakończeniu aukcji ramki WSZYSTKICH
+	## graczy mają zniknąć, zostawiając tylko przycisk powrotu — dalsze
+	## podbijanie/rezygnacja i tak nie mają już sensu (auction_active=false
+	## blokuje oba przyciski w każdej ramce, patrz _update_frame), więc same
+	## puste, zablokowane skrzynki tylko zaśmiecały ekran.
+	left_frames_column.visible = false
+	right_frames_column.visible = false
+
 	## Zgłoszone przez użytkownika: pod skrzynką oferty nie może być żaden
 	## napis (patrz wcześniejsze usunięcie "Zabrakło czasu..." w
 	## _on_time_expired) — wynik rundy i tak widać w bid_label (kto
-	## prowadzi/za ile) i w bocznych ramkach graczy (gotówka po transakcji),
-	## więc osobne zdanie podsumowujące jest zbędne.
+	## prowadzi/za ile), więc osobne zdanie podsumowujące jest zbędne.
 	if current_leader.begins_with("player:"):
 		var winner_index := int(current_leader.substr(7))
 		Players.spend_player_money(winner_index, current_bid)
