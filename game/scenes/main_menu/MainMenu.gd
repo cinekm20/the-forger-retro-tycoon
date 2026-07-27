@@ -58,8 +58,6 @@ func _ready() -> void:
 	root.alignment = BoxContainer.ALIGNMENT_BEGIN
 	root.add_child(ScreenHelpers.make_expand_spacer())
 
-	ScreenHelpers.make_label(root, "Ekonomiczna gra strategiczna — lata 20. XX wieku")
-
 	## Skrzynka Art Deco, TA SAMA co wszędzie indziej (ScreenHelpers.make_boxed_back_button/
 	## make_root_bottom) — zgłoszone przez użytkownika: te dwa "menu" (wybór
 	## trybu gry i wpisywanie imion graczy) mają wyglądać tak samo. Wariant
