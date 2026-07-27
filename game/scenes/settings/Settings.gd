@@ -1,9 +1,20 @@
 extends Control
-## Ekran ustawień — na razie wybór języka interfejsu (Localization.gd).
-## Miejsce na przyszłe opcje. Dostępny z menu głównego (MainMenu.gd).
+## Ekran ustawień — wybór języka interfejsu (Localization.gd) i wyciszenie
+## muzyki (Music.gd). Miejsce na przyszłe opcje. Dostępny z menu głównego
+## (MainMenu.gd).
 
 
 func _ready() -> void:
+	## Zgłoszone przez użytkownika: tło i skrzynka opcji mają wyglądać tak
+	## samo jak wszędzie indziej w grze, nie goły ekran bez tła. Dedykowana
+	## grafika (docs/GRAFIKA_LEONARDO.md §11) jeszcze nie wygenerowana — po
+	## cichu spada na tło Giełdy, tak jak WorldEventCard.gd, dopóki plik nie
+	## zostanie wgrany.
+	var background_path := "res://art/backgrounds/settings.jpg"
+	if not ResourceLoader.exists(background_path):
+		background_path = "res://art/backgrounds/stock_market.jpg"
+	ScreenHelpers.make_background(self, background_path)
+
 	## use_menu_frame=false + ALIGNMENT_BEGIN + JEDEN rozpychacz na końcu:
 	## zgłoszone przez użytkownika — ozdobna ramka znika, nazwa ekranu zostaje
 	## przypięta na samej górze, przycisk powrotu na samym dole. Treść leci
@@ -13,9 +24,15 @@ func _ready() -> void:
 	root.alignment = BoxContainer.ALIGNMENT_BEGIN
 	ScreenHelpers.make_title(root, "Ustawienia")
 
-	ScreenHelpers.make_label(root, "Język / Language / Sprache")
+	## Skrzynka Art Deco, TA SAMA co wszędzie indziej (ScreenHelpers.make_boxed_panel)
+	## — zgłoszone przez użytkownika: opcje mają być w ładnym, oprawionym
+	## menu, nie luźno na tle.
+	var options_box := ScreenHelpers.make_boxed_panel(root)["content"]
+
+	ScreenHelpers.make_label(options_box, "Język / Language / Sprache")
 
 	var lang_option := OptionButton.new()
+	lang_option.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	lang_option.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 	var lang_codes: Array[String] = []
 	for code in Localization.LANGUAGES.keys():
@@ -24,7 +41,15 @@ func _ready() -> void:
 		if code == Localization.current_language:
 			lang_option.select(lang_codes.size() - 1)
 	lang_option.item_selected.connect(func(index: int) -> void: Localization.set_language(lang_codes[index]))
-	root.add_child(lang_option)
+	options_box.add_child(lang_option)
+
+	var mute_check := CheckBox.new()
+	mute_check.text = tr("Wycisz muzykę")
+	mute_check.button_pressed = Music.muted
+	mute_check.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	mute_check.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
+	mute_check.toggled.connect(Music.set_muted)
+	options_box.add_child(mute_check)
 
 	## Ozdobna skrzynka Art Deco w prawym dolnym rogu, TA SAMA co boczny
 	## panel na TravelMap.gd/Hub.gd — zgłoszone przez użytkownika: przycisk
