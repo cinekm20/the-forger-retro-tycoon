@@ -55,6 +55,12 @@ const GROUND_DASH_GAP := 50.0
 const GROUND_SCROLL_SPEED := 160.0  ## szybciej niż banery = wrażenie głębi (paralaksa)
 
 const LINE_WIDTH := 16.0
+## Zgłoszenie użytkownika: linia startu ma "odlecieć" z ekranu zaraz po
+## starcie, linia mety ma "dolecieć" od lewej dopiero po pewnym czasie —
+## oba w jednostkach t (ułamek DURATION).
+const START_LINE_EXIT_END := 0.12
+const FINISH_LINE_ENTRY_START := 0.2
+const FINISH_LINE_ENTRY_END := 0.5
 
 var view_size: Vector2 = Vector2(1280.0, 720.0)
 var start_x: float = 0.0
@@ -243,9 +249,10 @@ func _build_ground_strip() -> void:
 		ground_dashes.append(dash)
 
 
-## Linia startu — jednolita biała, NIERUCHOMA przez cały wyścig (konie
-## faktycznie od niej odjeżdżają, w przeciwieństwie do mety, która stoi w
-## miejscu i czeka na nie — patrz _build_finish_line).
+## Linia startu — jednolita biała. Zgłoszenie użytkownika: konie startują na
+## niej, a ona sama zaraz potem "odlatuje" z ekranu (w prawo, tak jak banery/
+## trawa — patrz _update_lines) — zostaje za końmi, tak jak prawdziwa linia
+## startu. Budowana na start_x, animacja wylotu w _update_lines.
 func _build_start_line() -> void:
 	start_line = Control.new()
 	start_line.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -260,13 +267,18 @@ func _build_start_line() -> void:
 	start_line.add_child(bar)
 
 
-## Linia mety — biało-czerwona w kratkę, NIERUCHOMA (konie do niej dobiegają,
-## nie odwrotnie).
+## Linia mety — biało-czerwona w kratkę. Zgłoszenie użytkownika: ma "dolecieć"
+## od lewej krawędzi ekranu po pewnym czasie (patrz _update_lines), a nie być
+## widoczna od samego początku — budowana od razu POZA ekranem po lewej,
+## dopiero animacja wjazdu ustawia ją docelowo na finish_x. Sam finish_x
+## (środek, niezależny od chwilowej pozycji linii-widoku) to nadal jedyne
+## źródło prawdy dla matematyki koni (_horse_x) — animacja linii jest czysto
+## kosmetyczna i nigdy nie zmienia, KIEDY koń faktycznie kończy bieg.
 func _build_finish_line() -> void:
 	finish_line = Control.new()
 	finish_line.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	finish_line.size = Vector2(LINE_WIDTH, view_size.y - BANNER_HEIGHT - GROUND_HEIGHT)
-	finish_line.position = Vector2(finish_x - LINE_WIDTH * 0.5, BANNER_HEIGHT)
+	finish_line.position = Vector2(-LINE_WIDTH - 60.0, BANNER_HEIGHT)
 	add_child(finish_line)
 
 	var segment_count := 8
@@ -342,6 +354,7 @@ func _process(delta: float) -> void:
 	ground_scroll_x += GROUND_SCROLL_SPEED * delta
 	_update_banner_positions()
 	_update_ground_positions()
+	_update_lines(t)
 	_update_horses(t)
 	if t >= 1.0:
 		set_process(false)
@@ -358,11 +371,15 @@ func skip() -> void:
 	_process(0.0)
 
 
+## Zgłoszenie użytkownika: banery/trawa mają się przesuwać w DRUGĄ stronę
+## (w prawo, nie w lewo jak poprzednio) — + zamiast - w formule fposmod,
+## reszta wzoru (standardowy trik na nieskończone przewijanie bez utraty
+## ciągłości na krawędzi) bez zmian.
 func _update_banner_positions() -> void:
 	var pattern_width := BANNER_CARD_WIDTH + BANNER_GAP
 	var total_width := pattern_width * banner_cards.size()
 	for i in banner_cards.size():
-		var x := fposmod(i * pattern_width - banner_scroll_x, total_width)
+		var x := fposmod(i * pattern_width + banner_scroll_x, total_width)
 		banner_cards[i].position.x = x
 		banner_labels[i].position.x = x
 
@@ -371,7 +388,21 @@ func _update_ground_positions() -> void:
 	var pattern_width := GROUND_DASH_WIDTH + GROUND_DASH_GAP
 	var total_width := pattern_width * ground_dashes.size()
 	for i in ground_dashes.size():
-		ground_dashes[i].position.x = fposmod(i * pattern_width - ground_scroll_x, total_width)
+		ground_dashes[i].position.x = fposmod(i * pattern_width + ground_scroll_x, total_width)
+
+
+## Linia startu "odlatuje" w prawo i znika za ekranem zaraz po starcie;
+## linia mety "dolatuje" od lewej krawędzi dopiero po pewnym czasie i
+## zatrzymuje się na finish_x — obie animacje czysto kosmetyczne (patrz
+## komentarz w _build_finish_line), matematyka koni (_horse_x) zawsze liczy
+## względem stałych start_x/finish_x, niezależnie od chwilowej pozycji
+## samej grafiki linii.
+func _update_lines(t: float) -> void:
+	var exit_t := clampf(t / START_LINE_EXIT_END, 0.0, 1.0)
+	start_line.position.x = lerp(start_x - LINE_WIDTH * 0.5, view_size.x + 60.0, smoothstep(0.0, 1.0, exit_t))
+
+	var entry_t := clampf((t - FINISH_LINE_ENTRY_START) / (FINISH_LINE_ENTRY_END - FINISH_LINE_ENTRY_START), 0.0, 1.0)
+	finish_line.position.x = lerp(-LINE_WIDTH - 60.0, finish_x - LINE_WIDTH * 0.5, smoothstep(0.0, 1.0, entry_t))
 
 
 ## Pozycja pozioma konia i w chwili t — krzywa potęgowa reparametryzowana
