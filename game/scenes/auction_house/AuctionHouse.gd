@@ -58,7 +58,6 @@ var rival_checked_this_round: bool = false
 var schedule_label: Label
 var painting_label: Label
 var bid_label: Label
-var status_label: Label
 var timer_label: Label
 var timer_bar: ProgressBar
 var painting_texture_rect: TextureRect
@@ -294,8 +293,6 @@ func _build_active_auction_ui(root: VBoxContainer) -> void:
 	bid_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	bid_label.custom_minimum_size = Vector2(520, 115)
 	bid_row.add_child(bid_label)
-
-	status_label = ScreenHelpers.make_label(root, "")
 
 	## Zastępuje przyciski Podbij/Rezygnuj (teraz w ramkach graczy) dopiero
 	## po rozstrzygnięciu aukcji — do tego momentu ukryty. Pasek czasu
@@ -595,21 +592,18 @@ func _resolve_auction() -> void:
 	timer_bar.visible = false
 	back_btn.visible = true
 
+	## Zgłoszone przez użytkownika: pod skrzynką oferty nie może być żaden
+	## napis (patrz wcześniejsze usunięcie "Zabrakło czasu..." w
+	## _on_time_expired) — wynik rundy i tak widać w bid_label (kto
+	## prowadzi/za ile) i w bocznych ramkach graczy (gotówka po transakcji),
+	## więc osobne zdanie podsumowujące jest zbędne.
 	if current_leader.begins_with("player:"):
 		var winner_index := int(current_leader.substr(7))
 		Players.spend_player_money(winner_index, current_bid)
-		if Players.player_has_number(winner_index, current_number):
-			status_label.text = tr("%s kupuje FAŁSZYWKĘ! Pieniądze przepadają, obraz nie trafia do kolekcji.") % Players.player_names[winner_index]
-		else:
+		if not Players.player_has_number(winner_index, current_number):
 			Players.catalogue_for_player(winner_index, current_number)
-			status_label.text = tr("%s: obraz trafia do kolekcji (%d/%d).") % [
-				Players.player_names[winner_index], Players.get_painting_count(winner_index), Paintings.win_threshold,
-			]
-	elif current_leader == "":
-		status_label.text = tr("Nikt nie licytował — obraz zostaje niesprzedany.")
-	else:
+	elif current_leader != "":
 		AIPlayers.award_painting(current_leader, current_number, current_bid)
-		status_label.text = ""
 	_update_labels()
 
 	Auctions.resolve_and_reschedule()
