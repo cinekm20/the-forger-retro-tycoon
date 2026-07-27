@@ -41,7 +41,13 @@ func _ready() -> void:
 	var bg_layers := ScreenHelpers.make_background_with_overlay(self, Cities.MAP_BACKGROUND_PATH)
 	map_overlay = bg_layers["overlay"]
 
-	root_panel = ScreenHelpers.make_root_side(self, true, true, 0.0)
+	## make_root_bottom (nie make_root_side jak wcześniej) — zgłoszone przez
+	## użytkownika: ta skrzynka ma mieć TĘ SAMĄ szerokość co skrzynka
+	## przycisku powrotu na innych ekranach (ScreenHelpers.make_boxed_back_button)
+	## i dopasowywać się wysokością do treści, bez pustego miejsca u dołu —
+	## make_root_side (pełnowysokościowy pasek) zostawiał dużo pustej
+	## przestrzeni pod jedynym przyciskiem "Pomiń »".
+	root_panel = ScreenHelpers.make_root_bottom(self, true)
 	ScreenHelpers.make_title(root_panel, "Podróż")
 	ScreenHelpers.make_label(root_panel, "%s → %s" % [
 		Cities.get_city_name(Travel.last_travel_from), Cities.get_city_name(Travel.last_travel_to),

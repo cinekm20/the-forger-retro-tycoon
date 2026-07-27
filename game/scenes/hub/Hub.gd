@@ -99,7 +99,17 @@ func _ready() -> void:
 	## zgodnie z oryginałem, ale bez informacji statusu (te są teraz w
 	## top_row powyżej). use_menu_frame=true: ozdobna ramka Art Deco
 	## zamiast zwykłego półprzezroczystego tła (docs/GRAFIKA_LEONARDO.md §10).
-	root_panel = ScreenHelpers.make_root_side(self, true, true)
+	##
+	## make_root_bottom (nie make_root_side jak wcześniej) — zgłoszone przez
+	## użytkownika: ta skrzynka ma mieć TĘ SAMĄ szerokość co skrzynka
+	## przycisku powrotu na innych ekranach (ScreenHelpers.make_boxed_back_button)
+	## i dopasowywać się wysokością do treści, bez pustego miejsca u dołu —
+	## make_root_side (pełnowysokościowy pasek) zostawiał dużo pustej
+	## przestrzeni pod ostatnim przyciskiem. Bez ScrollContainera bezpiecznie
+	## (główny widok ma tylko 4 przyciski, podmenu "Miejsca »" maks. 8 —
+	## patrz niżej — mieszczą się z zapasem w 720px wysokości ekranu nawet
+	## bez przewijania).
+	root_panel = ScreenHelpers.make_root_bottom(self, true)
 
 	## Na telefonie przewijanie tego paska dotykiem nie zawsze działa
 	## niezawodnie (zgłoszone przez użytkownika), więc zamiast liczyć na
@@ -107,9 +117,7 @@ func _ready() -> void:
 	## stałe, a ekrany lokacji (bramkowane + darmowe) chowają się w osobnym
 	## podmenu "Miejsca »" — otwieranym/zamykanym przełączeniem visible
 	## między main_menu_section i places_menu_section (ten sam patent co
-	## MainMenu.gd _show_name_entry). ScrollContainer z make_root_side zostaje
-	## jako zabezpieczenie, ale w normalnych warunkach nie powinien być już
-	## potrzebny.
+	## MainMenu.gd _show_name_entry).
 	main_menu_section = VBoxContainer.new()
 	root_panel.add_child(main_menu_section)
 
