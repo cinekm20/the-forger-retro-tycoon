@@ -77,10 +77,17 @@ func _build_pins() -> void:
 		pin.anchor_right = frac.x
 		pin.anchor_top = frac.y
 		pin.anchor_bottom = frac.y
+		## Zgłoszone przez użytkownika: skalibrowany punkt (frac) ma pokrywać się
+		## z KONIUSZKIEM pinezki (ostry czubek na dole grafiki, patrz MapPin.gd
+		## _draw — tip = Vector2(w*0.5, size.y)), nie ze środkiem całego
+		## prostokąta. W poziomie pinezka zostaje wyśrodkowana (czubek leży na
+		## środku szerokości), w pionie offset_bottom=0 przypina sam dół
+		## (czubek) dokładnie do punktu zakotwiczenia, a offset_top=-PIN_SIZE.y
+		## rozciąga resztę grafiki W GÓRĘ od tego punktu.
 		pin.offset_left = -MapPinScript.PIN_SIZE.x / 2.0
 		pin.offset_right = MapPinScript.PIN_SIZE.x / 2.0
-		pin.offset_top = -MapPinScript.PIN_SIZE.y / 2.0
-		pin.offset_bottom = MapPinScript.PIN_SIZE.y / 2.0
+		pin.offset_top = -MapPinScript.PIN_SIZE.y
+		pin.offset_bottom = 0.0
 		pin.tooltip_text = Cities.get_city_name(city_id)
 		pin.pressed.connect(_on_pin_selected.bind(city_id))
 		pins_layer.add_child(pin)
