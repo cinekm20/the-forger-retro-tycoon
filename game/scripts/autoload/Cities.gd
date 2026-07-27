@@ -138,11 +138,31 @@ func get_auction_cities() -> Array:
 ## wymagając "głębokiego lądu" (margines koloru ląd/morze dodatni w całym
 ## promieniu ~6px wokół punktu, nie tylko w jednym pikselu), żeby nie trafić
 ## na wąski przesmyk/zatoczkę widoczny dokładnie w tym pasie.
+##
+## Kolejna poprawka (zgłoszenie użytkownika: "już to poprawialiśmy ale nadal
+## nie w tych miejscach są znaczniki", ze zrzutem ekranu z gry): programowe
+## próbkowanie koloru ujawniło, że new_york/richmond/st_louis lądowały w
+## KANADYJSKIEJ ARKTYCE (rozdrobnione wysepki archipelagu widoczne na
+## hub_map.jpg), nie na kontynentalnych Stanach Zjednoczonych — jednolity,
+## niepofragmentowany ląd niżej na tym samym kontynencie (między Arktyką a
+## przesmykiem do Ameryki Środkowej) to faktyczne "USA" na tej grafice.
+## guatemala i rio wypadały wprost w morzu (kolor beżowy, nie ląd) — guatemala
+## przesunięta na wąski, ale jednoznacznie lądowy fragment przesmyku
+## środkowoamerykańskiego kawałek na wschód/południe od poprzedniej pozycji;
+## rio przesunięte w lewo, bo poprzednia pozycja lądowała w otwartym oceanie
+## na wschód od wybrzeża Brazylii. lisbon leżała dokładnie na granicy ląd/
+## morze (część sąsiednich pikseli już w morzu) — przesunięta kawałek w
+## prawo, w głąb lądu. Reszta miast (w tym bombay/colombo) zweryfikowana
+## jako poprawna: subkontynent indyjski na tej konkretnej grafice jest
+## namalowany w cieplejszym, piaskowym odcieniu zamiast niebiesko-turkusowym
+## jak reszta lądów — kolor sam w sobie nie jest tu wiarygodnym testem, liczy
+## się rozpoznawalny kształt kontynentu (zweryfikowane wizualnie, nie tylko
+## programowo).
 const MAP_POSITION := {
 	"berlin": Vector2(0.55, 0.327),
 	"paris": Vector2(0.493, 0.405),
 	"amsterdam": Vector2(0.539, 0.361),
-	"lisbon": Vector2(0.48, 0.42),
+	"lisbon": Vector2(0.49, 0.415),
 	"london": Vector2(0.526, 0.367),
 	"ankara": Vector2(0.60, 0.31),
 	"bombay": Vector2(0.66, 0.49),
@@ -150,13 +170,13 @@ const MAP_POSITION := {
 	"mombasa": Vector2(0.59, 0.58),
 	"duala": Vector2(0.52, 0.54),
 	"abidjan": Vector2(0.48, 0.52),
-	"rio": Vector2(0.41, 0.68),
+	"rio": Vector2(0.378, 0.68),
 	"bogota": Vector2(0.36, 0.55),
-	"guatemala": Vector2(0.33, 0.51),
+	"guatemala": Vector2(0.332, 0.509),
 	"mexico": Vector2(0.29, 0.46),
-	"new_york": Vector2(0.38, 0.33),
-	"richmond": Vector2(0.36, 0.31),
-	"st_louis": Vector2(0.307, 0.302),
+	"new_york": Vector2(0.356, 0.345),
+	"richmond": Vector2(0.352, 0.400),
+	"st_louis": Vector2(0.275, 0.378),
 }
 
 
