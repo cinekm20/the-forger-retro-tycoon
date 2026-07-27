@@ -140,6 +140,36 @@ regenerację/inpainting SAMEGO napisu, jeśli reszta kompozycji już pasuje).
 Przed wgraniem do repo zawsze odczytaj napis na wygenerowanym obrazku
 litera po literze — "FORGER" (nie "FROGER"), z dwukropkiem po "THE FORGER".
 
+Poprawka #3 (zgłoszenie użytkownika, 4 kolejne zrzuty ekranu — pisownia
+tym razem poprawna, ale kompozycja dalej zła): mimo podziału na "TOP BAND
+touching the top border", model uporczywie traktuje to jako winietę/kartę
+tytułową i tak czy inaczej dorysowuje ozdobną ramkę i margines WOKÓŁ
+banera (złoty pasek u samej góry, potem pusty margines, dopiero potem
+napis pływający na środku kadru) — słowo "title card" najwyraźniej
+przywołuje w modelu układ okładkowy/plakatowy z wyśrodkowanym logo, silniej
+niż działa opis "top band". Nowy prompt: (1) usuwa frazę "title card" na
+rzecz neutralnego opisu tła, (2) explicite ZAKAZUJE pustej przestrzeni,
+ramki i marginesu NAD banerem, wprost mówiąc, że baner zaczyna się w
+lewym górnym rogu kadru (piksel 0,0) i że NIC nie ma nad nim, (3) dopisuje
+negatywne słowa kluczowe wprost do promptu (nie tylko do wspólnego
+Negative Prompt), bo to właśnie ta konkretna, uporczywa usterka:
+```
+Full-bleed mobile game background image, no picture frame, no border, no vignette, no white margin anywhere. The very first thing visible at the absolute top-left corner of the canvas, starting at pixel row zero with nothing above it — no sky, no wall, no ceiling, no map, no empty space, no decorative frame — is a solid dark green banner strip stretching the full width of the image, filled edge to edge with large bold gold Art Deco lettering reading "THE FORGER: RETRO TYCOON". The banner occupies the top 20% of the image. Immediately below the banner, with no gap and no border between them, an art collector's 1920s study scene fills the remaining 80% of the canvas: world maps on the walls, a brass compass and a globe in the corner, a city skyline silhouette along the bottom edge. Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, edge-to-edge full-bleed composition, no photorealism
+```
+Do promptu negatywnego (dla TEGO jednego promptu, oprócz zwykłego zdjęcia
+"text, watermark, signature, logo" — patrz wyżej) dopisz: `picture frame,
+border, vignette, centered logo, floating title, empty margin, whitespace
+above banner, poster layout`.
+
+Jeśli model DALEJ wyśrodkuje napis mimo tego promptu — to znany, twardy
+limit tego konkretnego modelu na tego typu kompozycję "tekst dokładnie przy
+krawędzi" (podobnie jak z literówkami wyżej, nie da się tego w 100%
+wymusić samym promptem). W takim wypadku najpewniejsze obejście to
+wygenerować obraz w proporcji szerszej niż docelowa (np. 16:9 zamiast
+docelowego kadru) z tym samym promptem, a następnie PRZYCIĄĆ górny margines
+ręcznie w dowolnym edytorze grafiki przed wgraniem do repo — pewniejsze niż
+kolejne iteracje samego tekstu promptu.
+
 **Prompt logo.jpg (nieużywane, zapis historyczny — patrz wyżej, dlaczego
 zrezygnowano):**
 ```
