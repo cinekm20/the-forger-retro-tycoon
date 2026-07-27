@@ -179,6 +179,16 @@ tury. Kolejny zakład możliwy dopiero po upływie `Players.DAYS_PER_TURN`
 (7 dni, TA SAMA stała co skok "Koniec tury") WŁASNEGO czasu gracza (Tor B),
 licząc od jego poprzedniego zakładu.
 
+✅ **Dryfujące kursy — zaimplementowane** (`Horses.gd`, nowy autoload):
+zgłoszone przez użytkownika — kursy koni miały być raz na zawsze ustawioną
+stałą, teraz dryfują dziennie o losowe ±5%, tym samym wzorcem co ceny
+akcji/towarów (`ShippingCompanies.gd`/`Crops.gd`), z twardymi granicami
+(1.3–20.0), żeby faworyt nigdy nie stał się "pewniakiem", a underdog nigdy
+nie dawał absurdalnej wypłaty. Tor A (wspólny dla wszystkich graczy,
+podłączony do `Calendar.day_advanced`) — ten sam dzień = ten sam kurs,
+niezależnie który gracz akurat stawia zakład, zgodnie z tą samą zasadą co
+ceny na Giełdzie/Rynku.
+
 ### 4.5 Dom aukcyjny
 Najbardziej "grafozależny" ekran. Prezentacja obrazu (w pełnej krasie, na
 sztaludze) i licytacja w czasie rzeczywistym z paskiem czasu (limit 20 s na

@@ -7,14 +7,16 @@ extends Control
 ## nieskończenie wiele zakładów w obrębie jednej tury. Players.last_race_day/
 ## days_since_last_race (Tor B, WŁASNY czas aktywnego gracza) pilnują tego
 ## per gracz, patrz komentarz tam.
-
-const HORSES := [
-	{"name": "Komet", "odds": 2.0, "image": "res://art/horses/komet.jpg"},
-	{"name": "Grom", "odds": 3.5, "image": "res://art/horses/grom.jpg"},
-	{"name": "Cyklon", "odds": 5.0, "image": "res://art/horses/cyklon.jpg"},
-	{"name": "Błyskawica", "odds": 8.0, "image": "res://art/horses/blyskawica.jpg"},
-	{"name": "Wicher", "odds": 12.0, "image": "res://art/horses/wicher.jpg"},
-]
+##
+## Tożsamość koni (nazwa/portret) jest tu, ale KURSY już nie — zgłoszone przez
+## użytkownika: kursy mają dryfować jak ceny na Giełdzie/Rynku, nie być raz na
+## zawsze ustawioną stałą. Przeniesione do autoloadu Horses.gd (Tor A, wspólny
+## dla wszystkich graczy, podłączony do Calendar.day_advanced) — patrz
+## komentarz tam. horse_ids ustala STAŁĄ kolejność (Dictionary.keys() w
+## GDScript zachowuje kolejność wstawienia, ale trzymamy osobną kopię, żeby
+## indeks z horse_option.selected zawsze trafiał w ten sam koń, niezależnie
+## od tego, co się dzieje z Horses.HORSES).
+var horse_ids: Array[String] = []
 
 var horse_option: OptionButton
 var bet_spin: SpinBox
@@ -38,10 +40,16 @@ func _ready() -> void:
 	ScreenHelpers.make_title(root, "Wyścigi konne")
 	ScreenHelpers.make_turn_indicator(root)
 
+	horse_ids.assign(Horses.HORSES.keys())
+
 	## Portret konia (wgrany, docs/GRAFIKA_LEONARDO.md §5) obok kursu — po
 	## cichu bez obrazka, jeśli plik jeszcze nie istnieje, tak jak wszystkie
-	## opcjonalne grafiki w tej grze.
-	for horse in HORSES:
+	## opcjonalne grafiki w tej grze. Kurs czytany z Horses.current_odds PRZY
+	## BUDOWANIU ekranu — nie musi się odświeżać w trakcie stania na tym
+	## ekranie, bo Kalendarz i tak przesuwa się tylko przy akcjach na innych
+	## ekranach (Koniec tury/podróż/Szkoła sztuki).
+	for horse_id in horse_ids:
+		var horse: Dictionary = Horses.HORSES[horse_id]
 		var row := HBoxContainer.new()
 		row.alignment = BoxContainer.ALIGNMENT_CENTER
 		row.add_theme_constant_override("separation", 10)
@@ -58,7 +66,7 @@ func _ready() -> void:
 		row.add_child(portrait)
 
 		var label := Label.new()
-		label.text = tr("%s — kurs ×%.1f") % [horse["name"], horse["odds"]]
+		label.text = tr("%s — kurs ×%.1f") % [horse["name"], Horses.get_odds(horse_id)]
 		label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
 		label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
 		row.add_child(label)
@@ -69,8 +77,8 @@ func _ready() -> void:
 
 	horse_option = OptionButton.new()
 	horse_option.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
-	for horse in HORSES:
-		horse_option.add_item(horse["name"])
+	for horse_id in horse_ids:
+		horse_option.add_item(Horses.HORSES[horse_id]["name"])
 	bet_row.add_child(horse_option)
 
 	bet_spin = SpinBox.new()
@@ -100,8 +108,8 @@ func _ready() -> void:
 func _pick_winner_index() -> int:
 	var weights: Array[float] = []
 	var total_weight := 0.0
-	for horse in HORSES:
-		var weight: float = 1.0 / horse["odds"]
+	for horse_id in horse_ids:
+		var weight: float = 1.0 / Horses.get_odds(horse_id)
 		weights.append(weight)
 		total_weight += weight
 
@@ -128,10 +136,11 @@ func _on_bet_pressed() -> void:
 
 	var chosen_index := horse_option.selected
 	var winner_index := _pick_winner_index()
-	var winner: Dictionary = HORSES[winner_index]
+	var winner_id: String = horse_ids[winner_index]
+	var winner: Dictionary = Horses.HORSES[winner_id]
 
 	if winner_index == chosen_index:
-		var payout: float = bet * HORSES[chosen_index]["odds"]
+		var payout: float = bet * Horses.get_odds(horse_ids[chosen_index])
 		Economy.earn(payout)
 		result_label.text = tr("Wygrywa %s! Wygrana: %.0f M") % [winner["name"], payout]
 	else:

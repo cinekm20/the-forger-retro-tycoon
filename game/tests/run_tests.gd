@@ -57,6 +57,8 @@ func _ready() -> void:
 	_test_price_history_for_charts()
 	_test_players_days_diverge()
 	_test_races_cooldown_between_bets()
+	_test_horses_odds_drift_and_bounds()
+	_test_horses_odds_shared_by_day()
 	_test_shared_price_by_day()
 	_test_catching_up_player_does_not_double_world_drift()
 	_test_catching_up_player_gets_full_personal_consequences()
@@ -857,6 +859,50 @@ func _test_races_cooldown_between_bets() -> void:
 
 	Players.advance_active_player_time(Players.DAYS_PER_TURN - 3)
 	_assert(Players.days_since_last_race() >= Players.DAYS_PER_TURN, "po pełnym DAYS_PER_TURN limit minął, kolejny zakład znów możliwy")
+
+
+## Zgłoszone przez użytkownika: kursy koni mają dryfować jak ceny na Giełdzie/
+## Rynku, nie być raz na zawsze ustawioną stałą (Horses.gd, ten sam wzorzec
+## dryfu co ShippingCompanies.gd). Sprawdzamy dwie rzeczy naraz: że kurs
+## faktycznie się zmienia po wielu skokach dni (nie stoi w miejscu), i że
+## MIN_ODDS/MAX_ODDS trzymają go w rozsądnych granicach mimo wielu powtórzeń
+## losowego dryfu (bez tego kurs mógłby "uciec" do zera i rozwalić wagę
+## 1.0/odds w Races._pick_winner_index, albo wystrzelić do absurdu).
+func _test_horses_odds_drift_and_bounds() -> void:
+	print("-- Horses: kurs dryfuje dziennie i trzyma się w granicach MIN/MAX_ODDS --")
+	Calendar.reset_new_game()
+	Horses.reset_new_game()
+
+	var starting_odds := Horses.get_odds("komet")
+	var changed_at_least_once := false
+	for i in 200:
+		Calendar.advance_days(7)
+		var odds := Horses.get_odds("komet")
+		_assert(odds >= Horses.MIN_ODDS and odds <= Horses.MAX_ODDS, "kurs Komet w granicach [MIN_ODDS, MAX_ODDS] (iteracja %d)" % i)
+		if not is_equal_approx(odds, starting_odds):
+			changed_at_least_once = true
+	_assert(changed_at_least_once, "kurs Komet faktycznie dryfuje po wielu skokach dni, nie stoi w miejscu")
+
+
+## Zgłoszone przez użytkownika: kursy koni mają być WSPÓLNE — ten sam dzień =
+## ten sam kurs, niezależnie który gracz akurat stawia zakład (Horses.gd to
+## Tor A, podłączony do Calendar.day_advanced, nie do per-gracz
+## Players.advance_active_player_time — ten sam wzorzec co
+## _test_shared_price_by_day niżej dla Crops/ShippingCompanies).
+func _test_horses_odds_shared_by_day() -> void:
+	print("-- Horses: ten sam dzień = ten sam kurs, niezależnie kto dotarł pierwszy --")
+	Calendar.reset_new_game()
+	Players.reset_new_game(2)
+	Horses.reset_new_game()
+
+	Players.advance_active_player_time(15)  # gracz 1 pcha świat do dnia 15
+	var odds_after_player_1 := Horses.get_odds("wicher")
+
+	Players.pass_turn_to_earliest_player()
+	_assert(Players.active_index == 1, "gracz 2 (dzień 0, najwcześniejsza data) dostaje ruch")
+	Players.advance_active_player_time(15)  # gracz 2 dogania do dnia 15 — już zasymulowanego
+
+	_assert(is_equal_approx(Horses.get_odds("wicher"), odds_after_player_1), "gracz 2, docierając do TEGO SAMEGO dnia, widzi ten sam kurs Wicher")
 
 
 ## Zgłoszone przez użytkownika: ceny na Giełdzie/Rynku mają być WSPÓLNE — ten

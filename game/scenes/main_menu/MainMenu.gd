@@ -280,6 +280,7 @@ func _on_start_confirmed() -> void:
 	Paintings.reset_new_game(easy_mode_check.button_pressed)
 	Auctions.reset_new_game()
 	ShippingCompanies.reset_new_game()
+	Horses.reset_new_game()
 	ForwardContracts.reset_new_game()
 	YearlyReport.reset_new_game()
 	WorldEvents.reset_new_game()

@@ -21,6 +21,7 @@ func save_game() -> void:
 		"shipping_prices": ShippingCompanies.stock_price,
 		"shipping_shares": ShippingCompanies.shares_owned,
 		"shipping_price_history": ShippingCompanies.price_history,
+		"horse_odds": Horses.current_odds,
 		"plantations": PlayerPlantations.plantations,
 		"city_grids": PlayerPlantations.city_grids,
 		"crop_prices": Crops.market_price,
@@ -74,6 +75,14 @@ func load_game() -> void:
 	for company_id in ShippingCompanies.COMPANIES.keys():
 		default_shipping_history[company_id] = [ShippingCompanies.get_price(company_id)]
 	ShippingCompanies.price_history = data.get("shipping_price_history", default_shipping_history)
+	## Zapisy sprzed dodania dryfującego kursu koni nie mają "horse_odds" —
+	## brakujące/nierozpoznane konie (np. stary zapis z inną listą) spadają
+	## do Horses.STARTING_ODDS per koń.
+	var loaded_horse_odds: Dictionary = data.get("horse_odds", {})
+	for horse_id in Horses.HORSES.keys():
+		if not loaded_horse_odds.has(horse_id):
+			loaded_horse_odds[horse_id] = Horses.STARTING_ODDS.get(horse_id, 1.0)
+	Horses.current_odds = loaded_horse_odds
 	var loaded_plantations: Array = data.get("plantations", [])
 	PlayerPlantations.plantations.assign(loaded_plantations)
 	## Zapisy sprzed wspólnej siatki miast (city_grids) nie mają tego klucza —
