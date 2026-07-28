@@ -43,6 +43,13 @@ const MAX_ZOOM := 2.5
 ## zoomie zamieniłoby je w nieczytelne plamy).
 const PIN_ZOOM_DAMPING := 0.35
 const WHEEL_ZOOM_STEP := 0.15  ## na jedno kliknięcie kółka myszy (test/desktop)
+## Zgłoszenie użytkownika: kliknięcie "Jedź »" w trakcie przybliżenia
+## przeskakiwało od razu na "standardową mapę" (czyli na nowo załadowaną
+## scenę TravelAnimation, zawsze w zoomie 1.0) — wyglądało jak nagłe
+## szarpnięcie. Zamiast tego mapa NAJPIERW płynnie oddala się z powrotem do
+## normalnego rozmiaru (patrz _on_confirm_pressed), DOPIERO PO tej animacji
+## rusza scena przelotu/przejazdu.
+const ZOOM_RESET_DURATION := 0.35
 
 var info_label: Label
 var confirm_button: Button
@@ -311,8 +318,27 @@ func _on_pin_selected(city_id: String) -> void:
 
 
 func _on_confirm_pressed() -> void:
-	if selected_city != "" and Travel.start_travel(selected_city):
+	if selected_city == "" or not Travel.start_travel(selected_city):
+		return
+
+	## Zabezpieczenie przed drugim kliknięciem w trakcie animacji oddalania
+	## (Travel.start_travel już ruszyło podróż — druga próba byłaby błędna).
+	confirm_button.disabled = true
+	cancel_button.disabled = true
+
+	if zoom <= MIN_ZOOM:
 		SceneRouter.goto_scene(SceneRouter.TRAVEL_ANIMATION)
+		return
+
+	## Płynny powrót do zoom=1.0 (ognisko na środku ekranu, nie tam, gdzie
+	## akurat kliknięto pinezkę) PRZED przejściem do sceny przelotu/przejazdu
+	## — patrz komentarz przy ZOOM_RESET_DURATION. _apply_zoom robi całą
+	## resztę (klamrowanie pozycji + skalowanie pinezek) na każdej klatce
+	## tweena, tak jak przy zwykłym zoomowaniu gestem.
+	var focal := map_viewport.size * 0.5
+	var tween := create_tween()
+	tween.tween_method(func(z: float): _apply_zoom(z, focal), zoom, MIN_ZOOM, ZOOM_RESET_DURATION)
+	tween.tween_callback(func(): SceneRouter.goto_scene(SceneRouter.TRAVEL_ANIMATION))
 
 
 func _on_cancel_pressed() -> void:
