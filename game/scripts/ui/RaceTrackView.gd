@@ -418,11 +418,20 @@ func skip() -> void:
 ## (w prawo, nie w lewo jak poprzednio) — + zamiast - w formule fposmod,
 ## reszta wzoru (standardowy trik na nieskończone przewijanie bez utraty
 ## ciągłości na krawędzi) bez zmian.
+##
+## Zgłoszenie użytkownika: kafelek na lewej krawędzi potrafił "wyskoczyć"
+## od razu w całości zamiast wjechać płynnie zza ekranu — fposmod() sam w
+## sobie ZAWSZE zawija wynik do [0, total_width), a 0 to lewa krawędź
+## ekranu, więc moment zawinięcia (teleport z dalekiego prawego offscreenu
+## na x=0) wypadał na widoku. Odjęcie jednego pattern_width przesuwa ten
+## moment zawinięcia o cały kafelek w lewo (na x=-pattern_width), czyli
+## poza ekran — od tej chwili kafelek wjeżdża płynnie od lewej zamiast
+## pojawiać się nagle w całości.
 func _update_banner_positions() -> void:
 	var pattern_width := banner_card_width + BANNER_GAP
 	var total_width := pattern_width * banner_cards.size()
 	for i in banner_cards.size():
-		var x := fposmod(i * pattern_width + banner_scroll_x, total_width)
+		var x := fposmod(i * pattern_width + banner_scroll_x, total_width) - pattern_width
 		banner_cards[i].position.x = x
 		banner_labels[i].position.x = x
 
@@ -430,7 +439,7 @@ func _update_banner_positions() -> void:
 func _update_ground_positions() -> void:
 	var total_width := ground_tile_width * ground_tiles.size()
 	for i in ground_tiles.size():
-		ground_tiles[i].position.x = fposmod(i * ground_tile_width + ground_scroll_x, total_width)
+		ground_tiles[i].position.x = fposmod(i * ground_tile_width + ground_scroll_x, total_width) - ground_tile_width
 
 
 ## Linia startu "odlatuje" w prawo i znika za ekranem zaraz po starcie;
