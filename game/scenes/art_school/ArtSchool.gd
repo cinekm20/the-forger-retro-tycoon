@@ -104,6 +104,14 @@ func _ready() -> void:
 
 
 func _on_train_pressed() -> void:
+	## Zgłoszenie użytkownika: przy 90% (Paintings.MAX_EXPERTISE) kurs i tak
+	## nie dawał już nic więcej (increase_expertise samo się ucina), ale
+	## gracz płacił za niego TRAINING_COST/dni bez żadnego efektu — myślał,
+	## że to błąd. Teraz kurs w ogóle się nie zaczyna (żadnej opłaty/dni),
+	## a przycisk jest disabled (patrz _update_info) z czytelnym komunikatem
+	## zamiast cichego "nic się nie stało".
+	if Paintings.expertise >= Paintings.MAX_EXPERTISE:
+		return
 	if not Economy.spend(TRAINING_COST):
 		money_date_label.text = tr("Za mało gotówki na kurs.")
 		return
@@ -219,5 +227,12 @@ func _end_course_turn() -> void:
 
 func _update_info() -> void:
 	money_date_label.text = tr("Gotówka: %.0f M | Data: %s") % [Economy.player_money, Calendar.format_day(Players.active_day())]
-	expertise_label.text = tr("Eksperckość: %.0f%%") % [Paintings.expertise * 100.0]
+
+	var at_max := Paintings.expertise >= Paintings.MAX_EXPERTISE
+	expertise_label.text = tr("Eksperckość: %.0f%%") % [Paintings.expertise * 100.0] + (tr(" (maksimum)") if at_max else "")
 	expertise_puzzle.set_progress(Paintings.expertise)
+
+	## Zgłoszenie użytkownika: patrz komentarz w _on_train_pressed — przycisk
+	## disabled, żeby od razu było widać, że dalsze kursy już nic nie dadzą,
+	## zamiast pozwalać płacić za nie w nieskończoność.
+	course_button.disabled = at_max
