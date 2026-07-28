@@ -10,6 +10,8 @@ config/description="Ekonomiczna gra strategiczna inspirowana grą Vermeer (Ariol
 run/main_scene="res://scenes/main_menu/MainMenu.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://art/icons/app_icon.jpg"
+run/low_processor_mode=true
+run/max_fps=60
 
 [autoload]
 
