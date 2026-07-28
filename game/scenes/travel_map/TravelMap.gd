@@ -131,6 +131,20 @@ func _build_map(background_path: String) -> void:
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	map_content.add_child(bg)
 
+	## Zgłoszony bug: "skacze jasność przy mapie" — ten ekran budował tło
+	## RĘCZNIE (zamiast przez ScreenHelpers.make_background, żeby dać mu
+	## rodzica map_content zamiast `self`), więc po drodze zgubił ciemniącą
+	## nakładkę (alpha 0.45), którą make_background zawsze dokłada. Bez niej
+	## ta mapa była JAŚNIEJSZA niż podgląd mapy w Hub.gd (który TĘ nakładkę
+	## ma) — stąd widoczny skok jasności przy przełączeniu scen. Dziecko
+	## map_content, więc przyciemnia dokładnie widoczny (zoomowany/przesunięty)
+	## fragment mapy, nie cały ekran.
+	var overlay := ColorRect.new()
+	overlay.color = Color(0, 0, 0, 0.45)
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	map_content.add_child(overlay)
+
 
 ## Pinezki NIE dostają jednorazowo wyliczonej pozycji w pikselach (`position =
 ## frac * get_viewport_rect().size`, tak było wcześniej) — to liczy się raz,
