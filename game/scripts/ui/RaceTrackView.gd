@@ -50,8 +50,7 @@ const BANNER_CARD_WIDTH := 200.0
 const BANNER_GAP := 24.0
 const BANNER_SCROLL_SPEED := 90.0  ## px/s
 
-const GROUND_DASH_WIDTH := 10.0
-const GROUND_DASH_GAP := 50.0
+const GRASS_TEXTURE_PATH := "res://art/backgrounds/race_grass.png"
 const GROUND_SCROLL_SPEED := 160.0  ## szybciej niż banery = wrażenie głębi (paralaksa)
 
 const LINE_WIDTH := 16.0
@@ -83,7 +82,8 @@ var crossed: Array[bool] = []
 
 var banner_cards: Array[ColorRect] = []
 var banner_labels: Array[Label] = []
-var ground_dashes: Array[ColorRect] = []
+var ground_tiles: Array[TextureRect] = []
+var ground_tile_width: float = 0.0
 var horse_icons: Array[TextureRect] = []
 var place_labels: Array[Label] = []
 var start_line: Control
@@ -222,6 +222,10 @@ func _build_banner_strip() -> void:
 		banner_labels.append(label)
 
 
+## Przewijana trawa u dołu — kafelki grafiki (res://art/backgrounds/
+## race_grass.png, przezroczyste tło) zamiast dawnych ColorRect-ów. Szerokość
+## kafelka liczona z proporcji tekstury, żeby przy skalowaniu do GROUND_HEIGHT
+## trawa nie wyglądała na rozciągniętą.
 func _build_ground_strip() -> void:
 	var strip := Control.new()
 	strip.position = Vector2(0.0, view_size.y - GROUND_HEIGHT)
@@ -237,16 +241,19 @@ func _build_ground_strip() -> void:
 	strip_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	strip.add_child(strip_bg)
 
-	var pattern_width := GROUND_DASH_WIDTH + GROUND_DASH_GAP
-	var dash_count := int(ceil(view_size.x / pattern_width)) + 2
-	for i in dash_count:
-		var dash := ColorRect.new()
-		dash.color = Color(0.1, 0.22, 0.09)
-		dash.size = Vector2(GROUND_DASH_WIDTH, GROUND_HEIGHT * 0.6)
-		dash.position.y = GROUND_HEIGHT * 0.2
-		dash.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		strip.add_child(dash)
-		ground_dashes.append(dash)
+	var grass_tex: Texture2D = load(GRASS_TEXTURE_PATH)
+	ground_tile_width = GROUND_HEIGHT * (grass_tex.get_width() / float(grass_tex.get_height()))
+
+	var tile_count := int(ceil(view_size.x / ground_tile_width)) + 2
+	for i in tile_count:
+		var tile := TextureRect.new()
+		tile.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tile.stretch_mode = TextureRect.STRETCH_SCALE
+		tile.texture = grass_tex
+		tile.size = Vector2(ground_tile_width, GROUND_HEIGHT)
+		tile.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		strip.add_child(tile)
+		ground_tiles.append(tile)
 
 
 ## Linia startu — jednolita biała. Zgłoszenie użytkownika: konie startują na
@@ -385,10 +392,9 @@ func _update_banner_positions() -> void:
 
 
 func _update_ground_positions() -> void:
-	var pattern_width := GROUND_DASH_WIDTH + GROUND_DASH_GAP
-	var total_width := pattern_width * ground_dashes.size()
-	for i in ground_dashes.size():
-		ground_dashes[i].position.x = fposmod(i * pattern_width + ground_scroll_x, total_width)
+	var total_width := ground_tile_width * ground_tiles.size()
+	for i in ground_tiles.size():
+		ground_tiles[i].position.x = fposmod(i * ground_tile_width + ground_scroll_x, total_width)
 
 
 ## Linia startu "odlatuje" w prawo i znika za ekranem zaraz po starcie;
