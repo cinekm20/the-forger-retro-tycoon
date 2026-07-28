@@ -107,9 +107,17 @@ func _ready() -> void:
 		odds_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
 		card.add_child(odds_label)
 
+	## Zgłoszenie użytkownika: zakład (koń + kwota + przycisk) ma być "ładnie
+	## wyeksponowany" — TA SAMA ozdobna skrzynka Art Deco (złota ramka,
+	## MenuFrame) co przycisk powrotu/sekcje MainMenu.gd, zamiast gołego rzędu
+	## kontrolek luzem na tle. make_boxed_panel (nie make_boxed_row) — potrzeba
+	## DWÓCH wierszy (koń+kwota, potem przycisk pod spodem), a make_boxed_row
+	## daje tylko jeden HBoxContainer.
+	var bet_box: VBoxContainer = ScreenHelpers.make_boxed_panel(root)["content"]
+
 	var bet_row := HBoxContainer.new()
 	bet_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	root.add_child(bet_row)
+	bet_box.add_child(bet_row)
 
 	horse_option = OptionButton.new()
 	horse_option.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
@@ -125,7 +133,7 @@ func _ready() -> void:
 	bet_spin.value = 500
 	bet_row.add_child(bet_spin)
 
-	bet_button = ScreenHelpers.make_button(root, "Postaw zakład", _on_bet_pressed)
+	bet_button = ScreenHelpers.make_button(bet_box, "Postaw zakład", _on_bet_pressed)
 
 	result_label = ScreenHelpers.make_label(root, "")
 	cooldown_label = ScreenHelpers.make_label(root, "")
