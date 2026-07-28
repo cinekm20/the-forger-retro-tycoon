@@ -107,17 +107,23 @@ func _ready() -> void:
 		odds_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
 		card.add_child(odds_label)
 
+	result_label = ScreenHelpers.make_label(root, "")
+	cooldown_label = ScreenHelpers.make_label(root, "")
+	info_label = ScreenHelpers.make_label(root, "")
+
 	## Zgłoszenie użytkownika: zakład (koń + kwota + przycisk) ma być "ładnie
-	## wyeksponowany" — TA SAMA ozdobna skrzynka Art Deco (złota ramka,
-	## MenuFrame) co przycisk powrotu/sekcje MainMenu.gd, zamiast gołego rzędu
-	## kontrolek luzem na tle. make_boxed_panel (nie make_boxed_row) — potrzeba
-	## DWÓCH wierszy (koń+kwota, potem przycisk pod spodem), a make_boxed_row
-	## daje tylko jeden HBoxContainer.
-	var bet_box: VBoxContainer = ScreenHelpers.make_boxed_panel(root)["content"]
+	## wyeksponowany" i dołączony do TEJ SAMEJ skrzynki w prawym dolnym rogu
+	## co przycisk powrotu — jedna wspólna ozdobna ramka Art Deco (złota
+	## ramka, MenuFrame), nie osobna skrzynka w środku ekranu. TA SAMA
+	## make_root_bottom co boczny panel na TravelMap.gd/Hub.gd, ale tu
+	## dokładamy WŁASNE dzieci (bet_row, przycisk zakładu, przycisk powrotu)
+	## zamiast gotowego make_boxed_back_button (który tworzy swoją OSOBNĄ
+	## skrzynkę) — stąd surowe wywołania make_root_bottom/make_back_button.
+	var corner_box := ScreenHelpers.make_root_bottom(self, true)
 
 	var bet_row := HBoxContainer.new()
 	bet_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	bet_box.add_child(bet_row)
+	corner_box.add_child(bet_row)
 
 	horse_option = OptionButton.new()
 	horse_option.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
@@ -133,20 +139,12 @@ func _ready() -> void:
 	bet_spin.value = 500
 	bet_row.add_child(bet_spin)
 
-	bet_button = ScreenHelpers.make_button(bet_box, "Postaw zakład", _on_bet_pressed)
+	bet_button = ScreenHelpers.make_button(corner_box, "Postaw zakład", _on_bet_pressed)
 
-	result_label = ScreenHelpers.make_label(root, "")
-	cooldown_label = ScreenHelpers.make_label(root, "")
-	info_label = ScreenHelpers.make_label(root, "")
-
-	## Ozdobna skrzynka Art Deco w prawym dolnym rogu, TA SAMA co boczny
-	## panel na TravelMap.gd/Hub.gd — zgłoszone przez użytkownika: przycisk
-	## powrotu ma wyglądać tak samo na wszystkich ekranach (oprócz Plantacji).
-	## Zakotwiczona niezależnie od `root`, więc bez rozpychacza. Zmienna (nie
-	## lokalny wywołanie) — disabled na czas animacji wyścigu, patrz
-	## _on_bet_pressed/_on_race_finished, żeby nie dało się wyjść z ekranu w
-	## trakcie.
-	back_btn = ScreenHelpers.make_boxed_back_button(self)
+	## Zmienna (nie lokalny wywołanie) — disabled na czas animacji wyścigu,
+	## patrz _on_bet_pressed/_on_race_finished, żeby nie dało się wyjść z
+	## ekranu w trakcie.
+	back_btn = ScreenHelpers.make_back_button(corner_box)
 
 	_update_info()
 	_update_cooldown_status()
