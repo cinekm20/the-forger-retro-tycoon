@@ -63,7 +63,7 @@ func _ready() -> void:
 	## czytelności/dopasowania do rozdzielczości na żądanie użytkownika).
 	explanation_label = ScreenHelpers.make_label(
 		root,
-		tr("Eksperckość zwiększa szansę na wczesne ostrzeżenie o podróbce w Domu aukcyjnym (NIE wpływa na szacowaną wartość obrazu)"),
+		tr("Eksperckość zwiększa szansę na wczesne ostrzeżenie o podróbce w Domu aukcyjnym\n(NIE wpływa na szacowaną wartość obrazu)"),
 	)
 	explanation_label.add_theme_font_size_override("font_size", EXPLANATION_FONT_SIZE)
 	explanation_label.autowrap_mode = TextServer.AUTOWRAP_WORD
