@@ -19,12 +19,6 @@ const COLUMN_SEPARATION := 24.0
 ## Zgłoszone przez użytkownika: litery mają być większe (domyślne z
 ## ScreenHelpers.make_label to 19).
 const BODY_FONT_SIZE := 22
-## Miejsce zarezerwowane na górze na skrzynki narożne (lokalizacja/data po
-## lewej, gotówka po prawej — ScreenHelpers.make_corner_status_row w
-## _ready()) — bez tego marginesu siatka/kolumny (celowo liczone na CAŁĄ
-## wysokość ekranu, patrz komentarz w _ready) nachodziły nagłówkiem
-## "Legenda" wprost na skrzynkę z gotówką w prawym górnym rogu.
-const TOP_CORNER_MARGIN := 76.0
 
 var plantation_index: int = -1
 
@@ -50,19 +44,7 @@ func _ready() -> void:
 	## realizowały dokładnie ten wzorzec przypięcia do krawędzi, więc tu nie
 	## trzeba nic dodatkowo spinać na poziomie root — tylko poprawić liczenie
 	## rozmiaru siatki, bo zakładało DOKŁADNIE geometrię usuniętej ramki.
-	## Zgłoszenie użytkownika: gotówka MA być wyłącznie w skrzynce w prawym
-	## górnym rogu, dokładnie jak w Giełdzie/Rynku (ScreenHelpers.make_corner_status_row),
-	## zamiast pierwszego wiersza w info_label niżej.
-	var corner := ScreenHelpers.make_corner_status_row(self, "", "")
-	location_label = corner["left"]
-	money_label = corner["right"]
-
 	var root := ScreenHelpers.make_root(self, false)
-
-	var top_spacer := Control.new()
-	top_spacer.custom_minimum_size = Vector2(0, TOP_CORNER_MARGIN)
-	top_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(top_spacer)
 
 	var main_row := HBoxContainer.new()
 	main_row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -80,7 +62,7 @@ func _ready() -> void:
 	## odpowiadało geometrii ramki, która już nie istnieje.
 	var viewport_size := get_viewport_rect().size
 	var frame_content_width := viewport_size.x
-	var frame_content_height := viewport_size.y - TOP_CORNER_MARGIN
+	var frame_content_height := viewport_size.y
 
 	var grid_total_size := frame_content_height
 	cell_size = (
@@ -140,6 +122,11 @@ func _ready() -> void:
 	legend_column.add_theme_constant_override("separation", 6)
 	right_half.add_child(legend_column)
 
+	## Zgłoszenie użytkownika: lokalizacja/data NAD napisem "Plantacje"
+	## (nie osobna skrzynka w rogu ekranu jak na innych ekranach) — siatka MA
+	## być liczona na całą wysokość viewportu bez żadnych wyjątków, więc tu
+	## etykieta jest zwykłym elementem info_column, nie absolutnym overlayem.
+	location_label = ScreenHelpers.make_info_box(info_column, "")
 	ScreenHelpers.make_title(info_column, "Plantacje")
 	ScreenHelpers.make_turn_indicator(info_column)
 
@@ -238,6 +225,9 @@ func _ready() -> void:
 	## Twoje pole/sąsiedztwo rzeki to stałe, zawsze te same wpisy (patrz
 	## PlantationTileIcon.gd — kolor/kształt ikonki ma być czytelny sam z
 	## siebie, legenda tu tylko dopowiada, co dana ikonka oznacza).
+	## Zgłoszenie użytkownika: gotówka NAD napisem "Legenda", ta sama zasada
+	## co location_label nad "Plantacje" wyżej — bez naruszania wysokości siatki.
+	money_label = ScreenHelpers.make_info_box(legend_column, "")
 	ScreenHelpers.make_title(legend_column, "Legenda")
 	_add_legend_row(legend_column, PlantationTileIconScript.Kind.RIVER, "", false, tr("Rzeka"))
 	_add_legend_row(legend_column, PlantationTileIconScript.Kind.VACANT, "", false, tr("Wolne pole (do kupienia)"))
