@@ -206,13 +206,19 @@ func _on_send_gangster_pressed() -> void:
 	if not result["success"]:
 		outcome = "failure_caught" if result["caught"] else "failure_escaped"
 
+	## Zgłoszenie użytkownika: informacja o wyniku (w tym grzywna za złapanie)
+	## ma być widoczna w ramce PODCZAS animacji — komunikat liczony OD RAZU
+	## (wynik już ustalony) i przekazany do HeistView.setup(), a nie dopiero
+	## po jej zakończeniu.
+	var message := _format_gangster_result_message(result)
+
 	heist_view = HeistViewScript.new()
 	add_child(heist_view)
-	heist_view.finished.connect(_on_heist_finished.bind(result))
-	heist_view.setup(Gangsters.GANGSTERS[gangster_id]["image"], AIPlayers.get_portrait_path(rival_id), outcome, get_viewport_rect().size)
+	heist_view.finished.connect(_on_heist_finished.bind(result, message))
+	heist_view.setup(Gangsters.GANGSTERS[gangster_id]["image"], AIPlayers.get_portrait_path(rival_id), outcome, message, get_viewport_rect().size)
 
 
-func _on_heist_finished(result: Dictionary) -> void:
+func _on_heist_finished(result: Dictionary, message: String) -> void:
 	heist_view.queue_free()
 	heist_view = null
 	is_attacking = false
@@ -223,13 +229,15 @@ func _on_heist_finished(result: Dictionary) -> void:
 
 	Security.apply_gangster_result(result)
 	_update_rival_labels()
+	security_label.text = message
 
+
+func _format_gangster_result_message(result: Dictionary) -> String:
 	if result["success"]:
-		security_label.text = tr("Gangster wraca z obrazem!")
-	elif result["caught"]:
-		security_label.text = tr("Gangster złapany! Dodatkowa grzywna %.0f M.") % Security.CAUGHT_FINE
-	else:
-		security_label.text = tr("Gangster wraca z pustymi rękami — pieniądze przepadły.")
+		return tr("Gangster wraca z obrazem!")
+	if result["caught"]:
+		return tr("Gangster złapany! Dodatkowa grzywna %.0f M.") % Security.CAUGHT_FINE
+	return tr("Gangster wraca z pustymi rękami — pieniądze przepadły.")
 
 
 func _update_rival_labels() -> void:

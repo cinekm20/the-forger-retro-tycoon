@@ -28,7 +28,18 @@ extends Control
 
 signal finished
 
-const DURATION := 11.0
+## Zgłoszenie użytkownika: po złapaniu gangstera scena "zamarzała" (patrz
+## CAUGHT_T) i stała w miejscu aż do końca DURATION — bez ruchu na ekranie
+## wyglądało to jak zawieszona gra, trzeba było kliknąć "Pomiń", żeby wrócić.
+## Zamiast JEDNEGO DURATION dla wszystkich wyników, każdy outcome dostaje
+## WŁASNY, dopasowany do własnego kształtu animacji (patrz setup()) —
+## failure_caught kończy się krótko po zamarznięciu (krótki, czytelny
+## "hold", nie kilka sekund bezruchu), success/failure_escaped zostają
+## dłuższe, bo tam gangster porusza się przez CAŁY czas trwania animacji.
+const DURATION_SUCCESS := 9.0
+const DURATION_FAILURE_ESCAPED := 7.0
+const DURATION_FAILURE_CAUGHT := 4.0
+
 const EDGE_INSET := 110.0
 const GROUND_HEIGHT := 70.0
 const GANGSTER_ICON_SIZE := Vector2(72.0, 72.0)
@@ -54,6 +65,7 @@ var scene_height: float = 0.0
 
 var outcome: String = "failure_escaped"
 var turn_x: float = 0.0  ## dla failure_escaped/failure_caught: x, do którego gangster faktycznie dochodzi
+var duration: float = DURATION_FAILURE_ESCAPED  ## ustawiane w setup() wg outcome, patrz komentarz przy stałych DURATION_*
 
 var elapsed: float = 0.0
 
@@ -62,8 +74,9 @@ var target_icon: TextureRect
 var spotlight: ColorRect
 var tension_bar_bg: ColorRect
 var tension_bar_fill: ColorRect
-var caught_label: Label
-var success_label: Label
+var result_box: PanelContainer
+var result_label: Label
+var result_message: String = ""
 var skip_button: Button
 
 
@@ -72,9 +85,15 @@ func _ready() -> void:
 
 
 ## Wołane RAZ przez SecurityScreen.gd, zaraz po Security.resolve_gangster_attempt().
-func setup(gangster_image_path: String, target_portrait_path: String, result_outcome: String, viewport_size: Vector2) -> void:
+## message: GOTOWY, sformatowany tekst wyniku (z kwotą grzywny/wygranej —
+## SecurityScreen.gd zna te liczby, HeistView nie musi znać Security.CAUGHT_FINE
+## itp.) — zgłoszenie użytkownika: informacja o wyniku (w tym grzywna za
+## złapanie) ma być widoczna w ramce PODCZAS animacji, nie dopiero po jej
+## zakończeniu na ekranie za nią.
+func setup(gangster_image_path: String, target_portrait_path: String, result_outcome: String, message: String, viewport_size: Vector2) -> void:
 	view_size = viewport_size
 	outcome = result_outcome
+	result_message = message
 	start_x = EDGE_INSET
 	target_x = view_size.x - EDGE_INSET
 	scene_top = 0.0
@@ -84,15 +103,30 @@ func setup(gangster_image_path: String, target_portrait_path: String, result_out
 	match outcome:
 		"failure_caught":
 			turn_x = lerp(start_x, target_x, randf_range(CAUGHT_PROGRESS_RANGE.x, CAUGHT_PROGRESS_RANGE.y))
+			duration = DURATION_FAILURE_CAUGHT
 		"failure_escaped":
 			turn_x = lerp(start_x, target_x, randf_range(ESCAPE_PROGRESS_RANGE.x, ESCAPE_PROGRESS_RANGE.y))
+			duration = DURATION_FAILURE_ESCAPED
 		_:
 			turn_x = target_x
+			duration = DURATION_SUCCESS
 
 	_build_visuals(gangster_image_path, target_portrait_path)
 
 	elapsed = 0.0
 	set_process(true)
+
+
+## Chwila (ułamek t), w której wynik staje się jasny — od tego momentu
+## result_box zostaje widoczny aż do końca animacji, patrz _process.
+func _reveal_t() -> float:
+	match outcome:
+		"success":
+			return SUCCESS_REACH_T
+		"failure_caught":
+			return CAUGHT_T
+		_:
+			return FAIL_ESCAPE_TURN_T
 
 
 func _build_visuals(gangster_image_path: String, target_portrait_path: String) -> void:
@@ -167,27 +201,39 @@ func _build_visuals(gangster_image_path: String, target_portrait_path: String) -
 	tension_bar_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(tension_bar_fill)
 
-	caught_label = Label.new()
-	caught_label.text = tr("Złapany!")
-	caught_label.add_theme_font_size_override("font_size", 22)
-	caught_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
-	caught_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
-	caught_label.add_theme_constant_override("shadow_offset_x", 1)
-	caught_label.add_theme_constant_override("shadow_offset_y", 1)
-	caught_label.visible = false
-	caught_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(caught_label)
+	## Ramka Art Deco z wynikiem (w tym kwota grzywny/wygranej) — zgłoszenie
+	## użytkownika: informacja o wyniku (złapanie + grzywna, ucieczka bez
+	## łupu, sukces) ma być widoczna w ramce PODCZAS animacji, dla WSZYSTKICH
+	## trzech wyników jednakowo, nie tylko krótka etykieta przy gangsterze.
+	## Ten sam styl co ScreenHelpers.make_info_box (burgund + złota ramka),
+	## budowany ręcznie (nie przez ten helper) — HeistView to zwykły Control,
+	## nie Container, którego make_info_box/make_boxed_row wymagają.
+	var box_style := StyleBoxFlat.new()
+	box_style.bg_color = Color(ScreenHelpers.COLOR_BURGUNDY_DARK.r, ScreenHelpers.COLOR_BURGUNDY_DARK.g, ScreenHelpers.COLOR_BURGUNDY_DARK.b, 0.92)
+	box_style.border_color = ScreenHelpers.COLOR_GOLD
+	box_style.set_border_width_all(2)
+	box_style.set_corner_radius_all(4)
+	box_style.content_margin_left = 24
+	box_style.content_margin_right = 24
+	box_style.content_margin_top = 14
+	box_style.content_margin_bottom = 14
 
-	success_label = Label.new()
-	success_label.text = tr("Zdobyty!")
-	success_label.add_theme_font_size_override("font_size", 22)
-	success_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
-	success_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
-	success_label.add_theme_constant_override("shadow_offset_x", 1)
-	success_label.add_theme_constant_override("shadow_offset_y", 1)
-	success_label.visible = false
-	success_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(success_label)
+	result_box = PanelContainer.new()
+	result_box.add_theme_stylebox_override("panel", box_style)
+	result_box.custom_minimum_size = Vector2(560.0, 0.0)
+	result_box.position = Vector2(view_size.x * 0.5 - 280.0, 120.0)
+	result_box.visible = false
+	result_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(result_box)
+
+	result_label = Label.new()
+	result_label.text = result_message
+	result_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	result_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	result_label.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
+	result_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
+	result_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	result_box.add_child(result_label)
 
 	skip_button = Button.new()
 	skip_button.text = tr("Pomiń »")
@@ -200,9 +246,10 @@ func _build_visuals(gangster_image_path: String, target_portrait_path: String) -
 
 func _process(delta: float) -> void:
 	elapsed += delta
-	var t: float = clampf(elapsed / DURATION, 0.0, 1.0)
+	var t: float = clampf(elapsed / duration, 0.0, 1.0)
 	_update_gangster(t)
 	_update_spotlight(t)
+	result_box.visible = t >= _reveal_t()
 	if t >= 1.0:
 		set_process(false)
 		finished.emit()
@@ -214,7 +261,7 @@ func _process(delta: float) -> void:
 func skip() -> void:
 	if not is_processing():
 		return
-	elapsed = DURATION
+	elapsed = duration
 	_process(0.0)
 
 
@@ -251,13 +298,6 @@ func _update_gangster(t: float) -> void:
 
 	var frozen := (outcome == "failure_caught" and t >= CAUGHT_T) or (outcome == "success" and t >= SUCCESS_RETREAT_START)
 	gangster_icon.rotation = 0.0 if frozen else deg_to_rad(sin(t * 30.0) * 4.0)
-
-	if outcome == "failure_caught" and t >= CAUGHT_T:
-		caught_label.visible = true
-		caught_label.position = Vector2(x - 40.0, lane_y - GANGSTER_ICON_SIZE.y * 0.5 - 30.0)
-	if outcome == "success" and t >= SUCCESS_REACH_T and t < SUCCESS_RETREAT_START:
-		success_label.visible = true
-		success_label.position = Vector2(target_x - 40.0, lane_y - TARGET_ICON_SIZE.y * 0.5 - 30.0)
 
 
 ## Napięcie = jak blisko celu jest gangster w danej chwili (0 przy starcie,

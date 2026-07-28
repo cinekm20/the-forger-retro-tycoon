@@ -708,7 +708,7 @@ func _test_heist_view_outcome_matches_precomputed_result() -> void:
 	for outcome in ["success", "failure_caught", "failure_escaped"]:
 		var view: Control = HeistViewScript.new()
 		add_child(view)
-		view.setup("res://art/gangsters/vito.jpg", "res://art/characters/male_tophat.jpg", outcome, Vector2(1280.0, 720.0))
+		view.setup("res://art/gangsters/vito.jpg", "res://art/characters/male_tophat.jpg", outcome, "test", Vector2(1280.0, 720.0))
 
 		var final_x: float = view._gangster_x(1.0)
 		match outcome:
