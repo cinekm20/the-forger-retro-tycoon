@@ -274,10 +274,24 @@ przy pełnej, `Music.set_volume_offset` podbija głośność proporcjonalnie do
 się na złoto). ⏳ **Wciąż niezaimplementowane:** fizyczny układ
 gabloty/ściany tematycznej zamiast płaskiej listy etykiet X/5 na kategorię.
 
-Ten sam ekran hostuje też system **Ochrony/kradzieży**: gracz może zatrudnić
-ochroniarza (stały koszt, chroni przed okradzeniem) i wysłać "gangstera"
-przeciwko wybranemu rywalowi (ryzykowna próba osłabienia jego kolekcji) —
-patrz `docs/DODATKOWE_MECHANIKI.md`.
+Osobny ekran (Ochrona, `SecurityScreen.gd`, dostępny z Huba niezależnie od
+lokalizacji, tak jak Wyścigi konne) hostuje system **Ochrony/kradzieży**:
+gracz może zatrudnić ochroniarza (stały koszt, chroni przed okradzeniem) i
+wysłać gangstera przeciwko wybranemu rywalowi — patrz
+`docs/DODATKOWE_MECHANIKI.md`. ✅ **Zgłoszenie użytkownika — w pełni
+przerobione z gołego przycisku na animowaną scenę skoku**: prawdziwy roster
+3 wybieralnych gangsterów (`Gangsters.gd`, portret + nazwa), szansa
+powodzenia KAŻDEGO gangstera dryfuje dziennie w przedziale 20-50% (ten sam
+mechanizm co kursy koni w `Horses.gd`, Tor A — wspólny dla wszystkich
+graczy). Wybór gangstera + rywala uruchamia animowaną scenę skoku
+(`HeistView.gd`) — gangster skrada się w stronę portretu rywala, reflektor
+ochrony przemiata scenę, pasek napięcia rośnie w miarę zbliżania się do
+celu; wynik (sukces/ucieczka/złapanie) jest ustalony PRZED animacją
+(`Security.resolve_gangster_attempt()`), scena tylko go wizualizuje,
+dokładnie jak zwycięzca wyścigu w `RaceTrackView.gd`. Nieudana próba ma
+dodatkowo ~50% szans zakończyć się złapaniem WŁASNEGO gangstera — dodatkowa
+grzywna (`CAUGHT_FINE`) ponad utraconą opłatę za wysłanie, rywal zostaje
+bez zmian.
 
 ### 4.8 Noworoczna Loteria (Neujahrstombola)
 Coroczne wydarzenie, osobne od aukcji i giełdy — losowanie/loteria na przełomie

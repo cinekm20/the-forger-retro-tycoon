@@ -569,6 +569,34 @@ hair, pencil moustache, fine tailored suit with pocket square, bust portrait,
 game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
+**Gangsterzy do wynajęcia (Ochrona/SecurityScreen.gd)** — zgłoszenie
+użytkownika: "ataki na innych" mają dostać prawdziwy roster wybieralnych
+gangsterów (jak konie w wyścigach, patrz §5) zamiast gołego przycisku.
+Tożsamość (nazwa/portret) w `Gangsters.gd`, szansa powodzenia dryfuje
+dziennie 20-50% (ten sam wzorzec co kursy koni). Zapisz pod
+`game/art/gangsters/<id>.jpg`.
+
+| Gangster | Plik |
+|---|---|
+| Vito "Brzytwa" | `gangsters/vito.jpg` |
+| Rosa Cień | `gangsters/rosa.jpg` |
+| Karl Żelazna Ręka | `gangsters/karl.jpg` |
+
+**Vito "Brzytwa"** (`gangsters/vito.jpg`)
+```
+1920s gangster character portrait, male, sharp cynical stare, straight razor scar on cheek, fedora tilted low, dark pinstripe suit, bust portrait, game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Rosa Cień** (`gangsters/rosa.jpg`)
+```
+1920s gangster character portrait, female, sharp watchful eyes, dark bob haircut, black gloves, fitted dark coat with upturned collar, bust portrait, game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Karl Żelazna Ręka** (`gangsters/karl.jpg`)
+```
+1920s gangster character portrait, male, heavyset build, broken nose, brass knuckles visible, rolled-up sleeves, suspenders, bust portrait, game character icon, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
 **Prompt (rama):**
 
 ⚠ **Poprawione drugi raz** — pierwsza poprawka (cienki brzeg + duży pusty

@@ -21,6 +21,7 @@ var total: int = 0
 
 const RaceTrackScript := preload("res://scripts/ui/RaceTrackView.gd")
 const ExpertisePuzzleScript := preload("res://scripts/ui/ExpertisePuzzle.gd")
+const HeistViewScript := preload("res://scripts/ui/HeistView.gd")
 
 
 func _ready() -> void:
@@ -64,6 +65,10 @@ func _ready() -> void:
 	_test_horses_odds_shared_by_day()
 	_test_race_track_winner_finishes_first()
 	_test_expertise_puzzle_reveal_stable_and_monotonic()
+	_test_gangsters_chance_drift_and_bounds()
+	_test_gangsters_chance_shared_by_day()
+	_test_gangster_attempt_resolve_apply_consequences()
+	_test_heist_view_outcome_matches_precomputed_result()
 	_test_shared_price_by_day()
 	_test_catching_up_player_does_not_double_world_drift()
 	_test_catching_up_player_gets_full_personal_consequences()
@@ -586,6 +591,7 @@ func _test_security_bodyguard_and_gangster() -> void:
 	print("-- Security: ochroniarz i gangster (docs/DODATKOWE_MECHANIKI.md) --")
 	Economy.reset_new_game()
 	Security.reset_new_game()
+	Gangsters.reset_new_game()
 
 	_assert(not Security.has_bodyguard, "na starcie brak ochroniarza")
 	var cost_before := Economy.player_money
@@ -597,18 +603,122 @@ func _test_security_bodyguard_and_gangster() -> void:
 	AIPlayers.reset_new_game()
 	Paintings.reset_new_game()
 	var rival_id: String = AIPlayers.rivals[0]["id"]
+	var gangster_id: String = Gangsters.GANGSTERS.keys()[0]
 	AIPlayers.rivals[0]["paintings"] = [7]
 	Economy.player_money = 100000.0
 
+	## resolve_gangster_attempt() sam NIE dotyka ekonomii (patrz komentarz w
+	## Security.gd) — opłata symuluje to, co realnie robi SecurityScreen.gd
+	## PRZED zbudowaniem HeistView, dokładnie jak zakład w Races.gd.
 	var money_before_gangster := Economy.player_money
-	Security.send_gangster(rival_id)
-	_assert(Economy.player_money == money_before_gangster - Security.GANGSTER_COST, "opłata za gangstera pobrana niezależnie od wyniku")
+	Economy.spend(Security.GANGSTER_COST)
+	var result := Security.resolve_gangster_attempt(gangster_id, rival_id)
+	Security.apply_gangster_result(result)
+	_assert(Economy.player_money <= money_before_gangster - Security.GANGSTER_COST, "opłata za gangstera pobrana niezależnie od wyniku (plus ewentualna grzywna za złapanie)")
 
 	# Rywal bez obrazów -> próba musi się nie udać (nie ma czego ukraść).
 	AIPlayers.rivals[0]["paintings"] = []
-	Economy.player_money = 100000.0
-	var stolen := Security.send_gangster(rival_id)
-	_assert(not stolen, "gangster nie może ukraść obrazu, którego rywal nie posiada")
+	var result_empty := Security.resolve_gangster_attempt(gangster_id, rival_id)
+	_assert(not result_empty["success"], "gangster nie może ukraść obrazu, którego rywal nie posiada")
+
+
+## Zgłoszenie użytkownika: szansa powodzenia gangstera ma dryfować dziennie
+## (20-50%), tak samo jak kurs koni (Horses.gd) — ten sam wzorzec testu co
+## _test_horses_odds_drift_and_bounds.
+func _test_gangsters_chance_drift_and_bounds() -> void:
+	print("-- Gangsters: szansa powodzenia dryfuje dziennie i trzyma się w granicach MIN/MAX_CHANCE --")
+	Calendar.reset_new_game()
+	Gangsters.reset_new_game()
+
+	var gangster_id: String = Gangsters.GANGSTERS.keys()[0]
+	var starting_chance := Gangsters.get_success_chance(gangster_id)
+	var changed_at_least_once := false
+	for i in 200:
+		Calendar.advance_days(7)
+		var chance := Gangsters.get_success_chance(gangster_id)
+		_assert(chance >= Gangsters.MIN_CHANCE and chance <= Gangsters.MAX_CHANCE, "szansa w granicach [MIN_CHANCE, MAX_CHANCE] (iteracja %d)" % i)
+		if not is_equal_approx(chance, starting_chance):
+			changed_at_least_once = true
+	_assert(changed_at_least_once, "szansa faktycznie dryfuje po wielu skokach dni, nie stoi w miejscu")
+
+
+## Zgłoszenie użytkownika: szansa gangstera ma być WSPÓLNA — ten sam dzień =
+## ta sama szansa, niezależnie który gracz akurat wysyła gangstera (Tor A,
+## ten sam wzorzec co _test_horses_odds_shared_by_day).
+func _test_gangsters_chance_shared_by_day() -> void:
+	print("-- Gangsters: ten sam dzień = ta sama szansa, niezależnie kto dotarł pierwszy --")
+	Calendar.reset_new_game()
+	Players.reset_new_game(2)
+	Gangsters.reset_new_game()
+
+	var gangster_id: String = Gangsters.GANGSTERS.keys()[0]
+	Players.advance_active_player_time(15)  # gracz 1 pcha świat do dnia 15
+	var chance_after_player_1 := Gangsters.get_success_chance(gangster_id)
+
+	Players.pass_turn_to_earliest_player()
+	_assert(Players.active_index == 1, "gracz 2 (dzień 0, najwcześniejsza data) dostaje ruch")
+	Players.advance_active_player_time(15)  # gracz 2 dogania do dnia 15 — już zasymulowanego
+
+	_assert(is_equal_approx(Gangsters.get_success_chance(gangster_id), chance_after_player_1), "gracz 2, docierając do TEGO SAMEGO dnia, widzi tę samą szansę")
+
+
+## Zgłoszenie użytkownika: nieudana próba CZASEM oznacza złapanie własnego
+## gangstera (dodatkowa grzywna), sukces i złapanie nigdy nie idą w parze, a
+## apply_gangster_result() nalicza dokładnie jedną z trzech, wzajemnie
+## wykluczających się konsekwencji — powtarzane wiele razy (jak
+## _test_race_track_winner_finishes_first), żeby złapać ewentualny błąd
+## niezależnie od tego, który wynik akurat wypadnie.
+func _test_gangster_attempt_resolve_apply_consequences() -> void:
+	print("-- Security: resolve/apply gangstera - sukces/ucieczka/złapanie nigdy się nie mieszają --")
+	AIPlayers.reset_new_game()
+	var rival_id: String = AIPlayers.rivals[0]["id"]
+	var gangster_id: String = Gangsters.GANGSTERS.keys()[0]
+
+	for trial in 30:
+		Paintings.reset_new_game()
+		Economy.reset_new_game()
+		AIPlayers.rivals[0]["paintings"] = [7]
+
+		var result := Security.resolve_gangster_attempt(gangster_id, rival_id)
+		_assert(not (result["success"] and result["caught"]), "próba %d: sukces i złapanie nigdy naraz" % trial)
+
+		var money_before_apply := Economy.player_money
+		Security.apply_gangster_result(result)
+
+		if result["success"]:
+			_assert(result["stolen_number"] == 7, "próba %d: sukces - skradziony numer to obraz, który rywal faktycznie miał" % trial)
+			_assert(Paintings.catalogued_numbers.has(7), "próba %d: sukces - obraz trafia do katalogu gracza" % trial)
+			_assert(not AIPlayers.rivals[0]["paintings"].has(7), "próba %d: sukces - obraz znika z kolekcji rywala" % trial)
+			_assert(is_equal_approx(Economy.player_money, money_before_apply), "próba %d: sukces - apply nie nakłada dodatkowej opłaty" % trial)
+		elif result["caught"]:
+			_assert(is_equal_approx(Economy.player_money, money_before_apply - Security.CAUGHT_FINE), "próba %d: złapanie - dodatkowa grzywna CAUGHT_FINE" % trial)
+			_assert(Paintings.catalogued_numbers.is_empty(), "próba %d: złapanie - żaden obraz nie trafia do gracza" % trial)
+		else:
+			_assert(is_equal_approx(Economy.player_money, money_before_apply), "próba %d: ucieczka bez łupu - brak dodatkowej opłaty" % trial)
+			_assert(Paintings.catalogued_numbers.is_empty(), "próba %d: ucieczka bez łupu - żaden obraz nie trafia do gracza" % trial)
+
+
+## Zgłoszenie użytkownika: animowana scena skoku (HeistView.gd) ma TYLKO
+## wizualizować wynik ustalony PRZED animacją (dokładnie jak RaceTrackView) —
+## dla wszystkich trzech wyników sprawdzamy, że stan końcowy animacji (t=1)
+## faktycznie odpowiada przekazanemu outcome, niezależnie od losowego
+## przebiegu drogi.
+func _test_heist_view_outcome_matches_precomputed_result() -> void:
+	print("-- HeistView: stan końcowy animacji zawsze zgodny z przekazanym outcome --")
+	for outcome in ["success", "failure_caught", "failure_escaped"]:
+		var view: Control = HeistViewScript.new()
+		add_child(view)
+		view.setup("res://art/gangsters/vito.jpg", "res://art/characters/male_tophat.jpg", outcome, Vector2(1280.0, 720.0))
+
+		var final_x: float = view._gangster_x(1.0)
+		match outcome:
+			"success":
+				_assert(is_equal_approx(final_x, view.start_x - 60.0), "success: gangster kończy poza ekranem po stronie startu (ucieczka z łupem)")
+			"failure_caught":
+				_assert(is_equal_approx(final_x, view.turn_x), "failure_caught: gangster zamarza dokładnie na turn_x (miejscu złapania)")
+			_:
+				_assert(is_equal_approx(final_x, view.start_x - 60.0), "failure_escaped: gangster kończy poza ekranem po stronie startu (ucieczka bez łupu)")
+		view.queue_free()
 
 
 func _test_travel_vehicle_choice() -> void:

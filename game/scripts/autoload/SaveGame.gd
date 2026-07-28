@@ -22,6 +22,7 @@ func save_game() -> void:
 		"shipping_shares": ShippingCompanies.shares_owned,
 		"shipping_price_history": ShippingCompanies.price_history,
 		"horse_odds": Horses.current_odds,
+		"gangster_chance": Gangsters.current_chance,
 		"plantations": PlayerPlantations.plantations,
 		"city_grids": PlayerPlantations.city_grids,
 		"crop_prices": Crops.market_price,
@@ -83,6 +84,14 @@ func load_game() -> void:
 		if not loaded_horse_odds.has(horse_id):
 			loaded_horse_odds[horse_id] = Horses.STARTING_ODDS.get(horse_id, 1.0)
 	Horses.current_odds = loaded_horse_odds
+	## Zapisy sprzed dodania dryfującej szansy gangsterów — ten sam wzorzec co
+	## horse_odds wyżej, brakujący/nierozpoznany gangster spada do
+	## Gangsters.STARTING_CHANCE.
+	var loaded_gangster_chance: Dictionary = data.get("gangster_chance", {})
+	for gangster_id in Gangsters.GANGSTERS.keys():
+		if not loaded_gangster_chance.has(gangster_id):
+			loaded_gangster_chance[gangster_id] = Gangsters.STARTING_CHANCE.get(gangster_id, 0.3)
+	Gangsters.current_chance = loaded_gangster_chance
 	var loaded_plantations: Array = data.get("plantations", [])
 	PlayerPlantations.plantations.assign(loaded_plantations)
 	## Zapisy sprzed wspólnej siatki miast (city_grids) nie mają tego klucza —

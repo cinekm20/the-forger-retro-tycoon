@@ -81,9 +81,17 @@ oznaczone ✅/⬜ przy każdej pozycji, żeby nie trzeba było zgadywać.
 - ✅ **Kradzieże obrazów i ochrona (bodyguard)** — wbrew wcześniejszej
   klasyfikacji "post-MVP, nie rdzeń" w tym dokumencie, **to już pełny,
   wpięty system**: `Security.gd` (cotygodniowa szansa kradzieży, wynajęcie
-  ochroniarza, akcja "wyślij gangstera" przeciw wybranemu rywalowi), dostępny
-  z ekranu Galerii. Brak jedynie osobnej "wieży strażniczej" jako wizualnego
-  elementu — mechanicznie system działa w całości.
+  ochroniarza), na osobnym ekranie Ochrony (`SecurityScreen.gd`, dostępny z
+  Huba niezależnie od lokalizacji). ✅ **Zgłoszenie użytkownika — akcja
+  "wyślij gangstera" przerobiona z gołego przycisku na animowaną scenę
+  skoku**: roster 3 wybieralnych gangsterów (`Gangsters.gd`, portret +
+  nazwa), szansa powodzenia dryfuje dziennie 20-50% (Tor A, jak kursy koni w
+  `Horses.gd`). Wynik ustalony PRZED animacją (`Security.resolve_gangster_attempt`),
+  `HeistView.gd` tylko go wizualizuje (skradanie się, reflektor ochrony,
+  pasek napięcia). Nieudana próba ma ~50% szans skończyć się złapaniem
+  WŁASNEGO gangstera — dodatkowa grzywna (`CAUGHT_FINE`) ponad utraconą
+  opłatę, rywal bez zmian. Brak jedynie osobnej "wieży strażniczej" jako
+  stałego wizualnego elementu tła — mechanicznie system działa w całości.
 - ⬜ **Pompy wodne**: inwestycja podnosząca plon i chroniąca przed klęskami
   (susza/powódź) — wciąż niezaimplementowane, rozszerzenie mechaniki ryzyka
   pogodowego z GDD 4.2 (która sama w sobie też jeszcze nie istnieje, patrz
