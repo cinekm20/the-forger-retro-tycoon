@@ -225,6 +225,39 @@ wiersz 5 — pinezki są już rozwiązane natywnie w kodzie (`MapPin.gd`),
 Leonardo uparcie robiło pełne sceny zamiast wyizolowanych ikon. Zostawione
 tu tylko jako zapis, dlaczego zrezygnowaliśmy z tego assetu.
 
+### 2b. Mapa świata — wariant BEZ granic politycznych (⚠ przygotowane, jeszcze NIE zdecydowane, czy generujemy)
+
+Zgłoszenie użytkownika: jeden z graczy zwrócił uwagę, że w 1920 roku nie
+wszystkie dzisiejsze państwa istniały (Austro-Węgry, Imperium Osmańskie
+itd.), a obecny `hub_map.jpg` (prompt w §2 wyżej) rysuje granice
+WSPÓŁCZESNYCH państw — anachronizm dla gry osadzonej w 1918+. Zamiast
+rekonstruować historyczne granice z tamtej epoki (karkołomne dla
+generatora — model i tak nie zna dokładnego przebiegu granic z 1920 roku),
+prostsze i tańsze rozwiązanie: mapa BEZ ŻADNYCH granic politycznych w
+ogóle — sama sylwetka kontynentów/ocean, w stylu vintage plakatu
+podróżniczego. To całkowicie omija pytanie "czyje to granice", bo ich po
+prostu nie ma.
+
+Prompt to DOKŁADNIE ten sam, już działający tekst z §2 (te same wymagania
+co do kształtów kontynentów/jednego koloru lądu — TEGO nie zmieniamy,
+zadziałało), z jednym dopiskiem zabraniającym rysowania linii granic
+wewnątrz lądu:
+
+```
+Accurate, immediately recognizable stylized world map, Art Deco cartography, top-down flat vector board game map. All continents drawn with their real, geographically correct outlines and proportions, not abstract or fantasy shapes: North America (a single, mostly continuous landmass, not broken into scattered islands), a clearly visible unbroken Central American land bridge connecting down into South America, Europe (clearly separate from but attached to the Eurasian landmass, with recognizable Scandinavia, British Isles and Iberian peninsula), Africa (recognizable wide northern bulge narrowing to a southern tip), Asia including a clearly triangular Indian subcontinent peninsula and the Arabian peninsula, and Australia. Every single landmass on the map, with no exceptions, uses the exact same solid deep teal/turquoise fill color, and every ocean area uses the exact same warm sepia/gold color — no region of the map may use a different color scheme than the rest. Draw ONLY the outer coastline of each continent — no internal country borders, no state or province borders, no political subdivisions, no border lines of any kind drawn on top of a landmass, each continent is one single unbroken solid-color shape with nothing else on it. Gold coastline outlines (continent edges only), decorative compass rose, thin sepia trade-route lines, subtle paper grain texture, elegant geometric ornamentation, empty pin slots for cities, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, mobile game asset, clean silhouette, no photorealism
+```
+
+Do promptu negatywnego (oprócz standardowego z góry dokumentu i tego z §2
+wyżej) dopisz: `country borders, political borders, internal border
+lines, state boundaries, national boundaries, subdivided regions,
+striped or segmented landmass, country labels, text, flags`.
+
+⚠ **UWAGA — to jest kosztowna zmiana, jeszcze nie ustalone, czy robimy:**
+nowy obrazek to NOWE `hub_map.jpg`, więc dokładnie jak przy poprzedniej
+wymianie mapy — WSZYSTKIE 18 współrzędnych w `Cities.gd MAP_POSITION`
+trzeba by przekalibrować od nowa (stare pasują tylko do aktualnego
+obrazka). Nie generować/wgrywać, dopóki nie padnie wyraźne "tak, rób to".
+
 ### 2.1 Tła miast (lokacje na mapie — ~18 sztuk, patrz `MECHANIKI_EKONOMICZNE.md`)
 
 18 unikalnych, w pełni bespoke teł miast to dużo pracy ręcznej w Leonardo —
