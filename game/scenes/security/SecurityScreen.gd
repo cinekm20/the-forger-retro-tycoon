@@ -31,12 +31,6 @@ func _ready() -> void:
 	ScreenHelpers.make_turn_indicator(root)
 
 	security_label = ScreenHelpers.make_label(root, "")
-	var bodyguard_btn := ScreenHelpers.make_button(
-		root,
-		tr("Zatrudnij ochroniarza (%.0f M)") % Security.BODYGUARD_COST,
-		_on_hire_bodyguard_pressed,
-	)
-	bodyguard_btn.disabled = Security.has_bodyguard
 	_update_security_label()
 
 	ScreenHelpers.make_title(root, "Rywale")
@@ -54,11 +48,18 @@ func _ready() -> void:
 		gangster_btn.pressed.connect(_on_send_gangster_pressed.bind(rival["id"]))
 		rival_row.add_child(gangster_btn)
 
-	## Ozdobna skrzynka Art Deco w prawym dolnym rogu, TA SAMA co boczny
-	## panel na TravelMap.gd/Hub.gd — zgłoszone przez użytkownika: przycisk
-	## powrotu ma wyglądać tak samo na wszystkich ekranach (oprócz Plantacji).
-	## Zakotwiczona niezależnie od `root`, więc bez rozpychacza.
-	ScreenHelpers.make_boxed_back_button(self)
+	## Zgłoszenie użytkownika: "Zatrudnij ochroniarza" ma wylądować w tej
+	## samej skrzynce co przycisk powrotu — dokładnie jak zakład w Races.gd/
+	## kurs w ArtSchool.gd, dołączony do TEJ SAMEJ ozdobnej ramki Art Deco w
+	## prawym dolnym rogu, zamiast osobnego przycisku w środku ekranu.
+	var corner_box := ScreenHelpers.make_root_bottom(self, true)
+	var bodyguard_btn := ScreenHelpers.make_button(
+		corner_box,
+		tr("Zatrudnij ochroniarza (%.0f M)") % Security.BODYGUARD_COST,
+		_on_hire_bodyguard_pressed,
+	)
+	bodyguard_btn.disabled = Security.has_bodyguard
+	ScreenHelpers.make_back_button(corner_box)
 
 
 func _on_hire_bodyguard_pressed() -> void:
