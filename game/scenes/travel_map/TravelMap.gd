@@ -338,7 +338,12 @@ func _on_confirm_pressed() -> void:
 	var focal := map_viewport.size * 0.5
 	var tween := create_tween()
 	tween.tween_method(func(z: float): _apply_zoom(z, focal), zoom, MIN_ZOOM, ZOOM_RESET_DURATION)
-	tween.tween_callback(func(): SceneRouter.goto_scene(SceneRouter.TRAVEL_ANIMATION))
+	## goto_scene_crossfade (NIE goto_scene) — zgłoszony bug: "na sam koniec
+	## miga i dopiero się pokazuje" — change_scene_to_file samo z siebie daje
+	## jedną pustą klatkę w momencie przełączenia, TA SAMA przyczyna, dla
+	## której Hub.gd::_on_travel_pressed używa crossfade zamiast zwykłego
+	## goto_scene po swoim własnym zoom-oucie.
+	tween.tween_callback(func(): SceneRouter.goto_scene_crossfade(SceneRouter.TRAVEL_ANIMATION))
 
 
 func _on_cancel_pressed() -> void:
