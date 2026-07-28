@@ -47,12 +47,6 @@ func _ready() -> void:
 	info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	info_label.custom_minimum_size = Vector2(700, 110)
 
-	course_button = ScreenHelpers.make_button(
-		root,
-		tr("Kurs (%.0f M, %d dni)") % [TRAINING_COST, TRAINING_DAYS],
-		_on_train_pressed,
-	)
-
 	## Sekcja quizu — ukryta, dopóki nie wykupiony jest kurs. Podmienia się z
 	## info_label/course_button (patrz _start_quiz/_close_quiz), żeby ekran
 	## nie pokazywał obu naraz.
@@ -60,11 +54,19 @@ func _ready() -> void:
 	quiz_section.visible = false
 	root.add_child(quiz_section)
 
-	## Ozdobna skrzynka Art Deco w prawym dolnym rogu, TA SAMA co boczny
-	## panel na TravelMap.gd/Hub.gd — zgłoszone przez użytkownika: przycisk
-	## powrotu ma wyglądać tak samo na wszystkich ekranach (oprócz Plantacji).
-	## Zakotwiczona niezależnie od `root`, więc bez rozpychacza.
-	ScreenHelpers.make_boxed_back_button(self)
+	## Zgłoszenie użytkownika: przycisk startu kursu ma "wylądować" w tej
+	## samej skrzynce co przycisk powrotu — dokładnie jak zakład w Races.gd,
+	## dołączony do TEJ SAMEJ ozdobnej ramki Art Deco w prawym dolnym rogu,
+	## zamiast osobnego przycisku w środku ekranu. Widoczność course_button
+	## nadal przełącza się niezależnie od tego, gdzie w drzewie węzłów
+	## siedzi (patrz _start_quiz/_close_quiz) — to zwykła właściwość Control.
+	var corner_box := ScreenHelpers.make_root_bottom(self, true)
+	course_button = ScreenHelpers.make_button(
+		corner_box,
+		tr("Kurs (%.0f M, %d dni)") % [TRAINING_COST, TRAINING_DAYS],
+		_on_train_pressed,
+	)
+	ScreenHelpers.make_back_button(corner_box)
 	_update_info()
 
 
