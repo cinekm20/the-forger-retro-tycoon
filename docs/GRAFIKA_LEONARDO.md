@@ -488,6 +488,12 @@ Vintage newspaper front page illustration, huge bold Art Deco masthead headline 
 1920s horse racetrack, grandstands with spectators (silhouettes), starting
 gate, side-view racing background for 2D game, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
+
+**Prompt (tło paska reklamowego nad torem — BEZ tekstu, nazwy reklam są
+renderowane w kodzie jako osobne etykiety nad tą planszą):**
+```
+1920s racetrack advertising hoarding board, empty wooden billboard panel background for game UI overlay text, ornate Art Deco geometric border frame, no text or lettering, seamless horizontally tileable pattern, side-view flat background asset for 2D game, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
 **Prompty (6 koni + dżokejów, różne barwy jeźdźców, gotowe do wklejenia):**
 
 **Czerwone jedwabie**
