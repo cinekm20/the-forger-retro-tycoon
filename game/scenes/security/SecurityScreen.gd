@@ -118,13 +118,16 @@ func _ready() -> void:
 		rival_count_labels.append(rival_label)
 	_update_rival_labels()
 
-	## Zgłoszenie użytkownika: "Zatrudnij ochroniarza" i "Wyślij gangstera"
-	## mają wylądować w TEJ SAMEJ skrzynce co przycisk powrotu — dokładnie
-	## jak zakład w Races.gd/kurs w ArtSchool.gd.
-	var corner_box := ScreenHelpers.make_root_bottom(self, true)
+	## Zgłoszenie użytkownika: skrzynka "Zatrudnij ochroniarza"/"Wyślij
+	## gangstera" w tym samym rogu co przycisk powrotu zasłaniała liczbę
+	## obrazów rywali (rival_count_labels, wiersz "Rywale" wyżej) — DWIE
+	## oddzielne skrzynki zamiast jednej: standardowy boxed_back_button po
+	## PRAWEJ (tak jak na innych ekranach), akcje ochrony/ataku w osobnej
+	## skrzynce po LEWEJ na dole.
+	var left_box := ScreenHelpers.make_root_bottom(self, true, 420.0, false)
 
 	var bodyguard_btn := ScreenHelpers.make_button(
-		corner_box,
+		left_box,
 		tr("Zatrudnij ochroniarza (%.0f M)") % Security.BODYGUARD_COST,
 		_on_hire_bodyguard_pressed,
 	)
@@ -132,7 +135,7 @@ func _ready() -> void:
 
 	var attack_row := HBoxContainer.new()
 	attack_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	corner_box.add_child(attack_row)
+	left_box.add_child(attack_row)
 
 	gangster_option = OptionButton.new()
 	gangster_option.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
@@ -147,15 +150,14 @@ func _ready() -> void:
 	attack_row.add_child(rival_option)
 
 	## send_btn W TYM SAMYM rzędzie co dropdowny (nie osobny wiersz pod
-	## spodem) — jedna kontrolka mniej w pionie w corner_box, patrz komentarz
-	## przy "Gangsterzy" wyżej o nachodzeniu na treść ekranu.
+	## spodem) — jedna kontrolka mniej w pionie w left_box.
 	send_btn = ScreenHelpers.make_button(
 		attack_row,
 		tr("Wyślij gangstera (%.0f M)") % Security.GANGSTER_COST,
 		_on_send_gangster_pressed,
 	)
 
-	back_btn = ScreenHelpers.make_back_button(corner_box)
+	back_btn = ScreenHelpers.make_boxed_back_button(self)
 
 
 ## Nagłówek śródekranowy MNIEJSZY niż make_title (38px) — używany dla
