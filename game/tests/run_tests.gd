@@ -20,6 +20,7 @@ var failures: int = 0
 var total: int = 0
 
 const RaceTrackScript := preload("res://scripts/ui/RaceTrackView.gd")
+const ExpertisePuzzleScript := preload("res://scripts/ui/ExpertisePuzzle.gd")
 
 
 func _ready() -> void:
@@ -62,6 +63,7 @@ func _ready() -> void:
 	_test_horses_odds_drift_and_bounds()
 	_test_horses_odds_shared_by_day()
 	_test_race_track_winner_finishes_first()
+	_test_expertise_puzzle_reveal_stable_and_monotonic()
 	_test_shared_price_by_day()
 	_test_catching_up_player_does_not_double_world_drift()
 	_test_catching_up_player_gets_full_personal_consequences()
@@ -939,6 +941,41 @@ func _test_race_track_winner_finishes_first() -> void:
 		_assert(view.places[winner_idx] == 1, "próba %d: zwycięzca (koń %d) ma dokładnie miejsce 1." % [trial, winner_idx])
 		_assert(is_equal_approx(view._horse_x(winner_idx, 1.0), view.finish_x), "próba %d: zwycięzca stoi na mecie przy t=1" % trial)
 		view.queue_free()
+
+
+## Zgłoszone przez użytkownika: układanka eksperckości w Szkole sztuki ma
+## "randomowo się układać" — kolejność odkrywania kafelków jest przetasowana
+## (nie rząd po rzędzie), ale STAŁA (REVEAL_SEED w ExpertisePuzzle.gd), więc
+## dwie osobne instancje muszą dać dokładnie ten sam reveal_rank. Dodatkowo
+## set_progress musi być monotoniczne: więcej odkrytych kafelków przy wyższym
+## fraction, nigdy mniej, i dokładnie GRID*GRID przy fraction=1.0.
+func _test_expertise_puzzle_reveal_stable_and_monotonic() -> void:
+	print("-- ExpertisePuzzle: stały (powtarzalny) losowy układ + monotoniczne odkrywanie kafelków --")
+	var view_a: Control = ExpertisePuzzleScript.new()
+	add_child(view_a)
+	view_a.setup("res://art/art_school/expertise_puzzle.jpg", Vector2(240, 240))
+
+	var view_b: Control = ExpertisePuzzleScript.new()
+	add_child(view_b)
+	view_b.setup("res://art/art_school/expertise_puzzle.jpg", Vector2(240, 240))
+
+	_assert(view_a.reveal_rank == view_b.reveal_rank, "dwie instancje mają identyczny reveal_rank (stały seed)")
+
+	var total: int = view_a.GRID * view_a.GRID
+	var previous_count := -1
+	for step in total + 1:
+		var fraction: float = float(step) / float(total)
+		view_a.set_progress(fraction)
+		var revealed_count := 0
+		for tile in view_a.tiles:
+			if tile.visible:
+				revealed_count += 1
+		_assert(revealed_count >= previous_count, "krok %d: liczba odkrytych kafelków nie maleje (%d -> %d)" % [step, previous_count, revealed_count])
+		_assert(revealed_count == step, "krok %d: dokładnie %d/%d kafelków odkrytych przy fraction=%.2f" % [step, step, total, fraction])
+		previous_count = revealed_count
+
+	view_a.queue_free()
+	view_b.queue_free()
 
 
 ## Zgłoszone przez użytkownika: ceny na Giełdzie/Rynku mają być WSPÓLNE — ten

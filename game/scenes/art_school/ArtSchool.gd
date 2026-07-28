@@ -16,11 +16,23 @@ const EXPERTISE_GAIN_CORRECT := 0.15
 const EXPERTISE_GAIN_WRONG := 0.05
 const QUIZ_IMAGE_SIZE := 280.0
 
+const ExpertisePuzzleScript := preload("res://scripts/ui/ExpertisePuzzle.gd")
+const EXPERTISE_PUZZLE_IMAGE := "res://art/art_school/expertise_puzzle.jpg"
+const EXPERTISE_PUZZLE_SIZE := Vector2(240, 240)
+
 var info_label: Label
 var course_button: Button
 var quiz_section: VBoxContainer
 var quiz_result_label: Label
 var quiz_painting_number: int = -1
+
+## Zgłoszenie użytkownika: eksperckość ma się pokazywać jako układanka,
+## która "randomowo się układa" w miarę wzrostu procentów, zamiast (obok,
+## nie zamiast) gołej liczby w info_label — patrz ExpertisePuzzle.gd.
+## Typowana jako Control (nie ExpertisePuzzle) — ta sama konwencja co
+## race_track w Races.gd/shipping_chart w StockMarket.gd, wywołania
+## setup()/set_progress() i tak działają przez dynamiczne wiązanie GDScript.
+var expertise_puzzle: Control
 
 
 func _ready() -> void:
@@ -46,6 +58,10 @@ func _ready() -> void:
 	## gotówka/data), żeby przycisk poniżej nigdy się nie przesuwał.
 	info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	info_label.custom_minimum_size = Vector2(700, 110)
+
+	expertise_puzzle = ExpertisePuzzleScript.new()
+	expertise_puzzle.setup(EXPERTISE_PUZZLE_IMAGE, EXPERTISE_PUZZLE_SIZE)
+	root.add_child(expertise_puzzle)
 
 	## Sekcja quizu — ukryta, dopóki nie wykupiony jest kurs. Podmienia się z
 	## info_label/course_button (patrz _start_quiz/_close_quiz), żeby ekran
@@ -114,6 +130,7 @@ func _start_quiz() -> void:
 
 	course_button.visible = false
 	info_label.visible = false
+	expertise_puzzle.visible = false
 	quiz_section.visible = true
 
 
@@ -163,6 +180,7 @@ func _close_quiz() -> void:
 	quiz_section.visible = false
 	course_button.visible = true
 	info_label.visible = true
+	expertise_puzzle.visible = true
 	_end_course_turn()
 
 
@@ -185,3 +203,4 @@ func _update_info() -> void:
 	info_label.text = tr("Eksperckość: %.0f%% — zwiększa szansę na wczesne ostrzeżenie o podróbce w Domu aukcyjnym (NIE wpływa na szacowaną wartość obrazu)\nGotówka: %.0f M | Data: %s") % [
 		Paintings.expertise * 100.0, Economy.player_money, Calendar.format_day(Players.active_day()),
 	]
+	expertise_puzzle.set_progress(Paintings.expertise)

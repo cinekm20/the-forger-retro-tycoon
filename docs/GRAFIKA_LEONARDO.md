@@ -886,6 +886,23 @@ natural window light, 1920s art school, game background art,
 Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
+### 8b. Szkoła sztuki — obraz-puzzle eksperckości
+
+Zgłoszenie użytkownika: eksperckość (Paintings.expertise) ma się pokazywać
+jako układanka, która stopniowo się "składa" w miarę wzrostu procentów
+(ExpertisePuzzle.gd, kod dzieli tę grafikę na siatkę 5×5 przez
+AtlasTexture — patrz komentarz w tym pliku). Potrzebny JEDEN kwadratowy
+obraz o wyraźnej, czytelnej kompozycji nawet pociętej na 25 kawałków —
+unikać drobnych detali/tekstu, które zgubiłyby się w pojedynczym kafelku.
+Plik: `res://art/art_school/expertise_puzzle.jpg` — dopóki go nie ma, kod
+po cichu pokazuje puste, oprawione gniazda układanki (bez obrazka), tak
+jak wszystkie opcjonalne grafiki w tej grze.
+
+**Prompt:**
+```
+Square portrait of an elegant 1920s art connoisseur examining a painting through a magnifying glass, single clear centered composition, bold simple shapes, high contrast, game background art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism, no text, no watermark
+```
+
 ### 9. Galeria (kolekcja gracza)
 - Tło pustej galerii + wariant "wypełnionej" (opcjonalnie kilka etapów
   zapełnienia)
