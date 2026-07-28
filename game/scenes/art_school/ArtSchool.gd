@@ -20,7 +20,14 @@ const ExpertisePuzzleScript := preload("res://scripts/ui/ExpertisePuzzle.gd")
 const EXPERTISE_PUZZLE_IMAGE := "res://art/art_school/expertise_puzzle.jpg"
 const EXPERTISE_PUZZLE_SIZE := Vector2(240, 240)
 
-var info_label: Label
+## Zgłoszenie użytkownika: zdanie tłumaczące, co robi eksperckość, ma być
+## "trochę większe" niż zwykły tekst — stąd osobny, większy font_size
+## (zwykły make_label zawsze daje ScreenHelpers.BODY_FONT_SIZE=22).
+const EXPLANATION_FONT_SIZE := 28
+
+var explanation_label: Label
+var money_date_label: Label
+var expertise_label: Label
 var course_button: Button
 var quiz_section: VBoxContainer
 var quiz_result_label: Label
@@ -47,25 +54,35 @@ func _ready() -> void:
 	ScreenHelpers.make_title(root, "Szkoła sztuki")
 	ScreenHelpers.make_turn_indicator(root)
 
-	info_label = ScreenHelpers.make_label(root, "")
-	## autowrap + custom_minimum_size (SZEROKOŚĆ i WYSOKOŚĆ oba stałe) —
-	## pierwsza linia jest bardzo długa (całe zdanie o działaniu
-	## eksperckości); bez zawijania renderowała się jako jeden, bardzo
-	## szeroki wiersz wychodzący poza ramkę ekranu na wąskich/portretowych
-	## rozdzielczościach (przegląd czytelności/dopasowania do rozdzielczości
-	## na żądanie użytkownika). Stała wysokość rezerwuje miejsce na
-	## najdłuższy możliwy wariant (zawinięta 1. linia + 2. linia
-	## gotówka/data), żeby przycisk poniżej nigdy się nie przesuwał.
-	info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	info_label.custom_minimum_size = Vector2(700, 110)
+	## Zdanie o działaniu eksperckości — WŁASNY (większy) font_size, patrz
+	## EXPLANATION_FONT_SIZE. Tekst STAŁY (nie zależy od wartości
+	## eksperckości), więc ustawiany raz tutaj, nie w _update_info().
+	## autowrap + custom_minimum_size (SZEROKOŚĆ i WYSOKOŚĆ oba stałe) — bez
+	## zawijania renderowało się jako jeden, bardzo szeroki wiersz wychodzący
+	## poza ramkę ekranu na wąskich/portretowych rozdzielczościach (przegląd
+	## czytelności/dopasowania do rozdzielczości na żądanie użytkownika).
+	explanation_label = ScreenHelpers.make_label(
+		root,
+		tr("Eksperckość zwiększa szansę na wczesne ostrzeżenie o podróbce w Domu aukcyjnym (NIE wpływa na szacowaną wartość obrazu)"),
+	)
+	explanation_label.add_theme_font_size_override("font_size", EXPLANATION_FONT_SIZE)
+	explanation_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	explanation_label.custom_minimum_size = Vector2(700, 90)
+
+	money_date_label = ScreenHelpers.make_label(root, "")
 
 	expertise_puzzle = ExpertisePuzzleScript.new()
 	expertise_puzzle.setup(EXPERTISE_PUZZLE_IMAGE, EXPERTISE_PUZZLE_SIZE)
 	root.add_child(expertise_puzzle)
 
+	## Zgłoszenie użytkownika: "Eksperckość: NN%" ma być POD obrazem (nie
+	## razem z resztą tekstu nad nim) — jak podpis pod portretem konia w
+	## Races.gd.
+	expertise_label = ScreenHelpers.make_label(root, "")
+
 	## Sekcja quizu — ukryta, dopóki nie wykupiony jest kurs. Podmienia się z
-	## info_label/course_button (patrz _start_quiz/_close_quiz), żeby ekran
-	## nie pokazywał obu naraz.
+	## powyższymi etykietami/course_button (patrz _start_quiz/_close_quiz),
+	## żeby ekran nie pokazywał obu naraz.
 	quiz_section = VBoxContainer.new()
 	quiz_section.visible = false
 	root.add_child(quiz_section)
@@ -88,7 +105,7 @@ func _ready() -> void:
 
 func _on_train_pressed() -> void:
 	if not Economy.spend(TRAINING_COST):
-		info_label.text = tr("Za mało gotówki na kurs.")
+		money_date_label.text = tr("Za mało gotówki na kurs.")
 		return
 	Players.advance_active_player_time(TRAINING_DAYS)
 	if GameState.check_game_over():
@@ -129,7 +146,9 @@ func _start_quiz() -> void:
 	quiz_result_label = ScreenHelpers.make_label(quiz_section, "")
 
 	course_button.visible = false
-	info_label.visible = false
+	explanation_label.visible = false
+	money_date_label.visible = false
+	expertise_label.visible = false
 	expertise_puzzle.visible = false
 	quiz_section.visible = true
 
@@ -179,7 +198,9 @@ func _disable_buttons(node: Node) -> void:
 func _close_quiz() -> void:
 	quiz_section.visible = false
 	course_button.visible = true
-	info_label.visible = true
+	explanation_label.visible = true
+	money_date_label.visible = true
+	expertise_label.visible = true
 	expertise_puzzle.visible = true
 	_end_course_turn()
 
@@ -197,10 +218,6 @@ func _end_course_turn() -> void:
 
 
 func _update_info() -> void:
-	## Jawnie wypisane, co eksperckość robi (a czego NIE robi) — tester
-	## zgłosił, że spodziewał się dokładniejszej szacowanej wartości obrazu
-	## podczas aukcji i nie widział różnicy, bo to nie jest jej działanie.
-	info_label.text = tr("Eksperckość: %.0f%% — zwiększa szansę na wczesne ostrzeżenie o podróbce w Domu aukcyjnym (NIE wpływa na szacowaną wartość obrazu)\nGotówka: %.0f M | Data: %s") % [
-		Paintings.expertise * 100.0, Economy.player_money, Calendar.format_day(Players.active_day()),
-	]
+	money_date_label.text = tr("Gotówka: %.0f M | Data: %s") % [Economy.player_money, Calendar.format_day(Players.active_day())]
+	expertise_label.text = tr("Eksperckość: %.0f%%") % [Paintings.expertise * 100.0]
 	expertise_puzzle.set_progress(Paintings.expertise)
