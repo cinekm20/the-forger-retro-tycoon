@@ -31,6 +31,37 @@ func _ready() -> void:
 	add_child(player)
 	play_track(DEFAULT_TRACK)
 
+	## Bez tego kliknięcie X na oknie od razu zabijało silnik, omijając
+	## quit_game() niżej — patrz komentarz tam po pełne wyjaśnienie.
+	get_tree().set_auto_accept_quit(false)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		quit_game()
+
+
+## Zgłoszone przez użytkownika: gra "nie całkiem wywala się z pamięci" po
+## zamknięciu — zweryfikowane (--verbose): odtwarzany w pętli
+## AudioStreamPlaybackMP3/AudioStreamMP3 (ten sam obiekt co player.stream)
+## zostawał w pamięci przy get_tree().quit() wywołanym wprost. Sam
+## player.stop() TO ZA MAŁO — serwer audio zwalnia swoją wewnętrzną
+## referencję do playbacku dopiero przy NASTĘPNYM przetworzonym mixie
+## dźwięku, a natychmiastowe quit() nie daje mu szansy na tę klatkę
+## (potwierdzone eksperymentalnie: stop() + kilka klatek odczekania PRZED
+## quit() usuwa wyciek, sam stop() bez odczekania — nie). Stąd ta funkcja
+## zamiast bezpośredniego get_tree().quit() z dowolnego miejsca w grze
+## (na razie jedyne wywołanie: przycisk "Wyjdź z gry" w MainMenu.gd) oraz
+## przechwycenie zamknięcia okna (X) przez set_auto_accept_quit(false) +
+## _notification wyżej, żeby TA sama ścieżka sprzątania obowiązywała
+## niezależnie od tego, jak gracz wychodzi z gry.
+func quit_game() -> void:
+	if player:
+		player.stop()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	get_tree().quit()
+
 
 ## Osobna funkcja (nie tylko wywołanie w _ready) — gdy dojdą osobne ścieżki
 ## per ekran (patrz komentarz wyżej), poszczególne sceny będą mogły wywołać

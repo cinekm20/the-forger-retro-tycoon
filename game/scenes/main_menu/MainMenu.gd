@@ -96,7 +96,7 @@ func _ready() -> void:
 	continue_btn.disabled = not SaveGame.has_save()
 
 	ScreenHelpers.make_button(setup_section, "Ustawienia", func(): SceneRouter.goto_scene(SceneRouter.SETTINGS))
-	ScreenHelpers.make_button(setup_section, "Wyjdź z gry", func(): get_tree().quit())
+	ScreenHelpers.make_button(setup_section, "Wyjdź z gry", func(): Music.quit_game())
 
 	var name_panel := ScreenHelpers.make_boxed_panel(root)
 	name_box = name_panel["box"]
