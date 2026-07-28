@@ -48,6 +48,7 @@ const INJURY_CENTER_FRACTION_RANGE := Vector2(0.3, 0.6)  ## ułamek WŁASNEGO t_
 const BANNER_TEXTS := ["CYGARA CYKLON", "BANK FALKENSTEIN", "PIWO GROM", "PERFUMY COLOMBO", "HOTEL ASHCOMBE"]
 const BANNER_TEXTURE_PATHS := ["res://art/backgrounds/advertising1.jpg", "res://art/backgrounds/advertising2.jpg"]
 const BANNER_CARD_HEIGHT_RATIO := 0.9  ## ułamek BANNER_HEIGHT — szerokość kafelka liczona z proporcji tekstury
+const BANNER_CARD_WIDTH_STRETCH := 1.5  ## zgłoszenie użytkownika: grafiki mają być rozciągnięte na boki (szerzej niż oryginalna proporcja), tekst zostaje wyśrodkowany bez zmian
 const BANNER_GAP := 24.0
 const BANNER_SCROLL_SPEED := 90.0  ## px/s
 
@@ -232,7 +233,7 @@ func _build_banner_strip() -> void:
 
 	var card_height := BANNER_HEIGHT * BANNER_CARD_HEIGHT_RATIO
 	var tex_size: Vector2 = banner_textures[0].get_size()
-	banner_card_width = card_height * (tex_size.x / tex_size.y)
+	banner_card_width = card_height * (tex_size.x / tex_size.y) * BANNER_CARD_WIDTH_STRETCH
 	var card_position_y := (BANNER_HEIGHT - card_height) * 0.5
 
 	var pattern_width := banner_card_width + BANNER_GAP
