@@ -83,7 +83,7 @@ func _ready() -> void:
 		horses_row.add_child(card)
 
 		var portrait := TextureRect.new()
-		portrait.custom_minimum_size = Vector2(96, 96)
+		portrait.custom_minimum_size = Vector2(160, 160)
 		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
