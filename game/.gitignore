@@ -3,3 +3,5 @@
 export.cfg
 export_credentials.cfg
 android/build/
+*.import
+*.uid
