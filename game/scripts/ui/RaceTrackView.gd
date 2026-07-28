@@ -51,6 +51,8 @@ const BANNER_GAP := 24.0
 const BANNER_SCROLL_SPEED := 90.0  ## px/s
 
 const GRASS_TEXTURE_PATH := "res://art/backgrounds/race_grass.png"
+const GROUND_TEXTURE_PATH := "res://art/backgrounds/race_track_ground.png"
+const GROUND_TILE_SIZE := 320.0  ## kafelek tła (grunt/podłoże) pod całą sceną
 const GROUND_SCROLL_SPEED := 160.0  ## szybciej niż banery = wrażenie głębi (paralaksa)
 
 const LINE_WIDTH := 16.0
@@ -169,12 +171,7 @@ func _build_visuals() -> void:
 	size = view_size
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
-	var backdrop := ColorRect.new()
-	backdrop.color = Color(0.04, 0.07, 0.05, 1.0)
-	backdrop.position = Vector2.ZERO
-	backdrop.size = view_size
-	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(backdrop)
+	_build_backdrop()
 
 	_build_banner_strip()
 	_build_ground_strip()
@@ -183,6 +180,33 @@ func _build_visuals() -> void:
 	_build_horses()
 	_build_injury_label()
 	_build_skip_button()
+
+
+## Podłoże pod całą sceną (res://art/backgrounds/race_track_ground.png,
+## kafelkowane, bez przewijania) — leży POD banerami/trawą/końmi, więc
+## przezroczysta górna część kafelków trawy (_build_ground_strip) pokazuje
+## tę teksturę zamiast dawnego płaskiego ciemnozielonego tła.
+func _build_backdrop() -> void:
+	var backdrop := Control.new()
+	backdrop.position = Vector2.ZERO
+	backdrop.size = view_size
+	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	backdrop.clip_contents = true
+	add_child(backdrop)
+
+	var ground_tex: Texture2D = load(GROUND_TEXTURE_PATH)
+	var cols := int(ceil(view_size.x / GROUND_TILE_SIZE))
+	var rows := int(ceil(view_size.y / GROUND_TILE_SIZE))
+	for row in rows:
+		for col in cols:
+			var tile := TextureRect.new()
+			tile.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			tile.stretch_mode = TextureRect.STRETCH_SCALE
+			tile.texture = ground_tex
+			tile.size = Vector2(GROUND_TILE_SIZE, GROUND_TILE_SIZE)
+			tile.position = Vector2(col * GROUND_TILE_SIZE, row * GROUND_TILE_SIZE)
+			tile.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			backdrop.add_child(tile)
 
 
 func _build_banner_strip() -> void:
@@ -233,13 +257,6 @@ func _build_ground_strip() -> void:
 	strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	strip.clip_contents = true
 	add_child(strip)
-
-	var strip_bg := ColorRect.new()
-	strip_bg.color = Color(0.16, 0.32, 0.14)
-	strip_bg.position = Vector2.ZERO
-	strip_bg.size = strip.size
-	strip_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	strip.add_child(strip_bg)
 
 	var grass_tex: Texture2D = load(GRASS_TEXTURE_PATH)
 	ground_tile_width = GROUND_HEIGHT * (grass_tex.get_width() / float(grass_tex.get_height()))
