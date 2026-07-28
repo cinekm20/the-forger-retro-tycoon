@@ -69,6 +69,9 @@ func _ready() -> void:
 	_test_gangsters_chance_shared_by_day()
 	_test_gangster_attempt_resolve_apply_consequences()
 	_test_heist_view_outcome_matches_precomputed_result()
+	_test_travel_map_zoom_clamped_and_pins_scale_damped()
+	_test_travel_map_pan_clamped_when_not_zoomed()
+	_test_travel_map_zoom_keeps_focal_point_fixed()
 	_test_shared_price_by_day()
 	_test_catching_up_player_does_not_double_world_drift()
 	_test_catching_up_player_gets_full_personal_consequences()
@@ -719,6 +722,87 @@ func _test_heist_view_outcome_matches_precomputed_result() -> void:
 			_:
 				_assert(is_equal_approx(final_x, view.start_x - 60.0), "failure_escaped: gangster kończy poza ekranem po stronie startu (ucieczka bez łupu)")
 		view.queue_free()
+
+
+## Buduje TravelMap.tscn dodaną do drzewa testu (nie tylko preloadowany
+## skrypt jak RaceTrackView/HeistView — TravelMap.gd nie ma class_name, tak
+## jak inne skrypty EKRANÓW, patrz _test_all_scene_scripts_parse_without_error).
+## map_viewport (PRESET_FULL_RECT) dostaje rozmiar okna projektu (project.godot
+## window/size, 1280×720) automatycznie z samych anchorów, bez ręcznego
+## nadpisywania .size — to samo źródło rozmiaru co Vector2(1280.0, 720.0)
+## używane w testach RaceTrackView/HeistView.
+func _build_travel_map_for_test() -> Control:
+	Travel.reset_new_game()
+	var view: Control = load("res://scenes/travel_map/TravelMap.tscn").instantiate()
+	add_child(view)
+	return view
+
+
+## Zgłoszenie użytkownika: mapę da się przybliżać (uszczypnięcie/kółko myszy),
+## a pinezki przy tym TROCHĘ się powiększają — nie 1:1 z zoomem mapy (patrz
+## PIN_ZOOM_DAMPING w TravelMap.gd). Sprawdzamy: zoom trzyma się granic
+## [MIN_ZOOM, MAX_ZOOM] mimo prośby o wartość poza zakresem, a widoczny
+## (skompensowany) rozmiar pinezki = target_scale/zoom * zoom (odziedziczona
+## skala map_content) = target_scale dokładnie, więc rośnie WOLNIEJ niż sam
+## zoom mapy.
+func _test_travel_map_zoom_clamped_and_pins_scale_damped() -> void:
+	print("-- TravelMap: zoom trzyma się granic, pinezki rosną wolniej niż mapa (PIN_ZOOM_DAMPING) --")
+	var view := _build_travel_map_for_test()
+	var focal: Vector2 = view.map_viewport.size * 0.5
+
+	view._apply_zoom(view.MAX_ZOOM + 5.0, focal)
+	_assert(is_equal_approx(view.zoom, view.MAX_ZOOM), "zoom nie przekracza MAX_ZOOM mimo prośby o dużo więcej")
+	_assert(is_equal_approx(view.map_content.scale.x, view.MAX_ZOOM), "map_content.scale odzwierciedla zaciśnięty zoom")
+
+	var apparent_pin_scale: float = view.pins[0].scale.x * view.map_content.scale.x
+	var expected_target_scale: float = 1.0 + (view.MAX_ZOOM - view.MIN_ZOOM) * view.PIN_ZOOM_DAMPING
+	_assert(is_equal_approx(apparent_pin_scale, expected_target_scale), "widoczny rozmiar pinezki przy MAX_ZOOM = stonowany target_scale (rośnie wolniej niż mapa)")
+	_assert(expected_target_scale < view.MAX_ZOOM, "stonowany rozmiar pinezki jest MNIEJSZY niż zoom samej mapy — rosną wolniej, nie 1:1")
+
+	view._apply_zoom(view.MIN_ZOOM - 5.0, focal)
+	_assert(is_equal_approx(view.zoom, view.MIN_ZOOM), "zoom nie spada poniżej MIN_ZOOM mimo prośby o dużo mniej")
+
+	view.queue_free()
+
+
+## Zgłoszenie użytkownika: pinezki mają ZOSTAĆ na dobrym miejscu — przy braku
+## przybliżenia (zoom == MIN_ZOOM) mapa i tak dokładnie wypełnia ekran, więc
+## przeciąganie nie powinno w ogóle przesuwać treści (nie ma dokąd — patrz
+## komentarz w _apply_pan/_clamp_pan).
+func _test_travel_map_pan_clamped_when_not_zoomed() -> void:
+	print("-- TravelMap: bez przybliżenia przeciąganie nie rusza mapy (nie ma dokąd) --")
+	var view := _build_travel_map_for_test()
+	_assert(is_equal_approx(view.zoom, view.MIN_ZOOM), "startowy zoom to MIN_ZOOM")
+
+	view._apply_pan(Vector2(150.0, -150.0))
+	_assert(view.map_content.position.is_equal_approx(Vector2.ZERO), "pozycja mapy zostaje (0,0) — przeciąganie bez zoomu jest bez efektu")
+
+	view.queue_free()
+
+
+## Zgłoszenie użytkownika: pinezki mają zostać na dobrym miejscu WZGLĘDEM
+## MAPY także w trakcie samego przybliżania — standardowa własność "zoom do
+## punktu": ten sam punkt mapy (we współrzędnych WEWNĄTRZ map_content, przed
+## przeskalowaniem) musi wypadać pod tym samym punktem ekranu (`focal`) i
+## PRZED, i PO zmianie zoomu. Test liczy ten punkt tym samym wzorem co
+## _apply_zoom i porównuje przed/po (przy zoomowaniu w okolicy środka ekranu
+## naturalny wynik mieści się w granicach _clamp_pan, więc test nie jest
+## zakłócony przez zaciskanie).
+func _test_travel_map_zoom_keeps_focal_point_fixed() -> void:
+	print("-- TravelMap: zoom zachowuje ten sam punkt mapy pod kursorem/palcem --")
+	var view := _build_travel_map_for_test()
+	var focal: Vector2 = view.map_viewport.size * 0.5
+	var local_point_before: Vector2 = (focal - view.map_content.position) / view.zoom
+
+	view._apply_zoom(1.6, focal)
+	var local_point_after: Vector2 = (focal - view.map_content.position) / view.zoom
+	_assert(local_point_before.is_equal_approx(local_point_after), "ten sam punkt mapy zostaje pod focal po zmianie zoomu (1.0 -> 1.6)")
+
+	view._apply_zoom(2.2, focal)
+	var local_point_after_2: Vector2 = (focal - view.map_content.position) / view.zoom
+	_assert(local_point_before.is_equal_approx(local_point_after_2), "ten sam punkt mapy zostaje pod focal po kolejnej zmianie zoomu (1.6 -> 2.2)")
+
+	view.queue_free()
 
 
 func _test_travel_vehicle_choice() -> void:
