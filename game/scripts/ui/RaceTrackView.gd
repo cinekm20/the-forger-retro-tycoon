@@ -46,7 +46,8 @@ const INJURY_WIDTH := 0.06  ## "szerokość" dołka w jednostkach t
 const INJURY_CENTER_FRACTION_RANGE := Vector2(0.3, 0.6)  ## ułamek WŁASNEGO t_cross[i] konia
 
 const BANNER_TEXTS := ["CYGARA CYKLON", "BANK FALKENSTEIN", "PIWO GROM", "PERFUMY COLOMBO", "HOTEL ASHCOMBE"]
-const BANNER_CARD_WIDTH := 200.0
+const BANNER_TEXTURE_PATHS := ["res://art/backgrounds/advertising1.jpg", "res://art/backgrounds/advertising2.jpg"]
+const BANNER_CARD_HEIGHT_RATIO := 0.9  ## ułamek BANNER_HEIGHT — szerokość kafelka liczona z proporcji tekstury
 const BANNER_GAP := 24.0
 const BANNER_SCROLL_SPEED := 90.0  ## px/s
 
@@ -82,8 +83,9 @@ var banner_scroll_x: float = 0.0
 var ground_scroll_x: float = 0.0
 var crossed: Array[bool] = []
 
-var banner_cards: Array[ColorRect] = []
+var banner_cards: Array[TextureRect] = []
 var banner_labels: Array[Label] = []
+var banner_card_width: float = 0.0
 var ground_tiles: Array[TextureRect] = []
 var ground_tile_width: float = 0.0
 var horse_icons: Array[TextureRect] = []
@@ -224,12 +226,27 @@ func _build_banner_strip() -> void:
 	strip_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	strip.add_child(strip_bg)
 
-	var pattern_width := BANNER_CARD_WIDTH + BANNER_GAP
+	var banner_textures: Array[Texture2D] = []
+	for path in BANNER_TEXTURE_PATHS:
+		banner_textures.append(load(path))
+
+	var card_height := BANNER_HEIGHT * BANNER_CARD_HEIGHT_RATIO
+	var tex_size: Vector2 = banner_textures[0].get_size()
+	banner_card_width = card_height * (tex_size.x / tex_size.y)
+	var card_position_y := (BANNER_HEIGHT - card_height) * 0.5
+
+	var pattern_width := banner_card_width + BANNER_GAP
 	var card_count := int(ceil(view_size.x / pattern_width)) + 2
 	for i in card_count:
-		var card := ColorRect.new()
-		card.color = Color(0.55, 0.4, 0.15)
-		card.size = Vector2(BANNER_CARD_WIDTH, BANNER_HEIGHT * 0.7)
+		## Zgłoszenie użytkownika: dwie grafiki plakietek reklamowych mają się
+		## pojawiać NA ZMIANĘ (advertising1/advertising2.jpg wg parzystości i)
+		## z podpisem (BANNER_TEXTS) wyrenderowanym NAD nimi jako osobny Label.
+		var card := TextureRect.new()
+		card.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		card.stretch_mode = TextureRect.STRETCH_SCALE
+		card.texture = banner_textures[i % banner_textures.size()]
+		card.size = Vector2(banner_card_width, card_height)
+		card.position.y = card_position_y
 		card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		strip.add_child(card)
 		banner_cards.append(card)
@@ -237,10 +254,11 @@ func _build_banner_strip() -> void:
 		var label := Label.new()
 		label.text = tr(BANNER_TEXTS[i % BANNER_TEXTS.size()])
 		label.add_theme_font_size_override("font_size", 15)
-		label.add_theme_color_override("font_color", ScreenHelpers.COLOR_CREAM)
+		label.add_theme_color_override("font_color", Color(0.25, 0.14, 0.08))
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		label.size = card.size
+		label.position.y = card_position_y
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		strip.add_child(label)
 		banner_labels.append(label)
@@ -400,7 +418,7 @@ func skip() -> void:
 ## reszta wzoru (standardowy trik na nieskończone przewijanie bez utraty
 ## ciągłości na krawędzi) bez zmian.
 func _update_banner_positions() -> void:
-	var pattern_width := BANNER_CARD_WIDTH + BANNER_GAP
+	var pattern_width := banner_card_width + BANNER_GAP
 	var total_width := pattern_width * banner_cards.size()
 	for i in banner_cards.size():
 		var x := fposmod(i * pattern_width + banner_scroll_x, total_width)
