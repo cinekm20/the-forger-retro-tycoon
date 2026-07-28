@@ -72,6 +72,7 @@ func _ready() -> void:
 	_test_travel_map_zoom_clamped_and_pins_scale_damped()
 	_test_travel_map_pan_clamped_when_not_zoomed()
 	_test_travel_map_zoom_keeps_focal_point_fixed()
+	_test_travel_map_pinch_zoom_via_touch_events()
 	_test_shared_price_by_day()
 	_test_catching_up_player_does_not_double_world_drift()
 	_test_catching_up_player_gets_full_personal_consequences()
@@ -801,6 +802,63 @@ func _test_travel_map_zoom_keeps_focal_point_fixed() -> void:
 	view._apply_zoom(2.2, focal)
 	var local_point_after_2: Vector2 = (focal - view.map_content.position) / view.zoom
 	_assert(local_point_before.is_equal_approx(local_point_after_2), "ten sam punkt mapy zostaje pod focal po kolejnej zmianie zoomu (1.6 -> 2.2)")
+
+	view.queue_free()
+
+
+## Zgłoszony przez użytkownika bug: "2 palcami nie mogę powiększyć na
+## telefonie" — root cause: uszczypnięcie na dotyku przychodzi jako surowy
+## InputEventScreenTouch/InputEventScreenDrag PER PALEC, który NIE dociera
+## do gui_input (kanał myszy/GUI), tylko do zwykłego _input() — poprzednia
+## wersja słuchała wyłącznie gui_input, więc pinch nigdy nie docierał do
+## _apply_zoom na prawdziwym telefonie. Test woła view._input(event)
+## BEZPOŚREDNIO (symulacja dwóch palców: dotknięcie, potem oddalenie od
+## siebie) — dokładnie ta sama ścieżka kodu co realny dotyk, żeby ten
+## dokładny bug nie mógł się cicho cofnąć.
+func _test_travel_map_pinch_zoom_via_touch_events() -> void:
+	print("-- TravelMap: uszczypnięcie DWOMA PALCAMI (surowy dotyk, nie gui_input) faktycznie zooomuje --")
+	var view := _build_travel_map_for_test()
+
+	var touch0 := InputEventScreenTouch.new()
+	touch0.index = 0
+	touch0.position = Vector2(300.0, 300.0)
+	touch0.pressed = true
+	view._input(touch0)
+
+	var touch1 := InputEventScreenTouch.new()
+	touch1.index = 1
+	touch1.position = Vector2(700.0, 300.0)
+	touch1.pressed = true
+	view._input(touch1)
+	_assert(view.touch_points.size() == 2, "oba palce zarejestrowane po dwóch InputEventScreenTouch")
+
+	## Pierwszy InputEventScreenDrag PO dwóch dotknięciach tylko ustala punkt
+	## odniesienia (pinch_start_distance) — zgodnie z komentarzem w
+	## _handle_pinch, żaden zoom jeszcze się nie zmienia.
+	var drag0 := InputEventScreenDrag.new()
+	drag0.index = 0
+	drag0.position = Vector2(280.0, 300.0)
+	drag0.relative = Vector2(-20.0, 0.0)
+	view._input(drag0)
+	_assert(is_equal_approx(view.zoom, view.MIN_ZOOM), "pierwszy InputEventScreenDrag po zejściu dwóch palców tylko ustala punkt odniesienia (bez zmiany zoomu)")
+	_assert(view.pinch_start_distance > 0.0, "pinch_start_distance ustalony po pierwszym drag przy dwóch palcach")
+
+	## Drugi palec oddala się (odległość między palcami rośnie) -> zoom w górę.
+	var drag1 := InputEventScreenDrag.new()
+	drag1.index = 1
+	drag1.position = Vector2(760.0, 300.0)
+	drag1.relative = Vector2(60.0, 0.0)
+	view._input(drag1)
+	_assert(view.zoom > view.MIN_ZOOM, "uszczypnięcie (palce oddalają się od siebie) faktycznie zwiększa zoom przez _input(), nie tylko przez gui_input")
+
+	## Podniesienie jednego palca resetuje pinch_start_distance — kolejne
+	## uszczypnięcie zaczyna się od nowa, nie od starego punktu odniesienia.
+	var lift0 := InputEventScreenTouch.new()
+	lift0.index = 0
+	lift0.position = drag0.position
+	lift0.pressed = false
+	view._input(lift0)
+	_assert(is_equal_approx(view.pinch_start_distance, 0.0), "podniesienie jednego palca resetuje pinch_start_distance")
 
 	view.queue_free()
 

@@ -54,6 +54,21 @@ var map_content: Control
 var pins: Array[Button] = []
 var zoom: float = MIN_ZOOM
 
+## Uszczypnięcie DWOMA PALCAMI na telefonie NIE przychodzi jako
+## InputEventMagnifyGesture (to gest trackpada na desktopie/macOS) —
+## zgłoszony przez użytkownika bug: "2 palcami nie mogę powiększyć na
+## telefonie". Godot na dotyku daje surowe InputEventScreenTouch/
+## InputEventScreenDrag PER PALEC (z `index`), więc uszczypnięcie trzeba
+## wykryć samemu: śledzimy pozycję każdego aktualnie dotykającego palca
+## (touch_points, index -> pozycja) i przy DWÓCH naraz liczymy zmianę
+## odległości między nimi względem odległości na POCZĄTKU tego uszczypnięcia
+## (pinch_start_distance/pinch_start_zoom) — porównanie do POCZĄTKU gestu
+## (nie klatka-do-klatki) jest stabilniejsze, nie dryfuje przy drobnych
+## drżeniach palców.
+var touch_points: Dictionary = {}
+var pinch_start_distance: float = 0.0
+var pinch_start_zoom: float = MIN_ZOOM
+
 
 func _ready() -> void:
 	_build_map(Cities.MAP_BACKGROUND_PATH)
@@ -82,8 +97,11 @@ func _default_info_text() -> String:
 
 
 ## map_viewport: pełnoekranowy, NIERUCHOMY kontener, wycina (clip_contents)
-## wszystko, co przy zoomie/panie wystaje poza ekran — jego WŁASNY `_gui_input`
-## odbiera gesty uszczypnięcia/przeciągnięcia/kółka myszy (patrz niżej).
+## wszystko, co przy zoomie/panie wystaje poza ekran. Gesty (uszczypnięcie/
+## przeciągnięcie/kółko myszy) obsługuje _input() na CAŁYM ekranie (patrz
+## komentarz przy touch_points wyżej), NIE gui_input tego węzła — surowy
+## dotyk wielopalcowy nie dociera do _gui_input (to kanał myszy/GUI), tylko
+## do zwykłego _input().
 ## map_content: to, co faktycznie się skaluje/przesuwa (`scale`/`position`) —
 ## tło + warstwa pinezek jako jego dzieci, więc poruszają się/skalują RAZEM.
 func _build_map(background_path: String) -> void:
@@ -91,7 +109,6 @@ func _build_map(background_path: String) -> void:
 	map_viewport.set_anchors_preset(Control.PRESET_FULL_RECT)
 	map_viewport.clip_contents = true
 	map_viewport.mouse_filter = Control.MOUSE_FILTER_PASS
-	map_viewport.gui_input.connect(_on_map_gui_input)
 	add_child(map_viewport)
 
 	map_content = Control.new()
@@ -158,13 +175,31 @@ func _build_pins() -> void:
 		pins.append(pin)
 
 
-## Obsługuje: uszczypnięcie (InputEventMagnifyGesture), przeciąganie dwoma
-## palcami (InputEventPanGesture), kółko myszy (zoom, desktop/test) i
-## przeciąganie lewym przyciskiem/palcem (pan). Zoom zawsze wokół pozycji
-## gestu/kursora (_apply_zoom), więc mapa "przybliża się w to miejsce, gdzie
-## uszczypnięto", nie zawsze do środka ekranu.
-func _on_map_gui_input(event: InputEvent) -> void:
-	if event is InputEventMagnifyGesture:
+## _input(), NIE _gui_input/gui_input — surowy wielopalcowy dotyk
+## (InputEventScreenTouch/InputEventScreenDrag, z `index` per palec) nie
+## dociera do kanału GUI (_gui_input odbiera właściwie tylko zdarzenia
+## myszy/GUI), tylko do zwykłego _input(), patrz komentarz przy touch_points.
+## Obsługuje: uszczypnięcie dwoma palcami (ręcznie liczone z touch_points),
+## gest uszczypnięcia trackpada (InputEventMagnifyGesture, macOS/desktop),
+## przeciąganie dwoma palcami trackpada (InputEventPanGesture), kółko myszy
+## (zoom, desktop/test) i przeciąganie myszą (pan, desktop — TYLKO gdy żaden
+## prawdziwy dotyk nie jest aktywny, patrz niżej). Zoom zawsze wokół pozycji
+## gestu/kursora/środka między palcami (_apply_zoom), więc mapa "przybliża
+## się w to miejsce, gdzie uszczypnięto", nie zawsze do środka ekranu.
+func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			touch_points[event.index] = event.position
+		else:
+			touch_points.erase(event.index)
+			pinch_start_distance = 0.0
+	elif event is InputEventScreenDrag:
+		touch_points[event.index] = event.position
+		if touch_points.size() >= 2:
+			_handle_pinch()
+		else:
+			_apply_pan(event.relative)
+	elif event is InputEventMagnifyGesture:
 		_apply_zoom(zoom * event.factor, event.position)
 	elif event is InputEventPanGesture:
 		_apply_pan(-event.delta)
@@ -172,10 +207,40 @@ func _on_map_gui_input(event: InputEvent) -> void:
 		_apply_zoom(zoom + WHEEL_ZOOM_STEP, event.position)
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 		_apply_zoom(zoom - WHEEL_ZOOM_STEP, event.position)
-	elif event is InputEventScreenDrag:
+	elif event is InputEventMouseMotion and touch_points.is_empty() and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		## touch_points.is_empty() — na dotyku Godot ZWYKLE emuluje z każdego
+		## palca też mysz (osobne InputEventMouseMotion), więc bez tego
+		## warunku przeciąganie jednym palcem przesuwałoby mapę PODWÓJNIE
+		## (raz jako ScreenDrag wyżej, raz jako emulowana mysz tutaj). Na
+		## prawdziwym desktopie (bez dotyku) touch_points jest zawsze puste,
+		## więc przeciąganie myszą działa bez zmian.
 		_apply_pan(event.relative)
-	elif event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		_apply_pan(event.relative)
+
+
+## Odległość między dwoma aktualnie dotykającymi palcami i punkt w połowie
+## drogi między nimi (środek uszczypnięcia — ognisko zoomu).
+func _touch_distance() -> float:
+	var positions: Array = touch_points.values()
+	return positions[0].distance_to(positions[1])
+
+
+func _touch_midpoint() -> Vector2:
+	var positions: Array = touch_points.values()
+	return (positions[0] + positions[1]) * 0.5
+
+
+## Nowe uszczypnięcie (dopiero co dotknęły DWA palce, albo trzeci nadepnął
+## po dwóch pierwszych) zapamiętuje odległość/zoom startowy; każda kolejna
+## klatka przelicza zoom jako pinch_start_zoom * (bieżąca odległość / odległość
+## startowa) — porównanie do POCZĄTKU gestu (nie klatka-do-klatki) jest
+## stabilniejsze, patrz komentarz przy touch_points.
+func _handle_pinch() -> void:
+	var distance := _touch_distance()
+	if pinch_start_distance <= 0.0:
+		pinch_start_distance = distance
+		pinch_start_zoom = zoom
+		return
+	_apply_zoom(pinch_start_zoom * (distance / pinch_start_distance), _touch_midpoint())
 
 
 ## Zmienia zoom, zachowując POD KURSOREM/PALCEM (`focal`, we współrzędnych
