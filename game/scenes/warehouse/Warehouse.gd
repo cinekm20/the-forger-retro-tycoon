@@ -14,15 +14,15 @@ const SILO_WIDTH := 70.0
 var fill_rects: Dictionary = {}
 var amount_labels: Dictionary = {}
 var status_label: Label
+var location_label: Label
+var money_label: Label
 
 
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/warehouse.jpg")
 	var corner := ScreenHelpers.make_corner_status_row(self, "", "")
-	var location_label: Label = corner["left"]
-	var money_label: Label = corner["right"]
-	location_label.text = tr("%s\n%s") % [Cities.get_city_name(Travel.current_city), Calendar.format_day(Players.active_day())]
-	money_label.text = tr("%.0f M") % Economy.player_money
+	location_label = corner["left"]
+	money_label = corner["right"]
 
 	## use_menu_frame=false + ALIGNMENT_BEGIN + JEDEN rozpychacz na końcu:
 	## zgłoszone przez użytkownika — ozdobna ramka znika, nazwa ekranu zostaje
@@ -133,6 +133,8 @@ func _on_sell_pressed(crop: String) -> void:
 
 
 func _update_info() -> void:
+	location_label.text = tr("%s\n%s") % [Cities.get_city_name(Travel.current_city), Calendar.format_day(Players.active_day())]
+	money_label.text = tr("%.0f M") % Economy.player_money
 	for crop in Crops.CROPS:
 		var stored := PlayerPlantations.get_total_stored(crop)
 		var ratio := clampf(stored / SILO_VISUAL_CAPACITY, 0.0, 1.0)

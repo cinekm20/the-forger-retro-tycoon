@@ -26,7 +26,9 @@ const EXPERTISE_PUZZLE_SIZE := Vector2(240, 240)
 const EXPLANATION_FONT_SIZE := 28
 
 var explanation_label: Label
-var money_date_label: Label
+var location_label: Label
+var money_label: Label
+var status_label: Label
 var expertise_label: Label
 var course_button: Button
 var quiz_section: VBoxContainer
@@ -44,6 +46,13 @@ var expertise_puzzle: Control
 
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/art_school.jpg")
+	## Zgłoszenie użytkownika: gotówka MA być wyłącznie w skrzynce w prawym
+	## górnym rogu, dokładnie jak w Giełdzie/Rynku (ScreenHelpers.make_corner_status_row),
+	## zamiast w zdaniu "Gotówka: X M | Data: Y" w środku ekranu.
+	var corner := ScreenHelpers.make_corner_status_row(self, "", "")
+	location_label = corner["left"]
+	money_label = corner["right"]
+
 	## use_menu_frame=false + ALIGNMENT_BEGIN + JEDEN rozpychacz na końcu:
 	## zgłoszone przez użytkownika — ozdobna ramka znika, nazwa ekranu zostaje
 	## przypięta na samej górze, przycisk powrotu na samym dole. Treść leci
@@ -69,7 +78,7 @@ func _ready() -> void:
 	explanation_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	explanation_label.custom_minimum_size = Vector2(700, 90)
 
-	money_date_label = ScreenHelpers.make_label(root, "")
+	status_label = ScreenHelpers.make_label(root, "")
 
 	expertise_puzzle = ExpertisePuzzleScript.new()
 	expertise_puzzle.setup(EXPERTISE_PUZZLE_IMAGE, EXPERTISE_PUZZLE_SIZE)
@@ -113,7 +122,7 @@ func _on_train_pressed() -> void:
 	if Paintings.expertise >= Paintings.MAX_EXPERTISE:
 		return
 	if not Economy.spend(TRAINING_COST):
-		money_date_label.text = tr("Za mało gotówki na kurs.")
+		status_label.text = tr("Za mało gotówki na kurs.")
 		return
 	Players.advance_active_player_time(TRAINING_DAYS)
 	if GameState.check_game_over():
@@ -155,7 +164,7 @@ func _start_quiz() -> void:
 
 	course_button.visible = false
 	explanation_label.visible = false
-	money_date_label.visible = false
+	status_label.visible = false
 	expertise_label.visible = false
 	expertise_puzzle.visible = false
 	quiz_section.visible = true
@@ -207,7 +216,7 @@ func _close_quiz() -> void:
 	quiz_section.visible = false
 	course_button.visible = true
 	explanation_label.visible = true
-	money_date_label.visible = true
+	status_label.visible = true
 	expertise_label.visible = true
 	expertise_puzzle.visible = true
 	_end_course_turn()
@@ -226,7 +235,8 @@ func _end_course_turn() -> void:
 
 
 func _update_info() -> void:
-	money_date_label.text = tr("Gotówka: %.0f M | Data: %s") % [Economy.player_money, Calendar.format_day(Players.active_day())]
+	location_label.text = tr("%s\n%s") % [Cities.get_city_name(Travel.current_city), Calendar.format_day(Players.active_day())]
+	money_label.text = tr("%.0f M") % Economy.player_money
 
 	var at_max := Paintings.expertise >= Paintings.MAX_EXPERTISE
 	expertise_label.text = tr("Eksperckość: %.0f%%") % [Paintings.expertise * 100.0] + (tr(" (maksimum)") if at_max else "")

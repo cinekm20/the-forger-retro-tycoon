@@ -25,6 +25,8 @@ extends Control
 const HeistViewScript := preload("res://scripts/ui/HeistView.gd")
 
 var security_label: Label
+var location_label: Label
+var money_label: Label
 var gangster_option: OptionButton
 var rival_option: OptionButton
 var send_btn: Button
@@ -43,6 +45,15 @@ var is_attacking: bool = false
 
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/gallery.jpg")
+
+	## Zgłoszenie użytkownika: gotówka MA być w skrzynce w prawym górnym
+	## rogu, dokładnie jak w Giełdzie/Rynku (ScreenHelpers.make_corner_status_row)
+	## — na tym ekranie (koszt ochroniarza/gangstera) wcześniej nie było
+	## żadnego stałego podglądu gotówki.
+	var corner := ScreenHelpers.make_corner_status_row(self, "", "")
+	location_label = corner["left"]
+	money_label = corner["right"]
+	_update_money_display()
 
 	## ALIGNMENT_BEGIN + JEDEN rozpychacz na końcu — patrz Races.gd po
 	## uzasadnienie, czemu JEDEN rozpychacz (nie dwa).
@@ -188,6 +199,7 @@ func _on_send_gangster_pressed() -> void:
 	if not Economy.spend(Security.GANGSTER_COST):
 		security_label.text = tr("Za mało gotówki na gangstera.")
 		return
+	_update_money_display()
 
 	## Wynik skoku ustalony OD RAZU, dokładnie jak zwycięzca wyścigu w
 	## Races.gd — HeistView tylko wizualizuje ten JUŻ ustalony wynik, nigdy
@@ -231,6 +243,7 @@ func _on_heist_finished(result: Dictionary, message: String) -> void:
 
 	Security.apply_gangster_result(result)
 	_update_rival_labels()
+	_update_money_display()
 	security_label.text = message
 
 
@@ -240,6 +253,11 @@ func _format_gangster_result_message(result: Dictionary) -> String:
 	if result["caught"]:
 		return tr("Gangster złapany! Dodatkowa grzywna %.0f M.") % Security.CAUGHT_FINE
 	return tr("Gangster wraca z pustymi rękami — pieniądze przepadły.")
+
+
+func _update_money_display() -> void:
+	location_label.text = tr("%s\n%s") % [Cities.get_city_name(Travel.current_city), Calendar.format_day(Players.active_day())]
+	money_label.text = tr("%.0f M") % Economy.player_money
 
 
 func _update_rival_labels() -> void:

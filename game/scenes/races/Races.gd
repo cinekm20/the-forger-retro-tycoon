@@ -33,7 +33,8 @@ var bet_spin: SpinBox
 var bet_button: Button
 var result_label: Label
 var cooldown_label: Label
-var info_label: Label
+var location_label: Label
+var money_label: Label
 var back_btn: Button
 
 ## Widok animacji, budowany dopiero w _on_bet_pressed (ten sam powód co
@@ -47,6 +48,13 @@ var is_racing: bool = false
 
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/races.jpg")
+	## Zgłoszenie użytkownika: gotówka MA być wyłącznie w skrzynce w prawym
+	## górnym rogu, dokładnie jak w Giełdzie/Rynku (ScreenHelpers.make_corner_status_row),
+	## zamiast osobnej etykiety "Gotówka: X M" w środku ekranu.
+	var corner := ScreenHelpers.make_corner_status_row(self, "", "")
+	location_label = corner["left"]
+	money_label = corner["right"]
+
 	## use_menu_frame=false + ALIGNMENT_BEGIN + JEDEN rozpychacz na końcu:
 	## zgłoszone przez użytkownika — ozdobna ramka znika, nazwa ekranu zostaje
 	## przypięta na samej górze, przycisk powrotu na samym dole. Treść leci
@@ -109,7 +117,6 @@ func _ready() -> void:
 
 	result_label = ScreenHelpers.make_label(root, "")
 	cooldown_label = ScreenHelpers.make_label(root, "")
-	info_label = ScreenHelpers.make_label(root, "")
 
 	## Zgłoszenie użytkownika: zakład (koń + kwota + przycisk) ma być "ładnie
 	## wyeksponowany" i dołączony do TEJ SAMEJ skrzynki w prawym dolnym rogu
@@ -229,7 +236,8 @@ func _on_race_finished(winner_index: int, chosen_index: int, bet: float) -> void
 
 
 func _update_info() -> void:
-	info_label.text = tr("Gotówka: %.0f M") % Economy.player_money
+	location_label.text = tr("%s\n%s") % [Cities.get_city_name(Travel.current_city), Calendar.format_day(Players.active_day())]
+	money_label.text = tr("%.0f M") % Economy.player_money
 
 
 ## Osobna od _update_info/result_label — zgłoszone przez użytkownika: limit
