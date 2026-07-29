@@ -479,6 +479,21 @@ Vintage newspaper front page illustration, huge bold Art Deco masthead headline 
 Vintage newspaper front page illustration, huge bold Art Deco masthead headline in capital letters reading "MARKET BOOM" spanning the full width of the page, dense columns of small newspaper body text filling the rest of the page below the headline, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
+Poniższe dwie karty (psucie towaru, konfiskata) doszły razem z 5 dodatkowymi
+mechanikami (docs/DODATKOWE_MECHANIKI.md) — kod (`WorldEvents.gd`/
+`WorldEventCard.gd`) już je obsługuje i po cichu spada na fallback (tło
+Giełdy), dopóki te dwie grafiki nie zostaną wgrane.
+
+**Zepsuty towar (Spichlerz)** — `events/spoilage.jpg`
+```
+Vintage newspaper front page illustration, huge bold Art Deco masthead headline in capital letters reading "CARGO SPOILED" spanning the full width of the page, dense columns of small newspaper body text filling the rest of the page below the headline, silhouettes of dismayed warehouse workers standing over crates and sacks of ruined produce, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+**Konfiskata przemycanej uprawy (plantacja)** — `events/confiscation.jpg`
+```
+Vintage newspaper front page illustration, huge bold Art Deco masthead headline in capital letters reading "CONTRABAND SEIZED" spanning the full width of the page, dense columns of small newspaper body text filling the rest of the page below the headline, silhouettes of customs officials confiscating crates from a plantation warehouse, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
 **Noworoczna Loteria** (GDD.md pkt. 4.8, `scenes/new_year_lottery/NewYearLottery.gd`) — `events/lottery.jpg`.
 Inny charakter niż karty wydarzeń wyżej — to nie strona gazety, tylko
 pełnoekranowe tło pod animacją konfetti/fajerwerków (rysowaną natywnie w
@@ -954,6 +969,35 @@ rozpoznać podróbkę "na oko". 10 z ~8–10 gotowe: obrazy 7, 10, 11, 16, 21, 2
 29, 30, 32, 33. Dla numerów bez wariantu gra po cichu pokazuje zwykłą grafikę
 (bez różnicy wizualnej), więc brakujące warianty nie są pilne.
 
+### 7b. 3 bonusowe obrazy wuja (poza katalogiem 40)
+
+`Paintings.BONUS_CATALOG` (docs/DODATKOWE_MECHANIKI.md) — 3 prawdziwe,
+historyczne (domena publiczna) dzieła, rzadko losowane na aukcji albo w
+Noworocznej Loterii, NIE liczące się do katalogu 40/warunku zwycięstwa.
+Ten sam styl/format co §7 wyżej (kwadrat, malarstwo muzealne, bez "Base
+style tag" gry, bez nazwiska malarza w prompcie — ta sama zasada
+"styl/okres, nie nazwisko" co reszta katalogu, mimo że akurat ci trzej
+malarze nie mają już żadnych praw autorskich). Zapisz jako `bonus_1.jpg`,
+`bonus_2.jpg`, `bonus_3.jpg` (patrz `Paintings.get_texture_path`, ujemny
+numer katalogowy `-N` → plik `bonus_N.jpg`). Nie potrzebują wariantu
+"podróbka" (`is_forgery_by_duplicate` zawsze zwraca false dla numerów
+ujemnych — patrz komentarz w `Paintings.gd`).
+
+**bonus_1) "Zabawa na lodzie przy fosie miejskiej" (1659)**
+```
+17th century Dutch Golden Age winter landscape painting, ice skaters and townsfolk gathered on a frozen moat beside old city fortification walls, pale winter sky, muted earthy palette with touches of red and white, oil painting texture, flat single painting filling the entire square canvas edge to edge, no curtain, no pedestal, no display stand, no surrounding objects, not a staged museum display
+```
+
+**bonus_2) "Canale Grande w Wenecji" (1730)**
+```
+18th century Venetian vedute cityscape painting, precise architectural perspective of the Grand Canal lined with palazzos, gondolas and small boats on the water, luminous daylight and soft reflections, restrained warm palette, oil painting texture, flat single painting filling the entire square canvas edge to edge, no curtain, no pedestal, no display stand, no surrounding objects, not a staged museum display
+```
+
+**bonus_3) "Dentysta" (1622)**
+```
+Baroque candlelit genre painting, dramatic chiaroscuro lighting from a single candle, a dentist examining a wincing patient's mouth by candlelight, onlookers gathered close, rich dark background, oil painting texture, flat single painting filling the entire square canvas edge to edge, no curtain, no pedestal, no display stand, no surrounding objects, not a staged museum display
+```
+
 ### 8. Szkoła sztuki (mini-gra autentykacji)
 - Tło: pracownia/atelier
 - Pary obrazów oryginał/fałszywka (patrz punkt 7)
@@ -1230,6 +1274,8 @@ Leonardo, żeby mieć z czego wybrać).
 | 15 | 4 | Karty wydarzeń: reforma walutowa, strajk, zamieszki, krach, hossa (docs/GDD.md pkt. 4.2, 4.3, 4.3.1) | 5 | 16:9, 1920×1080 | §4 | ✅ zrobione i podpięte — wszystkie 5 (`events/reform.jpg`/`events/strike.jpg`/`events/riot.jpg`/`events/crash.jpg`/`events/boom.jpg`) wgrane, `WorldEventCard.gd` je wyświetla zamiast fallbacku na tło Giełdy. Krach/hossa: `ShippingCompanies.apply_market_shock` |
 | 16 | 4 | Tło ekranu Ustawień | 1 | 16:9, 1920×1080 | §11 | ✅ zrobione i podpięte — `settings.jpg` wgrane |
 | 17 | 4 | Tło Noworocznej Loterii (GDD.md pkt. 4.8, `NewYearLottery.gd`) | 1 | 16:9, 1920×1080 | §4 | ⬜ do zrobienia — kod działa, po cichu spada na fallback `stock_market.jpg` do czasu wgrania `events/lottery.jpg` |
+| 18 | 4 | Karty wydarzeń: psucie towaru, konfiskata przemycanej uprawy (docs/DODATKOWE_MECHANIKI.md) | 2 | 16:9, 1920×1080 | §4 | ⬜ do zrobienia — kod działa, po cichu spada na fallback `stock_market.jpg` do czasu wgrania `events/spoilage.jpg`/`events/confiscation.jpg` |
+| 19 | 6 | 3 bonusowe obrazy wuja, poza katalogiem 40 (docs/DODATKOWE_MECHANIKI.md) | 3 | 1:1, min. 1024×1024 | §7b | ⬜ do zrobienia — kod działa, rama pokazuje się pusta (bez tekstury), dopóki `bonus_1.jpg`/`bonus_2.jpg`/`bonus_3.jpg` nie zostaną wgrane |
 
 **Zasada dla wierszy oznaczonych "uwaga" (7 i 9):** jeśli Leonardo znowu
 zacznie robić pełne sceny zamiast wyizolowanych ikon/sprite'ów mimo
