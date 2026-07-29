@@ -229,3 +229,70 @@ Trafnie! To rzeczywiście była podróbka.,Correct! That really was the forgery.
 Nietrafiona odpowiedź — to był oryginał.,Wrong guess — that was the original.,Falsch geraten — das war das Original.
 " Eksperckość +%.0f%%."," Expertise +%.0f%%."," Expertise +%.0f%%."
 Zamknij,Close,Schließen
+ (aktywny), (active), (aktiv)
+ (maksimum), (maximum), (Maximum)
+%.0f M,%.0f M,%.0f M
+%d. %s,%d. %s,%d. %s
+%s — %s,%s — %s,%s — %s
+"%s
+%s","%s
+%s","%s
+%s"
+Bonus,Bonus,Bonus
+"Dodatkowo w kopercie czekał prawdziwy obraz: „%s” (%s, %s)!","A genuine painting was also waiting in the envelope: “%s” (%s, %s)!","Zusätzlich wartete ein echtes Gemälde im Umschlag: „%s“ (%s, %s)!"
+"Eksperckość zwiększa szansę na wczesne ostrzeżenie o podróbce w Domu aukcyjnym
+(NIE wpływa na szacowaną wartość obrazu)","Expertise increases the chance of an early forgery warning at the Auction House
+(does NOT affect the estimated value of a painting)","Expertise erhöht die Chance auf eine frühe Fälschungswarnung im Auktionshaus
+(beeinflusst NICHT den Schätzwert eines Gemäldes)"
+Eksperckość: %.0f%%,Expertise: %.0f%%,Expertise: %.0f%%
+Euforia inwestorów! Kursy WSZYSTKICH linii żeglugowych rosną naraz o %.0f%%.,Investor euphoria! ALL shipping line rates jump by %.0f%% at once.,Anlegereuphorie! Die Kurse ALLER Schifffahrtslinien steigen gleichzeitig um %.0f%%.
+Galeria »,Gallery »,Galerie »
+Gangster złapany! Dodatkowa grzywna %.0f M.,Gangster caught! Additional fine %.0f M.,Gangster gefasst! Zusätzliche Geldstrafe %.0f M.
+Gracz,Player,Spieler
+Hossa na giełdzie!,Stock market boom!,Börsenboom!
+Klęska żywiołowa w %s!,Natural disaster in %s!,Naturkatastrophe in %s!
+Konfiskata w %s!,Confiscation in %s!,Beschlagnahmung in %s!
+Kontuzja!,Injury!,Verletzung!
+Krach giełdowy!,Stock market crash!,Börsencrash!
+Kup pompę wodną (%.0f M),Buy water pump (%.0f M),Wasserpumpe kaufen (%.0f M)
+Następny zakład możliwy za %d dni.,Next bet possible in %d days.,Nächste Wette möglich in %d Tagen.
+Niepokoje społeczne uderzają w plantację.,Civil unrest strikes the plantation.,Soziale Unruhen treffen die Plantage.
+"Noworoczna Loteria!
+%s wygrywa %.0f M.","New Year Lottery!
+%s wins %.0f M.","Neujahrslotterie!
+%s gewinnt %.0f M."
+Obraz nr %d — %s,Painting no. %d — %s,Gemälde Nr. %d — %s
+Panika na parkiecie! Kursy WSZYSTKICH linii żeglugowych spadają naraz o %.0f%%.,Panic on the trading floor! ALL shipping line rates drop by %.0f%% at once.,Panik auf dem Börsenparkett! Die Kurse ALLER Schifffahrtslinien fallen gleichzeitig um %.0f%%.
+Podbij,Raise bid,Gebot erhöhen
+Pompa wodna (kupiona),Water pump (purchased),Wasserpumpe (gekauft)
+Pompa wodna kupiona — plantacja odporna na suszę/powódź.,Water pump purchased — the plantation is now protected against drought/flood.,Wasserpumpe gekauft — die Plantage ist jetzt vor Dürre/Überschwemmung geschützt.
+ROK %d,YEAR %d,JAHR %d
+Reforma walutowa!,Currency reform!,Währungsreform!
+Rezygnuję,Withdraw,Aufgeben
+Robotnicy porzucają pracę wobec zaległych wypłat.,Workers walk off the job over unpaid wages.,Arbeiter legen wegen ausstehender Löhne die Arbeit nieder.
+Rzeka,River,Fluss
+Rząd wprowadza nowy przelicznik marki na dolara: %d:1. Nowy kurs dolara: %.2f M.,The government introduces a new mark-to-dollar conversion rate: %d:1. New dollar rate: %.2f M.,Die Regierung führt einen neuen Umrechnungskurs von Mark zu Dollar ein: %d:1. Neuer Dollarkurs: %.2f M.
+Straciłeś/-aś %d robotników.,You lost %d workers.,Du hast %d Arbeiter verloren.
+Strajk w %s!,Strike in %s!,Streik in %s!
+Susza i powodzie niszczą uprawy — pompa wodna dałaby pełną ochronę.,Drought and floods destroy the crops — a water pump would have given full protection.,Dürre und Überschwemmungen zerstören die Ernte — eine Wasserpumpe hätte vollen Schutz geboten.
+Sytuacja wymknęła się spod kontroli — plantacja została całkowicie utracona.,The situation spiraled out of control — the plantation was completely lost.,Die Situation geriet außer Kontrolle — die Plantage ist vollständig verloren.
+Sąsiaduje z rzeką (większy plon),Adjacent to the river (higher yield),Grenzt an den Fluss (höherer Ertrag)
+Towar zepsuty w %s!,Goods spoiled in %s!,Waren verdorben in %s!
+Twoje pole (niezasiane),Your field (unplanted),Dein Feld (unbepflanzt)
+Ulubiony obraz wuja! Bonus: %.0f M.,Uncle's favorite painting! Bonus: %.0f M.,Lieblingsgemälde des Onkels! Bonus: %.0f M.
+Wiadomości,News,Nachrichten
+Wolne pole (do kupienia),Vacant field (for sale),Freies Feld (kaufbar)
+Wycisz muzykę,Mute music,Musik stummschalten
+Władze skonfiskowały %d jednostek przemycanej uprawy.,The authorities confiscated %d units of the smuggled crop.,Die Behörden haben %d Einheiten der geschmuggelten Ernte beschlagnahmt.
+Za mało gotówki na gangstera.,Not enough cash for a gangster.,Nicht genug Bargeld für einen Gangster.
+Za mało gotówki na pompę wodną.,Not enough cash for a water pump.,Nicht genug Bargeld für eine Wasserpumpe.
+Zajęte przez innego gracza (kolor/inicjał = kto),Occupied by another player (color/initial = who),Von einem anderen Spieler belegt (Farbe/Initiale = wer)
+Zamieszki w %s!,Riots in %s!,Unruhen in %s!
+Zapas %s (%d jednostek) leżał w magazynie zbyt długo i uległ zepsuciu.,The stock of %s (%d units) sat in the warehouse too long and spoiled.,Der Bestand an %s (%d Einheiten) lag zu lange im Lager und ist verdorben.
+Zebrane zapasy zostały skonfiskowane.,The harvested stock was confiscated.,Die geernteten Vorräte wurden beschlagnahmt.
+kurs ×%.1f,odds ×%.1f,Quote ×%.1f
+szansa %.0f%%,chance %.0f%%,Chance %.0f%%
+« Wróć do galerii,« Back to gallery,« Zurück zur Galerie
+« Wróć,« Back,« Zurück
+"„%s” — %s, %s","“%s” — %s, %s","„%s“ — %s, %s"
+⚠ możliwa podróbka!,⚠ possible forgery!,⚠ mögliche Fälschung!
