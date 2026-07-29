@@ -348,66 +348,91 @@ Isometric plantation field background, 1920s tropical farmland, rows of crops,
 small worker huts, warm afternoon light, game background art,
 Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
-**Prompty (12 = 4 uprawy × 3 fazy wzrostu, gotowe do wklejenia):**
+**Prompty (12 = 4 uprawy × 3 fazy wzrostu) — DRUGIE PODEJŚCIE.** Poprzednia
+wersja tych 12 promptów (generyczne "seedling stage" / "growing stage" /
+"ready to harvest stage") nie dawała nic użytecznego — najbardziej
+prawdopodobny powód: fraza "plant growth stage(s)" ciągnie model w stronę
+znanego z treningu schematu **botanicznego diagramu wzrostu** (rządek
+kilku roślinek w jednym kadrze, czasem ze strzałkami/podpisami) albo w
+stronę **sceny uprawy/pola** zamiast pojedynczego, wyizolowanego okazu — ten
+sam mechanizm, przez który padły pinezki mapy i ramka menu (patrz Plan
+produkcji, wiersze 5 i 7). Poniższe prompty naprawiają to trzema rzeczami
+naraz: (1) jawnie wykluczają diagram/pole/wiele roślin w samym promencie
+(nie tylko w negative prompt), (2) opisują KONKRETNY wygląd danej rośliny na
+danym etapie zamiast samej nazwy etapu, (3) mają dedykowany dodatkowy
+negative prompt (patrz niżej) celujący akurat w ten problem.
+
+**Negative prompt DODATKOWY — dokleić do wspólnego negative prompt z góry
+dokumentu, tylko przy generowaniu tych 12 promptów:**
+```
+multiple plants, several plants, rows of plants, plant growth stages diagram, growth chart, timeline, side-by-side comparison, infographic, labeled diagram, arrows, numbers, plant life cycle chart, field, farmland, crop rows, plantation landscape, soil extending to horizon, potted plant, flower pot, greenhouse, scientific botanical diagram, line art diagram, multiple panels, grid of images
+```
+
+**Wskazówka workflow (patrz też ogólna sekcja "Workflow zachowania spójności"
+wyżej, punkt 3):** generuj 3 fazy TEJ SAMEJ uprawy po kolei, każdą kolejną
+w trybie **Image-to-Image** na bazie poprzedniej (Strength ~25–35%) —
+oprócz spójności kształtu/koloru między fazami to też utrwala Leonardo w
+kompozycji "jeden okaz na jednolitym tle", zamiast za każdym razem losowo
+próbować czegoś innego od zera.
 
 **Kawa — zasiew**
 ```
-Coffee plant, seedling stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+A single isolated coffee seedling, one small young plant only, thin stem with one pair of round cotyledon leaves and one pair of small glossy dark-green true leaves, tiny mound of soil visible only at the very base of the stem, close-up botanical icon illustration, centered, full plant visible from base to top, isolated on transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Kawa — wzrost**
 ```
-Coffee plant, growing stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+A single isolated young coffee shrub, one plant only, knee-high bushy shape, woody stem with several pairs of glossy dark-green oval leaves, no berries yet, close-up botanical icon illustration, centered, full plant visible from base to top, isolated on transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Kawa — zbiory**
 ```
-Coffee plant, ready to harvest stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+A single isolated mature coffee shrub, one plant only, full bushy shape, glossy dark-green oval leaves, clusters of bright red ripe coffee cherries along the branches, ready to pick, close-up botanical icon illustration, centered, full plant visible from base to top, isolated on transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Tytoń — zasiew**
 ```
-Tobacco plant, seedling stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+A single isolated tobacco seedling, one small young plant only, a few broad rounded light-green leaves low to the ground, no stalk yet, tiny mound of soil visible only at the very base, close-up botanical icon illustration, centered, full plant visible from base to top, isolated on transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Tytoń — wzrost**
 ```
-Tobacco plant, growing stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+A single isolated half-grown tobacco plant, one plant only, tall upright single stalk with large broad light-green leaves spiraling up the stem, no flowers yet, close-up botanical icon illustration, centered, full plant visible from base to top, isolated on transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Tytoń — zbiory**
 ```
-Tobacco plant, ready to harvest stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+A single isolated full-grown tobacco plant, one plant only, tall stalk with large broad leaves, some leaves turned golden-yellow ready for harvest, small pink-white flower cluster on top, close-up botanical icon illustration, centered, full plant visible from base to top, isolated on transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Herbata — zasiew**
 ```
-Tea plant, seedling stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+A single isolated tea seedling, one small young plant only, thin stem with a few small narrow dark-green leaves, tiny mound of soil visible only at the very base, close-up botanical icon illustration, centered, full plant visible from base to top, isolated on transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Herbata — wzrost**
 ```
-Tea plant, growing stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+A single isolated young tea bush, one plant only, compact rounded low shape, dense small narrow glossy dark-green leaves, close-up botanical icon illustration, centered, full plant visible from base to top, isolated on transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Herbata — zbiory**
 ```
-Tea plant, ready to harvest stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+A single isolated mature tea bush, one plant only, dense rounded shrub shape, glossy dark-green leaves with pale light-green tender new shoot tips ready for picking, close-up botanical icon illustration, centered, full plant visible from base to top, isolated on transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Kakao — zasiew**
 ```
-Cocoa plant, seedling stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+A single isolated cocoa seedling sapling, one small young plant only, thin stem with a few large broad dark-green leaves, no pods, tiny mound of soil visible only at the very base, close-up botanical icon illustration, centered, full plant visible from base to top, isolated on transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Kakao — wzrost**
 ```
-Cocoa plant, growing stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+A single isolated young cocoa sapling tree, one plant only, taller thin trunk with large broad glossy dark-green leaves, still no pods, close-up botanical icon illustration, centered, full plant visible from base to top, isolated on transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 **Kakao — zbiory**
 ```
-Cocoa plant, ready to harvest stage, isolated game sprite, simple flat illustration, transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+A single isolated mature cocoa tree trunk section, one plant only, large glossy dark-green leaves, a few elongated ridged cocoa pods in yellow and orange-red hanging directly from the trunk and branches, ready to harvest, close-up botanical icon illustration, centered, full plant visible from base to top, isolated on transparent background, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
 ### 4. Giełda i Rynek
