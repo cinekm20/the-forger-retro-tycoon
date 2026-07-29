@@ -15,6 +15,7 @@ func save_game() -> void:
 		"dollar_rate": Economy.dollar_rate,
 		"inflation": Economy.inflation,
 		"catalogued_numbers": Paintings.catalogued_numbers,
+		"bonus_awarded": Paintings.bonus_awarded,
 		"expertise": Paintings.expertise,
 		"win_threshold": Paintings.win_threshold,
 		"days_in_debt": Economy.days_in_debt,
@@ -65,6 +66,8 @@ func load_game() -> void:
 	Economy.days_in_debt = data.get("days_in_debt", 0)
 	var loaded_numbers: Array = data.get("catalogued_numbers", [])
 	Paintings.catalogued_numbers.assign(loaded_numbers)
+	var loaded_bonus_awarded: Array = data.get("bonus_awarded", [])  # zapisy sprzed bonusowych obrazów wuja: brak = żaden jeszcze nie rozdany
+	Paintings.bonus_awarded.assign(loaded_bonus_awarded)
 	Paintings.expertise = data.get("expertise", 0.0)
 	Paintings.win_threshold = data.get("win_threshold", Paintings.CATALOG.size())
 	ShippingCompanies.stock_price = data.get("shipping_prices", {})
@@ -163,6 +166,6 @@ func load_game() -> void:
 	Security.has_bodyguard = data.get("has_bodyguard", false)
 	Auctions.next_auction_city = data.get("next_auction_city", "")
 	Auctions.next_auction_day = data.get("next_auction_day", 0)
-	Auctions.current_painting_number = data.get("current_painting_number", -1)
+	Auctions.current_painting_number = data.get("current_painting_number", Auctions.NO_PAINTING_SELECTED)
 	if Auctions.next_auction_city == "":
 		Auctions.reset_new_game()  # zapis sprzed dodania harmonogramu aukcji

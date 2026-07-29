@@ -275,6 +275,16 @@ func player_can_afford(index: int, amount: float) -> bool:
 	return get_player_money(index) >= amount
 
 
+## Odwrotność spend_player_money — dolicza kwotę do konta DANEGO gracza.
+## Używane przez AuctionHouse.gd do wypłaty bonusu za wygranie jednego z
+## "bonusowych obrazów wuja" (docs/DODATKOWE_MECHANIKI.md).
+func earn_player_money(index: int, amount: float) -> void:
+	if index == active_index:
+		Economy.earn(amount)
+		return
+	snapshots[index]["money"] = snapshots[index].get("money", Economy.STARTING_MONEY) + amount
+
+
 ## Odejmuje kwotę z konta DANEGO gracza, jeśli go na to stać — zwraca false
 ## bez żadnego efektu, jeśli nie. Używane przez AuctionHouse.gd, gdzie
 ## licytować i wygrywać może każdy gracz fizycznie obecny na aukcji, nie

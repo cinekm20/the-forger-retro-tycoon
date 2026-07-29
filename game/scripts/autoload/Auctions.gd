@@ -10,6 +10,18 @@ extends Node
 const MIN_DAYS_AHEAD := 4
 const MAX_DAYS_AHEAD := 12
 
+## Sentinel "jeszcze nie wylosowano" dla current_painting_number niżej —
+## NIE -1: odkąd doszły 3 bonusowe "obrazy wuja" (docs/DODATKOWE_MECHANIKI.md),
+## numery -1/-2/-3 to PRAWDZIWE, poprawne numery katalogowe (Paintings.BONUS_CATALOG),
+## więc -1 jako sentinel kolidowałby z pierwszym bonusowym obrazem. Wartość
+## daleko poza jakimkolwiek realnym zakresem numerów (1..40 zwykłych, -1..-3
+## bonusowych).
+const NO_PAINTING_SELECTED := -1000
+## Zgłoszenie użytkownika: 3 bonusowe "ulubione obrazy wuja" (docs/DODATKOWE_MECHANIKI.md)
+## mają szansę pojawić się na aukcji ZAMIAST zwykłego obrazu z katalogu —
+## tylko dopóki jest jeszcze jakiś nierozdany (patrz Paintings.get_available_bonus_numbers).
+const BONUS_PAINTING_CHANCE := 0.05
+
 ## Ile dni po terminie aukcja jeszcze "czeka" (gdyby gracz akurat dojeżdżał),
 ## zanim uznajemy ją za przegapioną i losujemy nowy termin automatycznie —
 ## bez tego, jeśli gracz po prostu stał w miejscu i nie odwiedził miasta
@@ -26,7 +38,7 @@ var next_auction_day: int = 0
 ## nie z góry, ale ten sam numer zostaje przy kolejnych wejściach do tego
 ## samego terminu (np. gracz wraca do Hub w trakcie licytacji i wchodzi
 ## ponownie) — dopóki resolve_and_reschedule() go nie wyzeruje.
-var current_painting_number: int = -1
+var current_painting_number: int = NO_PAINTING_SELECTED
 
 
 func _ready() -> void:
@@ -34,13 +46,13 @@ func _ready() -> void:
 
 
 func reset_new_game() -> void:
-	current_painting_number = -1
+	current_painting_number = NO_PAINTING_SELECTED
 	_pick_new_schedule(0)
 
 
 func _on_day_advanced(_days_elapsed: int, current_day: int) -> void:
 	if next_auction_city != "" and current_day > next_auction_day + MISSED_GRACE_DAYS:
-		current_painting_number = -1
+		current_painting_number = NO_PAINTING_SELECTED
 		_pick_new_schedule(current_day)
 
 
@@ -72,8 +84,12 @@ func get_present_players() -> Array[int]:
 
 
 func get_current_painting_number() -> int:
-	if current_painting_number == -1:
-		current_painting_number = 1 + randi() % Paintings.CATALOG.size()
+	if current_painting_number == NO_PAINTING_SELECTED:
+		var available_bonus := Paintings.get_available_bonus_numbers()
+		if not available_bonus.is_empty() and randf() < BONUS_PAINTING_CHANCE:
+			current_painting_number = available_bonus[randi() % available_bonus.size()]
+		else:
+			current_painting_number = 1 + randi() % Paintings.CATALOG.size()
 	return current_painting_number
 
 
@@ -81,7 +97,7 @@ func get_current_painting_number() -> int:
 ## kolejny — inne miasto, dzień w przyszłości — żeby ten sam termin nie dało
 ## się rozstrzygać w nieskończoność.
 func resolve_and_reschedule() -> void:
-	current_painting_number = -1
+	current_painting_number = NO_PAINTING_SELECTED
 	_pick_new_schedule(Calendar.current_day)
 
 

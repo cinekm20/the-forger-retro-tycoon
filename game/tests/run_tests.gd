@@ -57,6 +57,8 @@ func _ready() -> void:
 	_test_water_pump_prevents_weather_crisis_and_boosts_yield()
 	_test_goods_spoil_after_a_year_in_storage()
 	_test_contraband_crop_restricted_and_confiscatable()
+	_test_bonus_paintings_available_and_awardable()
+	_test_auctions_can_select_bonus_painting_when_available()
 	_test_world_events_reform_queued()
 	_test_market_shock_crash_and_boom()
 	_test_yearly_report_populated_on_new_year()
@@ -436,6 +438,56 @@ func _test_contraband_crop_restricted_and_confiscatable() -> void:
 	_assert(WorldEvents.has_pending(), "konfiskata trafiła do kolejki WorldEvents")
 	var reported := WorldEvents.consume_next()
 	_assert(reported.get("kind", "") == "confiscation" and reported.get("city", "") == "ankara" and int(reported.get("amount", 0)) == 10, "zdarzenie opisuje dokładnie skonfiskowaną ilość i miasto")
+
+
+## docs/DODATKOWE_MECHANIKI.md: "3 ulubione obrazy wuja" — spoza katalogu
+## 40, bez fałszywek, nie liczą się do win_threshold.
+func _test_bonus_paintings_available_and_awardable() -> void:
+	print("-- Paintings: bonusowe obrazy wuja (numery ujemne, poza katalogiem 40) --")
+	Paintings.reset_new_game()
+
+	_assert(Paintings.is_bonus_painting(-1), "numer ujemny to obraz bonusowy")
+	_assert(not Paintings.is_bonus_painting(5), "zwykły numer katalogowy NIE jest bonusowy")
+	_assert(Paintings.get_available_bonus_numbers().size() == 3, "na starcie gry wszystkie 3 obrazy bonusowe dostępne")
+
+	var info := Paintings.get_painting_info(-1)
+	_assert(info.get("artist", "") == "Adriaen van de Velde", "get_painting_info działa też dla numerów bonusowych")
+	_assert(is_equal_approx(Paintings.get_estimated_value(-1), Paintings.BONUS_ESTIMATED_VALUE), "szacowana wartość obrazu bonusowego to BONUS_ESTIMATED_VALUE")
+	_assert(Paintings.get_texture_path(-1) == "res://art/paintings/bonus_1.jpg", "ścieżka grafiki obrazu bonusowego wg własnej konwencji nazw")
+
+	Paintings.award_bonus_painting(-1)
+	_assert(Paintings.get_available_bonus_numbers().size() == 2, "po rozdaniu jednego zostają 2 dostępne")
+	_assert(not Paintings.get_available_bonus_numbers().has(-1), "rozdany numer znika z puli dostępnych")
+	_assert(not Paintings.is_forgery_by_duplicate(-1), "obraz bonusowy NIGDY nie jest 'duplikatem/fałszywką' — nie wchodzi do catalogued_numbers")
+	_assert(Paintings.catalogued_numbers.is_empty(), "rozdanie obrazu bonusowego NIE dolicza się do zwykłego katalogu (win_threshold)")
+
+
+## Zweryfikowane bez polegania na dokładnej wartości losowania: gdy WSZYSTKIE
+## obrazy bonusowe są już rozdane, get_current_painting_number() nigdy nie
+## może wybrać żadnego z nich (deterministyczne, 0% szans niezależnie od
+## randf()) — a gdy jest ich pod dostatkiem, w wystarczająco wielu próbach
+## przynajmniej raz wybierze jeden z nich (Auctions.BONUS_PAINTING_CHANCE).
+func _test_auctions_can_select_bonus_painting_when_available() -> void:
+	print("-- Auctions: losowanie obrazu bonusowego na aukcji --")
+	Paintings.reset_new_game()
+	Calendar.reset_new_game()
+	Auctions.reset_new_game()
+	Players.reset_new_game(1)
+
+	for number in Paintings.BONUS_CATALOG.keys():
+		Paintings.award_bonus_painting(number)
+	Auctions.current_painting_number = Auctions.NO_PAINTING_SELECTED
+	var picked := Auctions.get_current_painting_number()
+	_assert(picked > 0, "gdy WSZYSTKIE obrazy bonusowe rozdane, aukcja zawsze wybiera zwykły numer katalogowy (1-40)")
+
+	Paintings.reset_new_game()  # przywraca wszystkie 3 obrazy bonusowe do puli
+	var saw_bonus := false
+	for i in 500:
+		Auctions.current_painting_number = Auctions.NO_PAINTING_SELECTED
+		if Auctions.get_current_painting_number() < 0:
+			saw_bonus = true
+			break
+	_assert(saw_bonus, "gdy obrazy bonusowe dostępne, aukcja w końcu wybiera jeden z nich (BONUS_PAINTING_CHANCE w ~500 próbach)")
 
 
 func _test_world_events_reform_queued() -> void:

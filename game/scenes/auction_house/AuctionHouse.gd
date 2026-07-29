@@ -608,16 +608,38 @@ func _resolve_auction() -> void:
 	## won_for_collection: TYLKO gdy obraz naprawdę trafił do kolekcji
 	## gracza (nie fałszywka, nie rywal AI, nie brak licytujących) — steruje
 	## przyciskiem "Galeria »" w _build_bottom_menu_box niżej.
+	## Bonusowy "obraz wuja" (docs/DODATKOWE_MECHANIKI.md) — celowo NIE
+	## przechodzi przez Players.catalogue_for_player/AIPlayers.award_painting
+	## (nie ma liczyć się do win_threshold ani do widocznego stanu kolekcji,
+	## patrz komentarz przy Paintings.BONUS_CATALOG) — tylko globalnie znika
+	## z rotacji (Paintings.award_bonus_painting) i (dla ludzkiego gracza)
+	## daje jednorazową nagrodę gotówkową.
+	var is_bonus := Paintings.is_bonus_painting(current_number)
+	var bonus_message := ""
+
 	var won_for_collection := false
 	if current_leader.begins_with("player:"):
 		var winner_index := int(current_leader.substr(7))
 		Players.spend_player_money(winner_index, current_bid)
-		if not Players.player_has_number(winner_index, current_number):
+		if is_bonus:
+			Paintings.award_bonus_painting(current_number)
+			Players.earn_player_money(winner_index, Paintings.BONUS_REWARD_MONEY)
+			bonus_message = tr("Ulubiony obraz wuja! Bonus: %.0f M.") % Paintings.BONUS_REWARD_MONEY
+		elif not Players.player_has_number(winner_index, current_number):
 			Players.catalogue_for_player(winner_index, current_number)
 			won_for_collection = true
 	elif current_leader != "":
-		AIPlayers.award_painting(current_leader, current_number, current_bid)
+		if is_bonus:
+			Paintings.award_bonus_painting(current_number)
+		else:
+			AIPlayers.award_painting(current_leader, current_number, current_bid)
 	_update_labels()
+	## won_for_collection zostaje false przy bonusie — nie trafia do Galerii,
+	## więc przycisk "Galeria »" po aukcji byłby mylący. bid_label
+	## dopisywany DOPIERO teraz (PO _update_labels), bo ta funkcja i tak
+	## nadpisuje bid_label.text od zera.
+	if bonus_message != "":
+		bid_label.text += "\n" + bonus_message
 	_build_bottom_menu_box(won_for_collection)
 
 	Auctions.resolve_and_reschedule()
@@ -635,7 +657,10 @@ func _update_labels() -> void:
 	schedule_label.text = tr("Aukcja w toku: %s — %s") % [Cities.get_city_name(Travel.current_city), Calendar.format_day(Auctions.next_auction_day)]
 
 	var category: String = Paintings.get_category(current_number)
-	var category_name: String = Paintings.CATEGORY_NAMES.get(category, category)
+	## Bonusowe obrazy wuja nie mają kategorii stylistycznej (CATALOG.get
+	## zwraca "" dla ujemnych numerów) — własna, wyróżniająca etykieta
+	## zamiast pustych nawiasów w painting_label niżej.
+	var category_name: String = tr("Bonus") if Paintings.is_bonus_painting(current_number) else Paintings.CATEGORY_NAMES.get(category, category)
 	var info := Paintings.get_painting_info(current_number)
 	if not info.is_empty():
 		painting_label.text = tr("Na sprzedaż: „%s” — %s, %s (%s) — szac. wartość %.0f M") % [

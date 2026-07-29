@@ -109,10 +109,36 @@ const MAX_EXPERTISE := 0.9
 
 const EASY_WIN_THRESHOLD := 15  ## docs/GDD.md pkt. 6: tryb łatwy = 15/40 obrazów
 
+## Zgłoszenie użytkownika (docs/DODATKOWE_MECHANIKI.md, materiał źródłowy do
+## sequela): "3 ulubione obrazy wuja" — prawdziwe, historyczne (domena
+## publiczna) dzieła SPOZA katalogu 40, bez fałszywek, dają jednorazowy
+## bonus gotówkowy zamiast liczyć się do progu zwycięstwa (win_threshold).
+## Numery UJEMNE (-1..-3) celowo — nigdy nie kolidują z numerami 1-40
+## zwykłego katalogu, więc get_painting_info/get_estimated_value/
+## get_texture_path obsługują je tym samym kodem co zwykłe numery, tylko z
+## jednym dodatkowym warunkiem na początku (is_bonus_painting). Świadomie
+## NIE trafiają do catalogued_numbers/Players.catalogue_for_player — to
+## bonus OBOK ścieżki do zwycięstwa, nie skrót do niej.
+const BONUS_CATALOG := {
+	-1: {"title": "Zabawa na lodzie przy fosie miejskiej", "artist": "Adriaen van de Velde", "year": "1659", "museum": "domena publiczna"},
+	-2: {"title": "Canale Grande w Wenecji", "artist": "Canaletto", "year": "1730", "museum": "domena publiczna"},
+	-3: {"title": "Dentysta", "artist": "Gerard van Honthorst", "year": "1622", "museum": "domena publiczna"},
+}
+const BONUS_REWARD_MONEY := 5000.0  ## rząd wielkości innych dużych jednorazowych kwot w grze (WATER_PUMP_COST, Security.BODYGUARD_COST)
+const BONUS_ESTIMATED_VALUE := 20000.0  ## wyżej niż najdroższa kategoria zwykłego katalogu (vermeer=15000) — to ma być coś WYJĄTKOWEGO
+
 ## Numery obrazów aktualnie skatalogowanych przez gracza (nieodwracalne —
 ## patrz docs/ZRODLA_C64_WIKI.md pkt. "Fragment 4", bug #4 oryginału,
 ## który u nas świadomie staje się zamierzoną mechaniką).
 var catalogued_numbers: Array[int] = []
+
+## Numery bonusowe już ROZDANE komuś (GLOBALNE, nie per gracz — jak tylko
+## raz ktokolwiek wygra dany obraz, znika z puli na zawsze dla wszystkich,
+## patrz Auctions.get_current_painting_number/get_available_bonus_numbers
+## niżej). Świadomie NIE migawkowane przez Players.gd (w odróżnieniu od
+## catalogued_numbers) — to fakt świata ("czy ten konkretny obraz wuja
+## wciąż krąży"), nie stan jednego gracza.
+var bonus_awarded: Array[int] = []
 
 ## Eksperckość (0.0–0.9) — patrz GDD.md pkt. 4.6: podnosi szansę na wczesne
 ## ostrzeżenie o duplikacie numeru katalogowego przed licytacją.
@@ -125,8 +151,27 @@ var win_threshold: int = CATALOG.size()
 
 func reset_new_game(easy_mode: bool = false) -> void:
 	catalogued_numbers.clear()
+	bonus_awarded.clear()
 	expertise = 0.0
 	win_threshold = EASY_WIN_THRESHOLD if easy_mode else CATALOG.size()
+
+
+func is_bonus_painting(number: int) -> bool:
+	return number < 0
+
+
+## Bonusowe numery jeszcze NIKOMU nie rozdane — patrz Auctions.get_current_painting_number.
+func get_available_bonus_numbers() -> Array[int]:
+	var result: Array[int] = []
+	for number in BONUS_CATALOG.keys():
+		if not bonus_awarded.has(number):
+			result.append(number)
+	return result
+
+
+func award_bonus_painting(number: int) -> void:
+	if not bonus_awarded.has(number):
+		bonus_awarded.append(number)
 
 
 func increase_expertise(amount: float) -> void:
@@ -140,6 +185,8 @@ func warns_about_forgery(number: int) -> bool:
 
 
 func get_estimated_value(number: int) -> float:
+	if is_bonus_painting(number):
+		return BONUS_ESTIMATED_VALUE
 	return CATEGORY_BASE_VALUE.get(get_category(number), 5000.0)
 
 
@@ -169,6 +216,8 @@ func get_category(number: int) -> String:
 ## Tytuł/autor/rok/muzeum obrazu nr `number` (patrz PAINTING_INFO wyżej) —
 ## pusty słownik, jeśli numer spoza katalogu.
 func get_painting_info(number: int) -> Dictionary:
+	if is_bonus_painting(number):
+		return BONUS_CATALOG.get(number, {})
 	return PAINTING_INFO.get(number, {})
 
 
@@ -188,6 +237,12 @@ func get_painting_info(number: int) -> Dictionary:
 ## (ten sam obraz co oryginał — brak wizualnej różnicy, dopóki nie
 ## dorobimy pozostałych wariantów).
 func get_texture_path(number: int, is_fake: bool = false) -> String:
+	## Bonusowe obrazy nigdy nie mają fałszywek (patrz komentarz przy
+	## BONUS_CATALOG) — is_fake ignorowane dla nich celowo. Osobna konwencja
+	## nazw (bonus_1/2/3.jpg, nie painting_NN.jpg — ujemny numer nie
+	## sformatowałby się sensownie w "%02d").
+	if is_bonus_painting(number):
+		return "res://art/paintings/bonus_%d.jpg" % -number
 	if is_fake:
 		var fake_path := "res://art/paintings/painting_%02d_fake.jpg" % number
 		if ResourceLoader.exists(fake_path):
