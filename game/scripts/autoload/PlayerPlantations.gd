@@ -76,6 +76,15 @@ const WATER_PUMP_YIELD_BONUS := 1.2  ## +20% plonu całej plantacji, patrz calcu
 ## placeholder" charakter co _apply_crisis_hit.
 const GOODS_SPOILAGE_DAYS := Calendar.DAYS_PER_MONTH * 12
 
+## Konfiskata przemycanej uprawy (Crops.CONTRABAND_CROP) — docs/DODATKOWE_MECHANIKI.md,
+## tipy do sequela: "ukryte, nielegalne lokalne uprawy... mechanika
+## konfiskaty". Wyższe niż WEATHER_RISK_CHANCE_PER_WEEK — to nielegalny
+## towar, ryzyko ma być odczuwalne, nie kosmetyczne. Sprawdzane co tydzień,
+## dopóki gracz TRZYMA choćby jedną jednostkę w magazynie (patrz
+## _apply_contraband_confiscation) — w odróżnieniu od _apply_crisis_hit,
+## konfiskata zabiera WYŁĄCZNIE ten jeden towar, nie całą plantację/załogę.
+const CONTRABAND_CONFISCATION_CHANCE_PER_WEEK := 0.05
+
 var plantations: Array[Dictionary] = []
 
 ## city_id -> {"river": Array[bool], "tile_owner": Array[int] (-1 = wolne,
@@ -160,6 +169,13 @@ func apply_player_days_elapsed(days_elapsed: int) -> void:
 		## właśnie i tak stracono w tym samym kroku).
 		if not lost:
 			_apply_spoilage(plantation)
+
+		## Konfiskata przemycanej uprawy (docs/DODATKOWE_MECHANIKI.md, tipy do
+		## sequela: "ukryte, nielegalne lokalne uprawy... mechanika konfiskaty")
+		## — niezależna od reszty, sprawdzana tylko, gdy plantacja faktycznie
+		## MA coś w magazynie do skonfiskowania (patrz _apply_contraband_confiscation).
+		if not lost:
+			_apply_contraband_confiscation(plantation, weeks)
 
 		if lost:
 			plantations.remove_at(i)
@@ -454,6 +470,20 @@ func _apply_spoilage(plantation: Dictionary) -> void:
 			stored[crop] = 0
 			WorldEvents.report_spoilage(plantation["city"], crop, amount)
 	plantation["stored_since"] = stored_since
+
+
+## Konfiskata przemycanej uprawy — patrz CONTRABAND_CONFISCATION_CHANCE_PER_WEEK.
+## W odróżnieniu od _apply_crisis_hit zabiera WYŁĄCZNIE zapas kontrabandy
+## (nie robotników, nie inne uprawy, nie całą plantację) — to celowa
+## konsekwencja TRZYMANIA nielegalnego towaru, nie ogólny kryzys plantacji.
+func _apply_contraband_confiscation(plantation: Dictionary, weeks: float) -> void:
+	var stored: Dictionary = plantation["stored_goods"]
+	var amount: int = int(stored.get(Crops.CONTRABAND_CROP, 0))
+	if amount <= 0:
+		return
+	if randf() < CONTRABAND_CONFISCATION_CHANCE_PER_WEEK * weeks:
+		stored[Crops.CONTRABAND_CROP] = 0
+		WorldEvents.report_confiscation(plantation["city"], amount)
 
 
 ## Sprzedaje zapas JEDNEJ uprawy z JEDNEJ plantacji po aktualnej cenie

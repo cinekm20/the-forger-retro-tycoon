@@ -59,6 +59,8 @@ func _background_path() -> String:
 			return "res://art/events/boom.jpg"
 		"spoilage":
 			return "res://art/events/spoilage.jpg"
+		"confiscation":
+			return "res://art/events/confiscation.jpg"
 		_:
 			return ""
 
@@ -81,6 +83,8 @@ func _headline() -> String:
 			return tr("Hossa na giełdzie!")
 		"spoilage":
 			return tr("Towar zepsuty w %s!") % Cities.get_city_name(event.get("city", ""))
+		"confiscation":
+			return tr("Konfiskata w %s!") % Cities.get_city_name(event.get("city", ""))
 		_:
 			return tr("Wiadomości")
 
@@ -99,6 +103,8 @@ func _body_text() -> String:
 			return tr("Zapas %s (%d jednostek) leżał w magazynie zbyt długo i uległ zepsuciu.") % [
 				Crops.CROP_NAMES.get(event.get("crop", ""), event.get("crop", "")), int(event.get("amount", 0)),
 			]
+		"confiscation":
+			return tr("Władze skonfiskowały %d jednostek przemycanej uprawy.") % int(event.get("amount", 0))
 		_:
 			return ""
 

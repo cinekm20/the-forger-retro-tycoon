@@ -31,6 +31,11 @@ var harvest_status_label: Label
 var crop_option: OptionButton
 var worker_spin: SpinBox
 var pump_button: Button
+## Podzbiór Crops.CROPS dostępny W TYM mieście (patrz Crops.is_crop_available)
+## — np. "Przemycana uprawa" tylko w Ankarze/Gwatemali. Trzymany osobno, bo
+## crop_option.selected to indeks w TEJ przefiltrowanej liście, nie w pełnym
+## Crops.CROPS.
+var available_crops: Array[String] = []
 var cell_size: float = 22.0
 var column_width: float = 260.0
 var legend_text_width: float = 200.0
@@ -169,8 +174,15 @@ func _ready() -> void:
 	crop_row.add_child(crop_caption)
 	crop_option = OptionButton.new()
 	crop_option.add_theme_font_size_override("font_size", BODY_FONT_SIZE)
+	## Zgłoszenie użytkownika (docs/DODATKOWE_MECHANIKI.md): "przemycana
+	## uprawa" ma iść do sadzenia TYLKO w Ankarze/Gwatemali — filtrowane tu
+	## (nie w samym Crops.CROPS, żeby generyczne pętle gdzie indziej w grze
+	## dalej widziały ją jak każdą inną uprawę, patrz komentarz w Crops.gd).
+	available_crops.clear()
 	for crop in Crops.CROPS:
-		crop_option.add_item(Crops.CROP_NAMES[crop])
+		if Crops.is_crop_available(crop, Travel.current_city):
+			available_crops.append(crop)
+			crop_option.add_item(Crops.CROP_NAMES[crop])
 	crop_row.add_child(crop_option)
 
 	var worker_row := HBoxContainer.new()
@@ -388,7 +400,7 @@ func _on_tile_pressed(tile_index: int) -> void:
 
 
 func _on_plant_tile_pressed(tile_index: int) -> void:
-	var crop: String = Crops.CROPS[crop_option.selected]
+	var crop: String = available_crops[crop_option.selected]
 	if PlayerPlantations.plant_tile(plantation_index, tile_index, crop):
 		_rebuild_grid()
 		_update_info()
@@ -461,13 +473,15 @@ func _update_info() -> void:
 	_update_legend()
 
 
-## Dynamiczna część legendy: ikonka koloru KAŻDEJ uprawy + ile pól jest nią
-## obsianych — zgłoszone przez użytkownika. ZAWSZE dokładnie 4 wiersze (po
-## jednym na każdą z 4 upraw, nawet przy 0 pól) — stała liczba wierszy
-## niezależnie od wartości, żeby nic nie "skakało" przy sadzeniu kolejnych pól.
+## Dynamiczna część legendy: ikonka koloru KAŻDEJ DOSTĘPNEJ TU uprawy + ile
+## pól jest nią obsianych — zgłoszone przez użytkownika. ZAWSZE dokładnie
+## tyle samo wierszy, ile dostępnych upraw w TYM mieście (patrz
+## available_crops — 4 zwykłe wszędzie, +1 "Przemycana uprawa" tylko w
+## Ankarze/Gwatemali), nawet przy 0 pól — stała liczba wierszy niezależnie
+## od wartości, żeby nic nie "skakało" przy sadzeniu kolejnych pól.
 func _update_legend() -> void:
 	for child in legend_crop_rows.get_children():
 		child.queue_free()
-	for crop in Crops.CROPS:
+	for crop in available_crops:
 		var count := PlayerPlantations.get_planted_tile_count(plantation_index, crop)
 		_add_legend_row(legend_crop_rows, PlantationTileIconScript.Kind.CROP, crop, false, tr("%s: %d pól") % [Crops.CROP_NAMES[crop], count])

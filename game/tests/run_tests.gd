@@ -56,6 +56,7 @@ func _ready() -> void:
 	_test_plantation_tiles_are_exclusive_between_players()
 	_test_water_pump_prevents_weather_crisis_and_boosts_yield()
 	_test_goods_spoil_after_a_year_in_storage()
+	_test_contraband_crop_restricted_and_confiscatable()
 	_test_world_events_reform_queued()
 	_test_market_shock_crash_and_boom()
 	_test_yearly_report_populated_on_new_year()
@@ -391,6 +392,50 @@ func _test_goods_spoil_after_a_year_in_storage() -> void:
 	_assert(WorldEvents.has_pending(), "zepsucie trafiło do kolejki WorldEvents")
 	var reported := WorldEvents.consume_next()
 	_assert(reported.get("kind", "") == "spoilage" and reported.get("crop", "") == "tobacco" and int(reported.get("amount", 0)) == 40, "zdarzenie opisuje dokładnie zepsuty towar (tytoń, 40 jednostek)")
+
+
+## docs/DODATKOWE_MECHANIKI.md: "ukryte, nielegalne lokalne uprawy... i
+## mechanika konfiskaty" — dostępna tylko w ankara/guatemala.
+func _test_contraband_crop_restricted_and_confiscatable() -> void:
+	print("-- Crops/PlayerPlantations: przemycana uprawa ograniczona do Ankary/Gwatemali + konfiskata --")
+
+	_assert(Crops.is_crop_available("contraband", "ankara"), "przemycana uprawa dostępna w Ankarze")
+	_assert(Crops.is_crop_available("contraband", "guatemala"), "przemycana uprawa dostępna w Gwatemali")
+	_assert(not Crops.is_crop_available("contraband", "richmond"), "przemycana uprawa NIEdostępna w Richmond")
+	_assert(Crops.is_crop_available("coffee", "richmond"), "zwykła uprawa (kawa) dostępna wszędzie, bez ograniczeń")
+
+	## Nawet gdyby ktoś ją zasadził poza dozwolonymi miastami (Plantation.gd
+	## i tak tego nie pozwala przez UI — to sprawdzenie na poziomie danych,
+	## REFERENCE_YIELD, patrz Crops.gd) — plon musi wynosić 0.
+	PlayerPlantations.reset_new_game()
+	Calendar.reset_new_game()
+	Economy.reset_new_game()
+	Players.reset_new_game(1)
+	var idx := PlayerPlantations.found_plantation("richmond")
+	PlayerPlantations.plantations[idx]["has_water_pump"] = true
+	PlayerPlantations.city_grids["richmond"]["river"].fill(false)
+	PlayerPlantations.buy_tile(idx, 0)
+	PlayerPlantations.plant_tile(idx, 0, "contraband")
+	PlayerPlantations.hire_workers(idx, 500)
+	Players.advance_active_player_time(30)
+	var harvest := PlayerPlantations.harvest(idx)
+	_assert(int(harvest.get("contraband", 0)) == 0, "przemycana uprawa zasadzona POZA Ankarą/Gwatemalą nie daje ŻADNEGO plonu (REFERENCE_YIELD)")
+
+	## Konfiskata: powtarzamy aż zajdzie (chance=5%/tydzień, ~500 prób to
+	## astronomicznie bezpieczny margines na trafienie choć raz).
+	WorldEvents.reset_new_game()
+	var idx2 := PlayerPlantations.found_plantation("ankara")
+	var confiscated := false
+	for i in 500:
+		PlayerPlantations.plantations[idx2]["stored_goods"][Crops.CONTRABAND_CROP] = 10
+		PlayerPlantations._apply_contraband_confiscation(PlayerPlantations.plantations[idx2], 1.0)
+		if int(PlayerPlantations.plantations[idx2]["stored_goods"][Crops.CONTRABAND_CROP]) == 0:
+			confiscated = true
+			break
+	_assert(confiscated, "konfiskata w końcu zachodzi (CONTRABAND_CONFISCATION_CHANCE_PER_WEEK w ~500 próbach)")
+	_assert(WorldEvents.has_pending(), "konfiskata trafiła do kolejki WorldEvents")
+	var reported := WorldEvents.consume_next()
+	_assert(reported.get("kind", "") == "confiscation" and reported.get("city", "") == "ankara" and int(reported.get("amount", 0)) == 10, "zdarzenie opisuje dokładnie skonfiskowaną ilość i miasto")
 
 
 func _test_world_events_reform_queued() -> void:

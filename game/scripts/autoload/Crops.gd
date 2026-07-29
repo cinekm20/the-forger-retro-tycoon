@@ -3,20 +3,50 @@ extends Node
 ## Źródło liczb: docs/MECHANIKI_EKONOMICZNE.md pkt. 3, 7.1;
 ## sezonowość i mnożnik rzeki: docs/DODATKOWE_MECHANIKI.md.
 
-const CROPS := ["coffee", "tobacco", "tea", "cocoa"]
+## "contraband" (docs/DODATKOWE_MECHANIKI.md, tipy do sequela: "ukryte,
+## nielegalne lokalne uprawy, w sequelu: konopie w Ankarze") — zgłoszenie
+## użytkownika: bez nazywania konkretnej substancji, dostępna w Ankarze I
+## Gwatemali (nie tylko jednym mieście jak w materiale źródłowym). Celowo w
+## TEJ SAMEJ liście co zwykłe uprawy (nie osobnym systemie) — wszystkie
+## generyczne mechanizmy (Warehouse.gd/Market.gd/StockMarket.gd/SaveGame.gd/
+## YearlyReport.gd, `for crop in Crops.CROPS`) obsługują ją bez zmian.
+## Jedyne miejsce z REALNYM ograniczeniem to Plantation.gd (dropdown "Sadzić"
+## filtrowany przez is_crop_available) i REFERENCE_YIELD niżej (0 = brak
+## wpisu poza Ankarą/Gwatemalą, więc nawet gdyby ktoś ją tam zasadził,
+## calculate_harvest i tak nie da żadnego plonu).
+const CONTRABAND_CROP := "contraband"
+const CROPS := ["coffee", "tobacco", "tea", "cocoa", CONTRABAND_CROP]
 
 const CROP_NAMES := {
 	"coffee": "Kawa",
 	"tobacco": "Tytoń",
 	"tea": "Herbata",
 	"cocoa": "Kakao",
+	"contraband": "Przemycana uprawa",
 }
+
+## crop -> lista miast, w których WOLNO ją sadzić (patrz Plantation.gd). Brak
+## wpisu = uprawa dostępna wszędzie (4 zwykłe uprawy) — tylko "contraband"
+## ma tu wpis, więc to jedyna ograniczona uprawa w grze na razie.
+const RESTRICTED_CROP_CITIES := {
+	"contraband": ["ankara", "guatemala"],
+}
+
+
+func is_crop_available(crop: String, city_id: String) -> bool:
+	if not RESTRICTED_CROP_CITIES.has(crop):
+		return true
+	return RESTRICTED_CROP_CITIES[crop].has(city_id)
 
 ## Plon referencyjny (total, przy 500 robotnikach / 30 dniach, pola przy rzece).
 ## Dane oryginału — świadomie NIE kopiujemy 1:1 przechyłu na rzecz tytoniu,
 ## patrz GDD.md pkt. 11 (balans do wyrównania przy strojeniu Economy).
 const REFERENCE_YIELD := {
-	"ankara": {"coffee": 16, "tobacco": 318, "tea": 206, "cocoa": 15},
+	## "contraband" TYLKO w ankara/guatemala (brak wpisu w pozostałych miastach
+	## niżej = 0 = brak plonu, patrz PlayerPlantations.calculate_harvest) —
+	## celowo skromny plon (rząd wielkości kawy w Ankarze, nie tytoniu) —
+	## mały, wysoko wyceniony przemyt, nie masowa uprawa towarowa.
+	"ankara": {"coffee": 16, "tobacco": 318, "tea": 206, "cocoa": 15, "contraband": 18},
 	"bombay": {"coffee": 18, "tobacco": 362, "tea": 235, "cocoa": 17},
 	"colombo": {"coffee": 17, "tobacco": 30, "tea": 215, "cocoa": 15},
 	"mombasa": {"coffee": 207, "tobacco": 33, "tea": 242, "cocoa": 17},
@@ -24,7 +54,7 @@ const REFERENCE_YIELD := {
 	"abidjan": {"coffee": 240, "tobacco": 39, "tea": 26, "cocoa": 218},
 	"rio": {"coffee": 220, "tobacco": 396, "tea": 24, "cocoa": 199},
 	"bogota": {"coffee": 215, "tobacco": 35, "tea": 23, "cocoa": 195},
-	"guatemala": {"coffee": 226, "tobacco": 37, "tea": 24, "cocoa": 19},
+	"guatemala": {"coffee": 226, "tobacco": 37, "tea": 24, "cocoa": 19, "contraband": 20},
 	"mexico": {"coffee": 206, "tobacco": 373, "tea": 22, "cocoa": 17},
 	"richmond": {"coffee": 22, "tobacco": 428, "tea": 25, "cocoa": 20},
 	"st_louis": {"coffee": 22, "tobacco": 433, "tea": 26, "cocoa": 20},
@@ -60,7 +90,9 @@ const RIVER_YIELD_MULTIPLIER := 2.0
 ## liczba JEST z materiałów źródłowych — patrz docs/DODATKOWE_MECHANIKI.md),
 ## tak by w pełni obsadzona plantacja referencyjna (500 robotników, 50 pól)
 ## wychodziła na plus — patrz tools/balance_simulation.py.
-const BASE_CROP_PRICE := {"coffee": 50.0, "tobacco": 50.0, "tea": 50.0, "cocoa": 50.0}
+## "contraband" 4x cenę zwykłej uprawy — mały plon (REFERENCE_YIELD wyżej),
+## ale wysoka cena za jednostkę, tak jak realny przemyt: mało, ale drogo.
+const BASE_CROP_PRICE := {"coffee": 50.0, "tobacco": 50.0, "tea": 50.0, "cocoa": 50.0, "contraband": 200.0}
 const DAILY_DRIFT_RANGE := 0.02  ## losowe wahanie ceny ±2% dziennie
 
 ## Historia ceny do wykresu (StockMarket.gd, PriceChart.gd) — ten sam wzorzec
