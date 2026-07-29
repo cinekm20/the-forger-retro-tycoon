@@ -252,7 +252,7 @@ func _build_category_card(parent: Container, category_id: String) -> void:
 	var cover_path := "res://art/categories/%s.jpg" % category_id
 	_build_framed_image(cover_center, cover_path, CATEGORY_FRAME_SIZE, owned_in_category == 0)
 
-	var category_name: String = Paintings.CATEGORY_NAMES[category_id]
+	var category_name: String = tr(Paintings.CATEGORY_NAMES[category_id])
 	var name_label := ScreenHelpers.make_label(column, tr("%s: %d/5") % [category_name, owned_in_category])
 	if owned_in_category >= 5:
 		name_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
@@ -289,7 +289,7 @@ func _build_category_detail_view() -> void:
 	content_root.alignment = BoxContainer.ALIGNMENT_BEGIN
 	content_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
 
-	var category_name: String = Paintings.CATEGORY_NAMES.get(selected_category, selected_category)
+	var category_name: String = tr(Paintings.CATEGORY_NAMES.get(selected_category, selected_category))
 	ScreenHelpers.make_title(content_root, category_name)
 
 	content_root.add_child(ScreenHelpers.make_expand_spacer())
@@ -387,7 +387,7 @@ func _build_painting_detail_view() -> void:
 
 	var number := selected_number
 	var category: String = Paintings.get_category(number)
-	var category_name: String = Paintings.CATEGORY_NAMES.get(category, category)
+	var category_name: String = tr(Paintings.CATEGORY_NAMES.get(category, category))
 	var info := Paintings.get_painting_info(number)
 
 	var frame_center := CenterContainer.new()

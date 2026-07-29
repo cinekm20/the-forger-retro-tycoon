@@ -661,7 +661,7 @@ func _update_labels() -> void:
 	## Bonusowe obrazy wuja nie mają kategorii stylistycznej (CATALOG.get
 	## zwraca "" dla ujemnych numerów) — własna, wyróżniająca etykieta
 	## zamiast pustych nawiasów w painting_label niżej.
-	var category_name: String = tr("Bonus") if Paintings.is_bonus_painting(current_number) else Paintings.CATEGORY_NAMES.get(category, category)
+	var category_name: String = tr("Bonus") if Paintings.is_bonus_painting(current_number) else tr(Paintings.CATEGORY_NAMES.get(category, category))
 	var info := Paintings.get_painting_info(current_number)
 	if not info.is_empty():
 		painting_label.text = tr("Na sprzedaż: „%s” — %s, %s (%s) — szac. wartość %.0f M") % [
