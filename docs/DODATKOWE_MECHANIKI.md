@@ -92,27 +92,33 @@ oznaczone ✅/⬜ przy każdej pozycji, żeby nie trzeba było zgadywać.
   WŁASNEGO gangstera — dodatkowa grzywna (`CAUGHT_FINE`) ponad utraconą
   opłatę, rywal bez zmian. Brak jedynie osobnej "wieży strażniczej" jako
   stałego wizualnego elementu tła — mechanicznie system działa w całości.
-- ⬜ **Pompy wodne**: inwestycja podnosząca plon i chroniąca przed klęskami
-  (susza/powódź) — wciąż niezaimplementowane, rozszerzenie mechaniki ryzyka
-  pogodowego z GDD 4.2 (która sama w sobie też jeszcze nie istnieje, patrz
-  tam).
-- ⬜ **Towar zalegający na magazynie dłużej niż rok psuje się** — wciąż
-  niezaimplementowane; `stored_goods` w `PlayerPlantations.gd`/Spichlerzu nie
-  ma żadnego mechanizmu starzenia/zepsucia.
-- ⬜ **Akademia Sztuki w konkretnym mieście** (w sequelu: Rzym) z dłuższymi
-  kursami — wciąż niezaimplementowane; `ArtSchool.gd` jest dostępna z
-  dowolnego miasta, nie tylko jednego.
-- ⬜ **Ukryte, "nielegalne" lokalne uprawy** (w sequelu: konopie w Ankarze) —
-  wciąż niezaimplementowane; `PlayerPlantations.gd`/`Crops.gd` nie mają
-  wariantu nielegalnej uprawy ani mechaniki konfiskaty.
-- ⬜ **3 "ulubione obrazy wuja"** — specjalne obrazy bonusowe (poza
-  katalogiem 40), bez fałszywek, dające dodatkową nagrodę/punkty uznania,
-  gdy trafią do kolekcji. W oryginalnym materiale wymienione jako prawdziwe,
-  historyczne (domena publiczna) dzieła: *"Zabawa na lodzie przy fosie
-  miejskiej"* Adriaena van de Velde (1659), *"Canale Grande w Wenecji"*
-  Canaletta (1730), *"Dentysta"* Gerarda van Honthorsta (1622). Wciąż
-  niezaimplementowane — `Paintings.CATALOG`/`PAINTING_INFO` obejmują tylko
-  40 numerów katalogowych, bez osobnej puli bonusowej.
+- ✅ **Pompy wodne**: inwestycja podnosząca plon i chroniąca przed klęskami
+  (susza/powódź) — zaimplementowane (`PlayerPlantations.has_water_pump`,
+  `WEATHER_RISK_CHANCE_PER_WEEK`); posiadanie pompy blokuje całkowicie
+  ryzyko pogodowe na danej plantacji.
+- ✅ **Towar zalegający na magazynie dłużej niż rok psuje się** —
+  zaimplementowane; `stored_goods` w `PlayerPlantations.gd` śledzi wiek
+  partii towaru i usuwa ją po roku (`WorldEvents.report_spoilage`
+  informuje gracza kartą wydarzenia).
+- ✅ **Akademia Sztuki w konkretnym mieście** — zaimplementowane, u nas
+  **Paryż** zamiast Rzymu z sequela (świadoma zmiana, spójna z resztą
+  naszej listy 18 lokacji), z dłuższym kursem (`ArtSchool.TRAINING_DAYS`
+  14→28 dni). `Hub.gd` blokuje dostęp do Akademii poza Paryżem
+  (`LOCATION_GATED_DESTINATIONS` + `requires_cities`).
+- ✅ **Ukryte, "nielegalne" lokalne uprawy** — zaimplementowane jako
+  ogólna **"przemycana uprawa"** (celowo bez nazwania konkretnej
+  substancji z sequela), dostępna w **Ankarze i Gwatemali**
+  (`Crops.RESTRICTED_CROP_CITIES`, `is_crop_available`), z ryzykiem
+  konfiskaty (`PlayerPlantations` + `WorldEvents.report_confiscation`).
+- ✅ **3 "ulubione obrazy wuja"** — specjalne obrazy bonusowe (poza
+  katalogiem 40), bez fałszywek, dające dodatkową nagrodę pieniężną, gdy
+  trafią do kolekcji. Prawdziwe, historyczne (domena publiczna) dzieła:
+  *"Zabawa na lodzie przy fosie miejskiej"* Adriaena van de Velde (1659),
+  *"Canale Grande w Wenecji"* Canaletta (1730), *"Dentysta"* Gerarda van
+  Honthorsta (1622). Zaimplementowane jako rzadka pozycja losowana na
+  aukcji (`Paintings.BONUS_CATALOG`, `Auctions.BONUS_PAINTING_CHANCE`) —
+  nie jako pełna Loteria Noworoczna (GDD 4.8), która zostaje osobnym,
+  wciąż nieobjętym tematem.
 
 ## Status rekomendacji (zaktualizowane)
 
@@ -120,7 +126,9 @@ Zamiast pierwotnej listy "co dopisać do GDD" — te rekomendacje zostały już
 zrealizowane i sam GDD.md (sekcje 4.2, 4.7, 10, 11) je odzwierciedla:
 sezonowość zbiorów, kara umowna za niezrealizowany kontrakt terminowy,
 kradzieże/ochrona (choć jako pełny system, nie tylko "odłożone na później") i
-twist fabularny (wuj = Vico) jako faktyczne zakończenie w `Ending.gd`. Jedyne,
-co realnie zostaje otwarte/odłożone: pompy wodne, psucie się towaru w
-magazynie, Akademia Sztuki przypisana do jednego miasta, nielegalne uprawy i
-3 bonusowe obrazy wuja — patrz oznaczenia ⬜ wyżej.
+twist fabularny (wuj = Vico) jako faktyczne zakończenie w `Ending.gd`. Z
+pierwotnie otwartej listy (pompy wodne, psucie się towaru w magazynie,
+Akademia Sztuki przypisana do jednego miasta, nielegalne uprawy, 3 bonusowe
+obrazy wuja) **wszystkie pięć pozycji jest już zaimplementowanych** — patrz
+oznaczenia ✅ wyżej. Jedyny wciąż otwarty temat z tego dokumentu to pełna
+Loteria Noworoczna (GDD 4.8), która pozostaje osobnym zakresem.
