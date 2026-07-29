@@ -11,7 +11,13 @@ extends Control
 ## dawać eksperckość za sam fakt kliknięcia przycisku.
 
 const TRAINING_COST := 2000.0
-const TRAINING_DAYS := 14
+## Zgłoszone przez użytkownika (docs/DODATKOWE_MECHANIKI.md, tipy do
+## sequela): "Akademia Sztuki w konkretnym mieście z dłuższymi kursami" —
+## Akademia jest teraz dostępna TYLKO w Paryżu (patrz Hub.LOCATION_GATED_DESTINATIONS,
+## "Szkoła sztuki" -> requires_cities=["paris"]), a kurs trwa 2× dłużej niż
+## dawniej (14 -> 28 dni) jako rekompensata za tę utratę dostępności —
+## rzadsza, ale bardziej znacząca podróż do jednego konkretnego miasta.
+const TRAINING_DAYS := 28
 const EXPERTISE_GAIN_CORRECT := 0.15
 const EXPERTISE_GAIN_WRONG := 0.05
 const QUIZ_IMAGE_SIZE := 280.0

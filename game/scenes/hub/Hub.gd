@@ -19,12 +19,14 @@ const LOCATION_GATED_DESTINATIONS := {
 	"Spichlerz": {"path": "res://scenes/warehouse/Warehouse.tscn", "requires_types": ["plantation"]},
 	"Dom aukcyjny": {"path": "res://scenes/auction_house/AuctionHouse.tscn", "requires_types": ["auction"]},
 	"Galeria": {"path": "res://scenes/gallery/Gallery.tscn", "requires_types": ["auction"]},
-	## Zgłoszone przez użytkownika: Szkoła sztuki ma być dostępna tylko w
-	## miastach aukcyjnych (Berlin/Paryż/Amsterdam/Lizbona/Londyn), nie
-	## wszędzie — bez Nowego Jorku (który jest typu "hub", nie "auction")
-	## mieści się już w istniejącym mechanizmie bramkowania wg typu, zamiast
-	## osobnej listy konkretnych miast.
-	"Szkoła sztuki": {"path": "res://scenes/art_school/ArtSchool.tscn", "requires_types": ["auction"]},
+	## Zgłoszone przez użytkownika (docs/DODATKOWE_MECHANIKI.md, tipy do
+	## sequela): Akademia Sztuki ma być przypisana do JEDNEGO konkretnego
+	## miasta (w oryginalnym materiale: Rzym, którego nie ma na naszej
+	## liście — zastąpiony Paryżem jako "stolicą sztuki" wśród naszych miast
+	## aukcyjnych). requires_cities (opcjonalne, patrz _update_gated_button)
+	## zawęża requires_types do KONKRETNYCH miast tego typu, zamiast całej
+	## kategorii "auction".
+	"Szkoła sztuki": {"path": "res://scenes/art_school/ArtSchool.tscn", "requires_types": ["auction"], "requires_cities": ["paris"]},
 	## Zgłoszone przez użytkownika: Giełda i Rynek mają być dostępne tylko w
 	## Nowym Jorku (typ "hub") i miastach aukcyjnych — NIE wszędzie, tak jak
 	## dotąd (to był błąd, ten sam co Plantacje pokazywane wszędzie by były).
@@ -135,6 +137,8 @@ func _ready() -> void:
 		var path: String = info["path"]
 		var btn := ScreenHelpers.make_button(places_menu_section, destination_name, func(): SceneRouter.goto_scene(path))
 		btn.set_meta("requires_types", info["requires_types"])
+		if info.has("requires_cities"):
+			btn.set_meta("requires_cities", info["requires_cities"])
 
 	for destination_name in FREE_DESTINATIONS.keys():
 		var path: String = FREE_DESTINATIONS[destination_name]
@@ -407,6 +411,13 @@ func _update_gated_button(node: Node) -> void:
 	if node is Button and node.has_meta("requires_types"):
 		var requires_types: Array = node.get_meta("requires_types")
 		var current_type: String = Cities.CITIES.get(Travel.current_city, {}).get("type", "")
-		node.visible = not Travel.is_traveling() and requires_types.has(current_type)
+		var visible_by_type := requires_types.has(current_type)
+		## requires_cities (opcjonalne) zawęża jeszcze dalej do konkretnych
+		## miast tego typu — patrz "Szkoła sztuki"/LOCATION_GATED_DESTINATIONS.
+		var visible_by_city := true
+		if node.has_meta("requires_cities"):
+			var requires_cities: Array = node.get_meta("requires_cities")
+			visible_by_city = requires_cities.has(Travel.current_city)
+		node.visible = not Travel.is_traveling() and visible_by_type and visible_by_city
 	for child in node.get_children():
 		_update_gated_button(child)

@@ -647,7 +647,7 @@ func _test_art_school_course_ends_turn_after_applying_effects() -> void:
 	Players.reset_new_game(2)
 
 	var training_cost := 2000.0
-	var training_days := 14
+	var training_days := 28  # ArtSchool.TRAINING_DAYS (Akademia w Paryżu, docs/DODATKOWE_MECHANIKI.md)
 	var expertise_gain := 0.15  # symuluje trafną odpowiedź w quizie
 
 	Economy.spend(training_cost)
@@ -663,7 +663,7 @@ func _test_art_school_course_ends_turn_after_applying_effects() -> void:
 	# — dopiero to oddaje ruch z powrotem, sprawdzamy migawkę gracza 1. NIE
 	# używamy Players.end_turn() tutaj: ono dolicza własny tydzień (i cap
 	# Auctions.cap_turn_advance) PRZED sprawdzeniem najwcześniejszej daty, co
-	# przy training_days=14 > DAYS_PER_TURN=7 nie wystarczyłoby, by wyprzedzić
+	# przy training_days=28 > DAYS_PER_TURN=7 nie wystarczyłoby, by wyprzedzić
 	# gracza 1 — testowalibyśmy więc coś innego niż samą logikę
 	# pass_turn_to_earliest_player.
 	Players.advance_active_player_time(training_days + 1)
