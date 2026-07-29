@@ -65,6 +65,17 @@ const WEATHER_RISK_CHANCE_PER_WEEK := 0.03
 const WATER_PUMP_COST := 5000.0  ## rząd wielkości Security.BODYGUARD_COST — duża, jednorazowa inwestycja infrastrukturalna
 const WATER_PUMP_YIELD_BONUS := 1.2  ## +20% plonu całej plantacji, patrz calculate_harvest
 
+## Psucie się towaru (docs/DODATKOWE_MECHANIKI.md, tipy do sequela: "Towar
+## zalegający na magazynie dłużej niż rok psuje się"). Rok gry = pełne 12
+## miesięcy × Calendar.DAYS_PER_MONTH (uproszczony kalendarz, patrz
+## Calendar.gd) — NIE duplikujemy tej liczby jako osobnej stałej "360",
+## żeby przy ewentualnej zmianie długości miesiąca w Calendar.gd próg
+## zepsucia automatycznie poszedł za nią. Uproszczony model (tak jak reszta
+## tego pliku — patrz komentarz nagłówkowy): CAŁY zapas danej uprawy psuje
+## się naraz po przekroczeniu progu, nie stopniowo — ten sam "tunable
+## placeholder" charakter co _apply_crisis_hit.
+const GOODS_SPOILAGE_DAYS := Calendar.DAYS_PER_MONTH * 12
+
 var plantations: Array[Dictionary] = []
 
 ## city_id -> {"river": Array[bool], "tile_owner": Array[int] (-1 = wolne,
@@ -142,6 +153,14 @@ func apply_player_days_elapsed(days_elapsed: int) -> void:
 			if randf() < WEATHER_RISK_CHANCE_PER_WEEK * weeks:
 				lost = _apply_crisis_hit(plantation, "weather")
 
+		## Psucie się towaru (docs/DODATKOWE_MECHANIKI.md, tipy do sequela:
+		## "Towar zalegający na magazynie dłużej niż rok psuje się") —
+		## niezależne od kryzysów wyżej, więc sprawdzane zawsze, dopóki
+		## plantacja jeszcze istnieje (bez sensu psuć magazyn plantacji, którą
+		## właśnie i tak stracono w tym samym kroku).
+		if not lost:
+			_apply_spoilage(plantation)
+
 		if lost:
 			plantations.remove_at(i)
 		else:
@@ -208,6 +227,7 @@ func found_plantation(city_id: String) -> int:
 		"city": city_id,
 		"workers": 0,
 		"stored_goods": {},  ## uprawa -> ilość w magazynie (osobno per uprawa)
+		"stored_since": {},  ## uprawa -> dzień, od którego leży bieżący zapas — patrz _apply_spoilage
 		"last_harvest_day": Players.active_day(),
 		"crisis_hits": 0,  ## ile razy strajk/zamieszki uderzyły w tę plantację — patrz _apply_crisis_hit
 	})
@@ -401,10 +421,39 @@ func harvest(plantation_index: int) -> Dictionary:
 	var amounts := calculate_harvest(plantation_index)
 	var plantation: Dictionary = plantations[plantation_index]
 	var stored: Dictionary = plantation["stored_goods"]
+	## stored_since (patrz _apply_spoilage) liczy się od pierwszego zbioru
+	## do PUSTEGO magazynu tej uprawy — dosypanie kolejnego zbioru do
+	## istniejącego zapasu NIE resetuje zegara na nowo (tak jak w realnym
+	## magazynie, najstarsza partia i tak psuje się pierwsza; uproszczenie:
+	## traktujemy CAŁY zapas jako jedną partię o wieku najstarszej reszty).
+	var stored_since: Dictionary = plantation.get("stored_since", {})
 	for crop in amounts:
+		if int(stored.get(crop, 0)) <= 0:
+			stored_since[crop] = Players.active_day()
 		stored[crop] = int(stored.get(crop, 0)) + amounts[crop]
+	plantation["stored_since"] = stored_since
 	plantation["last_harvest_day"] = Players.active_day()
 	return amounts
+
+
+## Psuje CAŁY zapas uprawy, która leży w magazynie dłużej niż GOODS_SPOILAGE_DAYS
+## — patrz komentarz przy stałej. Zapas bez wpisu w stored_since (zapisy
+## sprzed dodania tej mechaniki) domyślnie liczy się jako "dopiero co
+## złożony" (Players.active_day()), żeby stare zapisy nie traciły całego
+## magazynu od razu przy pierwszym wczytaniu.
+func _apply_spoilage(plantation: Dictionary) -> void:
+	var stored: Dictionary = plantation["stored_goods"]
+	var stored_since: Dictionary = plantation.get("stored_since", {})
+	var current_day: int = Players.active_day()
+	for crop in stored.keys().duplicate():
+		var amount: int = int(stored[crop])
+		if amount <= 0:
+			continue
+		var since: int = int(stored_since.get(crop, current_day))
+		if current_day - since > GOODS_SPOILAGE_DAYS:
+			stored[crop] = 0
+			WorldEvents.report_spoilage(plantation["city"], crop, amount)
+	plantation["stored_since"] = stored_since
 
 
 ## Sprzedaje zapas JEDNEJ uprawy z JEDNEJ plantacji po aktualnej cenie

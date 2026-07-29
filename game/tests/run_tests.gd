@@ -55,6 +55,7 @@ func _ready() -> void:
 	_test_plantation_lost_after_repeated_crisis_hits()
 	_test_plantation_tiles_are_exclusive_between_players()
 	_test_water_pump_prevents_weather_crisis_and_boosts_yield()
+	_test_goods_spoil_after_a_year_in_storage()
 	_test_world_events_reform_queued()
 	_test_market_shock_crash_and_boom()
 	_test_yearly_report_populated_on_new_year()
@@ -232,15 +233,17 @@ func _test_plant_tile_requires_ownership() -> void:
 
 ## "richmond" (region north_america) celowo — Cities.REGION_UNREST_CHANCE_PER_WEEK
 ## nie ma dla niego wpisu, więc zamieszki nigdy nie ingerują w ten test.
-## Wymuszony dług (Economy.player_money < 0) gwarantuje, że sprawdzenie
-## strajku w apply_player_days_elapsed trafia PIERWSZE i od razu zwraca
-## lost=true — więc NOWSZE ryzyko pogodowe (PlayerPlantations.WEATHER_RISK_CHANCE_PER_WEEK,
-## sprawdzane dopiero `if not lost`, patrz komentarz tam) jest w tym
-## konkretnym wywołaniu w ogóle pomijane, mimo że samo w sobie NIE jest
-## ograniczone do żadnego regionu (w odróżnieniu od zamieszek). Deterministyczne
-## z tego samego powodu, dla którego _test_security_bodyguard_and_gangster
-## nigdy nie wywołuje apply_player_days_elapsed — realne, losowe zdarzenia
-## tygodniowe nie powinny wpływać na wynik testu.
+## `lost` w apply_player_days_elapsed odzwierciedla WYŁĄCZNIE "czy PLANTACJA
+## PADŁA CAŁKOWICIE" (crisis_hits >= próg), NIE "czy jakikolwiek kryzys już
+## zaszedł w tym wywołaniu" — pojedyncze, niefatalne uderzenie (jak tu:
+## crisis_hits 0->1) zostawia `lost=false`, więc KOLEJNE, niezależne
+## sprawdzenia (zamieszki, a teraz też ryzyko pogodowe — patrz
+## PlayerPlantations.WEATHER_RISK_CHANCE_PER_WEEK, jedyne z trzech BEZ
+## ograniczenia do regionu) nadal by się wykonały tego samego dnia. Pompa
+## wodna (has_water_pump=true) blokuje tę trzecią, region-niezależną
+## możliwość, żeby test sprawdzał DOKŁADNIE jedno, przewidywalne uderzenie —
+## ten sam powód, dla którego _test_security_bodyguard_and_gangster nigdy
+## nie wywołuje apply_player_days_elapsed.
 func _test_plantation_crisis_from_unpaid_wages() -> void:
 	print("-- PlayerPlantations: strajk (brak wypłat) zabiera zapasy i połowę robotników --")
 	PlayerPlantations.reset_new_game()
@@ -248,6 +251,7 @@ func _test_plantation_crisis_from_unpaid_wages() -> void:
 	WorldEvents.reset_new_game()
 	Players.reset_new_game(1)
 	var idx := PlayerPlantations.found_plantation("richmond")
+	PlayerPlantations.plantations[idx]["has_water_pump"] = true  # odporność na losowe susze/powodzie — inaczej sporadyczny DRUGI hit tego samego dnia psuje asercje poniżej
 	PlayerPlantations.hire_workers(idx, 10)
 	PlayerPlantations.plantations[idx]["stored_goods"]["tobacco"] = 50
 	Economy.player_money = -1.0  # już na minusie — jedna dowolna płaca utrzyma dług
@@ -270,6 +274,7 @@ func _test_plantation_lost_after_repeated_crisis_hits() -> void:
 	WorldEvents.reset_new_game()
 	Players.reset_new_game(1)
 	var idx := PlayerPlantations.found_plantation("richmond")
+	PlayerPlantations.plantations[idx]["has_water_pump"] = true  # odporność na losowe susze/powodzie — inaczej sporadyczny dodatkowy hit psuje liczenie dokładnie 3 uderzeń
 	PlayerPlantations.city_grids["richmond"]["river"].fill(false)
 	PlayerPlantations.buy_tile(idx, 0)
 	PlayerPlantations.hire_workers(idx, 10)
@@ -354,6 +359,38 @@ func _test_water_pump_prevents_weather_crisis_and_boosts_yield() -> void:
 	PlayerPlantations.plantations[idx]["has_water_pump"] = false
 	var without_pump := PlayerPlantations.calculate_harvest(idx)
 	_assert(int(with_pump.get("tobacco", 0)) > int(without_pump.get("tobacco", 0)), "plon z pompą wyższy niż bez pompy (WATER_PUMP_YIELD_BONUS)")
+
+
+## docs/DODATKOWE_MECHANIKI.md: "Towar zalegający na magazynie dłużej niż
+## rok psuje się" — "richmond" + pompa wodna, tak jak w innych testach
+## harvest-owych wyżej, żeby losowe ryzyko pogodowe nie ingerowało.
+func _test_goods_spoil_after_a_year_in_storage() -> void:
+	print("-- PlayerPlantations: towar starszy niż rok psuje się --")
+	PlayerPlantations.reset_new_game()
+	Calendar.reset_new_game()
+	Economy.reset_new_game()
+	WorldEvents.reset_new_game()
+	Players.reset_new_game(1)
+	var idx := PlayerPlantations.found_plantation("richmond")
+	PlayerPlantations.plantations[idx]["has_water_pump"] = true
+
+	# Zapas "starzeje się" wstecz: udajemy, że leży tu od dnia sprzed
+	# GOODS_SPOILAGE_DAYS + 1, więc JEDNO wywołanie apply_player_days_elapsed
+	# musi go zepsuć.
+	PlayerPlantations.plantations[idx]["stored_goods"]["tobacco"] = 40
+	PlayerPlantations.plantations[idx]["stored_since"]["tobacco"] = Players.active_day() - PlayerPlantations.GOODS_SPOILAGE_DAYS - 1
+
+	# Świeży zapas innej uprawy, złożony DZISIAJ — nie powinien ucierpieć.
+	PlayerPlantations.plantations[idx]["stored_goods"]["coffee"] = 25
+	PlayerPlantations.plantations[idx]["stored_since"]["coffee"] = Players.active_day()
+
+	PlayerPlantations.apply_player_days_elapsed(1)
+
+	_assert(int(PlayerPlantations.plantations[idx]["stored_goods"]["tobacco"]) == 0, "roczny zapas tytoniu zepsuty do zera")
+	_assert(int(PlayerPlantations.plantations[idx]["stored_goods"]["coffee"]) == 25, "świeży zapas kawy NIE zepsuty")
+	_assert(WorldEvents.has_pending(), "zepsucie trafiło do kolejki WorldEvents")
+	var reported := WorldEvents.consume_next()
+	_assert(reported.get("kind", "") == "spoilage" and reported.get("crop", "") == "tobacco" and int(reported.get("amount", 0)) == 40, "zdarzenie opisuje dokładnie zepsuty towar (tytoń, 40 jednostek)")
 
 
 func _test_world_events_reform_queued() -> void:

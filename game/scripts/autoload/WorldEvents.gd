@@ -6,12 +6,14 @@ extends Node
 ## bo w jednym dużym skoku dni (np. długa podróż) może uzbierać się kilka
 ## zdarzeń naraz — pokazywane jedno po drugim, nie zlewane w jeden komunikat.
 ##
-## Trzy źródła zdarzeń:
+## Cztery źródła zdarzeń:
 ## 1. Reforma walutowa (Economy.currency_reform) — dziś cicha zmiana
 ##    liczbowa (patrz Economy.gd _on_day_advanced), teraz dostaje kartę.
-## 2. Kryzys na plantacji: strajk (brak wypłat) albo zamieszki (niestabilny
-##    region) — patrz PlayerPlantations._apply_crisis_hit.
+## 2. Kryzys na plantacji: strajk (brak wypłat), zamieszki (niestabilny
+##    region) albo susza/powódź — patrz PlayerPlantations._apply_crisis_hit.
 ## 3. Krach/hossa na giełdzie — patrz ShippingCompanies.apply_market_shock.
+## 4. Zepsuty towar w magazynie (leżał dłużej niż rok) — patrz
+##    PlayerPlantations._apply_spoilage.
 
 var queue: Array[Dictionary] = []
 
@@ -62,4 +64,15 @@ func report_market_shock(kind: String, change_ratio: float) -> void:
 	queue.append({
 		"kind": kind,
 		"change_ratio": change_ratio,
+	})
+
+
+## Wywoływane z PlayerPlantations._apply_spoilage — cały zapas jednej uprawy
+## na jednej plantacji przekroczył GOODS_SPOILAGE_DAYS i zniknął.
+func report_spoilage(city: String, crop: String, amount: int) -> void:
+	queue.append({
+		"kind": "spoilage",
+		"city": city,
+		"crop": crop,
+		"amount": amount,
 	})

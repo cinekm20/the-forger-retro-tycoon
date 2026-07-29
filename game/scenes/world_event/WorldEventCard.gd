@@ -57,6 +57,8 @@ func _background_path() -> String:
 			return "res://art/events/crash.jpg"
 		"boom":
 			return "res://art/events/boom.jpg"
+		"spoilage":
+			return "res://art/events/spoilage.jpg"
 		_:
 			return ""
 
@@ -77,6 +79,8 @@ func _headline() -> String:
 			return tr("Krach giełdowy!")
 		"boom":
 			return tr("Hossa na giełdzie!")
+		"spoilage":
+			return tr("Towar zepsuty w %s!") % Cities.get_city_name(event.get("city", ""))
 		_:
 			return tr("Wiadomości")
 
@@ -91,6 +95,10 @@ func _body_text() -> String:
 			return _crisis_body_text()
 		"crash", "boom":
 			return _market_shock_body_text()
+		"spoilage":
+			return tr("Zapas %s (%d jednostek) leżał w magazynie zbyt długo i uległ zepsuciu.") % [
+				Crops.CROP_NAMES.get(event.get("crop", ""), event.get("crop", "")), int(event.get("amount", 0)),
+			]
 		_:
 			return ""
 
