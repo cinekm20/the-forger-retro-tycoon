@@ -50,6 +50,21 @@ const REFERENCE_TILE_COUNT := 50.0  ## odniesienie do tabeli plonów (ok. 50 ha 
 const CRISIS_HITS_TO_LOSE_PLANTATION := 3
 const CRISIS_WORKER_LOSS_RATIO := 0.5  ## ucieka połowa aktualnej załogi za każdym uderzeniem
 
+## Ryzyko pogodowe (susza/powódź) — docs/DODATKOWE_MECHANIKI.md, tipy do
+## sequela: "Pompy wodne: inwestycja podnosząca plon i chroniąca przed
+## klęskami (susza/powódź)". W odróżnieniu od ryzyka regionalnego
+## (Cities.REGION_UNREST_CHANCE_PER_WEEK, tylko Afryka/Azja) pogoda dotyczy
+## KAŻDEJ plantacji jednakowo, niezależnie od regionu — stąd stała tu, nie w
+## Cities.gd. Ta sama konsekwencja co strajk/zamieszki (_apply_crisis_hit,
+## dzielony licznik crisis_hits), tylko z WŁASNĄ przyczyną ("weather") do
+## rozróżnienia w karcie gazety (patrz WorldEventCard.gd).
+const WEATHER_RISK_CHANCE_PER_WEEK := 0.03
+## Plantacja z pompą jest CAŁKOWICIE odporna na to konkretne ryzyko (patrz
+## apply_player_days_elapsed) — "chroniąca przed klęskami" z materiału
+## źródłowego, nie tylko je łagodząca.
+const WATER_PUMP_COST := 5000.0  ## rząd wielkości Security.BODYGUARD_COST — duża, jednorazowa inwestycja infrastrukturalna
+const WATER_PUMP_YIELD_BONUS := 1.2  ## +20% plonu całej plantacji, patrz calculate_harvest
+
 var plantations: Array[Dictionary] = []
 
 ## city_id -> {"river": Array[bool], "tile_owner": Array[int] (-1 = wolne,
@@ -119,6 +134,13 @@ func apply_player_days_elapsed(days_elapsed: int) -> void:
 			var chance_per_week: float = Cities.REGION_UNREST_CHANCE_PER_WEEK.get(region, 0.0)
 			if chance_per_week > 0.0 and randf() < chance_per_week * weeks:
 				lost = _apply_crisis_hit(plantation, "unrest")
+
+		## Susza/powódź: ta sama logika co zamieszki wyżej, ale JEDNAKOWE
+		## ryzyko dla każdej plantacji (nie zależne od regionu) i CAŁKOWICIE
+		## pominięte, jeśli gracz ma tu pompę wodną — patrz WATER_PUMP_COST.
+		if not lost and not bool(plantation.get("has_water_pump", false)):
+			if randf() < WEATHER_RISK_CHANCE_PER_WEEK * weeks:
+				lost = _apply_crisis_hit(plantation, "weather")
 
 		if lost:
 			plantations.remove_at(i)
@@ -292,6 +314,22 @@ func hire_workers(plantation_index: int, count: int) -> void:
 	plantations[plantation_index]["workers"] = clampi(count, 0, MAX_WORKERS)
 
 
+## Jednorazowa inwestycja per plantacja (nie per pole) — patrz WATER_PUMP_COST
+## wyżej. Zwraca false, jeśli plantacja już ma pompę, albo brak gotówki.
+func buy_water_pump(plantation_index: int) -> bool:
+	var plantation: Dictionary = plantations[plantation_index]
+	if bool(plantation.get("has_water_pump", false)):
+		return false
+	if not Economy.spend(WATER_PUMP_COST):
+		return false
+	plantation["has_water_pump"] = true
+	return true
+
+
+func has_water_pump(plantation_index: int) -> bool:
+	return bool(plantations[plantation_index].get("has_water_pump", false))
+
+
 ## Ile pól we wspólnej siatce miasta NALEŻY DO AKTYWNEGO GRACZA — pola
 ## zajęte przez innych graczy się NIE liczą (patrz komentarz nagłówkowy
 ## pliku: pola są na wyłączność).
@@ -328,6 +366,9 @@ func calculate_harvest(plantation_index: int) -> Dictionary:
 	var worker_factor: float = float(plantation["workers"]) / 500.0
 	var seasonal_factor: float = Crops.SEASONAL_YIELD_FACTOR[Calendar.get_month_for_day(Players.active_day())]
 	var time_factor: float = days_since_harvest / REFERENCE_PERIOD_DAYS
+	## Pompa wodna: +20% plonu CAŁEJ plantacji (WATER_PUMP_YIELD_BONUS) —
+	## patrz komentarz przy stałej, "podnosząca plon" z materiału źródłowego.
+	var pump_factor: float = WATER_PUMP_YIELD_BONUS if bool(plantation.get("has_water_pump", false)) else 1.0
 	var tile_owner: Array = grid["tile_owner"]
 	var tile_crops: Array = grid["tile_crops"]
 	for crop in Crops.CROPS:
@@ -347,7 +388,7 @@ func calculate_harvest(plantation_index: int) -> Dictionary:
 			continue
 		var effective_tiles: float = normal_tiles + river_tiles * Crops.RIVER_YIELD_MULTIPLIER
 		var tile_factor: float = effective_tiles / REFERENCE_TILE_COUNT
-		var amount := int(reference * worker_factor * tile_factor * seasonal_factor * time_factor)
+		var amount := int(reference * worker_factor * tile_factor * seasonal_factor * time_factor * pump_factor)
 		if amount > 0:
 			result[crop] = amount
 	return result

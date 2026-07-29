@@ -46,7 +46,13 @@ func _background_path() -> String:
 		"reform":
 			return "res://art/events/reform.jpg"
 		"crisis":
-			return "res://art/events/strike.jpg" if event.get("cause", "") == "wages" else "res://art/events/riot.jpg"
+			match event.get("cause", ""):
+				"wages":
+					return "res://art/events/strike.jpg"
+				"weather":
+					return "res://art/events/drought.jpg"
+				_:
+					return "res://art/events/riot.jpg"
 		"crash":
 			return "res://art/events/crash.jpg"
 		"boom":
@@ -60,9 +66,13 @@ func _headline() -> String:
 		"reform":
 			return tr("Reforma walutowa!")
 		"crisis":
-			if event.get("cause", "") == "wages":
-				return tr("Strajk w %s!") % Cities.get_city_name(event.get("city", ""))
-			return tr("Zamieszki w %s!") % Cities.get_city_name(event.get("city", ""))
+			match event.get("cause", ""):
+				"wages":
+					return tr("Strajk w %s!") % Cities.get_city_name(event.get("city", ""))
+				"weather":
+					return tr("Klęska żywiołowa w %s!") % Cities.get_city_name(event.get("city", ""))
+				_:
+					return tr("Zamieszki w %s!") % Cities.get_city_name(event.get("city", ""))
 		"crash":
 			return tr("Krach giełdowy!")
 		"boom":
@@ -94,10 +104,13 @@ func _market_shock_body_text() -> String:
 
 func _crisis_body_text() -> String:
 	var lines: Array[String] = []
-	if event.get("cause", "") == "wages":
-		lines.append(tr("Robotnicy porzucają pracę wobec zaległych wypłat."))
-	else:
-		lines.append(tr("Niepokoje społeczne uderzają w plantację."))
+	match event.get("cause", ""):
+		"wages":
+			lines.append(tr("Robotnicy porzucają pracę wobec zaległych wypłat."))
+		"weather":
+			lines.append(tr("Susza i powodzie niszczą uprawy — pompa wodna dałaby pełną ochronę."))
+		_:
+			lines.append(tr("Niepokoje społeczne uderzają w plantację."))
 
 	var workers_lost: int = int(event.get("workers_lost", 0))
 	if workers_lost > 0:

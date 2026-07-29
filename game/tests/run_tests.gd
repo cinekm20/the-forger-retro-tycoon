@@ -54,6 +54,7 @@ func _ready() -> void:
 	_test_plantation_crisis_from_unpaid_wages()
 	_test_plantation_lost_after_repeated_crisis_hits()
 	_test_plantation_tiles_are_exclusive_between_players()
+	_test_water_pump_prevents_weather_crisis_and_boosts_yield()
 	_test_world_events_reform_queued()
 	_test_market_shock_crash_and_boom()
 	_test_yearly_report_populated_on_new_year()
@@ -141,6 +142,7 @@ func _test_harvest_requires_elapsed_time() -> void:
 	Players.reset_new_game(1)
 	var idx := PlayerPlantations.found_plantation("richmond")
 	PlayerPlantations.city_grids["richmond"]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
+	PlayerPlantations.plantations[idx]["has_water_pump"] = true  # odporność na losowe susze/powodzie — test ma być deterministyczny
 	PlayerPlantations.buy_tile(idx, 0)
 	PlayerPlantations.plant_tile(idx, 0, "tobacco")
 	PlayerPlantations.hire_workers(idx, 500)
@@ -163,6 +165,7 @@ func _test_harvest_scales_with_time() -> void:
 	Players.reset_new_game(1)
 	var idx := PlayerPlantations.found_plantation("richmond")
 	PlayerPlantations.city_grids["richmond"]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
+	PlayerPlantations.plantations[idx]["has_water_pump"] = true  # odporność na losowe susze/powodzie — test ma być deterministyczny
 	PlayerPlantations.buy_tile(idx, 0)
 	PlayerPlantations.plant_tile(idx, 0, "tobacco")
 	PlayerPlantations.hire_workers(idx, 500)
@@ -175,6 +178,7 @@ func _test_harvest_scales_with_time() -> void:
 	Players.reset_new_game(1)
 	idx = PlayerPlantations.found_plantation("richmond")
 	PlayerPlantations.city_grids["richmond"]["river"].fill(false)  # rzeka losowa - pole 0 musi być pewne do kupienia
+	PlayerPlantations.plantations[idx]["has_water_pump"] = true  # odporność na losowe susze/powodzie — test ma być deterministyczny
 	PlayerPlantations.buy_tile(idx, 0)
 	PlayerPlantations.plant_tile(idx, 0, "tobacco")
 	PlayerPlantations.hire_workers(idx, 500)
@@ -199,6 +203,7 @@ func _test_plantation_grows_multiple_crops_at_once() -> void:
 	## po 1 polu każdej z nich wynik zaokrągla się w górę od zera.
 	var idx := PlayerPlantations.found_plantation("rio")
 	PlayerPlantations.city_grids["rio"]["river"].fill(false)
+	PlayerPlantations.plantations[idx]["has_water_pump"] = true  # odporność na losowe susze/powodzie — test ma być deterministyczny
 	PlayerPlantations.hire_workers(idx, 500)
 
 	PlayerPlantations.buy_tile(idx, 0)
@@ -226,11 +231,16 @@ func _test_plant_tile_requires_ownership() -> void:
 
 
 ## "richmond" (region north_america) celowo — Cities.REGION_UNREST_CHANCE_PER_WEEK
-## nie ma dla niego wpisu, więc zamieszki nigdy nie ingerują w ten test:
-## sprawdzamy WYŁĄCZNIE strajk z zaległych wypłat, deterministycznie, bez
-## żadnego randf() w grze (ten sam powód, dla którego _test_security_bodyguard_and_gangster
+## nie ma dla niego wpisu, więc zamieszki nigdy nie ingerują w ten test.
+## Wymuszony dług (Economy.player_money < 0) gwarantuje, że sprawdzenie
+## strajku w apply_player_days_elapsed trafia PIERWSZE i od razu zwraca
+## lost=true — więc NOWSZE ryzyko pogodowe (PlayerPlantations.WEATHER_RISK_CHANCE_PER_WEEK,
+## sprawdzane dopiero `if not lost`, patrz komentarz tam) jest w tym
+## konkretnym wywołaniu w ogóle pomijane, mimo że samo w sobie NIE jest
+## ograniczone do żadnego regionu (w odróżnieniu od zamieszek). Deterministyczne
+## z tego samego powodu, dla którego _test_security_bodyguard_and_gangster
 ## nigdy nie wywołuje apply_player_days_elapsed — realne, losowe zdarzenia
-## tygodniowe nie powinny wpływać na wynik testu).
+## tygodniowe nie powinny wpływać na wynik testu.
 func _test_plantation_crisis_from_unpaid_wages() -> void:
 	print("-- PlayerPlantations: strajk (brak wypłat) zabiera zapasy i połowę robotników --")
 	PlayerPlantations.reset_new_game()
@@ -306,6 +316,44 @@ func _test_plantation_tiles_are_exclusive_between_players() -> void:
 	Players.pass_turn_to_earliest_player()
 	_assert(Players.active_index == 0, "gracz 1 jest znów aktywny")
 	_assert(PlayerPlantations.get_owned_tile_count(idx_p1) == 1, "gracz 1 nadal widzi TYLKO swoje pole (0), nie pole gracza 2")
+
+
+## docs/DODATKOWE_MECHANIKI.md: "Pompy wodne: inwestycja podnosząca plon i
+## chroniąca przed klęskami (susza/powódź)".
+func _test_water_pump_prevents_weather_crisis_and_boosts_yield() -> void:
+	print("-- PlayerPlantations: pompa wodna chroni przed pogodą i podnosi plon --")
+	PlayerPlantations.reset_new_game()
+	Economy.reset_new_game()
+	WorldEvents.reset_new_game()
+	Players.reset_new_game(1)
+	var idx := PlayerPlantations.found_plantation("richmond")
+	PlayerPlantations.city_grids["richmond"]["river"].fill(false)
+
+	_assert(not PlayerPlantations.has_water_pump(idx), "plantacja startuje bez pompy")
+	Economy.player_money = PlayerPlantations.WATER_PUMP_COST
+	_assert(PlayerPlantations.buy_water_pump(idx), "zakup pompy się udaje przy wystarczającej gotówce")
+	_assert(PlayerPlantations.has_water_pump(idx), "has_water_pump zwraca true po zakupie")
+	_assert(Economy.player_money == 0.0, "koszt pompy odjęty od gotówki")
+	_assert(not PlayerPlantations.buy_water_pump(idx), "nie da się kupić drugiej pompy na tę samą plantację")
+
+	## Odporność na pogodę: kod pomija losowanie CAŁKOWICIE, gdy has_water_pump
+	## jest ustawione (patrz apply_player_days_elapsed) — więc mimo bardzo
+	## wielu tygodni crisis_hits musi zostać dokładnie 0, w pełni deterministycznie.
+	for i in 50:
+		Economy.player_money = 1000000.0
+		PlayerPlantations.apply_player_days_elapsed(7)
+	_assert(int(PlayerPlantations.plantations[idx].get("crisis_hits", 0)) == 0, "pompa daje pełną odporność na suszę/powódź (0 uderzeń mimo 50 tygodni)")
+
+	## Bonus plonu: ta sama plantacja/pola/robotnicy, TYLKO obecność pompy
+	## się zmienia między dwoma pomiarami.
+	PlayerPlantations.buy_tile(idx, 0)
+	PlayerPlantations.plant_tile(idx, 0, "tobacco")
+	PlayerPlantations.hire_workers(idx, 500)
+	PlayerPlantations.plantations[idx]["last_harvest_day"] = Players.active_day() - 30
+	var with_pump := PlayerPlantations.calculate_harvest(idx)
+	PlayerPlantations.plantations[idx]["has_water_pump"] = false
+	var without_pump := PlayerPlantations.calculate_harvest(idx)
+	_assert(int(with_pump.get("tobacco", 0)) > int(without_pump.get("tobacco", 0)), "plon z pompą wyższy niż bez pompy (WATER_PUMP_YIELD_BONUS)")
 
 
 func _test_world_events_reform_queued() -> void:

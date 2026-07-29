@@ -30,6 +30,7 @@ var info_label: Label
 var harvest_status_label: Label
 var crop_option: OptionButton
 var worker_spin: SpinBox
+var pump_button: Button
 var cell_size: float = 22.0
 var column_width: float = 260.0
 var legend_text_width: float = 200.0
@@ -218,6 +219,11 @@ func _ready() -> void:
 	## napis z nazwą miasta był za długi na węższą kolumnę (column_width),
 	## Godot obcinał go wewnątrz guzika.
 	ScreenHelpers.make_button(info_column, "Wyślij i sprzedaj", _on_sell_pressed, column_width)
+	## Pompa wodna (docs/DODATKOWE_MECHANIKI.md) — jednorazowa inwestycja per
+	## plantacja, chroni przed suszą/powodzią (PlayerPlantations.WEATHER_RISK_CHANCE_PER_WEEK)
+	## i podnosi plon o WATER_PUMP_YIELD_BONUS. Tekst/disabled aktualizowane w
+	## _update_info(), zależnie od tego, czy TA plantacja już ją ma.
+	pump_button = ScreenHelpers.make_button(info_column, "", _on_buy_pump_pressed, column_width)
 
 	## Legenda WYGLĄDU pól — ikonka + podpis dla każdego stanu pola (nie tylko
 	## opis liczbowy) — zgłoszone przez użytkownika: musi być pokazane, jak
@@ -417,6 +423,14 @@ func _on_sell_pressed() -> void:
 	_update_info()
 
 
+func _on_buy_pump_pressed() -> void:
+	if PlayerPlantations.buy_water_pump(plantation_index):
+		harvest_status_label.text = tr("Pompa wodna kupiona — plantacja odporna na suszę/powódź.")
+	else:
+		harvest_status_label.text = tr("Za mało gotówki na pompę wodną.")
+	_update_info()
+
+
 ## TRZY krótkie, stałe wiersze (każdy z osobna, sam jeden, zawsze mieści się
 ## w custom_minimum_size.x bez zawijania) zamiast jednego długiego zdania z
 ## autowrap — długość samej TREŚCI zmieniała liczbę zawiniętych linii, więc
@@ -439,6 +453,11 @@ func _update_info() -> void:
 		tr("Robotnicy: %d") % int(plantation["workers"]),
 		tr("Zboże w magazynie: %d") % total_stored,
 	]
+
+	var has_pump := PlayerPlantations.has_water_pump(plantation_index)
+	pump_button.text = tr("Pompa wodna (kupiona)") if has_pump else tr("Kup pompę wodną (%.0f M)") % PlayerPlantations.WATER_PUMP_COST
+	pump_button.disabled = has_pump
+
 	_update_legend()
 
 
