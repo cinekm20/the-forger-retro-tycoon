@@ -39,6 +39,17 @@ photo, realistic skin texture
 2. Dodaj go jako **Style Reference / Image Guidance** (w zależności od wersji
    UI Leonardo bywa to nazwane "Elements" albo "Image Guidance → Style
    Reference") przy wadze ok. **30–50%** dla wszystkich kolejnych generacji.
+   **Wyjątek — WYIZOLOWANE sprite'y/ikony bez tła (rośliny, zwierzęta,
+   postacie, dowolny "goły" obiekt na przezroczystym tle):** jeśli Twój
+   obraz referencyjny ma ozdobną ramkę/kartę/winietę (np. ekran tytułowy z
+   punktu 1, ramka obrazu z domu aukcyjnego, ikony kategorii Galerii §9b —
+   patrz też Plan produkcji, wiersz 9, faza wzrostu roślin, TRZECIE
+   PODEJŚCIE niżej w §3), Image Guidance przy tej wadze "przebija" tekstowe
+   `no frame` w prompcie — obraz referencyjny to silniejszy sygnał niż sam
+   tekst. Dla takich assetów albo **wyłącz Style Reference całkowicie**
+   (sam tekstowy tag stylu w promencie wystarcza do spójnej palety), albo
+   **podmień referencję na inny, już goły sprite bez ramki** (np. jeden z
+   gotowych portretów koni/gangsterów, §5/§6).
 3. Dla **wariantów tego samego obiektu** (np. 3 fazy wzrostu tej samej
    rośliny, 3 wyrazy twarzy Vico) używaj trybu **Image-to-Image** na bazie
    poprzedniego wariantu z niskim **Strength ~20–35%**, zamiast generować od
