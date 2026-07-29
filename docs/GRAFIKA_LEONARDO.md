@@ -480,9 +480,8 @@ Vintage newspaper front page illustration, huge bold Art Deco masthead headline 
 ```
 
 Poniższe dwie karty (psucie towaru, konfiskata) doszły razem z 5 dodatkowymi
-mechanikami (docs/DODATKOWE_MECHANIKI.md) — kod (`WorldEvents.gd`/
-`WorldEventCard.gd`) już je obsługuje i po cichu spada na fallback (tło
-Giełdy), dopóki te dwie grafiki nie zostaną wgrane.
+mechanikami (docs/DODATKOWE_MECHANIKI.md) — ✅ obie grafiki zrobione i
+podpięte (`events/spoilage.jpg`, `events/confiscation.jpg`).
 
 **Zepsuty towar (Spichlerz)** — `events/spoilage.jpg`
 ```
@@ -502,9 +501,7 @@ kodzie, patrz `NewYearLottery.gd`), więc prompt celowo NIE jest w formacie
 ```
 Art Deco New Year's Eve gala ballroom interior at the stroke of midnight, elegant guests in 1920s evening wear celebrating, golden confetti and paper streamers scattered in the air, a large ornate clock in the background, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, game background art, Art Deco 1920s illustration style, mobile game asset, clean silhouette, no photorealism
 ```
-Dopóki grafika nie jest wgrana, `NewYearLottery.gd` po cichu spada na tło
-Giełdy (`stock_market.jpg`) — ten sam wzorzec fallbacku co
-`WorldEventCard.gd`.
+✅ Zrobione i podpięte (`events/lottery.jpg`).
 
 ### 5. Tor wyścigów konnych
 - Tło toru
@@ -1298,9 +1295,9 @@ Leonardo, żeby mieć z czego wybrać).
 | 14 | 2 | Pusty wariant tła Galerii (bez obrazów/ławek/żyrandola na ścianach) | 1 | 16:9, 1920×1080 | §9 | ✅ zrobione i podpięte (`gallery_empty.jpg`) — zwykły `gallery.jpg` zostaje jako czysty fallback, gdyby plik kiedyś zniknął |
 | 15 | 4 | Karty wydarzeń: reforma walutowa, strajk, zamieszki, krach, hossa (docs/GDD.md pkt. 4.2, 4.3, 4.3.1) | 5 | 16:9, 1920×1080 | §4 | ✅ zrobione i podpięte — wszystkie 5 (`events/reform.jpg`/`events/strike.jpg`/`events/riot.jpg`/`events/crash.jpg`/`events/boom.jpg`) wgrane, `WorldEventCard.gd` je wyświetla zamiast fallbacku na tło Giełdy. Krach/hossa: `ShippingCompanies.apply_market_shock` |
 | 16 | 4 | Tło ekranu Ustawień | 1 | 16:9, 1920×1080 | §11 | ✅ zrobione i podpięte — `settings.jpg` wgrane |
-| 17 | 4 | Tło Noworocznej Loterii (GDD.md pkt. 4.8, `NewYearLottery.gd`) | 1 | 16:9, 1920×1080 | §4 | ⬜ do zrobienia — kod działa, po cichu spada na fallback `stock_market.jpg` do czasu wgrania `events/lottery.jpg` |
-| 18 | 4 | Karty wydarzeń: psucie towaru, konfiskata przemycanej uprawy (docs/DODATKOWE_MECHANIKI.md) | 2 | 16:9, 1920×1080 | §4 | ⬜ do zrobienia — kod działa, po cichu spada na fallback `stock_market.jpg` do czasu wgrania `events/spoilage.jpg`/`events/confiscation.jpg` |
-| 19 | 6 | 3 bonusowe obrazy wuja, poza katalogiem 40 (docs/DODATKOWE_MECHANIKI.md) | 3 | 1:1, min. 1024×1024 | §7b | ⬜ do zrobienia — kod działa, rama pokazuje się pusta (bez tekstury), dopóki `bonus_1.jpg`/`bonus_2.jpg`/`bonus_3.jpg` nie zostaną wgrane |
+| 17 | 4 | Tło Noworocznej Loterii (GDD.md pkt. 4.8, `NewYearLottery.gd`) | 1 | 16:9, 1920×1080 | §4 | ✅ zrobione i podpięte (`events/lottery.jpg`) |
+| 18 | 4 | Karty wydarzeń: psucie towaru, konfiskata przemycanej uprawy (docs/DODATKOWE_MECHANIKI.md) | 2 | 16:9, 1920×1080 | §4 | ✅ zrobione i podpięte — obie (`events/spoilage.jpg`, `events/confiscation.jpg`) |
+| 19 | 6 | 3 bonusowe obrazy wuja, poza katalogiem 40 (docs/DODATKOWE_MECHANIKI.md) | 3 | 1:1, min. 1024×1024 | §7b | ✅ zrobione i podpięte — wszystkie 3 (`bonus_1.jpg`, `bonus_2.jpg`, `bonus_3.jpg`) |
 
 **Zasada dla wierszy oznaczonych "uwaga" (7 i 9):** jeśli Leonardo znowu
 zacznie robić pełne sceny zamiast wyizolowanych ikon/sprite'ów mimo
