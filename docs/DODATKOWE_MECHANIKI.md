@@ -48,9 +48,19 @@ grafiki nie jest nam potrzebne jako referencja wizualna.
   szkodnikami czy wywłaszczeniem, pozostałe dalej dają dochód. Dobry,
   organiczny powód, by zachęcać gracza do dywersyfikacji zamiast jednej
   megaplantacji.
-- **Noworoczna Loteria może wylosować konkretny, prawdziwy obraz** (w opisie
+- ✅ **Noworoczna Loteria może wylosować konkretny, prawdziwy obraz** (w opisie
   gracz wygrywa autentycznego Mackego) — nie tylko gotówkę. Potwierdza naszą
   wcześniejszą decyzję (GDD 4.8), dodaje konkretny wariant nagrody.
+  **Zaimplementowane**: jedno wspólne losowanie na przełomie roku
+  (`Calendar.new_year`, Tor A), zwycięzca wybierany losowo spośród
+  WSZYSTKICH graczy (`Players.grant_new_year_to_random_player`) — zawsze
+  gotówka (`Economy.NEW_YEAR_MONEY_RANGE`), z dodatkową szansą
+  (`Economy.NEW_YEAR_PAINTING_CHANCE`) na losowy, autentyczny obraz z
+  głównego katalogu 1-40 (liczy się do warunku zwycięstwa, nigdy nie
+  trafia w numer, który zwycięzca już ma). Wynik czeka w `Lottery.gd` do
+  najbliższego wejścia do Huba, które pokazuje animowany ekran
+  (`scenes/new_year_lottery/NewYearLottery.gd`: konfetti, fajerwerki,
+  kalendarz przewracający rok) PRZED Podsumowaniem roku.
 - **Zwrot fabularny w zakończeniu oryginału:** według tej relacji z rozgrywki,
   na koniec gry testament ujawnia, że **wuj Walther von Grünschild i
   fałszerz Vico Vermeer to ta sama osoba** — cały "polowanie na fałszerza"
@@ -117,18 +127,19 @@ oznaczone ✅/⬜ przy każdej pozycji, żeby nie trzeba było zgadywać.
   *"Canale Grande w Wenecji"* Canaletta (1730), *"Dentysta"* Gerarda van
   Honthorsta (1622). Zaimplementowane jako rzadka pozycja losowana na
   aukcji (`Paintings.BONUS_CATALOG`, `Auctions.BONUS_PAINTING_CHANCE`) —
-  nie jako pełna Loteria Noworoczna (GDD 4.8), która zostaje osobnym,
-  wciąż nieobjętym tematem.
+  OBOK pełnej Loterii Noworocznej (GDD 4.8, patrz wyżej), która ma własną,
+  osobną szansę na losowy obraz z głównego katalogu 1-40 (inna pula, inny
+  mechanizm losowania).
 
 ## Status rekomendacji (zaktualizowane)
 
 Zamiast pierwotnej listy "co dopisać do GDD" — te rekomendacje zostały już
-zrealizowane i sam GDD.md (sekcje 4.2, 4.7, 10, 11) je odzwierciedla:
+zrealizowane i sam GDD.md (sekcje 4.2, 4.7, 4.8, 10, 11) je odzwierciedla:
 sezonowość zbiorów, kara umowna za niezrealizowany kontrakt terminowy,
-kradzieże/ochrona (choć jako pełny system, nie tylko "odłożone na później") i
-twist fabularny (wuj = Vico) jako faktyczne zakończenie w `Ending.gd`. Z
-pierwotnie otwartej listy (pompy wodne, psucie się towaru w magazynie,
-Akademia Sztuki przypisana do jednego miasta, nielegalne uprawy, 3 bonusowe
-obrazy wuja) **wszystkie pięć pozycji jest już zaimplementowanych** — patrz
-oznaczenia ✅ wyżej. Jedyny wciąż otwarty temat z tego dokumentu to pełna
-Loteria Noworoczna (GDD 4.8), która pozostaje osobnym zakresem.
+kradzieże/ochrona (choć jako pełny system, nie tylko "odłożone na później"),
+Noworoczna Loteria i twist fabularny (wuj = Vico) jako faktyczne zakończenie
+w `Ending.gd`. Z pierwotnie otwartej listy (pompy wodne, psucie się towaru w
+magazynie, Akademia Sztuki przypisana do jednego miasta, nielegalne uprawy, 3
+bonusowe obrazy wuja) **wszystkie pięć pozycji jest już zaimplementowanych** —
+patrz oznaczenia ✅ wyżej. Loteria Noworoczna (GDD 4.8), wcześniej jedyny
+otwarty temat z tego dokumentu, jest teraz również zaimplementowana.

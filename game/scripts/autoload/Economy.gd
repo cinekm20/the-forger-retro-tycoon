@@ -100,7 +100,13 @@ func apply_player_days_elapsed(days_elapsed: int) -> void:
 
 ## Noworoczna Loteria (Neujahrstombola) — docs/GDD.md pkt. 4.8,
 ## docs/DODATKOWE_MECHANIKI.md. Trafia w losowego gracza (Players), niekoniecznie
-## akurat aktywnego — to też zdarzenie globalne, nie efekt czyjejś tury.
-func _on_new_year(_year: int) -> void:
+## akurat aktywnego — to też zdarzenie globalne, nie efekt czyjejś tury. Wynik
+## trafia do Lottery.gd (patrz ten plik) — czeka tam do najbliższego wejścia
+## do Huba, które pokazuje animowany ekran NewYearLottery.gd (fajerwerki,
+## konfetti, kalendarz przewracający rok), ZANIM zbuduje resztę Huba —
+## dokładnie ten sam wzorzec co YearlyReport.gd/WorldEvents.gd.
+func _on_new_year(year: int) -> void:
 	var money_bonus := randf_range(NEW_YEAR_MONEY_RANGE.x, NEW_YEAR_MONEY_RANGE.y)
-	Players.grant_new_year_to_random_player(money_bonus, NEW_YEAR_PAINTING_CHANCE)
+	var result := Players.grant_new_year_to_random_player(money_bonus, NEW_YEAR_PAINTING_CHANCE)
+	result["year"] = year
+	Lottery.set_pending(result)

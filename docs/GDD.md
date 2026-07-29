@@ -299,6 +299,18 @@ roku w grze, dodatkowe źródło pieniędzy lub nawet obrazu-niespodzianki. Dobr
 moment na krótką, satysfakcjonującą animację (fajerwerki, konfetti, kalendarz
 przewracający rok).
 
+✅ **Zaimplementowane**: `Calendar.new_year` (Tor A, wspólny dla wszystkich
+graczy) wyzwala JEDNO losowanie na przełomie roku, zwycięzcę wybiera losowo
+spośród WSZYSTKICH graczy (`Players.grant_new_year_to_random_player`) —
+zawsze gotówka z przedziału `Economy.NEW_YEAR_MONEY_RANGE`, plus dodatkowa
+szansa (`Economy.NEW_YEAR_PAINTING_CHANCE`) na prawdziwy, autentyczny obraz z
+głównego katalogu 1–40 (liczy się do warunku zwycięstwa; nigdy nie trafia w
+numer, który zwycięzca już ma). Wynik czeka w `Lottery.gd` do najbliższego
+wejścia do Huba, które pokazuje animowany ekran
+(`scenes/new_year_lottery/NewYearLottery.gd`: konfetti, fajerwerki, kalendarz
+przewracający rok) — dokładnie ten sam wzorzec kolejki co Podsumowanie roku
+(`YearlyReport.gd`) i karty wydarzeń (`WorldEvents.gd`).
+
 ### 4.9 Podróże między lokacjami
 Przemieszczanie się między ~18 miastami na mapie świata (lista i czasy
 podróży: `MECHANIKI_EKONOMICZNE.md` pkt. 2) nie jest natychmiastowe — zajmuje

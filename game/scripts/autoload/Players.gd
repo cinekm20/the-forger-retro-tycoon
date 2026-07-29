@@ -365,7 +365,11 @@ func apply_reform_to_all(ratio: float) -> void:
 
 
 ## Noworoczna Loteria trafia w losowego gracza (nie zawsze akurat aktywnego).
-func grant_new_year_to_random_player(money_amount: float, painting_chance: float) -> void:
+## Zwraca wynik losowania (winner_index/money/painting_number), żeby
+## wywołujący (Economy._on_new_year) mógł go przekazać dalej do Lottery.gd —
+## ekran NewYearLottery.gd tylko go wizualizuje, tak jak RaceTrackView/
+## HeistView nigdy nie decydują same o wyniku, tylko już ustalony pokazują.
+func grant_new_year_to_random_player(money_amount: float, painting_chance: float) -> Dictionary:
 	var index := randi() % player_count
 	var already_catalogued: Array = (
 		Paintings.catalogued_numbers if index == active_index
@@ -389,3 +393,9 @@ func grant_new_year_to_random_player(money_amount: float, painting_chance: float
 			var nums: Array = snapshots[index].get("catalogued_numbers", [])
 			nums.append(painting_number)
 			snapshots[index]["catalogued_numbers"] = nums
+
+	return {
+		"winner_index": index,
+		"money": money_amount,
+		"painting_number": painting_number,
+	}

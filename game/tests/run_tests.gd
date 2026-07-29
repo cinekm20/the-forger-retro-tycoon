@@ -62,6 +62,9 @@ func _ready() -> void:
 	_test_world_events_reform_queued()
 	_test_market_shock_crash_and_boom()
 	_test_yearly_report_populated_on_new_year()
+	_test_grant_new_year_to_random_player_awards_money_and_avoids_duplicate_paintings()
+	_test_grant_new_year_credits_correct_player_in_multiplayer()
+	_test_new_year_lottery_populates_pending_after_new_year()
 	_test_players_gender_and_avatar_selection()
 	_test_price_history_for_charts()
 	_test_players_days_diverge()
@@ -1205,6 +1208,77 @@ func _test_yearly_report_populated_on_new_year() -> void:
 	_assert(report["shipping"].size() == ShippingCompanies.COMPANIES.size(), "migawka zawiera kursy wszystkich linii żeglugowych")
 	_assert(report["crops"].size() == Crops.CROPS.size(), "migawka zawiera ceny wszystkich towarów")
 	_assert(not YearlyReport.has_pending(), "consume_pending() czyści podsumowanie, żeby nie pokazało się drugi raz")
+
+
+func _test_grant_new_year_to_random_player_awards_money_and_avoids_duplicate_paintings() -> void:
+	print("-- Players: grant_new_year_to_random_player — gotówka zawsze, obraz bez duplikatów --")
+	Players.reset_new_game(1)
+	Paintings.reset_new_game()
+	Economy.reset_new_game()
+
+	var money_before := Economy.player_money
+	var result := Players.grant_new_year_to_random_player(1000.0, 0.0)
+	_assert(result["winner_index"] == 0, "jedyny gracz zawsze wygrywa (player_count=1)")
+	_assert(result["painting_number"] == -1, "painting_chance=0.0 nigdy nie daje obrazu")
+	_assert(is_equal_approx(Economy.player_money, money_before + 1000.0), "gotówka doliczona zwycięzcy")
+
+	## painting_chance=1.0: zawsze przyznaje obraz, dopóki jakiś jest dostępny — nigdy
+	## numer, który zwycięzca już ma (already_catalogued filtr w grant_new_year_to_random_player).
+	## Po wyczerpaniu całego katalogu (40) spada z powrotem na samą gotówkę — deterministyczny
+	## dowód działania tego zabezpieczenia, bez potrzeby losowej pętli.
+	var granted_numbers: Array[int] = []
+	for i in Paintings.CATALOG.size():
+		var r := Players.grant_new_year_to_random_player(0.0, 1.0)
+		_assert(r["painting_number"] > 0, "painting_chance=1.0 przyznaje obraz, dopóki katalog nie jest wyczerpany (próba %d)" % i)
+		_assert(not granted_numbers.has(r["painting_number"]), "nigdy nie przyznaje numeru, który zwycięzca już ma")
+		granted_numbers.append(r["painting_number"])
+	_assert(Paintings.owned_count() == Paintings.CATALOG.size(), "cały katalog skatalogowany po tylu wygranych z rzędu")
+
+	var r_exhausted := Players.grant_new_year_to_random_player(500.0, 1.0)
+	_assert(r_exhausted["painting_number"] == -1, "po wyczerpaniu całego katalogu spada z powrotem na samą gotówkę")
+
+
+func _test_grant_new_year_credits_correct_player_in_multiplayer() -> void:
+	print("-- Players: grant_new_year_to_random_player — dolicza gotówkę WŁAŚCIWEMU graczowi (aktywnemu i migawce) --")
+	Players.reset_new_game(3)
+	Paintings.reset_new_game()
+	Economy.reset_new_game()
+
+	var before: Array[float] = [Players.get_player_money(0), Players.get_player_money(1), Players.get_player_money(2)]
+	for i in 20:
+		var result := Players.grant_new_year_to_random_player(777.0, 0.0)
+		var winner: int = result["winner_index"]
+		_assert(winner >= 0 and winner < 3, "zwycięzca to zawsze poprawny indeks gracza")
+		_assert(is_equal_approx(Players.get_player_money(winner), before[winner] + 777.0), "gotówka doliczona DOKŁADNIE zwycięzcy")
+		before[winner] += 777.0
+		for j in 3:
+			if j != winner:
+				_assert(is_equal_approx(Players.get_player_money(j), before[j]), "pozostali gracze bez zmian")
+
+
+func _test_new_year_lottery_populates_pending_after_new_year() -> void:
+	print("-- Lottery: wynik Noworocznej Loterii trafia do kolejki po przekroczeniu Sylwestra --")
+	Calendar.reset_new_game()
+	Economy.reset_new_game()
+	Players.reset_new_game(1)
+	Paintings.reset_new_game()
+	Lottery.reset_new_game()
+
+	_assert(not Lottery.has_pending(), "brak wyniku loterii na starcie gry")
+
+	var days_to_new_year := Calendar.DAYS_PER_MONTH * 12 - Calendar.current_day
+	Calendar.advance_days(days_to_new_year)
+	_assert(Lottery.has_pending(), "po przekroczeniu Sylwestra wynik loterii czeka na pokazanie")
+
+	var pending := Lottery.consume_pending()
+	_assert(pending["winner_index"] == 0, "jedyny gracz zawsze wygrywa (player_count=1)")
+	_assert(pending["year"] == Calendar.START_YEAR + 1, "pending niesie NOWY rok, ten sam co niesie Calendar.new_year")
+	_assert(
+		pending["money"] >= Economy.NEW_YEAR_MONEY_RANGE.x and pending["money"] <= Economy.NEW_YEAR_MONEY_RANGE.y,
+		"kwota mieści się w Economy.NEW_YEAR_MONEY_RANGE",
+	)
+	_assert(pending.has("painting_number"), "pending zawiera klucz painting_number (obraz albo -1)")
+	_assert(not Lottery.has_pending(), "consume_pending() czyści wynik, żeby nie pokazał się drugi raz")
 
 
 func _test_players_gender_and_avatar_selection() -> void:

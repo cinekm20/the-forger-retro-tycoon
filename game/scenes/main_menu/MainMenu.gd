@@ -284,6 +284,7 @@ func _on_start_confirmed() -> void:
 	Gangsters.reset_new_game()
 	ForwardContracts.reset_new_game()
 	YearlyReport.reset_new_game()
+	Lottery.reset_new_game()
 	WorldEvents.reset_new_game()
 	AIPlayers.reset_new_game()
 	PlayerPlantations.reset_new_game()

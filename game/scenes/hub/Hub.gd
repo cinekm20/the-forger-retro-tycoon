@@ -76,6 +76,15 @@ func _ready() -> void:
 		SceneRouter.goto_scene(SceneRouter.WORLD_EVENT)
 		return
 
+	## Noworoczna Loteria (patrz Lottery.gd/Economy._on_new_year) — jeśli od
+	## ostatniego wejścia do Huba minął Sylwester w grze, pokaż NAJPIERW
+	## animowany ekran loterii (fajerwerki/konfetti/kalendarz), a dopiero POTEM
+	## poważniejsze Podsumowanie roku niżej — tak jak prawdziwy Sylwester:
+	## najpierw zabawa o północy, dopiero potem biznesowe podsumowanie.
+	if Lottery.has_pending():
+		SceneRouter.goto_scene(SceneRouter.NEW_YEAR_LOTTERY)
+		return
+
 	## Podsumowanie roku (patrz YearlyReport.gd) — jeśli od ostatniego wejścia
 	## do Huba minął Sylwester w grze, pokaż je NAJPIERW, zamiast budować
 	## resztę Huba pod spodem (i tak zostanie natychmiast odsłonięty

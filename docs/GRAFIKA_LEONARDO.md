@@ -479,6 +479,18 @@ Vintage newspaper front page illustration, huge bold Art Deco masthead headline 
 Vintage newspaper front page illustration, huge bold Art Deco masthead headline in capital letters reading "MARKET BOOM" spanning the full width of the page, dense columns of small newspaper body text filling the rest of the page below the headline, Art Deco newspaper layout, game event card art, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
+**Noworoczna Loteria** (GDD.md pkt. 4.8, `scenes/new_year_lottery/NewYearLottery.gd`) — `events/lottery.jpg`.
+Inny charakter niż karty wydarzeń wyżej — to nie strona gazety, tylko
+pełnoekranowe tło pod animacją konfetti/fajerwerków (rysowaną natywnie w
+kodzie, patrz `NewYearLottery.gd`), więc prompt celowo NIE jest w formacie
+"nagłówek gazety":
+```
+Art Deco New Year's Eve gala ballroom interior at the stroke of midnight, elegant guests in 1920s evening wear celebrating, golden confetti and paper streamers scattered in the air, a large ornate clock in the background, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, game background art, Art Deco 1920s illustration style, mobile game asset, clean silhouette, no photorealism
+```
+Dopóki grafika nie jest wgrana, `NewYearLottery.gd` po cichu spada na tło
+Giełdy (`stock_market.jpg`) — ten sam wzorzec fallbacku co
+`WorldEventCard.gd`.
+
 ### 5. Tor wyścigów konnych
 - Tło toru
 - Sylwetki 4–6 różnych koni + dżokejów (do prostej animacji przesuwania)
@@ -1217,6 +1229,7 @@ Leonardo, żeby mieć z czego wybrać).
 | 14 | 2 | Pusty wariant tła Galerii (bez obrazów/ławek/żyrandola na ścianach) | 1 | 16:9, 1920×1080 | §9 | ✅ zrobione i podpięte (`gallery_empty.jpg`) — zwykły `gallery.jpg` zostaje jako czysty fallback, gdyby plik kiedyś zniknął |
 | 15 | 4 | Karty wydarzeń: reforma walutowa, strajk, zamieszki, krach, hossa (docs/GDD.md pkt. 4.2, 4.3, 4.3.1) | 5 | 16:9, 1920×1080 | §4 | ✅ zrobione i podpięte — wszystkie 5 (`events/reform.jpg`/`events/strike.jpg`/`events/riot.jpg`/`events/crash.jpg`/`events/boom.jpg`) wgrane, `WorldEventCard.gd` je wyświetla zamiast fallbacku na tło Giełdy. Krach/hossa: `ShippingCompanies.apply_market_shock` |
 | 16 | 4 | Tło ekranu Ustawień | 1 | 16:9, 1920×1080 | §11 | ✅ zrobione i podpięte — `settings.jpg` wgrane |
+| 17 | 4 | Tło Noworocznej Loterii (GDD.md pkt. 4.8, `NewYearLottery.gd`) | 1 | 16:9, 1920×1080 | §4 | ⬜ do zrobienia — kod działa, po cichu spada na fallback `stock_market.jpg` do czasu wgrania `events/lottery.jpg` |
 
 **Zasada dla wierszy oznaczonych "uwaga" (7 i 9):** jeśli Leonardo znowu
 zacznie robić pełne sceny zamiast wyizolowanych ikon/sprite'ów mimo
