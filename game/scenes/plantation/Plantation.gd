@@ -4,6 +4,7 @@ extends Control
 ## Grafikę (docs/GRAFIKA_LEONARDO.md §3) podepniemy później bez zmiany logiki.
 
 const PlantationTileIconScript := preload("res://scripts/ui/PlantationTileIcon.gd")
+const StatIconScript := preload("res://scripts/ui/StatIcon.gd")
 
 ## Muszą się zgadzać z faktycznym stylem grid_frame/grid_container niżej —
 ## używane do przeliczenia rozmiaru POJEDYNCZEGO pola z docelowego rozmiaru
@@ -132,7 +133,7 @@ func _ready() -> void:
 	## (nie osobna skrzynka w rogu ekranu jak na innych ekranach) — siatka MA
 	## być liczona na całą wysokość viewportu bez żadnych wyjątków, więc tu
 	## etykieta jest zwykłym elementem info_column, nie absolutnym overlayem.
-	location_label = ScreenHelpers.make_info_box(info_column, "")
+	location_label = ScreenHelpers.make_info_box(info_column, "", 0.0, 0, StatIconScript.Kind.DATE)
 	ScreenHelpers.make_title(info_column, "Plantacje")
 	ScreenHelpers.make_turn_indicator(info_column)
 
@@ -245,7 +246,7 @@ func _ready() -> void:
 	## siebie, legenda tu tylko dopowiada, co dana ikonka oznacza).
 	## Zgłoszenie użytkownika: gotówka NAD napisem "Legenda", ta sama zasada
 	## co location_label nad "Plantacje" wyżej — bez naruszania wysokości siatki.
-	money_label = ScreenHelpers.make_info_box(legend_column, "")
+	money_label = ScreenHelpers.make_info_box(legend_column, "", 0.0, 0, StatIconScript.Kind.MONEY)
 	ScreenHelpers.make_title(legend_column, "Legenda")
 	_add_legend_row(legend_column, PlantationTileIconScript.Kind.RIVER, "", false, tr("Rzeka"))
 	_add_legend_row(legend_column, PlantationTileIconScript.Kind.VACANT, "", false, tr("Wolne pole (do kupienia)"))

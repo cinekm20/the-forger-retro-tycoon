@@ -20,6 +20,7 @@ extends Control
 
 const BID_INCREMENT_RATIO := 0.1  ## gracz podbija o 10% szacunkowej wartości
 const BID_TIME_LIMIT := 20.0  ## sekundy realnego czasu na podbicie oferty
+const StatIconScript := preload("res://scripts/ui/StatIcon.gd")
 
 var current_number: int = -1
 var current_bid: float = 0.0
@@ -141,7 +142,7 @@ func _build_top_left_corner() -> void:
 	add_child(corner)
 
 	ScreenHelpers.make_turn_indicator(corner)
-	schedule_label = ScreenHelpers.make_info_box(corner, "")
+	schedule_label = ScreenHelpers.make_info_box(corner, "", 0.0, 0, StatIconScript.Kind.DATE)
 
 
 ## Skrzynka z przyciskiem(-ami) powrotu, w TYM SAMYM stylu co boczny panel

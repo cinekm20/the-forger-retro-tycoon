@@ -322,7 +322,10 @@ static func make_title(root: VBoxContainer, text: String) -> Label:
 	return label
 
 
-static func make_label(root: VBoxContainer, text: String) -> Label:
+## root: Container (nie tylko VBoxContainer) — pozwala budować etykietę
+## bezpośrednio w HBoxContainerze (np. wiersz ikona+tekst eksperckości w
+## ArtSchool.gd), oba dziedziczą po Container/BoxContainer.
+static func make_label(root: Container, text: String) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -338,6 +341,9 @@ static func make_label(root: VBoxContainer, text: String) -> Label:
 	return label
 
 
+const StatIconScript := preload("res://scripts/ui/StatIcon.gd")
+const STAT_ICON_SEPARATION := 6.0
+
 ## Etykieta w osobnej oprawionej "skrzynce" (złota ramka + ciemne tło) —
 ## tak jak w oryginale pasek stanu to kilka osobnych skrzynek (imię gracza +
 ## lokalizacja, gotówka, data), nie jeden zbity ciąg tekstu. Używać dla
@@ -351,7 +357,11 @@ static func make_label(root: VBoxContainer, text: String) -> Label:
 ## szerokość). Ustawiamy custom_minimum_size.x na SAMEJ etykiecie (nie tylko
 ## na panelu) + autowrap, więc dłuższy tekst zawija się na kolejny wiersz
 ## zamiast rozpychać skrzynkę.
-static func make_info_box(root: Container, text: String, min_width: float = 0.0, font_size: int = 0) -> Label:
+## icon_kind opcjonalny (StatIcon.Kind, domyślnie -1 = brak ikony) — dokleja
+## StatIcon.gd po lewej stronie tekstu wewnątrz tej samej skrzynki, patrz
+## docs/GRAFIKA_LEONARDO.md wiersz 7b (ikony statystyk zamiast grafiki z
+## Leonardo, ten sam powód co MapPin.gd/VaultIcon.gd).
+static func make_info_box(root: Container, text: String, min_width: float = 0.0, font_size: int = 0, icon_kind: int = -1) -> Label:
 	var box := StyleBoxFlat.new()
 	box.bg_color = Color(COLOR_BURGUNDY_DARK.r, COLOR_BURGUNDY_DARK.g, COLOR_BURGUNDY_DARK.b, 0.85)
 	box.border_color = COLOR_GOLD
@@ -376,9 +386,19 @@ static func make_info_box(root: Container, text: String, min_width: float = 0.0,
 	## powinna zostać na mniejszym rozmiarze.
 	label.add_theme_font_size_override("font_size", font_size if font_size > 0 else BODY_FONT_SIZE)
 	if min_width > 0.0:
-		label.custom_minimum_size = Vector2(min_width - box.content_margin_left - box.content_margin_right, 0)
+		var reserved_for_icon := (StatIconScript.ICON_SIZE.x + STAT_ICON_SEPARATION) if icon_kind >= 0 else 0.0
+		label.custom_minimum_size = Vector2(min_width - box.content_margin_left - box.content_margin_right - reserved_for_icon, 0)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	panel.add_child(label)
+
+	if icon_kind >= 0:
+		var row := HBoxContainer.new()
+		row.alignment = BoxContainer.ALIGNMENT_CENTER
+		row.add_theme_constant_override("separation", STAT_ICON_SEPARATION)
+		panel.add_child(row)
+		row.add_child(StatIconScript.new(icon_kind))
+		row.add_child(label)
+	else:
+		panel.add_child(label)
 	return label
 
 
@@ -403,7 +423,10 @@ static func make_corner_status_row(parent: Control, left_text: String, right_tex
 	var left_column := VBoxContainer.new()
 	left_column.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	row.add_child(left_column)
-	var left_label := make_info_box(left_column, left_text)
+	## left_text to zawsze "Miasto\nData" (patrz wywołania w Warehouse.gd/
+	## ArtSchool.gd/Races.gd/StockMarket.gd/Market.gd/SecurityScreen.gd) —
+	## ikona kalendarza pasuje, mimo że pierwsza linia to lokalizacja.
+	var left_label := make_info_box(left_column, left_text, 0.0, 0, StatIconScript.Kind.DATE)
 
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -413,7 +436,7 @@ static func make_corner_status_row(parent: Control, left_text: String, right_tex
 	var right_column := VBoxContainer.new()
 	right_column.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	row.add_child(right_column)
-	var right_label := make_info_box(right_column, right_text)
+	var right_label := make_info_box(right_column, right_text, 0.0, 0, StatIconScript.Kind.MONEY)
 
 	return {"left": left_label, "right": right_label}
 

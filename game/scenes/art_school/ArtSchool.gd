@@ -23,6 +23,7 @@ const EXPERTISE_GAIN_WRONG := 0.05
 const QUIZ_IMAGE_SIZE := 280.0
 
 const ExpertisePuzzleScript := preload("res://scripts/ui/ExpertisePuzzle.gd")
+const StatIconScript := preload("res://scripts/ui/StatIcon.gd")
 const EXPERTISE_PUZZLE_IMAGE := "res://art/art_school/expertise_puzzle.jpg"
 const EXPERTISE_PUZZLE_SIZE := Vector2(240, 240)
 
@@ -36,6 +37,7 @@ var location_label: Label
 var money_label: Label
 var status_label: Label
 var expertise_label: Label
+var expertise_row: HBoxContainer
 var course_button: Button
 var quiz_section: VBoxContainer
 var quiz_result_label: Label
@@ -92,8 +94,15 @@ func _ready() -> void:
 
 	## Zgłoszenie użytkownika: "Eksperckość: NN%" ma być POD obrazem (nie
 	## razem z resztą tekstu nad nim) — jak podpis pod portretem konia w
-	## Races.gd.
-	expertise_label = ScreenHelpers.make_label(root, "")
+	## Races.gd. Ikona lupy (docs/GRAFIKA_LEONARDO.md wiersz 7b) doklejona z
+	## boku w osobnym wierszu — expertise_row (nie expertise_label) chowany/
+	## pokazywany razem z quizem, żeby ikona nie zostawała samotnie widoczna.
+	expertise_row = HBoxContainer.new()
+	expertise_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	expertise_row.add_theme_constant_override("separation", 8)
+	root.add_child(expertise_row)
+	expertise_row.add_child(StatIconScript.new(StatIconScript.Kind.EXPERTISE))
+	expertise_label = ScreenHelpers.make_label(expertise_row, "")
 
 	## Sekcja quizu — ukryta, dopóki nie wykupiony jest kurs. Podmienia się z
 	## powyższymi etykietami/course_button (patrz _start_quiz/_close_quiz),
@@ -171,7 +180,7 @@ func _start_quiz() -> void:
 	course_button.visible = false
 	explanation_label.visible = false
 	status_label.visible = false
-	expertise_label.visible = false
+	expertise_row.visible = false
 	expertise_puzzle.visible = false
 	quiz_section.visible = true
 
@@ -223,7 +232,7 @@ func _close_quiz() -> void:
 	course_button.visible = true
 	explanation_label.visible = true
 	status_label.visible = true
-	expertise_label.visible = true
+	expertise_row.visible = true
 	expertise_puzzle.visible = true
 	_end_course_turn()
 

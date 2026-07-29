@@ -54,9 +54,8 @@ Jak uruchomić: `game/README.md`.
    lokalizacja PL/EN/DE, zapis/odczyt
 3. ✅ Grafiki (Leonardo.ai) — większość teł ekranów, wszystkie tła miast (18)
    i wszystkie 40 obrazów kolekcji już wygenerowane i podpięte; status
-   szczegółowy (co jeszcze zostało: ramka obrazu, część ikon UI, portrety
-   rywali, fazy wzrostu roślin, konie/dżokeje) w tabeli "Plan produkcji" w
-   `docs/GRAFIKA_LEONARDO.md`
+   szczegółowy (co jeszcze zostało: fazy wzrostu roślin) w tabeli
+   "Plan produkcji" w `docs/GRAFIKA_LEONARDO.md`
 4. ✅ Podpięcie gotowych grafik pod ekrany
 5. ✅ Eksport APK działa (`.github/workflows/android-build.yml`, debug
    keystore) — podpisywanie pod Google Play/AAB wciąż do zrobienia

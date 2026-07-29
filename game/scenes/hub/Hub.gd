@@ -44,6 +44,7 @@ const FREE_DESTINATIONS := {
 }
 
 const MapPinScript := preload("res://scripts/ui/MapPin.gd")
+const StatIconScript := preload("res://scripts/ui/StatIcon.gd")
 const ZOOM_OUT_DURATION := 0.9
 
 var location_label: Label
@@ -232,7 +233,7 @@ func _build_top_row() -> HBoxContainer:
 	## make_info_box z min_width > 0 wymusza teraz stałą szerokość +
 	## zawijanie zamiast rozpychania skrzynki (patrz komentarz w
 	## screen_helpers.gd).
-	date_label = ScreenHelpers.make_info_box(left_column, "", 280.0)
+	date_label = ScreenHelpers.make_info_box(left_column, "", 280.0, 0, StatIconScript.Kind.DATE)
 	paintings_label = ScreenHelpers.make_info_box(left_column, "", 280.0)
 	## Skrzynka "NEXT AUCTION IS: ..." z oryginału — widoczna niezależnie od
 	## typu aktualnego miasta, bo termin aukcji dotyczy jednego z 5 miast
@@ -248,7 +249,7 @@ func _build_top_row() -> HBoxContainer:
 	right_column.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	row.add_child(right_column)
 
-	money_label = ScreenHelpers.make_info_box(right_column, "")
+	money_label = ScreenHelpers.make_info_box(right_column, "", 0.0, 0, StatIconScript.Kind.MONEY)
 	warning_label = ScreenHelpers.make_label(right_column, "")
 	warning_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	warning_label.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
