@@ -19,6 +19,7 @@ const HORSES := {
 	"cyklon": {"name": "Cyklon", "image": "res://art/horses/cyklon.jpg"},
 	"blyskawica": {"name": "Błyskawica", "image": "res://art/horses/blyskawica.jpg"},
 	"wicher": {"name": "Wicher", "image": "res://art/horses/wicher.jpg"},
+	"zamiec": {"name": "Zamieć", "image": "res://art/horses/spare_stripes.jpg"},
 }
 
 const STARTING_ODDS := {
@@ -27,6 +28,7 @@ const STARTING_ODDS := {
 	"cyklon": 5.0,
 	"blyskawica": 8.0,
 	"wicher": 12.0,
+	"zamiec": 16.0,
 }
 
 const DAILY_DRIFT_RANGE := 0.05  ## losowe wahanie kursu ±5% dziennie — koń, nie akcja, ma być trochę żywszy niż giełda
