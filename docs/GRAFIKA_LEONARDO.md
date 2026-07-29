@@ -983,17 +983,42 @@ numer katalogowy `-N` → plik `bonus_N.jpg`). Nie potrzebują wariantu
 "podróbka" (`is_forgery_by_duplicate` zawsze zwraca false dla numerów
 ujemnych — patrz komentarz w `Paintings.gd`).
 
+Zgłoszenie użytkownika: skoro to prawdziwe, publicznie dostępne dzieła (w
+odróżnieniu od głównego katalogu 40, gdzie część malarzy — Picasso, Braque —
+wciąż ma prawa autorskie i celowo unikamy nazwiska w promptcie), poniżej
+dopisane malarz/oryginalny tytuł przy każdym — żeby dało się wyszukać
+prawdziwą reprodukcję jako referencję zamiast (albo obok) generowania przez
+Leonardo. **Uwaga na pewność identyfikacji** — źródło to fanowski materiał
+opisowy do gry (nie katalog muzealny), więc dwa z trzech dzieł nie są
+jednoznacznie przypisane do JEDNEGO konkretnego obrazu (obaj malarze mieli
+kilka prac o bardzo podobnym temacie z tego okresu):
+
 **bonus_1) "Zabawa na lodzie przy fosie miejskiej" (1659)**
+Malarz: **Adriaen van de Velde**. ⚠ Bez pewnej identyfikacji — van de Velde
+namalował kilka zimowych scen z łyżwiarzami z tego okresu, źródło nie
+precyzuje, o którą dokładnie chodzi. Szukaj: *"Adriaen van de Velde winter
+landscape skaters"* / *"ijsvermaak"* i wybierz dowolną pasującą kompozycję
+(łyżwiarze przy murach/fosą miejską) jako referencję.
 ```
 17th century Dutch Golden Age winter landscape painting, ice skaters and townsfolk gathered on a frozen moat beside old city fortification walls, pale winter sky, muted earthy palette with touches of red and white, oil painting texture, flat single painting filling the entire square canvas edge to edge, no curtain, no pedestal, no display stand, no surrounding objects, not a staged museum display
 ```
 
 **bonus_2) "Canale Grande w Wenecji" (1730)**
+Malarz: **Giovanni Antonio Canal, zwany Canaletto**. ⚠ Bez pewnej
+identyfikacji — Canaletto namalował dziesiątki widoków Canale Grande, w tym
+kilka z ok. 1730, źródło nie precyzuje, o który dokładnie chodzi. Szukaj:
+*"Canaletto Grand Canal Venice"* i wybierz dowolny widok z pałacami,
+gondolami i tą samą charakterystyczną perspektywą jako referencję.
 ```
 18th century Venetian vedute cityscape painting, precise architectural perspective of the Grand Canal lined with palazzos, gondolas and small boats on the water, luminous daylight and soft reflections, restrained warm palette, oil painting texture, flat single painting filling the entire square canvas edge to edge, no curtain, no pedestal, no display stand, no surrounding objects, not a staged museum display
 ```
 
 **bonus_3) "Dentysta" (1622)**
+Malarz: **Gerrit (Gerard) van Honthorst**. Oryginalny tytuł: **"De
+Tandentrekker" / "The Tooth Puller"** — Galleria degli Uffizi, Florencja.
+W odróżnieniu od dwóch wyżej, to konkretne, dobrze udokumentowane dzieło
+(rok zgadza się dokładnie z `Paintings.BONUS_CATALOG`) — szukaj dokładnie
+tego tytułu.
 ```
 Baroque candlelit genre painting, dramatic chiaroscuro lighting from a single candle, a dentist examining a wincing patient's mouth by candlelight, onlookers gathered close, rich dark background, oil painting texture, flat single painting filling the entire square canvas edge to edge, no curtain, no pedestal, no display stand, no surrounding objects, not a staged museum display
 ```
