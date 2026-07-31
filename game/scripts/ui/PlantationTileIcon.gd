@@ -14,6 +14,13 @@ extends Control
 ## zgłoszone przez użytkownika — pola są na wyłączność między graczami).
 
 enum Kind { RIVER, VACANT, SOIL, CROP, OWNED_BY_OTHER }
+enum GrowthPhase { SEEDLING, GROWING, HARVEST }
+
+const GROWTH_PHASE_NAMES := {
+	GrowthPhase.SEEDLING: "seedling",
+	GrowthPhase.GROWING: "growing",
+	GrowthPhase.HARVEST: "harvest",
+}
 
 const COLOR_RIVER := Color(0.25, 0.45, 0.75)
 const COLOR_RIVER_WAVE := Color(0.75, 0.88, 0.97)
@@ -44,6 +51,7 @@ const OTHER_PLAYER_COLORS := [
 
 var kind: int = Kind.VACANT
 var crop: String = ""
+var growth_phase: int = GrowthPhase.HARVEST  ## tylko dla Kind.CROP, patrz Plantation.gd _rebuild_grid
 var river_adjacent: bool = false
 var owner_index: int = -1  ## tylko dla Kind.OWNED_BY_OTHER — indeks gracza-właściciela
 
@@ -75,9 +83,17 @@ func _draw() -> void:
 				draw_line(Vector2(s.x * 0.1, y), Vector2(s.x * 0.9, y), COLOR_SOIL_CLOD, maxf(1.0, s.x * 0.06))
 		Kind.CROP:
 			draw_rect(Rect2(Vector2.ZERO, s), COLOR_SOIL)
-			var plant_color: Color = CROP_COLORS.get(crop, Color.FOREST_GREEN)
-			draw_circle(s * 0.5, s.x * 0.32, plant_color)
-			draw_circle(s * Vector2(0.5, 0.32), s.x * 0.14, plant_color.lightened(0.3))
+			## Grafika fazy wzrostu (docs/GRAFIKA_LEONARDO.md, wiersz 9,
+			## game/art/crops/<uprawa>_<faza>.png) — po cichu spada na
+			## kolorowe kółko poniżej, jeśli plik jeszcze nie istnieje, tak
+			## jak wszystkie opcjonalne grafiki w tej grze.
+			var texture_path := "res://art/crops/%s_%s.png" % [crop, GROWTH_PHASE_NAMES[growth_phase]]
+			if ResourceLoader.exists(texture_path):
+				draw_texture_rect(load(texture_path), Rect2(Vector2.ZERO, s), false)
+			else:
+				var plant_color: Color = CROP_COLORS.get(crop, Color.FOREST_GREEN)
+				draw_circle(s * 0.5, s.x * 0.32, plant_color)
+				draw_circle(s * Vector2(0.5, 0.32), s.x * 0.14, plant_color.lightened(0.3))
 		Kind.OWNED_BY_OTHER:
 			var base_color: Color = OTHER_PLAYER_COLORS[owner_index % OTHER_PLAYER_COLORS.size()] if owner_index >= 0 else COLOR_SOIL
 			draw_rect(Rect2(Vector2.ZERO, s), base_color)

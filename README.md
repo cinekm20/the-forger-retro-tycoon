@@ -52,10 +52,10 @@ Jak uruchomić: `game/README.md`.
 1. ✅ Projekt gry (GDD)
 2. ✅ Szkielet Godot z pełną logiką wszystkich systemów + multiplayer,
    lokalizacja PL/EN/DE, zapis/odczyt
-3. ✅ Grafiki (Leonardo.ai) — większość teł ekranów, wszystkie tła miast (18)
-   i wszystkie 40 obrazów kolekcji już wygenerowane i podpięte; status
-   szczegółowy (co jeszcze zostało: fazy wzrostu roślin) w tabeli
-   "Plan produkcji" w `docs/GRAFIKA_LEONARDO.md`
+3. ✅ Grafiki (Leonardo.ai) — kompletne: wszystkie tła ekranów, wszystkie
+   tła miast (18), wszystkie 40 obrazów kolekcji i 12 faz wzrostu roślin
+   wygenerowane i podpięte; szczegóły w tabeli "Plan produkcji" w
+   `docs/GRAFIKA_LEONARDO.md`
 4. ✅ Podpięcie gotowych grafik pod ekrany
 5. ✅ Eksport APK działa (`.github/workflows/android-build.yml`, debug
    keystore) — podpisywanie pod Google Play/AAB wciąż do zrobienia

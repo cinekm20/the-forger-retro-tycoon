@@ -356,10 +356,27 @@ func _setup_current_plantation() -> void:
 func _rebuild_grid() -> void:
 	for child in grid_container.get_children():
 		child.queue_free()
-	var city: String = PlayerPlantations.plantations[plantation_index]["city"]
+	var plantation: Dictionary = PlayerPlantations.plantations[plantation_index]
+	var city: String = plantation["city"]
 	var grid: Dictionary = PlayerPlantations.city_grids[city]
 	var tile_owner: Array = grid["tile_owner"]
 	var tile_crops: Array = grid["tile_crops"]
+	## Faza wzrostu (docs/GRAFIKA_LEONARDO.md wiersz 9) wspólna dla
+	## WSZYSTKICH obsianych pól tej plantacji — last_harvest_day jest
+	## wartością per-plantacja (patrz PlayerPlantations.calculate_harvest),
+	## nie per-pole, więc im dłużej od ostatnich zbiorów (relatywnie do
+	## PlayerPlantations.REFERENCE_PERIOD_DAYS, tego samego okresu co plon),
+	## tym "dojrzalej" wyglądają rośliny — czysto kosmetyczne, nie wpływa na
+	## faktyczny plon.
+	var days_since_harvest: int = Players.active_day() - int(plantation["last_harvest_day"])
+	var growth_ratio: float = clampf(days_since_harvest / PlayerPlantations.REFERENCE_PERIOD_DAYS, 0.0, 1.0)
+	var growth_phase: int
+	if growth_ratio < 1.0 / 3.0:
+		growth_phase = PlantationTileIconScript.GrowthPhase.SEEDLING
+	elif growth_ratio < 2.0 / 3.0:
+		growth_phase = PlantationTileIconScript.GrowthPhase.GROWING
+	else:
+		growth_phase = PlantationTileIconScript.GrowthPhase.HARVEST
 	for tile_index in tile_owner.size():
 		var btn := Button.new()
 		btn.custom_minimum_size = Vector2(cell_size, cell_size)
@@ -378,6 +395,7 @@ func _rebuild_grid() -> void:
 			if tile_crop != "":
 				icon.kind = PlantationTileIconScript.Kind.CROP
 				icon.crop = tile_crop
+				icon.growth_phase = growth_phase
 				btn.disabled = true
 			else:
 				icon.kind = PlantationTileIconScript.Kind.SOIL
