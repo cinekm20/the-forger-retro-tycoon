@@ -80,15 +80,26 @@ jobs:
           mv /tmp/templates/templates/* ~/.local/share/godot/export_templates/${{ env.GODOT_TEMPLATES_DIR }}/
 
       # Odpowiednik menu "Project > Install Android Build Template" z edytora
-      # (niedostępnego w trybie headless) — dokładnie ten sam plik
-      # (android_source.zip z paczki export templates) rozpakowany w to samo
-      # miejsce (game/android/build), które normalnie tworzy ta akcja w GUI.
-      # Wymagane, bo gradle_build/use_gradle_build=true (preset "Android
-      # Release") nie zadziała bez gotowego projektu Gradle pod tą ścieżką.
+      # (niedostępnego w trybie headless) — replikuje DOKŁADNIE to, co robi
+      # Godot w ExportTemplateManager::install_android_template_from_file:
+      # 1) android/.build_version (JEDEN poziom NAD android/build) z
+      #    identyfikatorem szablonu — dla domyślnego (nie custom) szablonu
+      #    to GODOT_VERSION_FULL_CONFIG, czyli "<major>.<minor>.<patch>.<status>"
+      #    (bez modułu mono), dokładnie ten sam string co GODOT_TEMPLATES_DIR
+      #    w tym workflow. Sam rozpakowany android_source.zip bez tego pliku
+      #    NIE wystarcza — Godot odmawia builda ("Trying to build from a
+      #    gradle built template, but no version info for it exists").
+      # 2) android/build/.gdignore — zapobiega skanowaniu tego katalogu jako
+      #    zasobów gry przy imporcie.
+      # 3) android_source.zip (z paczki export templates) rozpakowany do
+      #    android/build/.
       - name: Install Android Gradle build template
         working-directory: game
         run: |
+          mkdir -p android
+          echo "${{ env.GODOT_TEMPLATES_DIR }}" > android/.build_version
           mkdir -p android/build
+          echo "" > android/build/.gdignore
           unzip -q -o ~/.local/share/godot/export_templates/${{ env.GODOT_TEMPLATES_DIR }}/android_source.zip -d android/build
 
       # Klucz release z sekretów repo (Settings > Secrets and variables >
