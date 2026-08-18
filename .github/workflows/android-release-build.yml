@@ -97,7 +97,7 @@ jobs:
       # release.keystore` całego pliku .keystore/.jks.
       - name: Decode release keystore
         run: |
-          echo "${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}" | base64 -d > ~/release.keystore
+          echo "${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}" | base64 -d > "${{ runner.temp }}/release.keystore"
 
       - name: Configure Godot editor settings
         run: |
@@ -129,7 +129,7 @@ jobs:
       - name: Export Android release AAB
         working-directory: game
         env:
-          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /root/release.keystore
+          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: ${{ runner.temp }}/release.keystore
           GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_RELEASE_KEYSTORE_ALIAS }}
           GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEYSTORE_PASSWORD }}
         run: |
@@ -143,7 +143,7 @@ jobs:
 
       - name: Remove decoded keystore
         if: always()
-        run: rm -f ~/release.keystore
+        run: rm -f "${{ runner.temp }}/release.keystore"
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v7
