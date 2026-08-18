@@ -169,9 +169,16 @@ jobs:
       # przygotowuje NASTĘPNY numer (0.1.1) na kolejne uruchomienie. Duży
       # skok (np. 0.1.x -> 0.2.0) zostaje ręczny — to decyzja produktowa, nie
       # coś do zgadywania automatem.
+      #
+      # Najpierw przywraca export_presets.cfg do stanu z commita (git
+      # checkout) — cofa efemeryczny bump version/code sprzed eksportu
+      # (miał zostać TYLKO w tej kopii na runnerze, ale bez tego przywrócenia
+      # "Commit version bump" niżej i tak by go złapał razem z version/name,
+      # bo commituje CAŁY zmieniony plik, nie tylko jedną linię).
       - name: Bump version/name for next release build
         working-directory: game
         run: |
+          git checkout -- export_presets.cfg
           python3 - <<'PYEOF'
           import re
 
