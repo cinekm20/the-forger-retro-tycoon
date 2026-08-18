@@ -7,6 +7,12 @@ name: Android release AAB build
 on:
   workflow_dispatch:
 
+# contents: write — workflow commituje z powrotem podbite version/name po
+# udanym buildzie (patrz krok "Bump version/name..." niżej), domyślny
+# GITHUB_TOKEN bez tego miałby tylko odczyt.
+permissions:
+  contents: write
+
 env:
   GODOT_VERSION: 4.7.1-stable
   GODOT_TEMPLATES_DIR: 4.7.1.stable
@@ -144,3 +150,45 @@ jobs:
         with:
           name: the-forger-release-aab
           path: android_build/the-forger-release.aab
+
+      # Podbija PATCH (ostatnią liczbę X.Y.Z) version/name w preset.2.options
+      # o 1 i commituje z powrotem do repo — TYLKO po udanym buildzie (jeśli
+      # eksport wyżej zawiedzie, cały job się zatrzymuje i te kroki się nie
+      # wykonują). Ten build użył jeszcze STAREJ wersji (np. 0.1.0) — bump
+      # przygotowuje NASTĘPNY numer (0.1.1) na kolejne uruchomienie. Duży
+      # skok (np. 0.1.x -> 0.2.0) zostaje ręczny — to decyzja produktowa, nie
+      # coś do zgadywania automatem.
+      - name: Bump version/name for next release build
+        working-directory: game
+        run: |
+          python3 - <<'PYEOF'
+          import re
+
+          path = "export_presets.cfg"
+          with open(path, encoding="utf-8") as f:
+              content = f.read()
+
+          def bump(m):
+              major, minor, patch = m.group(1), m.group(2), int(m.group(3))
+              return f'version/name="{major}.{minor}.{patch + 1}"'
+
+          def patch_section(sec_match):
+              return re.sub(r'version/name="(\d+)\.(\d+)\.(\d+)"', bump, sec_match.group(0), count=1)
+
+          new_content = re.sub(r"\[preset\.2\.options\](?:\n(?!\[).*)*", patch_section, content)
+          with open(path, "w", encoding="utf-8") as f:
+              f.write(new_content)
+          PYEOF
+          grep 'version/name' export_presets.cfg
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game/export_presets.cfg
+          if git diff --cached --quiet; then
+            echo "Brak zmian do commitowania."
+          else
+            git commit -m "ci: podbij version/name po udanym release build #${{ github.run_number }}"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
