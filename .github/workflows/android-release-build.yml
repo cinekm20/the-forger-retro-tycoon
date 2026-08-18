@@ -107,6 +107,19 @@ jobs:
         working-directory: game
         run: timeout 180 godot --headless --import --path .
 
+      # version/code w export_presets.cfg (numer, po którym Google Play
+      # rozpoznaje "nowszy" upload — musi zawsze rosnąć) NIE jest ręcznie
+      # bumpowany w repo. Zamiast tego każdy przebieg tego workflow nadpisuje
+      # go numerem uruchomienia GitHub Actions (github.run_number) — zawsze
+      # unikalny i rosnący, więc każdy build z automatu jest "nowszą wersją"
+      # dla Play. Nadpisuje TYLKO w tej efemerycznej kopii repo na runnerze
+      # (nic nie jest commitowane z powrotem) — ta sama linia istnieje też w
+      # preset.1 (debug .apk), ale ten workflow jej nie używa, więc
+      # nadpisanie obu na raz jest nieszkodliwe.
+      - name: Bump release version code to this workflow run's number
+        working-directory: game
+        run: sed -i -E "s/version\/code=[0-9]+/version\/code=${{ github.run_number }}/" export_presets.cfg
+
       - name: Export Android release AAB
         working-directory: game
         env:
