@@ -1,0 +1,133 @@
+name: Android release AAB build
+
+# Ręczne uruchomienie (workflow_dispatch) — ten build wymaga sekretów
+# keystore release i produkuje plik do wgrania na Google Play, więc nie ma
+# uruchamiać się automatycznie przy każdym pushu (patrz android-build.yml
+# dla szybkich debug .apk, ten sam powód).
+on:
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: 4.7.1-stable
+  GODOT_TEMPLATES_DIR: 4.7.1.stable
+
+jobs:
+  build-android-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Locate sdkmanager
+        id: sdkmanager
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          SDKMANAGER_PATH=$(find "$ANDROID_HOME" -name sdkmanager -type f 2>/dev/null | head -1)
+          if [ -z "$SDKMANAGER_PATH" ]; then
+            echo "Nie znaleziono sdkmanager w $ANDROID_HOME" >&2
+            exit 1
+          fi
+          echo "Znaleziono: $SDKMANAGER_PATH"
+          echo "bin_dir=$(dirname "$SDKMANAGER_PATH")" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure required Android SDK packages
+        run: |
+          export PATH="${{ steps.sdkmanager.outputs.bin_dir }}:$PATH"
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platform-tools" "build-tools;34.0.0" "platforms;android-34"
+
+      - name: Cache Godot binary
+        id: godot-cache
+        uses: actions/cache@v6
+        with:
+          path: /usr/local/bin/godot
+          key: godot-${{ env.GODOT_VERSION }}-linux-x86_64
+
+      - name: Download Godot headless binary
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          curl -sSL -o godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}/Godot_v${{ env.GODOT_VERSION }}_linux.x86_64.zip"
+          unzip -q godot.zip
+          chmod +x Godot_v${{ env.GODOT_VERSION }}_linux.x86_64
+          sudo mv Godot_v${{ env.GODOT_VERSION }}_linux.x86_64 /usr/local/bin/godot
+
+      - name: Cache export templates
+        id: templates-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.local/share/godot/export_templates/${{ env.GODOT_TEMPLATES_DIR }}
+          key: godot-export-templates-${{ env.GODOT_VERSION }}
+
+      - name: Download export templates
+        if: steps.templates-cache.outputs.cache-hit != 'true'
+        run: |
+          curl -sSL -o templates.tpz \
+            "https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}/Godot_v${{ env.GODOT_VERSION }}_export_templates.tpz"
+          mkdir -p ~/.local/share/godot/export_templates/${{ env.GODOT_TEMPLATES_DIR }}
+          unzip -q templates.tpz -d /tmp/templates
+          mv /tmp/templates/templates/* ~/.local/share/godot/export_templates/${{ env.GODOT_TEMPLATES_DIR }}/
+
+      # Odpowiednik menu "Project > Install Android Build Template" z edytora
+      # (niedostępnego w trybie headless) — dokładnie ten sam plik
+      # (android_source.zip z paczki export templates) rozpakowany w to samo
+      # miejsce (game/android/build), które normalnie tworzy ta akcja w GUI.
+      # Wymagane, bo gradle_build/use_gradle_build=true (preset "Android
+      # Release") nie zadziała bez gotowego projektu Gradle pod tą ścieżką.
+      - name: Install Android Gradle build template
+        working-directory: game
+        run: |
+          mkdir -p android/build
+          unzip -q -o ~/.local/share/godot/export_templates/${{ env.GODOT_TEMPLATES_DIR }}/android_source.zip -d android/build
+
+      # Klucz release z sekretów repo (Settings > Secrets and variables >
+      # Actions), NIE z pliku w repo — patrz komentarz w export_presets.cfg
+      # przy preset.2. ANDROID_RELEASE_KEYSTORE_BASE64 to `base64 -w0
+      # release.keystore` całego pliku .keystore/.jks.
+      - name: Decode release keystore
+        run: |
+          echo "${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}" | base64 -d > ~/release.keystore
+
+      - name: Configure Godot editor settings
+        run: |
+          mkdir -p ~/.config/godot
+          cat > ~/.config/godot/editor_settings-4.tres << EOF
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          EOF
+
+      - name: Import project (builds class_name cache)
+        working-directory: game
+        run: timeout 180 godot --headless --import --path .
+
+      - name: Export Android release AAB
+        working-directory: game
+        env:
+          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /root/release.keystore
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_RELEASE_KEYSTORE_ALIAS }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEYSTORE_PASSWORD }}
+        run: |
+          mkdir -p ../android_build
+          timeout 600 godot --headless --export-release "Android Release" ../android_build/the-forger-release.aab --path . 2>&1 | tee export_output.log
+          exit_code=${PIPESTATUS[0]}
+          if [ "$exit_code" -ne 0 ] || [ ! -f ../android_build/the-forger-release.aab ]; then
+            echo "Eksport nie powiódł się (kod $exit_code) albo plik .aab nie powstał."
+            exit 1
+          fi
+
+      - name: Remove decoded keystore
+        if: always()
+        run: rm -f ~/release.keystore
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: the-forger-release-aab
+          path: android_build/the-forger-release.aab
