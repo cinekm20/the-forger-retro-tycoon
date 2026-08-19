@@ -55,6 +55,18 @@ var growth_phase: int = GrowthPhase.HARVEST  ## tylko dla Kind.CROP, patrz Plant
 var river_adjacent: bool = false
 var owner_index: int = -1  ## tylko dla Kind.OWNED_BY_OTHER — indeks gracza-właściciela
 
+## Grafika fazy wzrostu (Kind.CROP) jako osobny węzeł TextureRect zamiast
+## draw_texture_rect() wewnątrz _draw() — zgłoszenie użytkownika ze zrzutem
+## ekranu z realnego telefonu: obsiane pola wychodziły jako czyste białe
+## kwadraciki. draw_texture_rect() w custom _draw() było JEDYNYM miejscem w
+## całej grze ładującym obrazek w ten sposób — każdy inny asset graficzny w
+## grze (konie, gangsterzy, ikony kategorii...) używa zwykłego TextureRect,
+## który już wiadomo, że działa poprawnie na urządzeniach. Import PNG-ów
+## upraw jest identyczny jak działających assetów, więc podejrzenie pada na
+## sam draw_texture_rect(), nie na pliki — przejście na sprawdzony wzorzec
+## zamiast dalszego grzebania w nieprzetestowanej ścieżce.
+var _crop_texture_rect: TextureRect
+
 
 func _init() -> void:
 	## IGNORE — ikonka jest czysto wizualna, tylko rodzic (Button w
@@ -62,10 +74,28 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
+## _draw() liczy wszystko na bieżąco z `size`, ale Godot NIE przerysowuje
+## Controli automatycznie, gdy tylko zmienia się ich rozmiar — trzeba samemu
+## zażądać queue_redraw() po NOTIFICATION_RESIZED. Bez tego ikonki w legendzie
+## (rozmiar nadawany z opóźnieniem przez HBoxContainer PO dodaniu węzła do
+## drzewa, patrz Plantation.gd _add_legend_row) potrafiły zostać puste na
+## stałe — pierwsze automatyczne rysowanie trafiało na jeszcze nieustalony
+## rozmiar (0,0), więc _draw() kończył się na wczesnym return, zanim
+## kontener zdążył nadać właściwy rozmiar (zgłoszone przez użytkownika:
+## zrzut ekranu z pustymi kwadracikami legendy na realnym telefonie).
+## Kafelki siatki (pełny rozmiar przycisku-rodzica od razu, bez czekania na
+## kontener) nie miały tego problemu, stąd rozjazd między siatką a legendą.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_RESIZED:
+		queue_redraw()
+
+
 func _draw() -> void:
 	var s := size
 	if s.x <= 0.0 or s.y <= 0.0:
 		return
+	if kind != Kind.CROP:
+		_hide_crop_texture()
 	match kind:
 		Kind.RIVER:
 			draw_rect(Rect2(Vector2.ZERO, s), COLOR_RIVER)
@@ -89,8 +119,9 @@ func _draw() -> void:
 			## jak wszystkie opcjonalne grafiki w tej grze.
 			var texture_path := "res://art/crops/%s_%s.png" % [crop, GROWTH_PHASE_NAMES[growth_phase]]
 			if ResourceLoader.exists(texture_path):
-				draw_texture_rect(load(texture_path), Rect2(Vector2.ZERO, s), false)
+				_show_crop_texture(texture_path, s)
 			else:
+				_hide_crop_texture()
 				var plant_color: Color = CROP_COLORS.get(crop, Color.FOREST_GREEN)
 				draw_circle(s * 0.5, s.x * 0.32, plant_color)
 				draw_circle(s * Vector2(0.5, 0.32), s.x * 0.14, plant_color.lightened(0.3))
@@ -104,3 +135,24 @@ func _draw() -> void:
 			draw_string(ThemeDB.fallback_font, Vector2(s.x * 0.28, s.y * 0.72), initial, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, Color.WHITE)
 	if river_adjacent:
 		draw_arc(s * 0.5, s.x * 0.42, 0.0, TAU, 12, COLOR_RIVER_ADJACENT_RING, maxf(1.0, s.x * 0.1), true)
+
+
+## Tworzony leniwie przy pierwszym użyciu (większość ikonek nigdy nie jest
+## Kind.CROP, nie ma sensu zakładać TextureRect z góry dla każdej). Dziecko
+## renderuje się NAD własnym _draw() rodzica, więc obraz rośliny poprawnie
+## przykrywa brązowe tło (COLOR_SOIL) narysowane wyżej w match.
+func _show_crop_texture(texture_path: String, s: Vector2) -> void:
+	if _crop_texture_rect == null:
+		_crop_texture_rect = TextureRect.new()
+		_crop_texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_crop_texture_rect.stretch_mode = TextureRect.STRETCH_SCALE
+		add_child(_crop_texture_rect)
+	_crop_texture_rect.texture = load(texture_path)
+	_crop_texture_rect.position = Vector2.ZERO
+	_crop_texture_rect.size = s
+	_crop_texture_rect.visible = true
+
+
+func _hide_crop_texture() -> void:
+	if _crop_texture_rect != null:
+		_crop_texture_rect.visible = false
