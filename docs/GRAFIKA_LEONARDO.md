@@ -189,6 +189,32 @@ Art Deco game logo title screen, elegant gold typography reading "THE FORGER: RE
 Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
 ```
 
+### 1b. Ikona aplikacji (launcher Android / Google Play Store)
+
+⚠ **Do zrobienia — nigdy nie było w tej checkliście.** `art/icons/app_icon.jpg`/
+`.png` to zaskoczenie znalezione dopiero przy szykowaniu wpisu w Google Play:
+ma na sobie wprost wypisany napis **"VERMEER,"** — stary tytuł gry, sprzed
+zmiany na "The Forger: Retro Tycoon" (patrz punkt 1 wyżej, powód zmiany:
+niepewny status "Vermeer" jako marki). Kompozycja (portret w okrągłym
+medalionie, kwadratowa ramka art déco w rogach) jest dobra i można ją
+utrzymać — problem to WYŁĄCZNIE tekst. Nowa wersja: ten sam styl, ale **bez
+żadnego tekstu w ogóle** — to też lepsza praktyka dla ikon aplikacji (nazwa
+i tak pokazuje się osobno w launcherze/Play Store, dublowanie jej w ikonie
+tylko podnosi ryzyko następnego niedopasowania przy kolejnej zmianie
+nazwy).
+
+**Format eksportu:** kwadrat, min. 512×512 (Google Play wymaga dokładnie
+512×512, 32-bit PNG), source generuj większy (1024×1024) i przeskaluj w
+dół — łatwiej o czyste krawędzie.
+
+```
+Art Deco portrait medallion icon, circular frame with elegant gold geometric ornamentation and stepped corner accents in the four corners of a square icon, a stylized woman's portrait bust centered inside the circular frame, no text, no lettering, no words, no logo, no watermark anywhere in the image, single self-contained square icon on its own, Art Deco 1920s illustration style, warm sepia and gold palette with deep green, burgundy and turquoise accents, flat vector-gouache texture, subtle paper grain, elegant geometric ornamentation, mobile game asset, clean silhouette, no photorealism
+```
+
+Do negative promptu (oprócz wspólnego z góry dokumentu) dopisz: `text,
+lettering, words, typography, title, wordmark, logo` (mocniej niż zwykle,
+bo to jest DOKŁADNIE ten problem z poprzedniej wersji).
+
 ### 2. Mapa świata (Hub)
 - Stylizowana mapa świata jako plansza gry, z oznaczonymi lokacjami (plantacje,
   Nowy Jork, Londyn, tor wyścigowy, dom aukcyjny, szkoła sztuki)
