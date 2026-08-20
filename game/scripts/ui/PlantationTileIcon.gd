@@ -30,11 +30,16 @@ const COLOR_SOIL := Color(0.4, 0.27, 0.15)
 const COLOR_SOIL_CLOD := Color(0.32, 0.21, 0.11)
 const COLOR_RIVER_ADJACENT_RING := Color(0.4, 0.75, 0.95)
 
+## Wyraziste, nasycone kolory — wyraźnie odróżnialne od ciemnego, stonowanego
+## COLOR_SOIL (0.4, 0.27, 0.15) w tle, nie tylko od siebie nawzajem.
+## Zgłoszenie użytkownika: poprzednie ciemnobrązowe warianty kawy/kakao
+## (bliskie COLOR_SOIL) zlewały się z tłem nieobsianej ziemi, więc obsiane
+## pole wyglądało jak zwykłe puste "Twoje pole (niezasiane)".
 const CROP_COLORS := {
-	"coffee": Color(0.32, 0.18, 0.09),
-	"tobacco": Color(0.68, 0.62, 0.22),
-	"tea": Color(0.28, 0.55, 0.28),
-	"cocoa": Color(0.42, 0.22, 0.12),
+	"coffee": Color(0.8, 0.15, 0.1),
+	"tobacco": Color(0.85, 0.68, 0.15),
+	"tea": Color(0.3, 0.7, 0.35),
+	"cocoa": Color(0.85, 0.5, 0.1),
 }
 
 ## Kolory per gracz (do Players.MAX_PLAYERS=4) dla pól zajętych przez INNEGO
@@ -146,6 +151,16 @@ func _show_crop_texture(texture_path: String, s: Vector2) -> void:
 		_crop_texture_rect = TextureRect.new()
 		_crop_texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_crop_texture_rect.stretch_mode = TextureRect.STRETCH_SCALE
+		## Bez tego domyślny EXPAND_KEEP_SIZE traktuje naturalny rozmiar
+		## obrazka źródłowego (896×896) jako minimalny rozmiar kontrolki —
+		## dużo większy niż kafelek (~40×40), więc ustawienie .size niżej
+		## dostawało wymuszone przycięcie do (0,0) lokalnie widocznego
+		## obszaru, który akurat u tych obrazków jest przezroczystym rogiem
+		## (zgłoszenie użytkownika: obsiane pole wyglądało jak zwykła
+		## ziemia — widać było tylko przezroczysty róg, nie roślinę). Ten
+		## sam parametr, którego już poprawnie używają portrety koni
+		## (Races.gd).
+		_crop_texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		add_child(_crop_texture_rect)
 	_crop_texture_rect.texture = load(texture_path)
 	_crop_texture_rect.position = Vector2.ZERO
