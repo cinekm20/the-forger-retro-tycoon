@@ -42,6 +42,14 @@ const MAX_ZOOM := 2.5
 ## "trochę powiększały się pinezki", nie tyle samo co mapa (co przy dużym
 ## zoomie zamieniłoby je w nieczytelne plamy).
 const PIN_ZOOM_DAMPING := 0.35
+## Dodatkowe powiększenie zaznaczonej (klikniętej) pinezki, NAD zwykłym
+## zoom-owym skalowaniem z PIN_ZOOM_DAMPING — zgłoszenie użytkownika:
+## kliknięcie pinezki ma ją wyraźnie powiększyć/podświetlić, a poprzednio
+## zaznaczona ma wrócić do normalnego rozmiaru. Mnożone RAZEM z `compensated`
+## w _update_pin_scale, nie zastępuje go — więc zaznaczona pinezka rośnie
+## proporcjonalnie tak samo przy zoomie mapy jak każda inna, tylko zawsze
+## dodatkowo 1.4× większa.
+const SELECTED_PIN_SCALE_BOOST := 1.4
 const WHEEL_ZOOM_STEP := 0.15  ## na jedno kliknięcie kółka myszy (test/desktop)
 ## Zgłoszenie użytkownika: kliknięcie "Jedź »" w trakcie przybliżenia
 ## przeskakiwało od razu na "standardową mapę" (czyli na nowo załadowaną
@@ -59,6 +67,7 @@ var selected_city: String = ""
 var map_viewport: Control
 var map_content: Control
 var pins: Array[Button] = []
+var pin_by_city: Dictionary = {}  ## city_id -> pinezka, patrz _update_pin_selection_visuals
 var zoom: float = MIN_ZOOM
 
 ## Uszczypnięcie DWOMA PALCAMI na telefonie NIE przychodzi jako
@@ -166,6 +175,7 @@ func _build_pins() -> void:
 	map_content.add_child(pins_layer)
 
 	pins.clear()
+	pin_by_city.clear()
 	for city_id in Cities.CITIES.keys():
 		var pin: Button = MapPinScript.new()
 		var city_type: String = Cities.CITIES[city_id]["type"]
@@ -194,6 +204,7 @@ func _build_pins() -> void:
 		pin.pressed.connect(_on_pin_selected.bind(city_id))
 		pins_layer.add_child(pin)
 		pins.append(pin)
+		pin_by_city[city_id] = pin
 
 
 ## _input(), NIE _gui_input/gui_input — surowy wielopalcowy dotyk
@@ -311,8 +322,22 @@ func _clamp_pan() -> void:
 func _update_pin_scale() -> void:
 	var target_scale := 1.0 + (zoom - MIN_ZOOM) * PIN_ZOOM_DAMPING
 	var compensated := target_scale / zoom
+	var selected_pin: Button = pin_by_city.get(selected_city)
 	for pin in pins:
-		pin.scale = Vector2(compensated, compensated)
+		var boost := SELECTED_PIN_SCALE_BOOST if pin == selected_pin else 1.0
+		pin.scale = Vector2(compensated * boost, compensated * boost)
+
+
+## Podświetla (jaśniejszy kolor + złota obwódka, patrz MapPin.set_selected) i
+## powiększa (patrz _update_pin_scale) pinezkę odpowiadającą selected_city,
+## a poprzednio zaznaczoną wraca do zwykłego wyglądu — zgłoszenie
+## użytkownika: kliknięcie innej pinezki ma cofnąć poprzednią do pierwotnej
+## formy, nie zostawiać dwóch podświetlonych naraz.
+func _update_pin_selection_visuals() -> void:
+	for city_id in pin_by_city:
+		var pin: Button = pin_by_city[city_id]
+		pin.set_selected(city_id == selected_city)
+	_update_pin_scale()
 
 
 ## Kliknięcie pinezki tylko zaznacza cel i pokazuje czas podróży — nie
@@ -325,6 +350,7 @@ func _on_pin_selected(city_id: String) -> void:
 	if preview.is_empty():
 		return
 	selected_city = city_id
+	_update_pin_selection_visuals()
 	var vehicle_name := tr("pociągiem") if preview["vehicle"] == Travel.Vehicle.TRAIN else tr("samolotem")
 	info_label.text = tr("Podróż do %s: %.1f dnia (%s)") % [Cities.get_city_name(city_id), preview["days"], vehicle_name]
 	confirm_button.visible = true
@@ -362,6 +388,7 @@ func _on_confirm_pressed() -> void:
 
 func _on_cancel_pressed() -> void:
 	selected_city = ""
+	_update_pin_selection_visuals()
 	info_label.text = _default_info_text()
 	confirm_button.visible = false
 	cancel_button.visible = false
