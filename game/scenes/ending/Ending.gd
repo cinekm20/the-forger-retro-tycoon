@@ -17,6 +17,10 @@ func _ready() -> void:
 	root.alignment = BoxContainer.ALIGNMENT_BEGIN
 
 	var outcome := GameState.last_outcome
+	## "win" = gracz komasuje kolekcję → wygrana. "bankrupt"/"rival_win" to
+	## dwa różne sposoby PRZEGRANEJ (własne bankructwo albo rywal był
+	## szybszy) — oba dostają ten sam, przygaszony nastrój ENDING_LOSE_TRACK.
+	Music.play_track(Music.ENDING_WIN_TRACK if outcome.begins_with("win:") else Music.ENDING_LOSE_TRACK)
 	if outcome.begins_with("win:"):
 		_build_win(root, int(outcome.substr(4)))
 	elif outcome.begins_with("bankrupt:"):

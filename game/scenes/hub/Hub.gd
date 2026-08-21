@@ -66,6 +66,7 @@ var turn_summary_button: Button
 
 
 func _ready() -> void:
+	Music.play_track(Music.HUB_TRACK)
 	## Karty wydarzeń (WorldEvents.gd — reforma walutowa / strajk / zamieszki
 	## na plantacji, zgłoszone przez użytkownika: "w formie gazety i popup
 	## między turami") mają pierwszeństwo przed Podsumowaniem roku — obie

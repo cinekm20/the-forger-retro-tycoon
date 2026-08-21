@@ -47,6 +47,7 @@ var is_racing: bool = false
 
 
 func _ready() -> void:
+	Music.play_track(Music.RACES_TRACK)
 	ScreenHelpers.make_background(self, "res://art/backgrounds/races.jpg")
 	## Zgłoszenie użytkownika: gotówka MA być wyłącznie w skrzynce w prawym
 	## górnym rogu, dokładnie jak w Giełdzie/Rynku (ScreenHelpers.make_corner_status_row),

@@ -87,6 +87,7 @@ var pinch_start_zoom: float = MIN_ZOOM
 
 
 func _ready() -> void:
+	Music.play_track(Music.HUB_TRACK)  ## ten sam nastrój co Hub.gd — patrz docs/MUZYKA_PROMPTY.md
 	_build_map(Cities.MAP_BACKGROUND_PATH)
 	_build_pins()
 

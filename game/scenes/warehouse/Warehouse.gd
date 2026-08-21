@@ -19,6 +19,7 @@ var money_label: Label
 
 
 func _ready() -> void:
+	Music.play_track(Music.PLANTATION_TRACK)  ## ten sam nastrój co Plantation.gd — patrz docs/MUZYKA_PROMPTY.md
 	ScreenHelpers.make_background(self, "res://art/backgrounds/warehouse.jpg")
 	var corner := ScreenHelpers.make_corner_status_row(self, "", "")
 	location_label = corner["left"]

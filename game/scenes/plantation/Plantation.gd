@@ -43,6 +43,7 @@ var legend_text_width: float = 200.0
 
 
 func _ready() -> void:
+	Music.play_track(Music.PLANTATION_TRACK)
 	ScreenHelpers.make_background(self, "res://art/backgrounds/plantation.jpg")
 	## use_menu_frame=false: zgłoszone przez użytkownika — ozdobna ramka na
 	## cały ekran ma zniknąć na wszystkich ekranach (ten sam fix co wcześniej

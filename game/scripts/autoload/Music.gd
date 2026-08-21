@@ -1,11 +1,20 @@
 extends Node
-## Muzyka w tle — na razie JEDEN wspólny utwór na całą grę (zgłoszone przez
-## użytkownika: "podepnij wszędzie to"), dopóki nie powstaną osobne ścieżki
-## per ekran (prompty już czekają w docs/MUZYKA_PROMPTY.md). Autoload gra
-## utwór raz, w pętli, i przetrwa zmiany scen bez przerywania/restartu —
-## żaden ekran nie musi nic wołać, żeby muzyka leciała.
+## Muzyka w tle — osobna ścieżka per ekran/nastrój (docs/MUZYKA_PROMPTY.md,
+## wszystkich 8 wygenerowane i podpięte). Autoload gra utwór w pętli i
+## przetrwa zmiany scen bez przerywania — dopiero konkretny ekran wywołuje
+## Music.play_track(...) w swoim _ready(), żeby PRZEŁĄCZYĆ ścieżkę; ekrany
+## bez własnego, dedykowanego nastroju (Galeria, Szkoła sztuki, Ochrona,
+## Ustawienia, mapa świata...) świadomie NIC nie wołają — muzyka po prostu
+## leci dalej z poprzedniego ekranu, zamiast przerywać się na krótką chwilę.
 
-const DEFAULT_TRACK := "res://audio/music/hub.mp3"
+const MAIN_MENU_TRACK := "res://audio/music/main_menu.mp3"
+const HUB_TRACK := "res://audio/music/hub.mp3"  ## też Hub/mapa świata (TravelMap.gd) — ten sam nastrój, patrz komentarz przy Hub.gd
+const PLANTATION_TRACK := "res://audio/music/plantation.mp3"  ## też Spichlerz (Warehouse.gd)
+const AUCTION_HOUSE_TRACK := "res://audio/music/auction_house.mp3"
+const MARKET_TRACK := "res://audio/music/market.mp3"  ## też Giełda (StockMarket.gd)
+const RACES_TRACK := "res://audio/music/races.mp3"
+const ENDING_WIN_TRACK := "res://audio/music/ending_win.mp3"
+const ENDING_LOSE_TRACK := "res://audio/music/ending_lose.mp3"
 const VOLUME_DB := -10.0  ## ciszej niż domyślne 0dB, żeby nie zagłuszało SFX/dialogów w przyszłości
 const MUTED_VOLUME_DB := -80.0  ## praktycznie cisza — AudioStreamPlayer nie ma osobnego "mute"
 
@@ -29,7 +38,10 @@ func _ready() -> void:
 	_load_settings()
 	player = AudioStreamPlayer.new()
 	add_child(player)
-	play_track(DEFAULT_TRACK)
+	## Bez wywołania play_track tutaj — pierwszy ekran gry (MainMenu.gd) sam
+	## wywoła Music.play_track(MAIN_MENU_TRACK) w swoim _ready(), zgodnie z
+	## ogólną zasadą "ekran wywołuje przy wejściu" (patrz komentarz na górze
+	## pliku), więc nie ma sensu grać tu czegokolwiek na chwilę przed tym.
 
 	## Bez tego kliknięcie X na oknie od razu zabijało silnik, omijając
 	## quit_game() niżej — patrz komentarz tam po pełne wyjaśnienie.
@@ -63,10 +75,15 @@ func quit_game() -> void:
 	get_tree().quit()
 
 
-## Osobna funkcja (nie tylko wywołanie w _ready) — gdy dojdą osobne ścieżki
-## per ekran (patrz komentarz wyżej), poszczególne sceny będą mogły wywołać
-## Music.play_track(...) przy wejściu, zamiast przerabiać cały autoload.
+## Wywoływane przez konkretne ekrany w ich _ready() (patrz komentarz na
+## górze pliku). Ekrany dzielące tę samą ścieżkę (np. Hub.gd i TravelMap.gd,
+## oba HUB_TRACK) odwiedza się w grze bardzo często — bez poniższej strażniczki
+## KAŻDE wejście na taki ekran restartowałoby utwór od zera, zamiast płynnie
+## kontynuować już grającą pętlę (zgłoszone jako ryzyko przy podpinaniu
+## per-ekranowych ścieżek).
 func play_track(path: String) -> void:
+	if player.playing and player.stream != null and player.stream.resource_path == path:
+		return
 	if not ResourceLoader.exists(path):
 		return
 	var stream: AudioStream = load(path)

@@ -2,8 +2,17 @@
 
 Ten plik zbiera prompty na ścieżki muzyczne w tym samym duchu co
 `docs/GRAFIKA_LEONARDO.md` dla grafiki — jeden wpis na ekran/sytuację, gotowy
-do wklejenia. `game/audio` jest na razie puste (patrz `GDD.md`), więc to
-pierwszy komplet do wygenerowania.
+do wklejenia.
+
+✅ **Wszystkie 8 wygenerowane i podpięte** (`game/audio/music/main_menu.mp3`,
+`hub.mp3`, `plantation.mp3`, `auction_house.mp3`, `market.mp3`, `races.mp3`,
+`ending_win.mp3`, `ending_lose.mp3`) — `Music.gd` przełącza ścieżkę przy
+wejściu na dany ekran (`Music.play_track(...)`, patrz stałe na górze pliku),
+ekrany bez własnego, dedykowanego nastroju świadomie nic nie wołają, więc
+muzyka po prostu leci dalej z poprzedniego ekranu. Wgrane jako `.mp3`, nie
+`.ogg` (patrz format docelowy niżej) — działa identycznie, `Music.play_track`
+ustawia `.loop = true` na obu typach strumienia, więc różnica jest tylko w
+nieco gorszej kompresji pętli, nie w funkcjonalności.
 
 **Format docelowy:** `.ogg` (Vorbis) — Godot 4 obsługuje natywnie i lepiej
 kompresuje pętle niż mp3. Każdy utwór ma być **instrumentalny** (bez wokalu —

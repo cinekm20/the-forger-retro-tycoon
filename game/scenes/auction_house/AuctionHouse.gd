@@ -96,6 +96,7 @@ const SIDE_FRAMES_TOP_OFFSET := 200.0
 
 
 func _ready() -> void:
+	Music.play_track(Music.AUCTION_HOUSE_TRACK)
 	ScreenHelpers.make_background(self, "res://art/backgrounds/auction_house.jpg")
 
 	## use_menu_frame=false: użytkownik zgłosił, że ozdobna ramka na cały
