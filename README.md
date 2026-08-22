@@ -26,14 +26,17 @@ game/   — projekt Godot 4 (kod gry)
   zakończenie).
 - **`GRAFIKA_LEONARDO.md`** — gotowe prompty i plan produkcji grafik w
   Leonardo.ai (spójny styl, ustawienia techniczne, checklista ~90 assetów).
+- **`MUZYKA_PROMPTY.md`** — gotowe prompty na ścieżki muzyczne (Suno/Udio),
+  jeden wpis na ekran/nastrój.
 - **`ZRODLA_C64_WIKI.md`**, **`PODSUMOWANIE_ARTYKULU.md`** — materiały
   źródłowe z c64-wiki.de (streszczone/sparafrazowane, nie przedrukowane —
   to cudza, licencjonowana treść).
 
 ## Gra (`game/`)
 
-Godot 4 — **logicznie kompletny i grywalny**, większość ekranów ma już
-podpiętą docelową grafikę tła (`docs/GRAFIKA_LEONARDO.md`). Ekrany: Hub +
+Godot 4 — **logicznie kompletny i grywalny**, wszystkie ekrany mają już
+podpiętą docelową grafikę tła (`docs/GRAFIKA_LEONARDO.md`) i muzykę
+przełączającą się per ekran (`docs/MUZYKA_PROMPTY.md`). Ekrany: Hub +
 osobna mapa świata z podróżami między miastami (z przesiadkami i animacją
 podróży), plantacje (siatka 16×16 z losową rzeką, bonus rzeki, robotnicy,
 zbiory) + Spichlerz (zbiorczy magazyn upraw), giełda (akcje + kontrakty
@@ -57,5 +60,12 @@ Jak uruchomić: `game/README.md`.
    wygenerowane i podpięte; szczegóły w tabeli "Plan produkcji" w
    `docs/GRAFIKA_LEONARDO.md`
 4. ✅ Podpięcie gotowych grafik pod ekrany
-5. ✅ Eksport APK działa (`.github/workflows/android-build.yml`, debug
-   keystore) — podpisywanie pod Google Play/AAB wciąż do zrobienia
+5. ✅ Muzyka (`docs/MUZYKA_PROMPTY.md`) — wszystkie 8 ścieżek wygenerowane i
+   podpięte, przełączają się automatycznie per ekran (`Music.gd`)
+6. ✅ Eksport APK debug działa (`.github/workflows/android-build.yml`,
+   debug keystore, do szybkich instalacji testowych)
+7. ✅ Build release `.aab` podpisany kluczem produkcyjnym
+   (`.github/workflows/android-release-build.yml`) — auto-bump wersji,
+   pierwsze wersje już wgrane do zamkniętego testu w Google Play Console
+8. 🔄 W trakcie: zbieranie 12 testerów na 14 dni (wymóg Google Play dla
+   nowych kont deweloperskich), zanim odblokuje się publikacja produkcyjna
