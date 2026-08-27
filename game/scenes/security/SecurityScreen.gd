@@ -45,6 +45,7 @@ var is_attacking: bool = false
 
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/gallery.jpg")
+	ScreenHelpers.make_instructions_button(self)
 
 	## Zgłoszenie użytkownika: gotówka MA być w skrzynce w prawym górnym
 	## rogu, dokładnie jak w Giełdzie/Rynku (ScreenHelpers.make_corner_status_row)

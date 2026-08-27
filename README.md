@@ -43,7 +43,10 @@ zbiory) + Spichlerz (zbiorczy magazyn upraw), giełda (akcje + kontrakty
 terminowe), dom aukcyjny (licytacja wg stałego harmonogramu przeciw 3
 rywalom AI, w tym Vico, z wizualnie odrębnymi fałszywkami dla części
 obrazów), szkoła sztuki (eksperckość), wyścigi konne, galeria (+ system
-ochrony/kradzieży), ustawienia (wybór języka). Ma pętlę wygrana/przegrana
+ochrony/kradzieży), ustawienia (wybór języka) — każdy z tych głównych
+ekranów ma w prawym górnym rogu przycisk "?" z pełną instrukcją gry
+(`scenes/instructions/Instructions.gd`), jedno wspólne źródło opisu
+wszystkich mechanik. Ma pętlę wygrana/przegrana
 (kompletna kolekcja / bankructwo / rywal wygrywa pierwszy), hot-seat
 multiplayer do 4 graczy, zapis/odczyt gry i pełny interfejs w trzech
 językach (polski/angielski/niemiecki).

@@ -402,6 +402,39 @@ static func make_info_box(root: Container, text: String, min_width: float = 0.0,
 	return label
 
 
+## Przycisk „?” w prawym górnym rogu, wejście do ekranu instrukcji
+## (Instructions.gd) — zgłoszone przez użytkownika: "wszędzie powinno być u
+## góry po prawej dostępne wejście do instrukcji", na wszystkich głównych
+## ekranach nawigacyjnych (Hub, Plantacje, Spichlerz, Giełda, Rynek, Dom
+## aukcyjny, Szkoła sztuki, Galeria, Ochrona, Wyścigi, Mapa świata,
+## Ustawienia). Pozycjonowany ręcznie (anchor_left=anchor_right=1.0 + offsety),
+## nie przez set_anchors_preset() — ten sam powód co _anchor_side_strip niżej
+## (rozmiar 0×0 w momencie wywołania blokowałby offsety). Rozmiar/pozycja
+## zdefiniowane jako CORNER_BUTTON_* stałe niżej, bo make_corner_status_row()
+## i Hub.gd._build_top_row() muszą wiedzieć, ile miejsca ten przycisk zajmuje,
+## żeby zepchnąć swoją skrzynkę gotówki niżej i uniknąć nachodzenia na siebie.
+const CORNER_BUTTON_SIZE := 52.0
+const CORNER_BUTTON_TOP_OFFSET := 12.0
+## 10px odstępu pod przyciskiem, zanim zacznie się kolejna skrzynka w tym samym rogu.
+const CORNER_BUTTON_RESERVED_HEIGHT := CORNER_BUTTON_TOP_OFFSET + CORNER_BUTTON_SIZE + 10.0
+
+static func make_instructions_button(parent: Control) -> Button:
+	var btn := Button.new()
+	btn.text = "?"
+	btn.tooltip_text = TranslationServer.translate("Instrukcja")
+	btn.anchor_left = 1.0
+	btn.anchor_right = 1.0
+	btn.offset_left = -16.0 - CORNER_BUTTON_SIZE
+	btn.offset_right = -16.0
+	btn.offset_top = CORNER_BUTTON_TOP_OFFSET
+	btn.offset_bottom = CORNER_BUTTON_TOP_OFFSET + CORNER_BUTTON_SIZE
+	_style_button(btn)
+	btn.add_theme_font_size_override("font_size", 28)
+	btn.pressed.connect(func(): SceneRouter.goto_scene(SceneRouter.INSTRUCTIONS))
+	parent.add_child(btn)
+	return btn
+
+
 ## Dwie skrzynki w przeciwległych górnych rogach (lewy: krótszy tekst typu
 ## lokalizacja/data, prawy: gotówka) — ten sam układ co Hub.gd _build_top_row,
 ## współdzielony tu, bo tego samego rozkładu (patrz zrzuty ekranu oryginału
@@ -416,7 +449,7 @@ static func make_corner_status_row(parent: Control, left_text: String, right_tex
 	## zaokrąglonymi rogami/notchem).
 	row.offset_left = 16
 	row.offset_right = -16
-	row.offset_top = 12
+	row.offset_top = CORNER_BUTTON_RESERVED_HEIGHT
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(row)
 

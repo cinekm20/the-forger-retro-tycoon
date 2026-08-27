@@ -54,6 +54,7 @@ var expertise_puzzle: Control
 
 func _ready() -> void:
 	ScreenHelpers.make_background(self, "res://art/backgrounds/art_school.jpg")
+	ScreenHelpers.make_instructions_button(self)
 	## Zgłoszenie użytkownika: gotówka MA być wyłącznie w skrzynce w prawym
 	## górnym rogu, dokładnie jak w Giełdzie/Rynku (ScreenHelpers.make_corner_status_row),
 	## zamiast w zdaniu "Gotówka: X M | Data: Y" w środku ekranu.

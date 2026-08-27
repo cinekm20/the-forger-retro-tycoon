@@ -106,6 +106,7 @@ func _ready() -> void:
 	## kontener) trzyma lewą kolumnę (location/date/obrazy) i skrzynkę
 	## gotówki po przeciwnych stronach — patrz komentarz przy _build_top_row.
 	top_row = _build_top_row()
+	ScreenHelpers.make_instructions_button(self)
 	_build_turn_summary()
 
 	## Panel boczny na menu nawigacyjne — zostaje w prawym dolnym rogu,
@@ -187,7 +188,7 @@ func _build_top_row() -> HBoxContainer:
 	## obszar (zgłoszone przez testera: "nie widać całej liczby").
 	row.offset_left = 16
 	row.offset_right = -16
-	row.offset_top = 12
+	row.offset_top = ScreenHelpers.CORNER_BUTTON_RESERVED_HEIGHT
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_theme_constant_override("separation", 16)
 	add_child(row)

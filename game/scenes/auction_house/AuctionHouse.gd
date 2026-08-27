@@ -98,6 +98,7 @@ const SIDE_FRAMES_TOP_OFFSET := 200.0
 func _ready() -> void:
 	Music.play_track(Music.AUCTION_HOUSE_TRACK)
 	ScreenHelpers.make_background(self, "res://art/backgrounds/auction_house.jpg")
+	ScreenHelpers.make_instructions_button(self)
 
 	## use_menu_frame=false: użytkownik zgłosił, że ozdobna ramka na cały
 	## ekran (ta sama co w Hub/TravelMap) tu tylko przeszkadzała.

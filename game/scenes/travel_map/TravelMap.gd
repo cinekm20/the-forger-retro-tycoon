@@ -90,6 +90,7 @@ func _ready() -> void:
 	Music.play_track(Music.HUB_TRACK)  ## ten sam nastrój co Hub.gd — patrz docs/MUZYKA_PROMPTY.md
 	_build_map(Cities.MAP_BACKGROUND_PATH)
 	_build_pins()
+	ScreenHelpers.make_instructions_button(self)
 
 	var root := ScreenHelpers.make_root_bottom(self, true)
 	ScreenHelpers.make_title(root, "Dokąd jedziemy?")

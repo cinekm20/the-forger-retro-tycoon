@@ -80,6 +80,7 @@ func _ready() -> void:
 	if not ResourceLoader.exists(background_path):
 		background_path = "res://art/backgrounds/gallery.jpg"
 	var bg_layers := ScreenHelpers.make_background_with_overlay(self, background_path)
+	ScreenHelpers.make_instructions_button(self)
 	overlay = bg_layers["overlay"]
 
 	var fill_ratio := float(Paintings.owned_count()) / float(Paintings.win_threshold)

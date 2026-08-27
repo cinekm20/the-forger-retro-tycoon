@@ -33,6 +33,7 @@ var shipping_chart: Control
 func _ready() -> void:
 	Music.play_track(Music.MARKET_TRACK)
 	ScreenHelpers.make_background(self, "res://art/backgrounds/stock_market.jpg")
+	ScreenHelpers.make_instructions_button(self)
 	var corner := ScreenHelpers.make_corner_status_row(self, "", "")
 	location_label = corner["left"]
 	money_label = corner["right"]

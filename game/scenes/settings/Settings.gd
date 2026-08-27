@@ -14,6 +14,7 @@ func _ready() -> void:
 	if not ResourceLoader.exists(background_path):
 		background_path = "res://art/backgrounds/stock_market.jpg"
 	ScreenHelpers.make_background(self, background_path)
+	ScreenHelpers.make_instructions_button(self)
 
 	## use_menu_frame=false + ALIGNMENT_BEGIN + JEDEN rozpychacz na końcu:
 	## zgłoszone przez użytkownika — ozdobna ramka znika, nazwa ekranu zostaje

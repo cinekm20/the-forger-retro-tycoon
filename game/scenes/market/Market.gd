@@ -31,6 +31,7 @@ var crop_chart: Control
 func _ready() -> void:
 	Music.play_track(Music.MARKET_TRACK)  ## ten sam nastrój co StockMarket.gd — patrz docs/MUZYKA_PROMPTY.md
 	ScreenHelpers.make_background(self, "res://art/backgrounds/market.jpg")
+	ScreenHelpers.make_instructions_button(self)
 	var corner := ScreenHelpers.make_corner_status_row(self, "", "")
 	location_label = corner["left"]
 	money_label = corner["right"]
