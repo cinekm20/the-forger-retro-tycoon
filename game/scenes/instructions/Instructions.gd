@@ -22,16 +22,39 @@ extends Control
 ## gdzie indziej) — druga ozdobna ramka w tym samym rogu co ramka główna
 ## nakładałaby się na nią wizualnie.
 
-## Zrzuty ekranu (game/art/instructions/*.jpg) — 960×540, przechwycone
-## bezpośrednio z działającej gry (nie generowane w Leonardo.ai), więc
-## zawsze wiernie pokazują aktualny wygląd/rozmieszczenie przycisków.
-## IMAGE_WIDTH dobrany tak, żeby zmieścił się z zapasem nawet w wąskiej,
-## portretowej ramce na telefonie (90% ekranu minus wcięcie ramki, patrz
-## ScreenHelpers.CONTENT_INSET_WITH_FRAME).
-const IMAGE_WIDTH := 560.0
-const IMAGE_HEIGHT := IMAGE_WIDTH * 9.0 / 16.0
+## Zrzuty ekranu (game/art/instructions/*.jpg) — 1000×375 (proporcje
+## 1920×720), przechwycone bezpośrednio z działającej gry (nie generowane w
+## Leonardo.ai), więc zawsze wiernie pokazują aktualny wygląd/rozmieszczenie
+## przycisków. Przechwycone celowo SZERZEJ niż domyślna rozdzielczość gry
+## (1280×720) — przy standardowej szerokości legenda Plantacji i rząd cen na
+## Rynku wychodziły poza prawą krawędź ekranu (zgłoszone przez użytkownika,
+## „odcięte są po prawej stronie”); silnik w trybie stretch/aspect=expand
+## daje ekranowi WIĘCEJ faktycznej szerokości logicznej przy szerszym oknie
+## (bez zmiany referencyjnej wysokości 720), więc dokładnie to samo dzieje
+## się realnie na szerokim telefonie/tablecie w orientacji poziomej — tu
+## tylko świadomie wymuszone przy przechwytywaniu, żeby żaden zrzut nie był
+## ucięty. IMAGE_WIDTH dobrany tak, żeby zmieścił się z zapasem nawet w
+## wąskiej, portretowej ramce na telefonie (90% ekranu minus wcięcie ramki,
+## patrz ScreenHelpers.CONTENT_INSET_WITH_FRAME).
+const IMAGE_WIDTH := 600.0
+const IMAGE_HEIGHT := IMAGE_WIDTH * 720.0 / 1920.0
 const SECTION_TEXT_WIDTH := 620.0
 const IMAGES_DIR := "res://art/instructions/"
+
+## Legendy (ikonka + rozwinięty opis) — zgłoszone przez użytkownika: "tak jak
+## w plantacji jest legenda, to tam też powinna być z rozwinięciem co i jak,
+## tak samo inne miejsca". Ikonki to te SAME klasy co w prawdziwej grze
+## (PlantationTileIcon.gd/StatIcon.gd/MapPin.gd — natywnie rysowane, patrz
+## uzasadnienie w tych plikach), nie osobne, zduplikowane rysunki — więc
+## legenda tu zawsze wygląda dokładnie tak samo jak w grze.
+const PlantationTileIconScript := preload("res://scripts/ui/PlantationTileIcon.gd")
+const StatIconScript := preload("res://scripts/ui/StatIcon.gd")
+const MapPinScript := preload("res://scripts/ui/MapPin.gd")
+## Tylko żeby odczytać TYPE_PIN_COLORS/CURRENT_CITY_PIN_COLOR (stałe, bez
+## efektów ubocznych) — preload NIE tworzy instancji sceny, tylko ładuje
+## definicję klasy, więc to bezpieczne mimo że to skrypt pełnego ekranu.
+const TravelMapScript := preload("res://scenes/travel_map/TravelMap.gd")
+const LEGEND_TILE_ICON_SIZE := 28.0
 
 
 func _ready() -> void:
@@ -46,17 +69,40 @@ func _ready() -> void:
 	_add_section(root, tr("Zwycięstwo i porażka"), [], [
 		tr("Wygrywasz, gdy zdobędziesz wszystkie obrazy z głównego katalogu (40 w trybie standardowym, 15 w trybie łatwym). Przegrywasz, jeśli przez 60 kolejnych dni gry masz ujemną gotówkę (bankructwo) albo jeśli rywal skompletuje kolekcję pierwszy. W grze wieloosobowej (hot-seat, do 4 graczy) wygrywa ten gracz, który jako pierwszy skompletuje kolekcję."),
 	])
-	_add_section(root, tr("Hub i mapa świata"), ["hub_places", "travel_map"], [
+	var hub_section := _add_section(root, tr("Hub i mapa świata"), ["hub_places", "travel_map"], [
 		tr("Hub to ekran startowy każdej tury — w rogach widać Twoją lokalizację i datę, liczbę zebranych obrazów, termin następnej aukcji oraz gotówkę. Menu w prawym dolnym rogu ma cztery stałe przyciski: „Jedź »” (otwiera mapę świata), „Miejsca »” (rozwija podmenu lokacji), „Koniec tury »” (przesuwa kalendarz) i „Zapisz i wyjdź do menu” (zapisuje grę)."),
 		tr("Przycisk „Miejsca »” pokazuje wszystkie akcje dostępne w Twojej bieżącej lokalizacji: Plantacje i Spichlerz tylko w miastach plantacyjnych, Dom aukcyjny i Galeria tylko w miastach aukcyjnych, Giełda i Rynek w Nowym Jorku i miastach aukcyjnych, Szkoła sztuki wyłącznie w Paryżu — a Wyścigi konne i Ochrona są dostępne zawsze, z każdej lokalizacji. Niedostępna tu akcja po prostu nie pokazuje się na liście, zamiast być wyszarzona."),
 		tr("„Jedź »” otwiera mapę świata z 18 lokacjami — dotknij pinezkę, żeby zobaczyć czas podróży (od ok. 1,5 dnia między sąsiednimi miastami Europy do prawie miesiąca na najdłuższych trasach) i potwierdzić przyciskiem „Jedź »” na dole ekranu. Mapę można przybliżać (uszczypnięcie/kółko myszy) i przesuwać przeciąganiem. „Koniec tury »” przesuwa kalendarz o 7 dni, chyba że w tym oknie wypada zaplanowana aukcja w Twoim mieście — wtedy tura skraca się, żeby jej nie przegapić."),
 	])
-	_add_section(root, tr("Plantacje"), ["plantation"], [
+	_add_legend(hub_section, tr("Legenda: ikony statystyk"), [
+		{"icon": StatIconScript.new(StatIconScript.Kind.MONEY), "text": tr("Złota moneta — Twoja gotówka.")},
+		{"icon": StatIconScript.new(StatIconScript.Kind.DATE), "text": tr("Kalendarzyk — aktualna data w grze.")},
+		{"icon": StatIconScript.new(StatIconScript.Kind.EXPERTISE), "text": tr("Lupa — Twoja eksperckość (patrz sekcja „Szkoła sztuki” niżej).")},
+	])
+	_add_legend(hub_section, tr("Legenda: kolory pinezek na mapie"), [
+		{"icon": _make_pin(TravelMapScript.TYPE_PIN_COLORS["plantation"]), "text": tr("Miasto plantacyjne — dostępne tu Plantacje i Spichlerz.")},
+		{"icon": _make_pin(TravelMapScript.TYPE_PIN_COLORS["auction"]), "text": tr("Miasto aukcyjne — dostępny tu Dom aukcyjny i Galeria (a w Paryżu dodatkowo Szkoła sztuki).")},
+		{"icon": _make_pin(TravelMapScript.TYPE_PIN_COLORS["hub"]), "text": tr("Nowy Jork — jedyne miasto typu „hub”, dostępne tu Giełda i Rynek (razem z miastami aukcyjnymi).")},
+		{"icon": _make_pin(TravelMapScript.CURRENT_CITY_PIN_COLOR), "text": tr("Twoja aktualna lokalizacja.")},
+	])
+	var plantation_section := _add_section(root, tr("Plantacje"), ["plantation"], [
 		tr("Każde miasto plantacyjne ma własną siatkę 16×16 pól, wspólną dla wszystkich graczy i wylosowaną raz na całą grę — rzeka (niebieski pas) przecina siatkę po przekątnej. Pole kosztuje 500 M i kupujesz je, dotykając wolnego pola (ikonka „+”); kto pierwszy kupi dane pole, ten jest jego właścicielem na resztę gry. Pola leżące obok rzeki — poziomo, pionowo lub po przekątnej — dają DWA RAZY większy plon niż pola zwykłe, więc miejsce przy rzece jest najcenniejszą działką na planszy."),
 		tr("Kupione, ale puste pole (goła ziemia) zasadzasz, dotykając go — obsiewa się uprawą wybraną w rozwijanej liście „Sadzić:” (Kawa, Tytoń, Herbata, Kakao, a w Ankarze i Gwatemali dodatkowo ryzykowna „Przemycana uprawa”). Jedna plantacja może uprawiać kilka różnych roślin naraz, każdą na innych polach. Pole „Robotnicy:” ustawia liczbę zatrudnionych na CAŁEJ plantacji (do 500) — każdy kosztuje 1 M dziennie, płatne automatycznie z Twojej gotówki. Plon rośnie WPROST proporcjonalnie do liczby robotników: przy 500 robotnikach dostajesz pełny plon z tabeli referencyjnej, przy 250 — połowę, przy 0 — nic, niezależnie od tego, ile masz obsianych pól."),
 		tr("Poza robotnikami na wielkość zbiorów wpływają jeszcze trzy czynniki: pora roku (zimą i latem plon spada nawet do 30-40% normy, wiosną i jesienią jest najwyższy), czas od ostatnich zbiorów (plon liczy się proporcjonalnie do dni, jakie minęły) oraz sama liczba i jakość Twoich pól (pole przy rzece liczy się podwójnie). Każde miasto ma inny profil upraw — np. Ankara/Bombaj/Colombo dają dużo herbaty i mało kawy, Rio/Abidżan/Duala odwrotnie — więc opłaca się sprawdzić, co w danym mieście rośnie najlepiej."),
 		tr("„Kup pompę wodną (5000 M)” to jednorazowa inwestycja na całą plantację: podnosi CAŁY jej plon o 20% i całkowicie chroni przed suszą/powodzią (bez pompy ryzyko klęski pogodowej wynosi ok. 3% na tydzień). Jeśli zabraknie Ci gotówki na wypłaty dla robotników, grozi strajk — plantacja traci wszystkie zebrane zapasy i połowę załogi; w niespokojnych regionach (m.in. Ankara, Bombaj, Colombo) to samo mogą wywołać zamieszki. Trzy takie uderzenia z rzędu (strajk lub zamieszki, liczone łącznie) kosztują całą plantację."),
-		tr("„Zbierz plony” zbiera od razu wszystkie dojrzałe uprawy z tej plantacji (może być kilka naraz) i pokazuje łączną ilość. „Wyślij i sprzedaj” wysyła cały zebrany zapas do sprzedaży w Nowym Jorku. Legenda po prawej tłumaczy każdą ikonkę pola, a przycisk „Spichlerz »” prowadzi do zbiorczego magazynu wszystkich Twoich plantacji w tym mieście (opisany niżej)."),
+		tr("„Zbierz plony” zbiera od razu wszystkie dojrzałe uprawy z tej plantacji (może być kilka naraz) i pokazuje łączną ilość. „Wyślij i sprzedaj” wysyła cały zebrany zapas do sprzedaży w Nowym Jorku. Przycisk „Spichlerz »” prowadzi do zbiorczego magazynu wszystkich Twoich plantacji w tym mieście (opisany niżej). Poniżej — pełna legenda wyglądu pól."),
+	])
+	_add_legend(plantation_section, tr("Legenda: pola na siatce"), [
+		{"icon": _make_tile_icon(PlantationTileIconScript.Kind.RIVER), "text": tr("Rzeka — niedostępna do kupienia; pola obok niej (poziomo, pionowo lub po przekątnej) dają dwa razy większy plon.")},
+		{"icon": _make_tile_icon(PlantationTileIconScript.Kind.VACANT), "text": tr("Wolne pole — kosztuje 500 M, dotknij, żeby je kupić.")},
+		{"icon": _make_tile_icon(PlantationTileIconScript.Kind.SOIL), "text": tr("Twoje pole, jeszcze niezasiane — dotknij, żeby zasiać uprawę wybraną w liście „Sadzić:”.")},
+		{"icon": _make_tile_icon(PlantationTileIconScript.Kind.SOIL, true), "text": tr("Twoje pole sąsiadujące z rzeką (jasna obwódka) — po zasianiu da dwa razy większy plon niż zwykłe pole.")},
+		{"icon": _make_tile_icon(PlantationTileIconScript.Kind.CROP, false, "coffee"), "text": tr("Obsiane pole — kolor rośliny pokazuje uprawę (tu: kawa); z czasem wygląd „dojrzewa”, czysto kosmetycznie, bez wpływu na plon.")},
+		{"icon": _make_tile_icon(PlantationTileIconScript.Kind.CROP, false, "tobacco"), "text": tr("Tytoń")},
+		{"icon": _make_tile_icon(PlantationTileIconScript.Kind.CROP, false, "tea"), "text": tr("Herbata")},
+		{"icon": _make_tile_icon(PlantationTileIconScript.Kind.CROP, false, "cocoa"), "text": tr("Kakao")},
+		{"icon": _make_tile_icon(PlantationTileIconScript.Kind.CROP, false, "contraband"), "text": tr("Przemycana uprawa — dostępna tylko w Ankarze i Gwatemali; wyższa cena sprzedaży, ale ryzyko konfiskaty.")},
+		{"icon": _make_tile_icon(PlantationTileIconScript.Kind.OWNED_BY_OTHER), "text": tr("Tylko w grze wieloosobowej: pole zajęte przez innego gracza (kolor + inicjał imienia) — nie da się go kupić ani na nim sadzić.")},
 	])
 	_add_section(root, tr("Spichlerz"), ["warehouse"], [
 		tr("Spichlerz zbiera w jednym miejscu plony ze WSZYSTKICH Twoich plantacji w danym mieście — każda uprawa ma własny „silos” pokazujący ilość i aktualną cenę za jednostkę. Przycisk „Wyślij i sprzedaj” pod danym silosem sprzedaje od razu cały jego zapas do Nowego Jorku po bieżącej cenie rynkowej. Towar, który zaległ w magazynie dłużej niż rok, psuje się i przepada — nie warto go magazynować w nieskończoność."),
@@ -98,7 +144,7 @@ func _ready() -> void:
 	ScreenHelpers.make_button(root, "« Powrót", func(): SceneRouter.goto_hub())
 
 
-func _add_section(container: VBoxContainer, title_text: String, image_names: Array, paragraphs: Array) -> void:
+func _add_section(container: VBoxContainer, title_text: String, image_names: Array, paragraphs: Array) -> VBoxContainer:
 	var section := VBoxContainer.new()
 	section.alignment = BoxContainer.ALIGNMENT_CENTER
 	section.add_theme_constant_override("separation", 10)
@@ -121,6 +167,59 @@ func _add_section(container: VBoxContainer, title_text: String, image_names: Arr
 		var body := ScreenHelpers.make_label(section, paragraph)
 		body.autowrap_mode = TextServer.AUTOWRAP_WORD
 		body.custom_minimum_size = Vector2(SECTION_TEXT_WIDTH, 0)
+
+	return section
+
+
+## Oprawiona skrzynka (ScreenHelpers.make_framed_box, ta sama co ramka pod
+## wykresem w Market.gd/StockMarket.gd) z wierszami ikonka+opis — zgłoszone
+## przez użytkownika: instrukcja ma mieć PRAWDZIWE legendy (ikonka + rozwinięty
+## tekst), nie tylko prozę. `rows`: Array of {"icon": Control, "text": String}.
+## Ikonka dostaje własny, stały "slot" (CenterContainer) zamiast wymuszania
+## jednego rozmiaru na WSZYSTKIE ikonki — PlantationTileIcon/StatIcon/MapPin
+## mają różne naturalne proporcje (kwadratowe kafelki vs. pinezka), więc
+## wymuszony wspólny rozmiar zniekształcałby część z nich.
+const LEGEND_ICON_SLOT := 40.0
+
+func _add_legend(container: VBoxContainer, legend_title: String, rows: Array) -> void:
+	var box := ScreenHelpers.make_framed_box(container)
+
+	var heading := Label.new()
+	heading.text = legend_title
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heading.add_theme_font_size_override("font_size", 24)
+	heading.add_theme_color_override("font_color", ScreenHelpers.COLOR_GOLD_BRIGHT)
+	box.add_child(heading)
+
+	for row in rows:
+		var hrow := HBoxContainer.new()
+		hrow.add_theme_constant_override("separation", 12)
+		box.add_child(hrow)
+
+		var icon_slot := CenterContainer.new()
+		icon_slot.custom_minimum_size = Vector2(LEGEND_ICON_SLOT, LEGEND_ICON_SLOT)
+		icon_slot.add_child(row["icon"])
+		hrow.add_child(icon_slot)
+
+		var label := ScreenHelpers.make_label(hrow, row["text"])
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		label.custom_minimum_size = Vector2(SECTION_TEXT_WIDTH - LEGEND_ICON_SLOT - 12.0, 0)
+
+
+func _make_tile_icon(kind: int, river_adjacent: bool = false, crop: String = "") -> Control:
+	var icon: Control = PlantationTileIconScript.new()
+	icon.custom_minimum_size = Vector2(LEGEND_TILE_ICON_SIZE, LEGEND_TILE_ICON_SIZE)
+	icon.kind = kind
+	icon.river_adjacent = river_adjacent
+	icon.crop = crop
+	return icon
+
+
+func _make_pin(color: Color) -> Control:
+	var pin: Control = MapPinScript.new()
+	pin.pin_color = color
+	return pin
 
 
 ## Prawdziwy zrzut ekranu z działającej gry (nie grafika z Leonardo.ai) —
