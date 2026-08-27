@@ -69,6 +69,19 @@ func _ready() -> void:
 	ScreenHelpers.make_title(root, "Wyścigi konne")
 	ScreenHelpers.make_turn_indicator(root)
 
+	## Odstęp o stałej wysokości pod tytułem — w trybie solo (bez wskaźnika
+	## tury) portrety koni zaczynały się od razu pod tytułem, na tej samej
+	## wysokości co skrzynki lokalizacji/gotówki w rogach (ScreenHelpers.
+	## make_corner_status_row, zepchnięte niżej pod przycisk instrukcji, patrz
+	## ScreenHelpers.CORNER_BUTTON_RESERVED_HEIGHT) — pierwszy i ostatni koń w
+	## rzędzie są dość szerocy, żeby fizycznie sięgać w poziomie do obu tych
+	## skrzynek, więc nachodziły na nie (zgłoszone przez użytkownika na zrzucie
+	## ekranu). Wysokość dobrana tak, żeby rząd koni zaczynał się bezpiecznie
+	## poniżej dolnej krawędzi obu skrzynek.
+	var top_spacer := Control.new()
+	top_spacer.custom_minimum_size = Vector2(0, 80)
+	root.add_child(top_spacer)
+
 	horse_ids.assign(Horses.HORSES.keys())
 
 	## Zgłoszenie użytkownika: konie mają stać OBOK SIEBIE (nie jeden pod

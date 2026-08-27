@@ -86,6 +86,15 @@ func _ready() -> void:
 	explanation_label.add_theme_font_size_override("font_size", EXPLANATION_FONT_SIZE)
 	explanation_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	explanation_label.custom_minimum_size = Vector2(700, 90)
+	## SIZE_SHRINK_CENTER: bez tego VBoxContainer i tak rozciągał etykietę na
+	## PEŁNĄ szerokość ekranu (custom_minimum_size wyżej to tylko MINIMUM, nie
+	## twardy limit) — długie pierwsze zdanie wychodziło niemal od krawędzi do
+	## krawędzi i nachodziło na skrzynki lokalizacji/gotówki w rogach (patrz
+	## ScreenHelpers.CORNER_BUTTON_RESERVED_HEIGHT — po zepchnięciu tych
+	## skrzynek niżej pod nowy przycisk instrukcji nakładanie stało się
+	## widoczne na zrzucie ekranu). Wyśrodkowana skrzynka o stałej szerokości
+	## 700px zostaje bezpiecznie między obiema skrzynkami w rogach.
+	explanation_label.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 
 	status_label = ScreenHelpers.make_label(root, "")
 
