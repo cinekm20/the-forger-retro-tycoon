@@ -10,6 +10,7 @@ func has_save() -> bool:
 
 func save_game() -> void:
 	var data := {
+		"difficulty_level": Difficulty.level,
 		"current_day": Calendar.current_day,
 		"player_money": Economy.player_money,
 		"dollar_rate": Economy.dollar_rate,
@@ -59,6 +60,11 @@ func load_game() -> void:
 	file.close()
 	if data == null:
 		return
+	## Zapisy sprzed dodania poziomów trudności nie mają "difficulty_level" —
+	## Difficulty.level domyślnie startuje jako VERY_HARD (patrz komentarz
+	## przy tej zmiennej), więc taki stary zapis wczyta się z dokładnie tym
+	## samym ryzykiem/plonem, jaki miał, zanim ta mechanika istniała.
+	Difficulty.level = data.get("difficulty_level", Difficulty.Level.VERY_HARD)
 	Calendar.current_day = data.get("current_day", 0)
 	Economy.player_money = data.get("player_money", Economy.STARTING_MONEY)
 	Economy.dollar_rate = data.get("dollar_rate", Economy.STARTING_DOLLAR_RATE)

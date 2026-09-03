@@ -37,6 +37,7 @@ func _ready() -> void:
 	_test_paintings_numbers_with_fake_variant()
 	_test_ai_players_rival_names_randomized()
 	_test_win_threshold_easy_mode()
+	_test_difficulty_level_multipliers()
 	_test_forward_contract_penalty_on_failure()
 	_test_players_hotseat_swap()
 	_test_players_turn_follows_earliest_date()
@@ -55,6 +56,8 @@ func _ready() -> void:
 	_test_plantation_lost_after_repeated_crisis_hits()
 	_test_plantation_tiles_are_exclusive_between_players()
 	_test_water_pump_prevents_weather_crisis_and_boosts_yield()
+	_test_difficulty_scales_plantation_yield()
+	_test_difficulty_very_easy_disables_weather_risk()
 	_test_goods_spoil_after_a_year_in_storage()
 	_test_contraband_crop_restricted_and_confiscatable()
 	_test_bonus_paintings_available_and_awardable()
@@ -370,6 +373,63 @@ func _test_water_pump_prevents_weather_crisis_and_boosts_yield() -> void:
 ## docs/DODATKOWE_MECHANIKI.md: "Towar zalegający na magazynie dłużej niż
 ## rok psuje się" — "richmond" + pompa wodna, tak jak w innych testach
 ## harvest-owych wyżej, żeby losowe ryzyko pogodowe nie ingerowało.
+## Difficulty.yield_multiplier() wchodzi do calculate_harvest() jako czysty,
+## deterministyczny mnożnik (bez randf() w środku formuły) — więc, w
+## odróżnieniu od ryzyka niżej, dający się sprawdzić WPROST na dokładnej
+## wartości, nie tylko statystycznie. int() ucina ułamki, stąd tolerancja
+## ±1 zamiast równości day (ta sama technika co _test_harvest_scales_with_time).
+func _test_difficulty_scales_plantation_yield() -> void:
+	print("-- PlayerPlantations: Difficulty.yield_multiplier skaluje plon --")
+	PlayerPlantations.reset_new_game()
+	Economy.reset_new_game()
+	Players.reset_new_game(1)
+	var idx := PlayerPlantations.found_plantation("richmond")
+	PlayerPlantations.city_grids["richmond"]["river"].fill(false)
+	PlayerPlantations.plantations[idx]["has_water_pump"] = true  # bez ryzyka pogodowego w tym pomiarze
+	PlayerPlantations.buy_tile(idx, 0)
+	PlayerPlantations.plant_tile(idx, 0, "tobacco")
+	PlayerPlantations.hire_workers(idx, 500)
+	PlayerPlantations.plantations[idx]["last_harvest_day"] = Players.active_day() - 30
+
+	Difficulty.reset_new_game(Difficulty.Level.VERY_HARD)  # mnożnik ×1,5
+	var amount_very_hard: int = PlayerPlantations.calculate_harvest(idx).get("tobacco", 0)
+	Difficulty.reset_new_game(Difficulty.Level.VERY_EASY)  # mnożnik ×4,0
+	var amount_very_easy: int = PlayerPlantations.calculate_harvest(idx).get("tobacco", 0)
+	Difficulty.reset_new_game(Difficulty.Level.VERY_HARD)  # przywrócone dla kolejnych testów w tym pliku
+
+	var expected_ratio := Difficulty.YIELD_MULTIPLIER[Difficulty.Level.VERY_EASY] / Difficulty.YIELD_MULTIPLIER[Difficulty.Level.VERY_HARD]
+	_assert(amount_very_hard > 0, "VERY_HARD daje niezerowy plon (baza testu)")
+	_assert(absi(amount_very_easy - int(amount_very_hard * expected_ratio)) <= 1, "VERY_EASY daje ~%.2f× plon VERY_HARD (stosunek mnożników)" % expected_ratio)
+	_assert(amount_very_easy > amount_very_hard, "VERY_EASY plonuje więcej niż VERY_HARD")
+
+
+## Difficulty.risk_multiplier() == 0.0 na VERY_EASY sprawia, że `randf() < X * 0.0`
+## jest MATEMATYCZNIE zawsze fałszywe (randf() nigdy nie zwraca ujemnej
+## liczby) — więc, tak jak przy pompie wodnej wyżej, można to sprawdzić w
+## pełni deterministycznie, bez polegania na wielu próbach i statystyce.
+## Bez pompy (w odróżnieniu od testu pompy) — właśnie BRAK pompy ma tu
+## znaczenie: pokazuje, że to Difficulty, nie pompa, wyłącza ryzyko.
+func _test_difficulty_very_easy_disables_weather_risk() -> void:
+	print("-- PlayerPlantations: Difficulty.VERY_EASY wyłącza ryzyko pogodowe/regionalne --")
+	PlayerPlantations.reset_new_game()
+	Economy.reset_new_game()
+	WorldEvents.reset_new_game()
+	Players.reset_new_game(1)
+	Difficulty.reset_new_game(Difficulty.Level.VERY_EASY)
+	## "ankara" ma REGION_UNREST_CHANCE_PER_WEEK > 0 (Azja) — sprawdza więc OBA
+	## źródła ryzyka naraz (pogoda + niepokoje regionalne), nie tylko pogodę.
+	var idx := PlayerPlantations.found_plantation("ankara")
+	PlayerPlantations.city_grids["ankara"]["river"].fill(false)
+
+	for i in 50:
+		Economy.player_money = 1000000.0
+		PlayerPlantations.apply_player_days_elapsed(7)
+	_assert(int(PlayerPlantations.plantations[idx].get("crisis_hits", 0)) == 0, "VERY_EASY: 0 uderzeń kryzysu mimo 50 tygodni bez pompy, w niestabilnym regionie")
+	_assert(PlayerPlantations.plantations.size() == 1, "VERY_EASY: plantacja przetrwała (nigdy nie osiągnęła progu utraty)")
+
+	Difficulty.reset_new_game(Difficulty.Level.VERY_HARD)  # przywrócone dla kolejnych testów w tym pliku
+
+
 func _test_goods_spoil_after_a_year_in_storage() -> void:
 	print("-- PlayerPlantations: towar starszy niż rok psuje się --")
 	PlayerPlantations.reset_new_game()
@@ -625,6 +685,43 @@ func _test_win_threshold_easy_mode() -> void:
 	_assert(Paintings.win_threshold == Paintings.EASY_WIN_THRESHOLD, "tryb łatwy: win_threshold == 15")
 	Paintings.reset_new_game(false)
 	_assert(Paintings.win_threshold == Paintings.CATALOG.size(), "tryb normalny: win_threshold == 40")
+
+
+## Difficulty.gd: sprawdza mapowanie WSZYSTKICH 5 poziomów na risk_multiplier/
+## yield_multiplier/is_easy_win — te trzy tabele to jedyne miejsce, gdzie te
+## liczby są zdefiniowane, więc test pilnuje, żeby literówka w stałej (albo
+## przyszła zmiana wartości) była widoczna od razu, zamiast dopiero w
+## rozgrywce. Przywraca VERY_HARD na końcu — to jedyny poziom, przy którym
+## WSZYSTKIE inne testy w tym pliku (pisane przed wprowadzeniem tej
+## mechaniki) dają dokładnie takie same wyniki jak wcześniej.
+func _test_difficulty_level_multipliers() -> void:
+	print("-- Difficulty: mapowanie 5 poziomów na mnożniki --")
+	Difficulty.reset_new_game(Difficulty.Level.VERY_EASY)
+	_assert(is_equal_approx(Difficulty.risk_multiplier(), 0.0), "VERY_EASY: ryzyko całkowicie wyłączone")
+	_assert(is_equal_approx(Difficulty.yield_multiplier(), 4.0), "VERY_EASY: plon ×4,0")
+	_assert(Difficulty.is_easy_win(), "VERY_EASY: łatwy próg zwycięstwa")
+
+	Difficulty.reset_new_game(Difficulty.Level.EASY)
+	_assert(is_equal_approx(Difficulty.risk_multiplier(), 0.25), "EASY: ryzyko ×0,25")
+	_assert(is_equal_approx(Difficulty.yield_multiplier(), 3.0), "EASY: plon ×3,0")
+	_assert(Difficulty.is_easy_win(), "EASY: łatwy próg zwycięstwa")
+
+	Difficulty.reset_new_game(Difficulty.Level.NORMAL)
+	_assert(is_equal_approx(Difficulty.risk_multiplier(), 0.5), "NORMAL: ryzyko ×0,5")
+	_assert(is_equal_approx(Difficulty.yield_multiplier(), 2.5), "NORMAL: plon ×2,5")
+	_assert(not Difficulty.is_easy_win(), "NORMAL: pełny próg zwycięstwa (40)")
+
+	Difficulty.reset_new_game(Difficulty.Level.HARD)
+	_assert(is_equal_approx(Difficulty.risk_multiplier(), 0.75), "HARD: ryzyko ×0,75")
+	_assert(is_equal_approx(Difficulty.yield_multiplier(), 2.0), "HARD: plon ×2,0")
+	_assert(not Difficulty.is_easy_win(), "HARD: pełny próg zwycięstwa (40)")
+
+	Difficulty.reset_new_game(Difficulty.Level.VERY_HARD)
+	_assert(is_equal_approx(Difficulty.risk_multiplier(), 1.0), "VERY_HARD: ryzyko niezmienione (dzisiejszy balans)")
+	_assert(is_equal_approx(Difficulty.yield_multiplier(), 1.5), "VERY_HARD: plon i tak ×1,5 względem dawnego balansu")
+	_assert(not Difficulty.is_easy_win(), "VERY_HARD: pełny próg zwycięstwa (40)")
+
+	_assert(Difficulty.LEVEL_ORDER.size() == 5, "LEVEL_ORDER wymienia dokładnie 5 poziomów (kolejność w MainMenu.gd)")
 
 
 func _test_forward_contract_penalty_on_failure() -> void:

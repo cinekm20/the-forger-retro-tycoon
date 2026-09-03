@@ -47,7 +47,9 @@ ochrony/kradzieży), ustawienia (wybór języka) — każdy z tych głównych
 ekranów ma w prawym górnym rogu przycisk "?" z pełną instrukcją gry
 (`scenes/instructions/Instructions.gd`), jedno wspólne źródło opisu
 wszystkich mechanik. Ma pętlę wygrana/przegrana
-(kompletna kolekcja / bankructwo / rywal wygrywa pierwszy), hot-seat
+(kompletna kolekcja / bankructwo / rywal wygrywa pierwszy), 5 poziomów
+trudności wybieranych przy nowej grze (`Difficulty.gd` — skalują częstość
+i surowość losowego ryzyka, plon z plantacji i próg zwycięstwa), hot-seat
 multiplayer do 4 graczy, zapis/odczyt gry i pełny interfejs w trzech
 językach (polski/angielski/niemiecki).
 

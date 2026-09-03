@@ -82,7 +82,7 @@ func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
 	inflation += randf_range(-0.002, 0.004) * weeks
 	inflation = max(0.0, inflation)
 
-	if is_reform_imminent() and randf() < REFORM_CHANCE_PER_WEEK * weeks:
+	if is_reform_imminent() and randf() < REFORM_CHANCE_PER_WEEK * weeks * Difficulty.risk_multiplier():
 		apply_currency_reform(REFORM_RATIO)
 
 

@@ -152,14 +152,14 @@ func apply_player_days_elapsed(days_elapsed: int) -> void:
 		if not lost:
 			var region: String = Cities.CITIES[plantation["city"]]["region"]
 			var chance_per_week: float = Cities.REGION_UNREST_CHANCE_PER_WEEK.get(region, 0.0)
-			if chance_per_week > 0.0 and randf() < chance_per_week * weeks:
+			if chance_per_week > 0.0 and randf() < chance_per_week * weeks * Difficulty.risk_multiplier():
 				lost = _apply_crisis_hit(plantation, "unrest")
 
 		## Susza/powódź: ta sama logika co zamieszki wyżej, ale JEDNAKOWE
 		## ryzyko dla każdej plantacji (nie zależne od regionu) i CAŁKOWICIE
 		## pominięte, jeśli gracz ma tu pompę wodną — patrz WATER_PUMP_COST.
 		if not lost and not bool(plantation.get("has_water_pump", false)):
-			if randf() < WEATHER_RISK_CHANCE_PER_WEEK * weeks:
+			if randf() < WEATHER_RISK_CHANCE_PER_WEEK * weeks * Difficulty.risk_multiplier():
 				lost = _apply_crisis_hit(plantation, "weather")
 
 		## Psucie się towaru (docs/DODATKOWE_MECHANIKI.md, tipy do sequela:
@@ -201,11 +201,26 @@ func _apply_crisis_hit(plantation: Dictionary, cause: String) -> bool:
 			had_crops = true
 		stored[crop] = 0
 
+	## Surowość skutków skaluje się TYM SAMYM mnożnikiem co szansa wystąpienia
+	## (Difficulty.risk_multiplier) — zgłoszone przez użytkownika jako część
+	## jednego pakietu "mniej losowych rzeczy" na łatwiejszych poziomach, nie
+	## tylko rzadszych, ale i łagodniejszych. Na VERY_HARD (mnożnik 1.0) obie
+	## stałe niżej wracają do dokładnie dzisiejszych wartości.
 	var workers_before: int = int(plantation["workers"])
-	var workers_lost: int = int(workers_before * CRISIS_WORKER_LOSS_RATIO)
+	var effective_loss_ratio: float = CRISIS_WORKER_LOSS_RATIO * Difficulty.risk_multiplier()
+	var workers_lost: int = int(workers_before * effective_loss_ratio)
 	plantation["workers"] = workers_before - workers_lost
 
-	var plantation_lost: bool = int(plantation["crisis_hits"]) >= CRISIS_HITS_TO_LOSE_PLANTATION
+	## Odwrotna zależność niż wyżej: im NIŻSZY mnożnik ryzyka, tym WIĘCEJ
+	## uderzeń potrzeba, żeby stracić całą plantację (bardziej wybaczające
+	## niższe poziomy trudności) — stąd dzielenie, nie mnożenie. Mnożnik 0.0
+	## (VERY_EASY) nigdy realnie tu nie trafia: przy nim żadne wywołanie tej
+	## funkcji się nie zdarza (obie szanse wyżej są wtedy dokładnie zerowe),
+	## ale @warning_ignore + max() zabezpieczają przed dzieleniem przez zero,
+	## gdyby kiedyś ta funkcja została wywołana spoza normalnej ścieżki (np.
+	## z testu) przy tym poziomie.
+	var effective_hits_to_lose: int = ceili(CRISIS_HITS_TO_LOSE_PLANTATION / maxf(Difficulty.risk_multiplier(), 0.01))
+	var plantation_lost: bool = int(plantation["crisis_hits"]) >= effective_hits_to_lose
 	if plantation_lost:
 		_release_player_tiles(plantation["city"], Players.active_index)
 	WorldEvents.report_plantation_crisis(cause, plantation["city"], workers_lost, had_crops, plantation_lost)
@@ -424,7 +439,11 @@ func calculate_harvest(plantation_index: int) -> Dictionary:
 			continue
 		var effective_tiles: float = normal_tiles + river_tiles * Crops.RIVER_YIELD_MULTIPLIER
 		var tile_factor: float = effective_tiles / REFERENCE_TILE_COUNT
-		var amount := int(reference * worker_factor * tile_factor * seasonal_factor * time_factor * pump_factor)
+		## Difficulty.yield_multiplier(): zgłoszone przez użytkownika — plon ma
+		## być wyraźnie wyższy na KAŻDYM poziomie trudności (nawet VERY_HARD
+		## dostaje ×1.5 względem dawnego balansu, nie tylko łatwiejsze
+		## poziomy), bo dotychczasowy plon "nic nie dawał".
+		var amount := int(reference * worker_factor * tile_factor * seasonal_factor * time_factor * pump_factor * Difficulty.yield_multiplier())
 		if amount > 0:
 			result[crop] = amount
 	return result
@@ -481,7 +500,7 @@ func _apply_contraband_confiscation(plantation: Dictionary, weeks: float) -> voi
 	var amount: int = int(stored.get(Crops.CONTRABAND_CROP, 0))
 	if amount <= 0:
 		return
-	if randf() < CONTRABAND_CONFISCATION_CHANCE_PER_WEEK * weeks:
+	if randf() < CONTRABAND_CONFISCATION_CHANCE_PER_WEEK * weeks * Difficulty.risk_multiplier():
 		stored[Crops.CONTRABAND_CROP] = 0
 		WorldEvents.report_confiscation(plantation["city"], amount)
 

@@ -48,7 +48,7 @@ func apply_player_days_elapsed(days_elapsed: int) -> void:
 	if has_bodyguard or Paintings.catalogued_numbers.is_empty():
 		return
 	var weeks: float = float(days_elapsed) / 7.0
-	if randf() < WEEKLY_THEFT_CHANCE_UNPROTECTED * weeks:
+	if randf() < WEEKLY_THEFT_CHANCE_UNPROTECTED * weeks * Difficulty.risk_multiplier():
 		var numbers := Paintings.catalogued_numbers
 		var stolen_number: int = numbers[randi() % numbers.size()]
 		numbers.erase(stolen_number)
@@ -77,7 +77,7 @@ func resolve_gangster_attempt(gangster_id: String, rival_id: String) -> Dictiona
 	## kończy się złapaniem TWOJEGO gangstera (dodatkowa grzywna na Ciebie),
 	## rywal zostaje bez zmian. Sprawdzane tylko przy porażce — udany skok
 	## nigdy nie kończy się złapaniem.
-	var caught := not success and randf() < CAUGHT_CHANCE_ON_FAILURE
+	var caught := not success and randf() < CAUGHT_CHANCE_ON_FAILURE * Difficulty.risk_multiplier()
 
 	return {"success": success, "caught": caught, "stolen_number": stolen_number, "rival_id": rival_id}
 

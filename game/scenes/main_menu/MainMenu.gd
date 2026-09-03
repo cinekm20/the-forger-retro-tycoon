@@ -9,7 +9,7 @@ extends Control
 ## bronić się przed dowolnie długim wejściem.
 const MAX_PLAYER_NAME_LENGTH := 16
 
-var easy_mode_check: CheckBox
+var difficulty_option: OptionButton
 var player_count_option: OptionButton
 var setup_section: VBoxContainer
 var name_section: VBoxContainer
@@ -83,10 +83,30 @@ func _ready() -> void:
 		player_count_option.add_item(str(count))
 	player_row.add_child(player_count_option)
 
-	easy_mode_check = CheckBox.new()
-	easy_mode_check.text = tr("Tryb łatwy (%d/%d obrazów do wygranej)") % [Paintings.EASY_WIN_THRESHOLD, Paintings.CATALOG.size()]
-	easy_mode_check.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
-	setup_section.add_child(easy_mode_check)
+	## Zastępuje dawny pojedynczy checkbox "Tryb łatwy" — zgłoszenie
+	## użytkownika: zamiast dwustanowego przełącznika, 5 poziomów trudności
+	## sterujących naraz częstością/surowością losowych zdarzeń (Difficulty.
+	## risk_multiplier), plonem z plantacji (Difficulty.yield_multiplier) i
+	## progiem zwycięstwa (Difficulty.is_easy_win — dokładnie to, co dawniej
+	## robił sam checkbox). Patrz Difficulty.gd po pełne uzasadnienie każdej
+	## z tych osi.
+	var difficulty_row := HBoxContainer.new()
+	difficulty_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	setup_section.add_child(difficulty_row)
+	var difficulty_caption := Label.new()
+	difficulty_caption.text = tr("Poziom trudności:")
+	difficulty_caption.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
+	difficulty_row.add_child(difficulty_caption)
+	difficulty_option = OptionButton.new()
+	difficulty_option.add_theme_font_size_override("font_size", ScreenHelpers.BODY_FONT_SIZE)
+	var difficulty_default_index := 0
+	for i in Difficulty.LEVEL_ORDER.size():
+		var level: int = Difficulty.LEVEL_ORDER[i]
+		difficulty_option.add_item(tr(Difficulty.LEVEL_NAMES[level]))
+		if level == Difficulty.Level.NORMAL:
+			difficulty_default_index = i
+	difficulty_option.select(difficulty_default_index)
+	difficulty_row.add_child(difficulty_option)
 
 	ScreenHelpers.make_button(setup_section, "Nowa gra", _show_name_entry)
 
@@ -275,10 +295,13 @@ func _update_avatar_preview(player_index: int) -> void:
 
 
 func _on_start_confirmed() -> void:
+	## Difficulty PRZED Paintings — is_easy_win() niżej czyta Difficulty.level,
+	## więc musi być już ustawiony w momencie wywołania.
+	Difficulty.reset_new_game(Difficulty.LEVEL_ORDER[difficulty_option.selected])
 	Calendar.reset_new_game()
 	Economy.reset_new_game()
 	Crops.reset_new_game()
-	Paintings.reset_new_game(easy_mode_check.button_pressed)
+	Paintings.reset_new_game(Difficulty.is_easy_win())
 	Auctions.reset_new_game()
 	ShippingCompanies.reset_new_game()
 	Horses.reset_new_game()

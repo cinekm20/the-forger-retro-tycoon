@@ -100,10 +100,15 @@ func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
 		_record_history(company_id)
 
 
+## Difficulty.risk_multiplier() tłumi OBIE strony (krach i hossa) tak samo —
+## zgłoszenie użytkownika grupuje "krachy i hossy" razem jako jedno źródło
+## nieprzewidywalności do wyłączenia na łatwiejszych poziomach, niezależnie
+## od tego, że hossa akurat jest korzystna dla gracza.
 func _maybe_trigger_market_shock(weeks: float) -> void:
-	if randf() < MARKET_CRASH_CHANCE_PER_WEEK * weeks:
+	var multiplier := Difficulty.risk_multiplier()
+	if randf() < MARKET_CRASH_CHANCE_PER_WEEK * weeks * multiplier:
 		apply_market_shock("crash", -randf_range(MARKET_SHOCK_RANGE.x, MARKET_SHOCK_RANGE.y))
-	elif randf() < MARKET_BOOM_CHANCE_PER_WEEK * weeks:
+	elif randf() < MARKET_BOOM_CHANCE_PER_WEEK * weeks * multiplier:
 		apply_market_shock("boom", randf_range(MARKET_SHOCK_RANGE.x, MARKET_SHOCK_RANGE.y))
 
 

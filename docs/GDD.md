@@ -339,10 +339,26 @@ osobiście na aukcję, czy wysłać pośrednika?").
 ## 6. Warunki zwycięstwa/porażki
 
 Wygrana: gracz jako pierwszy zdobywa wszystkie 40 obrazów (lub tryb skrócony:
-**15/40 na łatwym poziomie**, `Paintings.EASY_WIN_THRESHOLD`, przełącznik przy
-zakładaniu nowej gry). Porażka: bankructwo (**ujemny kapitał przez 60 kolejnych
-dni gry**, `Economy.BANKRUPTCY_THRESHOLD_DAYS`) lub rywal komplementuje
-kolekcję pierwszy.
+**15/40 na dwóch najłatwiejszych poziomach trudności**, `Paintings.EASY_WIN_THRESHOLD`).
+Porażka: bankructwo (**ujemny kapitał przez 60 kolejnych dni gry**,
+`Economy.BANKRUPTCY_THRESHOLD_DAYS`) lub rywal komplementuje kolekcję pierwszy.
+
+**Poziomy trudności** (`Difficulty.gd`, wybór przy zakładaniu nowej gry,
+wspólny dla całej rozgrywki — nie zmienialny w trakcie, nie osobny per
+gracz w hot-seat) — 5 poziomów od Bardzo łatwego po Bardzo trudny, każdy
+sterujący trzema osiami naraz:
+- **mnożnik ryzyka** (`Difficulty.risk_multiplier`) — skaluje WSZYSTKIE
+  tygodniowe szanse na negatywne zdarzenia losowe (susza/powódź, niepokoje
+  regionalne, konfiskata przemytu, kradzież obrazu, złapanie gangstera,
+  reforma walutowa, krach/hossa na giełdzie) i surowość ich skutków
+  (utrata robotników/plantacji przy strajku i zamieszkach); 0,0 na
+  najłatwiejszym poziomie wyłącza je całkowicie, 1,0 na najtrudniejszym to
+  dokładnie dotychczasowy, niezmieniony balans;
+- **mnożnik plonu** (`Difficulty.yield_multiplier`) — od ×1,5 (najtrudniejszy)
+  do ×4,0 (najłatwiejszy) względem dotychczasowego wzoru w
+  `PlayerPlantations.calculate_harvest`;
+- **próg zwycięstwa** — 15/40 na dwóch najłatwiejszych poziomach, 40/40 na
+  pozostałych trzech (to, co dawniej robił osobny checkbox "tryb łatwy").
 
 ## 7. Sterowanie i UX (mobile)
 
