@@ -255,6 +255,12 @@ func _test_plant_tile_requires_ownership() -> void:
 ## nie wywołuje apply_player_days_elapsed.
 func _test_plantation_crisis_from_unpaid_wages() -> void:
 	print("-- PlayerPlantations: strajk (brak wypłat) zabiera zapasy i połowę robotników --")
+	## VERY_HARD (mnożnik ryzyka 1.0) — test sprawdza SUROWOŚĆ skutków strajku
+	## (dokładnie połowa załogi, patrz CRISIS_WORKER_LOSS_RATIO), która na
+	## niższych poziomach trudności jest CELOWO łagodniejsza (Difficulty.
+	## risk_multiplier w _apply_crisis_hit) — bez tego przypięcia wynik
+	## zależałby od tego, jaki poziom trudności zostawiły wcześniejsze testy.
+	Difficulty.reset_new_game(Difficulty.Level.VERY_HARD)
 	PlayerPlantations.reset_new_game()
 	Economy.reset_new_game()
 	WorldEvents.reset_new_game()
@@ -278,6 +284,12 @@ func _test_plantation_crisis_from_unpaid_wages() -> void:
 
 func _test_plantation_lost_after_repeated_crisis_hits() -> void:
 	print("-- PlayerPlantations: powtarzające się strajki zabierają całą plantację i zwalniają jej pola --")
+	## VERY_HARD — test liczy DOKŁADNIE CRISIS_HITS_TO_LOSE_PLANTATION uderzeń
+	## i sprawdza, że tyle wystarcza; na niższych poziomach trudności próg jest
+	## CELOWO wyższy (Difficulty.risk_multiplier w _apply_crisis_hit robi
+	## plantację bardziej wybaczającą), więc bez tego przypięcia pętla poniżej
+	## mogłaby nie wystarczyć.
+	Difficulty.reset_new_game(Difficulty.Level.VERY_HARD)
 	PlayerPlantations.reset_new_game()
 	Economy.reset_new_game()
 	WorldEvents.reset_new_game()
@@ -395,7 +407,7 @@ func _test_difficulty_scales_plantation_yield() -> void:
 	var amount_very_hard: int = PlayerPlantations.calculate_harvest(idx).get("tobacco", 0)
 	Difficulty.reset_new_game(Difficulty.Level.VERY_EASY)  # mnożnik ×4,0
 	var amount_very_easy: int = PlayerPlantations.calculate_harvest(idx).get("tobacco", 0)
-	Difficulty.reset_new_game(Difficulty.Level.VERY_HARD)  # przywrócone dla kolejnych testów w tym pliku
+	Difficulty.reset_new_game(Difficulty.Level.NORMAL)  # przywrócone do domyślnego dla kolejnych testów w tym pliku
 
 	var expected_ratio := Difficulty.YIELD_MULTIPLIER[Difficulty.Level.VERY_EASY] / Difficulty.YIELD_MULTIPLIER[Difficulty.Level.VERY_HARD]
 	_assert(amount_very_hard > 0, "VERY_HARD daje niezerowy plon (baza testu)")
@@ -427,7 +439,7 @@ func _test_difficulty_very_easy_disables_weather_risk() -> void:
 	_assert(int(PlayerPlantations.plantations[idx].get("crisis_hits", 0)) == 0, "VERY_EASY: 0 uderzeń kryzysu mimo 50 tygodni bez pompy, w niestabilnym regionie")
 	_assert(PlayerPlantations.plantations.size() == 1, "VERY_EASY: plantacja przetrwała (nigdy nie osiągnęła progu utraty)")
 
-	Difficulty.reset_new_game(Difficulty.Level.VERY_HARD)  # przywrócone dla kolejnych testów w tym pliku
+	Difficulty.reset_new_game(Difficulty.Level.NORMAL)  # przywrócone do domyślnego dla kolejnych testów w tym pliku
 
 
 func _test_goods_spoil_after_a_year_in_storage() -> void:
@@ -722,6 +734,8 @@ func _test_difficulty_level_multipliers() -> void:
 	_assert(not Difficulty.is_easy_win(), "VERY_HARD: pełny próg zwycięstwa (40)")
 
 	_assert(Difficulty.LEVEL_ORDER.size() == 5, "LEVEL_ORDER wymienia dokładnie 5 poziomów (kolejność w MainMenu.gd)")
+
+	Difficulty.reset_new_game(Difficulty.Level.NORMAL)  # przywrócone do domyślnego dla kolejnych testów w tym pliku
 
 
 func _test_forward_contract_penalty_on_failure() -> void:

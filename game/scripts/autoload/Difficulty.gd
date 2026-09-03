@@ -29,10 +29,10 @@ extends Node
 ##
 ## VERY_HARD = dzisiejszy, niezmieniony balans ryzyka (mnożnik 1.0) —
 ## zgłoszone przez użytkownika: "tak jak teraz to musi być najtrudniejszy
-## poziom" — więc domyślna wartość `level` (na wypadek odczytu przed
+## poziom". Domyślna wartość `level` (na wypadek odczytu przed
 ## reset_new_game(), np. stary zapis sprzed tej mechaniki, patrz SaveGame.gd)
-## to właśnie VERY_HARD, nie NORMAL — brak jawnego wyboru ma zachowywać się
-## tak jak przed wprowadzeniem tej funkcji, nie po cichu ułatwiać grę.
+## to jednak NORMAL, nie VERY_HARD — zgłoszone przez użytkownika osobno:
+## "niech defaultowy to będzie poziom pośredni, czyli normalny".
 
 enum Level { VERY_EASY, EASY, NORMAL, HARD, VERY_HARD }
 
@@ -69,7 +69,7 @@ const YIELD_MULTIPLIER := {
 ## zaznaczony.
 const EASY_WIN_LEVELS: Array[int] = [Level.VERY_EASY, Level.EASY]
 
-var level: int = Level.VERY_HARD
+var level: int = Level.NORMAL
 
 
 func reset_new_game(new_level: int) -> void:

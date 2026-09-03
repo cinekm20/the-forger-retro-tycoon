@@ -61,10 +61,11 @@ func load_game() -> void:
 	if data == null:
 		return
 	## Zapisy sprzed dodania poziomów trudności nie mają "difficulty_level" —
-	## Difficulty.level domyślnie startuje jako VERY_HARD (patrz komentarz
-	## przy tej zmiennej), więc taki stary zapis wczyta się z dokładnie tym
-	## samym ryzykiem/plonem, jaki miał, zanim ta mechanika istniała.
-	Difficulty.level = data.get("difficulty_level", Difficulty.Level.VERY_HARD)
+	## spadają do NORMAL, tak samo jak domyślna wartość Difficulty.level
+	## (zgłoszone przez użytkownika: "defaultowy to ma być poziom pośredni,
+	## czyli normalny" — spójnie w całej grze, nie tylko przy zakładaniu
+	## nowej gry w MainMenu.gd).
+	Difficulty.level = data.get("difficulty_level", Difficulty.Level.NORMAL)
 	Calendar.current_day = data.get("current_day", 0)
 	Economy.player_money = data.get("player_money", Economy.STARTING_MONEY)
 	Economy.dollar_rate = data.get("dollar_rate", Economy.STARTING_DOLLAR_RATE)
