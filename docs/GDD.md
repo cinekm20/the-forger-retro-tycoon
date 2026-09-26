@@ -352,18 +352,19 @@ sterujący CZTEREMA osiami naraz:
   regionalne, konfiskata przemytu, kradzież obrazu, złapanie gangstera,
   reforma walutowa, krach/hossa na giełdzie) i surowość ich skutków
   (utrata robotników/plantacji przy strajku i zamieszkach); 0,0 na
-  najłatwiejszym poziomie wyłącza je całkowicie, 1,0 na najtrudniejszym to
-  dokładnie dotychczasowy, niezmieniony balans;
-- **mnożnik plonu** (`Difficulty.yield_multiplier`) — od ×1,5 (najtrudniejszy)
-  do ×4,0 (najłatwiejszy) względem dotychczasowego wzoru w
+  najłatwiejszym poziomie wyłącza je całkowicie, 0,6 na najtrudniejszym
+  (obniżone z dotychczasowego, niezmienionego balansu ×1,0 — zgłoszone przez
+  użytkownika: "ogólnie wszędzie muszą być niższe poziomy trudności");
+- **mnożnik plonu** (`Difficulty.yield_multiplier`) — od ×2,5 (najtrudniejszy)
+  do ×5,0 (najłatwiejszy) względem dotychczasowego wzoru w
   `PlayerPlantations.calculate_harvest`;
 - **próg zwycięstwa** — 15/40 na dwóch najłatwiejszych poziomach, 40/40 na
   pozostałych trzech (to, co dawniej robił osobny checkbox "tryb łatwy");
 - **skłonność rywali do podbijania na aukcji** (`Difficulty.rival_bid_aggressiveness`,
-  `AIPlayers.decide_bid`) — od ×0,4 (najłatwiejszy, rywale poddają się
-  szybciej) do ×1,2 (najtrudniejszy, rywale wytrzymują wyższe oferty);
-  ×1,0 na poziomie Trudnym (nie Normalnym) to dotychczasowy, niezmieniony
-  balans licytacji.
+  `AIPlayers.decide_bid`) — od ×0,3 (najłatwiejszy, rywale poddają się
+  szybciej) do ×0,9 (najtrudniejszy, rywale wytrzymują wyższe oferty); żaden
+  poziom nie odtwarza już dokładnie balansu licytacji sprzed tej mechaniki
+  (×1,0) — obniżone tym samym zgłoszeniem co mnożnik ryzyka wyżej.
 
 ## 7. Sterowanie i UX (mobile)
 

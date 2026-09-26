@@ -6,7 +6,7 @@ extends Node
 ## `is_easy_win()` niżej daje dokładnie tę samą wartość, jaką dawniej dawał
 ## ten checkbox wprost.
 ##
-## Steruje TRZEMA osiami naraz, każda pochodna z tego samego poziomu:
+## Steruje CZTEREMA osiami naraz, każda pochodna z tego samego poziomu:
 ## - risk_multiplier(): mnoży WSZYSTKIE tygodniowe szanse na negatywne
 ##   zdarzenia losowe (pogoda, niepokoje regionalne, konfiskata przemytu,
 ##   kradzież obrazu bez ochrony, złapanie własnego gangstera, reforma
@@ -16,32 +16,32 @@ extends Node
 ##   skaluje też SUROWOŚĆ skutków, gdy już do nich dojdzie (patrz
 ##   PlayerPlantations._apply_crisis_hit) — zgłoszone przez użytkownika jako
 ##   część tego samego pakietu "mniej losowych rzeczy" na łatwiejszych
-##   poziomach, nie tylko rzadsze, ale i łagodniejsze.
+##   poziomach, nie tylko rzadsze, ale i łagodniejsze. Zgłoszone przez
+##   użytkownika OSOBNO, później: "ogólnie wszędzie muszą być niższe poziomy
+##   trudności" — VERY_HARD (1.0 -> 0.6) już NIE odtwarza dokładnie
+##   dotychczasowego, niezmienionego balansu ryzyka (to był stan PRZED tym
+##   zgłoszeniem, patrz historia komentarza niżej).
 ## - yield_multiplier(): mnoży plon z plantacji (PlayerPlantations.calculate_harvest)
 ##   — zgłoszone przez użytkownika: "więcej musi rosnąć na plantacjach,
-##   nawet w najtrudniejszym poziomie, a w najłatwiejszym sporo więcej",
-##   bo dotychczasowy (niezmieniony na poziomie VERY_HARD) balans "nic nie
-##   dawał". VERY_HARD i tak dostaje ×1,5 względem starego balansu, nie ×1 —
-##   to CELOWE, nie błąd.
+##   nawet w najtrudniejszym poziomie, a w najłatwiejszym sporo więcej", a
+##   później (to samo zgłoszenie "niższe poziomy trudności" jak wyżej)
+##   podniesione o kolejny krok skali (VERY_HARD ×1,5 -> ×2,5, VERY_EASY
+##   ×4,0 -> ×5,0).
 ## - is_easy_win(): próg zwycięstwa 15/40 zamiast 40/40 (Paintings.EASY_WIN_THRESHOLD)
 ##   na dwóch najłatwiejszych poziomach — dokładnie to, co dawniej robił
 ##   sam checkbox "tryb łatwy".
 ## - rival_bid_aggressiveness(): mnoży, jak wysoko rywale (AIPlayers.decide_bid)
 ##   są skłonni podbić licytację obrazu ponad jego szacunkową wartość —
 ##   zgłoszone przez użytkownika: "trzeba też zrobić rozróżnienie poziomu
-##   trudności przy licytacji obrazu". W ODRÓŻNIENIU od reszty osi wyżej, ta
-##   kotwiczy się na HARD (×1,0 — zgłoszone przez użytkownika: "1x1 to
-##   trudny"), NIE na NORMAL/VERY_HARD — pozostałe cztery poziomy dobrane
-##   jako równa progresja co ±0,2 od tej kotwicy (VERY_EASY 0,4 / EASY 0,6 /
-##   NORMAL 0,8 / HARD 1,0 / VERY_HARD 1,2), zgłoszone przez użytkownika
-##   wprost dla NORMAL (0,8) i VERY_HARD (1,2).
+##   trudności przy licytacji obrazu", potem obniżone o kolejny krok skali
+##   tym samym zgłoszeniem "niższe poziomy trudności" (HARD ×1,0 -> ×0,75 —
+##   już NIE odtwarza dokładnie balansu AIPlayers.decide_bid sprzed tej
+##   całej mechaniki, to był stan PRZED tym zgłoszeniem).
 ##
-## VERY_HARD = dzisiejszy, niezmieniony balans ryzyka (mnożnik 1.0) —
-## zgłoszone przez użytkownika: "tak jak teraz to musi być najtrudniejszy
-## poziom". Domyślna wartość `level` (na wypadek odczytu przed
-## reset_new_game(), np. stary zapis sprzed tej mechaniki, patrz SaveGame.gd)
-## to jednak NORMAL, nie VERY_HARD — zgłoszone przez użytkownika osobno:
-## "niech defaultowy to będzie poziom pośredni, czyli normalny".
+## Domyślna wartość `level` (na wypadek odczytu przed reset_new_game(), np.
+## stary zapis sprzed tej mechaniki, patrz SaveGame.gd) to NORMAL —
+## zgłoszone przez użytkownika: "niech defaultowy to będzie poziom
+## pośredni, czyli normalny".
 
 enum Level { VERY_EASY, EASY, NORMAL, HARD, VERY_HARD }
 
@@ -60,18 +60,18 @@ const LEVEL_ORDER: Array[int] = [Level.VERY_EASY, Level.EASY, Level.NORMAL, Leve
 
 const RISK_MULTIPLIER := {
 	Level.VERY_EASY: 0.0,
-	Level.EASY: 0.25,
-	Level.NORMAL: 0.5,
-	Level.HARD: 0.75,
-	Level.VERY_HARD: 1.0,
+	Level.EASY: 0.15,
+	Level.NORMAL: 0.3,
+	Level.HARD: 0.45,
+	Level.VERY_HARD: 0.6,
 }
 
 const YIELD_MULTIPLIER := {
-	Level.VERY_EASY: 4.0,
-	Level.EASY: 3.0,
-	Level.NORMAL: 2.5,
-	Level.HARD: 2.0,
-	Level.VERY_HARD: 1.5,
+	Level.VERY_EASY: 5.0,
+	Level.EASY: 4.0,
+	Level.NORMAL: 3.5,
+	Level.HARD: 3.0,
+	Level.VERY_HARD: 2.5,
 }
 
 ## Te same dwa poziomy, na których dawny checkbox "tryb łatwy" byłby
@@ -79,16 +79,17 @@ const YIELD_MULTIPLIER := {
 const EASY_WIN_LEVELS: Array[int] = [Level.VERY_EASY, Level.EASY]
 
 ## Mnożnik skłonności rywali do podbijania licytacji (patrz komentarz
-## nagłówkowy) — HARD=1.0 to dzisiejszy balans AIPlayers.decide_bid bez
-## zmian (zgłoszone przez użytkownika: "1x1 to trudny"). Niżej rywale
-## poddają się coraz szybciej, na VERY_HARD upierają się jeszcze bardziej i
-## podbijają wyżej.
+## nagłówkowy) — obniżony o kolejny krok skali (zgłoszenie "niższe poziomy
+## trudności"), więc HARD=0,75 już NIE odtwarza dokładnie balansu
+## AIPlayers.decide_bid sprzed tej mechaniki (to był stan sprzed tego
+## zgłoszenia, ×1,0). Niżej rywale poddają się coraz szybciej, na
+## VERY_HARD upierają się jeszcze bardziej i podbijają wyżej.
 const RIVAL_AGGRESSIVENESS_MULTIPLIER := {
-	Level.VERY_EASY: 0.4,
-	Level.EASY: 0.6,
-	Level.NORMAL: 0.8,
-	Level.HARD: 1.0,
-	Level.VERY_HARD: 1.2,
+	Level.VERY_EASY: 0.3,
+	Level.EASY: 0.45,
+	Level.NORMAL: 0.6,
+	Level.HARD: 0.75,
+	Level.VERY_HARD: 0.9,
 }
 
 var level: int = Level.NORMAL

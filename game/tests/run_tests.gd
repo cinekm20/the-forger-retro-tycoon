@@ -258,11 +258,15 @@ func _test_plant_tile_requires_ownership() -> void:
 ## nie wywołuje apply_player_days_elapsed.
 func _test_plantation_crisis_from_unpaid_wages() -> void:
 	print("-- PlayerPlantations: strajk (brak wypłat) zabiera zapasy i połowę robotników --")
-	## VERY_HARD (mnożnik ryzyka 1.0) — test sprawdza SUROWOŚĆ skutków strajku
-	## (dokładnie połowa załogi, patrz CRISIS_WORKER_LOSS_RATIO), która na
-	## niższych poziomach trudności jest CELOWO łagodniejsza (Difficulty.
-	## risk_multiplier w _apply_crisis_hit) — bez tego przypięcia wynik
-	## zależałby od tego, jaki poziom trudności zostawiły wcześniejsze testy.
+	## VERY_HARD — test sprawdza SUROWOŚĆ skutków strajku wg wzoru w
+	## _apply_crisis_hit (CRISIS_WORKER_LOSS_RATIO * Difficulty.risk_multiplier),
+	## która na niższych poziomach trudności jest CELOWO łagodniejsza — bez
+	## tego przypięcia wynik zależałby od tego, jaki poziom trudności
+	## zostawiły wcześniejsze testy. Oczekiwana liczba robotników liczona z
+	## TEGO SAMEGO wzoru (nie z zapamiętanej "połowy", odkąd risk_multiplier
+	## na VERY_HARD przestał być równy 1.0, patrz zgłoszenie "niższe poziomy
+	## trudności") — inaczej test złamałby się przy KAŻDEJ kolejnej zmianie
+	## RISK_MULTIPLIER, mimo że sam mechanizm zostaje bez zmian.
 	Difficulty.reset_new_game(Difficulty.Level.VERY_HARD)
 	PlayerPlantations.reset_new_game()
 	Economy.reset_new_game()
@@ -276,8 +280,10 @@ func _test_plantation_crisis_from_unpaid_wages() -> void:
 
 	PlayerPlantations.apply_player_days_elapsed(1)
 
+	var expected_loss_ratio: float = PlayerPlantations.CRISIS_WORKER_LOSS_RATIO * Difficulty.RISK_MULTIPLIER[Difficulty.Level.VERY_HARD]
+	var expected_workers: int = 10 - int(10 * expected_loss_ratio)
 	_assert(int(PlayerPlantations.plantations[idx]["stored_goods"].get("tobacco", 0)) == 0, "zapasy skonfiskowane po strajku")
-	_assert(int(PlayerPlantations.plantations[idx]["workers"]) == 5, "połowa robotników uciekła (10 -> 5)")
+	_assert(int(PlayerPlantations.plantations[idx]["workers"]) == expected_workers, "robotnicy uciekli wg CRISIS_WORKER_LOSS_RATIO×risk_multiplier (10 -> %d)" % expected_workers)
 	_assert(int(PlayerPlantations.plantations[idx]["crisis_hits"]) == 1, "licznik uderzeń kryzysu wzrósł do 1")
 	_assert(WorldEvents.has_pending(), "zdarzenie trafiło do kolejki WorldEvents")
 	var reported_event := WorldEvents.consume_next()
@@ -287,27 +293,30 @@ func _test_plantation_crisis_from_unpaid_wages() -> void:
 
 func _test_plantation_lost_after_repeated_crisis_hits() -> void:
 	print("-- PlayerPlantations: powtarzające się strajki zabierają całą plantację i zwalniają jej pola --")
-	## VERY_HARD — test liczy DOKŁADNIE CRISIS_HITS_TO_LOSE_PLANTATION uderzeń
-	## i sprawdza, że tyle wystarcza; na niższych poziomach trudności próg jest
-	## CELOWO wyższy (Difficulty.risk_multiplier w _apply_crisis_hit robi
-	## plantację bardziej wybaczającą), więc bez tego przypięcia pętla poniżej
-	## mogłaby nie wystarczyć.
+	## VERY_HARD — test liczy DOKŁADNIE tyle uderzeń, ile wg wzoru w
+	## _apply_crisis_hit (ceili(CRISIS_HITS_TO_LOSE_PLANTATION / risk_multiplier))
+	## wystarcza na TYM poziomie trudności — NIE zawsze CRISIS_HITS_TO_LOSE_PLANTATION
+	## wprost, odkąd risk_multiplier na VERY_HARD przestał być równy 1.0
+	## (patrz zgłoszenie "niższe poziomy trudności"); na niższych poziomach
+	## próg jest CELOWO jeszcze wyższy (plantacja bardziej wybaczająca).
 	Difficulty.reset_new_game(Difficulty.Level.VERY_HARD)
 	PlayerPlantations.reset_new_game()
 	Economy.reset_new_game()
 	WorldEvents.reset_new_game()
 	Players.reset_new_game(1)
 	var idx := PlayerPlantations.found_plantation("richmond")
-	PlayerPlantations.plantations[idx]["has_water_pump"] = true  # odporność na losowe susze/powodzie — inaczej sporadyczny dodatkowy hit psuje liczenie dokładnie 3 uderzeń
+	PlayerPlantations.plantations[idx]["has_water_pump"] = true  # odporność na losowe susze/powodzie — inaczej sporadyczny dodatkowy hit psuje liczenie dokładnie tylu uderzeń
 	PlayerPlantations.city_grids["richmond"]["river"].fill(false)
 	PlayerPlantations.buy_tile(idx, 0)
 	PlayerPlantations.hire_workers(idx, 10)
 
-	for i in PlayerPlantations.CRISIS_HITS_TO_LOSE_PLANTATION:
+	var risk_mult: float = Difficulty.RISK_MULTIPLIER[Difficulty.Level.VERY_HARD]
+	var hits_to_lose: int = ceili(PlayerPlantations.CRISIS_HITS_TO_LOSE_PLANTATION / maxf(risk_mult, 0.01))
+	for i in hits_to_lose:
 		Economy.player_money = -1.0  # utrzymaj dług przed każdym kolejnym uderzeniem
 		PlayerPlantations.apply_player_days_elapsed(1)
 
-	_assert(PlayerPlantations.find_plantation_index("richmond") == -1, "po %d uderzeniach kryzysu plantacja znika z tablicy" % PlayerPlantations.CRISIS_HITS_TO_LOSE_PLANTATION)
+	_assert(PlayerPlantations.find_plantation_index("richmond") == -1, "po %d uderzeniach kryzysu plantacja znika z tablicy" % hits_to_lose)
 	_assert(int(PlayerPlantations.city_grids["richmond"]["tile_owner"][0]) == -1, "utracone pole wraca do wspólnej puli (wolne dla kogokolwiek)")
 
 
@@ -415,9 +424,9 @@ func _test_difficulty_scales_plantation_yield() -> void:
 	## apply_player_days_elapsed.
 	PlayerPlantations.plantations[idx]["worker_days_accum"] = 500 * 30.0
 
-	Difficulty.reset_new_game(Difficulty.Level.VERY_HARD)  # mnożnik ×1,5
+	Difficulty.reset_new_game(Difficulty.Level.VERY_HARD)  # mnożnik ×2,5
 	var amount_very_hard: int = PlayerPlantations.calculate_harvest(idx).get("tobacco", 0)
-	Difficulty.reset_new_game(Difficulty.Level.VERY_EASY)  # mnożnik ×4,0
+	Difficulty.reset_new_game(Difficulty.Level.VERY_EASY)  # mnożnik ×5,0
 	var amount_very_easy: int = PlayerPlantations.calculate_harvest(idx).get("tobacco", 0)
 	Difficulty.reset_new_game(Difficulty.Level.NORMAL)  # przywrócone do domyślnego dla kolejnych testów w tym pliku
 
@@ -504,23 +513,22 @@ func _test_difficulty_very_easy_disables_weather_risk() -> void:
 	Difficulty.reset_new_game(Difficulty.Level.NORMAL)  # przywrócone do domyślnego dla kolejnych testów w tym pliku
 
 
-## Rozstawa mnożników (Difficulty.RIVAL_AGGRESSIVENESS_MULTIPLIER: 0.4 na
-## VERY_EASY, 1.2 na VERY_HARD) jest węższa niż poprzednio (kotwica
-## przesunięta na HARD=1.0, zgłoszone przez użytkownika: "1x1 to trudny"),
-## więc current_bid == estimated_value nie daje już bezpiecznego zapasu —
-## current_bid = 0,7×estimated_value nadal wypada MATEMATYCZNIE
-## deterministycznie (ten sam trik co przy risk_multiplier=0.0 w innych
-## testach Difficulty wyżej):
-## - VERY_EASY: willingness_multiplier ∈ [0.32, 0.64] (zwykły rywal i Vico) —
-##   ZAWSZE < next_bid ∈ [0.75, 0.85]×estimated_value, więc rywal ZAWSZE
+## Rozstawa mnożników (Difficulty.RIVAL_AGGRESSIVENESS_MULTIPLIER: 0.3 na
+## VERY_EASY, 0.9 na VERY_HARD) jest jeszcze węższa niż poprzednio (obniżona
+## kolejnym zgłoszeniem "ogólnie wszędzie muszą być niższe poziomy
+## trudności") — current_bid = 0,5×estimated_value nadal wypada
+## MATEMATYCZNIE deterministycznie (ten sam trik co przy risk_multiplier=0.0
+## w innych testach Difficulty wyżej):
+## - VERY_EASY: willingness_multiplier ∈ [0.24, 0.48] (zwykły rywal i Vico) —
+##   ZAWSZE < next_bid ∈ [0.55, 0.65]×estimated_value, więc rywal ZAWSZE
 ##   rezygnuje.
-## - VERY_HARD: willingness_multiplier ∈ [0.96, 1.92] — ZAWSZE > next_bid,
+## - VERY_HARD: willingness_multiplier ∈ [0.72, 1.44] — ZAWSZE > next_bid,
 ##   więc rywal ZAWSZE podbija.
 func _test_difficulty_scales_rival_bid_aggressiveness() -> void:
 	print("-- AIPlayers: Difficulty.rival_bid_aggressiveness skaluje skłonność rywali do podbijania --")
 	AIPlayers.reset_new_game()
 	var estimated_value := 1000.0
-	var current_bid := estimated_value * 0.7
+	var current_bid := estimated_value * 0.5
 
 	Difficulty.reset_new_game(Difficulty.Level.VERY_EASY)
 	var easy_accepts := 0
@@ -846,34 +854,36 @@ func _test_win_threshold_easy_mode() -> void:
 ## yield_multiplier/is_easy_win — te trzy tabele to jedyne miejsce, gdzie te
 ## liczby są zdefiniowane, więc test pilnuje, żeby literówka w stałej (albo
 ## przyszła zmiana wartości) była widoczna od razu, zamiast dopiero w
-## rozgrywce. Przywraca VERY_HARD na końcu — to jedyny poziom, przy którym
-## WSZYSTKIE inne testy w tym pliku (pisane przed wprowadzeniem tej
-## mechaniki) dają dokładnie takie same wyniki jak wcześniej.
+## rozgrywce. Wartości obniżone/podniesione kolejnym zgłoszeniem "ogólnie
+## wszędzie muszą być niższe poziomy trudności" — VERY_HARD NIE odtwarza już
+## dokładnie balansu risk_multiplier sprzed całej mechaniki Difficulty (to
+## był stan sprzed tego zgłoszenia, ryzyko ×1,0). Przywraca NORMAL na końcu
+## — domyślny poziom całej gry, patrz SaveGame.gd/MainMenu.gd.
 func _test_difficulty_level_multipliers() -> void:
 	print("-- Difficulty: mapowanie 5 poziomów na mnożniki --")
 	Difficulty.reset_new_game(Difficulty.Level.VERY_EASY)
 	_assert(is_equal_approx(Difficulty.risk_multiplier(), 0.0), "VERY_EASY: ryzyko całkowicie wyłączone")
-	_assert(is_equal_approx(Difficulty.yield_multiplier(), 4.0), "VERY_EASY: plon ×4,0")
+	_assert(is_equal_approx(Difficulty.yield_multiplier(), 5.0), "VERY_EASY: plon ×5,0")
 	_assert(Difficulty.is_easy_win(), "VERY_EASY: łatwy próg zwycięstwa")
 
 	Difficulty.reset_new_game(Difficulty.Level.EASY)
-	_assert(is_equal_approx(Difficulty.risk_multiplier(), 0.25), "EASY: ryzyko ×0,25")
-	_assert(is_equal_approx(Difficulty.yield_multiplier(), 3.0), "EASY: plon ×3,0")
+	_assert(is_equal_approx(Difficulty.risk_multiplier(), 0.15), "EASY: ryzyko ×0,15")
+	_assert(is_equal_approx(Difficulty.yield_multiplier(), 4.0), "EASY: plon ×4,0")
 	_assert(Difficulty.is_easy_win(), "EASY: łatwy próg zwycięstwa")
 
 	Difficulty.reset_new_game(Difficulty.Level.NORMAL)
-	_assert(is_equal_approx(Difficulty.risk_multiplier(), 0.5), "NORMAL: ryzyko ×0,5")
-	_assert(is_equal_approx(Difficulty.yield_multiplier(), 2.5), "NORMAL: plon ×2,5")
+	_assert(is_equal_approx(Difficulty.risk_multiplier(), 0.3), "NORMAL: ryzyko ×0,3")
+	_assert(is_equal_approx(Difficulty.yield_multiplier(), 3.5), "NORMAL: plon ×3,5")
 	_assert(not Difficulty.is_easy_win(), "NORMAL: pełny próg zwycięstwa (40)")
 
 	Difficulty.reset_new_game(Difficulty.Level.HARD)
-	_assert(is_equal_approx(Difficulty.risk_multiplier(), 0.75), "HARD: ryzyko ×0,75")
-	_assert(is_equal_approx(Difficulty.yield_multiplier(), 2.0), "HARD: plon ×2,0")
+	_assert(is_equal_approx(Difficulty.risk_multiplier(), 0.45), "HARD: ryzyko ×0,45")
+	_assert(is_equal_approx(Difficulty.yield_multiplier(), 3.0), "HARD: plon ×3,0")
 	_assert(not Difficulty.is_easy_win(), "HARD: pełny próg zwycięstwa (40)")
 
 	Difficulty.reset_new_game(Difficulty.Level.VERY_HARD)
-	_assert(is_equal_approx(Difficulty.risk_multiplier(), 1.0), "VERY_HARD: ryzyko niezmienione (dzisiejszy balans)")
-	_assert(is_equal_approx(Difficulty.yield_multiplier(), 1.5), "VERY_HARD: plon i tak ×1,5 względem dawnego balansu")
+	_assert(is_equal_approx(Difficulty.risk_multiplier(), 0.6), "VERY_HARD: ryzyko ×0,6")
+	_assert(is_equal_approx(Difficulty.yield_multiplier(), 2.5), "VERY_HARD: plon ×2,5")
 	_assert(not Difficulty.is_easy_win(), "VERY_HARD: pełny próg zwycięstwa (40)")
 
 	_assert(Difficulty.LEVEL_ORDER.size() == 5, "LEVEL_ORDER wymienia dokładnie 5 poziomów (kolejność w MainMenu.gd)")
