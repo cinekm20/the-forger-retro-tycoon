@@ -346,7 +346,7 @@ Porażka: bankructwo (**ujemny kapitał przez 60 kolejnych dni gry**,
 **Poziomy trudności** (`Difficulty.gd`, wybór przy zakładaniu nowej gry,
 wspólny dla całej rozgrywki — nie zmienialny w trakcie, nie osobny per
 gracz w hot-seat) — 5 poziomów od Bardzo łatwego po Bardzo trudny, każdy
-sterujący trzema osiami naraz:
+sterujący CZTEREMA osiami naraz:
 - **mnożnik ryzyka** (`Difficulty.risk_multiplier`) — skaluje WSZYSTKIE
   tygodniowe szanse na negatywne zdarzenia losowe (susza/powódź, niepokoje
   regionalne, konfiskata przemytu, kradzież obrazu, złapanie gangstera,
@@ -358,7 +358,11 @@ sterujący trzema osiami naraz:
   do ×4,0 (najłatwiejszy) względem dotychczasowego wzoru w
   `PlayerPlantations.calculate_harvest`;
 - **próg zwycięstwa** — 15/40 na dwóch najłatwiejszych poziomach, 40/40 na
-  pozostałych trzech (to, co dawniej robił osobny checkbox "tryb łatwy").
+  pozostałych trzech (to, co dawniej robił osobny checkbox "tryb łatwy");
+- **skłonność rywali do podbijania na aukcji** (`Difficulty.rival_bid_aggressiveness`,
+  `AIPlayers.decide_bid`) — od ×0,5 (najłatwiejszy, rywale poddają się dużo
+  szybciej) do ×1,6 (najtrudniejszy, rywale wytrzymują dużo wyższe oferty);
+  ×1,0 na poziomie Normalnym to dotychczasowy, niezmieniony balans licytacji.
 
 ## 7. Sterowanie i UX (mobile)
 

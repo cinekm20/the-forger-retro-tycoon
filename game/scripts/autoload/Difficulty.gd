@@ -26,6 +26,14 @@ extends Node
 ## - is_easy_win(): próg zwycięstwa 15/40 zamiast 40/40 (Paintings.EASY_WIN_THRESHOLD)
 ##   na dwóch najłatwiejszych poziomach — dokładnie to, co dawniej robił
 ##   sam checkbox "tryb łatwy".
+## - rival_bid_aggressiveness(): mnoży, jak wysoko rywale (AIPlayers.decide_bid)
+##   są skłonni podbić licytację obrazu ponad jego szacunkową wartość —
+##   zgłoszone przez użytkownika: "trzeba też zrobić rozróżnienie poziomu
+##   trudności przy licytacji obrazu". NORMAL = dzisiejszy, niezmieniony
+##   balans (×1,0, tak jak było zawsze) — ta oś jest nowa i nie miała
+##   wcześniej żadnego "starego balansu" do zachowania na VERY_HARD (w
+##   odróżnieniu od risk_multiplier wyżej), więc kotwiczy się na NORMAL, tak
+##   jak domyślny poziom całej gry.
 ##
 ## VERY_HARD = dzisiejszy, niezmieniony balans ryzyka (mnożnik 1.0) —
 ## zgłoszone przez użytkownika: "tak jak teraz to musi być najtrudniejszy
@@ -69,6 +77,18 @@ const YIELD_MULTIPLIER := {
 ## zaznaczony.
 const EASY_WIN_LEVELS: Array[int] = [Level.VERY_EASY, Level.EASY]
 
+## Mnożnik skłonności rywali do podbijania licytacji (patrz komentarz
+## nagłówkowy) — NORMAL=1.0 to dzisiejszy balans AIPlayers.decide_bid bez
+## zmian. Niżej (VERY_EASY) rywale poddają się dużo szybciej, wyżej
+## (VERY_HARD) są znacznie bardziej upierają się i podbijają wyżej.
+const RIVAL_AGGRESSIVENESS_MULTIPLIER := {
+	Level.VERY_EASY: 0.5,
+	Level.EASY: 0.75,
+	Level.NORMAL: 1.0,
+	Level.HARD: 1.3,
+	Level.VERY_HARD: 1.6,
+}
+
 var level: int = Level.NORMAL
 
 
@@ -86,3 +106,7 @@ func yield_multiplier() -> float:
 
 func is_easy_win() -> bool:
 	return level in EASY_WIN_LEVELS
+
+
+func rival_bid_aggressiveness() -> float:
+	return RIVAL_AGGRESSIVENESS_MULTIPLIER[level]

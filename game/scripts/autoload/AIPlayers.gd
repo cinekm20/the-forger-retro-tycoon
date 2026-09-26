@@ -99,13 +99,19 @@ func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
 ## Zwraca 0.0, jeśli rywal rezygnuje (za drogo albo brak środków).
 ## Vico bywa bardziej agresywny — czasem podbija cenę bez realnego zamiaru
 ## kupna (patrz docs/DODATKOWE_MECHANIKI.md).
+## Difficulty.rival_bid_aggressiveness() skaluje, jak wysoko rywal jest
+## skłonny podbić PONAD szacunkową wartość (willingness_multiplier) —
+## zgłoszone przez użytkownika: rozróżnienie poziomu trudności ma dotyczyć
+## też licytacji, nie tylko ryzyka/plonu/progu zwycięstwa. NORMAL=1.0 to
+## dzisiejszy balans bez zmian.
 func decide_bid(rival_id: String, current_bid: float, estimated_value: float) -> float:
 	var rival := get_rival(rival_id)
 	if rival.is_empty():
 		return 0.0
-	var willingness_multiplier := randf_range(0.8, 1.3)
+	var aggressiveness := Difficulty.rival_bid_aggressiveness()
+	var willingness_multiplier := randf_range(0.8, 1.3) * aggressiveness
 	if rival_id == "vico":
-		willingness_multiplier = randf_range(0.9, 1.6)
+		willingness_multiplier = randf_range(0.9, 1.6) * aggressiveness
 	var willingness: float = estimated_value * willingness_multiplier
 	var next_bid: float = current_bid + estimated_value * randf_range(0.05, 0.15)
 	if next_bid > willingness or next_bid > rival["money"]:

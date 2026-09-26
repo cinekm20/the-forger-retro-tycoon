@@ -59,6 +59,7 @@ func _ready() -> void:
 	_test_difficulty_scales_plantation_yield()
 	_test_hire_right_before_harvest_no_longer_gives_full_yield()
 	_test_difficulty_very_easy_disables_weather_risk()
+	_test_difficulty_scales_rival_bid_aggressiveness()
 	_test_goods_spoil_after_a_year_in_storage()
 	_test_contraband_crop_restricted_and_confiscatable()
 	_test_bonus_paintings_available_and_awardable()
@@ -501,6 +502,44 @@ func _test_difficulty_very_easy_disables_weather_risk() -> void:
 	_assert(PlayerPlantations.plantations.size() == 1, "VERY_EASY: plantacja przetrwała (nigdy nie osiągnęła progu utraty)")
 
 	Difficulty.reset_new_game(Difficulty.Level.NORMAL)  # przywrócone do domyślnego dla kolejnych testów w tym pliku
+
+
+## Rozstawa mnożników (Difficulty.RIVAL_AGGRESSIVENESS_MULTIPLIER: 0.5 na
+## VERY_EASY, 1.6 na VERY_HARD) jest tak szeroka, że dla current_bid ==
+## estimated_value obie skrajności wypadają MATEMATYCZNIE deterministycznie
+## (bez polegania na wielu próbach/statystyce, ten sam trik co przy
+## risk_multiplier=0.0 w innych testach Difficulty wyżej):
+## - VERY_EASY: willingness_multiplier ∈ [0.4, 0.8] (zwykły rywal i Vico) —
+##   ZAWSZE < next_bid ∈ [1.05, 1.15]×estimated_value, więc rywal ZAWSZE
+##   rezygnuje.
+## - VERY_HARD: willingness_multiplier ∈ [1.28, 2.56] — ZAWSZE > next_bid,
+##   więc rywal ZAWSZE podbija.
+func _test_difficulty_scales_rival_bid_aggressiveness() -> void:
+	print("-- AIPlayers: Difficulty.rival_bid_aggressiveness skaluje skłonność rywali do podbijania --")
+	AIPlayers.reset_new_game()
+	var estimated_value := 1000.0
+	var current_bid := estimated_value
+
+	Difficulty.reset_new_game(Difficulty.Level.VERY_EASY)
+	var easy_accepts := 0
+	for i in 20:
+		if AIPlayers.decide_bid("rival_2", current_bid, estimated_value) > 0.0:
+			easy_accepts += 1
+		if AIPlayers.decide_bid("vico", current_bid, estimated_value) > 0.0:
+			easy_accepts += 1
+
+	Difficulty.reset_new_game(Difficulty.Level.VERY_HARD)
+	var hard_accepts := 0
+	for i in 20:
+		if AIPlayers.decide_bid("rival_2", current_bid, estimated_value) > 0.0:
+			hard_accepts += 1
+		if AIPlayers.decide_bid("vico", current_bid, estimated_value) > 0.0:
+			hard_accepts += 1
+
+	Difficulty.reset_new_game(Difficulty.Level.NORMAL)  # przywrócone do domyślnego dla kolejnych testów w tym pliku
+
+	_assert(easy_accepts == 0, "VERY_EASY: rywale NIGDY nie podbijają tak wysokiej oferty (0/40 prób)")
+	_assert(hard_accepts == 40, "VERY_HARD: rywale ZAWSZE podbijają tę samą ofertę (40/40 prób)")
 
 
 func _test_goods_spoil_after_a_year_in_storage() -> void:
