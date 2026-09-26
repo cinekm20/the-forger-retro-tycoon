@@ -102,8 +102,9 @@ func _on_day_advanced(days_elapsed: int, _current_day: int) -> void:
 ## Difficulty.rival_bid_aggressiveness() skaluje, jak wysoko rywal jest
 ## skłonny podbić PONAD szacunkową wartość (willingness_multiplier) —
 ## zgłoszone przez użytkownika: rozróżnienie poziomu trudności ma dotyczyć
-## też licytacji, nie tylko ryzyka/plonu/progu zwycięstwa. NORMAL=1.0 to
-## dzisiejszy balans bez zmian.
+## też licytacji, nie tylko ryzyka/plonu/progu zwycięstwa. HARD=1.0 (nie
+## NORMAL) to dzisiejszy balans bez zmian — patrz komentarz przy
+## Difficulty.RIVAL_AGGRESSIVENESS_MULTIPLIER.
 func decide_bid(rival_id: String, current_bid: float, estimated_value: float) -> float:
 	var rival := get_rival(rival_id)
 	if rival.is_empty():

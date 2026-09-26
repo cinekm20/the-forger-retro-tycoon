@@ -504,21 +504,23 @@ func _test_difficulty_very_easy_disables_weather_risk() -> void:
 	Difficulty.reset_new_game(Difficulty.Level.NORMAL)  # przywrócone do domyślnego dla kolejnych testów w tym pliku
 
 
-## Rozstawa mnożników (Difficulty.RIVAL_AGGRESSIVENESS_MULTIPLIER: 0.5 na
-## VERY_EASY, 1.6 na VERY_HARD) jest tak szeroka, że dla current_bid ==
-## estimated_value obie skrajności wypadają MATEMATYCZNIE deterministycznie
-## (bez polegania na wielu próbach/statystyce, ten sam trik co przy
-## risk_multiplier=0.0 w innych testach Difficulty wyżej):
-## - VERY_EASY: willingness_multiplier ∈ [0.4, 0.8] (zwykły rywal i Vico) —
-##   ZAWSZE < next_bid ∈ [1.05, 1.15]×estimated_value, więc rywal ZAWSZE
+## Rozstawa mnożników (Difficulty.RIVAL_AGGRESSIVENESS_MULTIPLIER: 0.4 na
+## VERY_EASY, 1.2 na VERY_HARD) jest węższa niż poprzednio (kotwica
+## przesunięta na HARD=1.0, zgłoszone przez użytkownika: "1x1 to trudny"),
+## więc current_bid == estimated_value nie daje już bezpiecznego zapasu —
+## current_bid = 0,7×estimated_value nadal wypada MATEMATYCZNIE
+## deterministycznie (ten sam trik co przy risk_multiplier=0.0 w innych
+## testach Difficulty wyżej):
+## - VERY_EASY: willingness_multiplier ∈ [0.32, 0.64] (zwykły rywal i Vico) —
+##   ZAWSZE < next_bid ∈ [0.75, 0.85]×estimated_value, więc rywal ZAWSZE
 ##   rezygnuje.
-## - VERY_HARD: willingness_multiplier ∈ [1.28, 2.56] — ZAWSZE > next_bid,
+## - VERY_HARD: willingness_multiplier ∈ [0.96, 1.92] — ZAWSZE > next_bid,
 ##   więc rywal ZAWSZE podbija.
 func _test_difficulty_scales_rival_bid_aggressiveness() -> void:
 	print("-- AIPlayers: Difficulty.rival_bid_aggressiveness skaluje skłonność rywali do podbijania --")
 	AIPlayers.reset_new_game()
 	var estimated_value := 1000.0
-	var current_bid := estimated_value
+	var current_bid := estimated_value * 0.7
 
 	Difficulty.reset_new_game(Difficulty.Level.VERY_EASY)
 	var easy_accepts := 0

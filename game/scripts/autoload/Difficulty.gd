@@ -29,11 +29,12 @@ extends Node
 ## - rival_bid_aggressiveness(): mnoży, jak wysoko rywale (AIPlayers.decide_bid)
 ##   są skłonni podbić licytację obrazu ponad jego szacunkową wartość —
 ##   zgłoszone przez użytkownika: "trzeba też zrobić rozróżnienie poziomu
-##   trudności przy licytacji obrazu". NORMAL = dzisiejszy, niezmieniony
-##   balans (×1,0, tak jak było zawsze) — ta oś jest nowa i nie miała
-##   wcześniej żadnego "starego balansu" do zachowania na VERY_HARD (w
-##   odróżnieniu od risk_multiplier wyżej), więc kotwiczy się na NORMAL, tak
-##   jak domyślny poziom całej gry.
+##   trudności przy licytacji obrazu". W ODRÓŻNIENIU od reszty osi wyżej, ta
+##   kotwiczy się na HARD (×1,0 — zgłoszone przez użytkownika: "1x1 to
+##   trudny"), NIE na NORMAL/VERY_HARD — pozostałe cztery poziomy dobrane
+##   jako równa progresja co ±0,2 od tej kotwicy (VERY_EASY 0,4 / EASY 0,6 /
+##   NORMAL 0,8 / HARD 1,0 / VERY_HARD 1,2), zgłoszone przez użytkownika
+##   wprost dla NORMAL (0,8) i VERY_HARD (1,2).
 ##
 ## VERY_HARD = dzisiejszy, niezmieniony balans ryzyka (mnożnik 1.0) —
 ## zgłoszone przez użytkownika: "tak jak teraz to musi być najtrudniejszy
@@ -78,15 +79,16 @@ const YIELD_MULTIPLIER := {
 const EASY_WIN_LEVELS: Array[int] = [Level.VERY_EASY, Level.EASY]
 
 ## Mnożnik skłonności rywali do podbijania licytacji (patrz komentarz
-## nagłówkowy) — NORMAL=1.0 to dzisiejszy balans AIPlayers.decide_bid bez
-## zmian. Niżej (VERY_EASY) rywale poddają się dużo szybciej, wyżej
-## (VERY_HARD) są znacznie bardziej upierają się i podbijają wyżej.
+## nagłówkowy) — HARD=1.0 to dzisiejszy balans AIPlayers.decide_bid bez
+## zmian (zgłoszone przez użytkownika: "1x1 to trudny"). Niżej rywale
+## poddają się coraz szybciej, na VERY_HARD upierają się jeszcze bardziej i
+## podbijają wyżej.
 const RIVAL_AGGRESSIVENESS_MULTIPLIER := {
-	Level.VERY_EASY: 0.5,
-	Level.EASY: 0.75,
-	Level.NORMAL: 1.0,
-	Level.HARD: 1.3,
-	Level.VERY_HARD: 1.6,
+	Level.VERY_EASY: 0.4,
+	Level.EASY: 0.6,
+	Level.NORMAL: 0.8,
+	Level.HARD: 1.0,
+	Level.VERY_HARD: 1.2,
 }
 
 var level: int = Level.NORMAL

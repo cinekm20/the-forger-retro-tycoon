@@ -360,9 +360,10 @@ sterujący CZTEREMA osiami naraz:
 - **próg zwycięstwa** — 15/40 na dwóch najłatwiejszych poziomach, 40/40 na
   pozostałych trzech (to, co dawniej robił osobny checkbox "tryb łatwy");
 - **skłonność rywali do podbijania na aukcji** (`Difficulty.rival_bid_aggressiveness`,
-  `AIPlayers.decide_bid`) — od ×0,5 (najłatwiejszy, rywale poddają się dużo
-  szybciej) do ×1,6 (najtrudniejszy, rywale wytrzymują dużo wyższe oferty);
-  ×1,0 na poziomie Normalnym to dotychczasowy, niezmieniony balans licytacji.
+  `AIPlayers.decide_bid`) — od ×0,4 (najłatwiejszy, rywale poddają się
+  szybciej) do ×1,2 (najtrudniejszy, rywale wytrzymują wyższe oferty);
+  ×1,0 na poziomie Trudnym (nie Normalnym) to dotychczasowy, niezmieniony
+  balans licytacji.
 
 ## 7. Sterowanie i UX (mobile)
 
