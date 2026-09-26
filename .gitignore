@@ -1,0 +1,5 @@
+# Artefakty budowania modułów Gradle w android_plugins/ (patrz
+# android_plugins/README.md) — kod źródłowy pluginów Androida ZOSTAJE
+# trackowany, tylko wyniki lokalnego budowania (`./gradlew`) nie.
+android_plugins/*/build/
+android_plugins/*/.gradle/

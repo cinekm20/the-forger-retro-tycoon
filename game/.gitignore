@@ -5,3 +5,10 @@ export_credentials.cfg
 android/build/
 *.import
 *.uid
+
+# Skompilowany plugin Androida (android_plugins/in_app_update/) — build
+# binarny, budowany na nowo przy KAŻDYM przebiegu android-release-build.yml
+# (patrz export_presets.cfg, komentarz przy preset.2), nie kod źródłowy do
+# commitowania. Sam .gdap (deskryptor) ZOSTAJE trackowany.
+android/plugins/*.aar
+

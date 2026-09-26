@@ -36,6 +36,10 @@ var player_corner_columns: Array[Control] = []
 
 func _ready() -> void:
 	Music.play_track(Music.MAIN_MENU_TRACK)
+	## Sprawdzenie aktualizacji Google Play (InAppUpdate.gd) — raz, od razu na
+	## starcie gry, zanim gracz jeszcze zdąży zrobić cokolwiek. Bez efektu
+	## poza Androidem/wersją z Play (patrz komentarz nagłówkowy InAppUpdate.gd).
+	InAppUpdate.check_for_update()
 	## Zgłoszenie użytkownika: tytuł "THE FORGER: RETRO TYCOON" ma być wpisany
 	## bezpośrednio w tym tle (patrz docs/GRAFIKA_LEONARDO.md §1, zaktualizowany
 	## prompt), zamiast osobno dogrywanej grafiki logo — jedno tło zamiast

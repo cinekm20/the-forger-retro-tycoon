@@ -63,6 +63,12 @@ var hub_overlay: ColorRect
 var turn_summary_container: HBoxContainer
 var turn_summary_label: Label
 var turn_summary_button: Button
+## Przycisk instalacji aktualizacji Google Play (InAppUpdate.gd) — osobny od
+## turn_summary_button (inny cel: restart apki, nie zmiana ekranu), ale
+## współdzieli TĘ SAMĄ oprawioną skrzynkę (row) i logikę pokazywania/
+## chowania w _update_turn_summary, żeby nie duplikować całej struktury
+## kontenera na jeden rzadki, przejściowy komunikat.
+var update_ready_button: Button
 
 
 func _ready() -> void:
@@ -298,6 +304,9 @@ func _build_turn_summary() -> void:
 	turn_summary_button = ScreenHelpers.make_button(row, tr("Przejdź do aukcji »"), func(): SceneRouter.goto_scene(SceneRouter.AUCTION_HOUSE))
 	turn_summary_button.visible = false
 
+	update_ready_button = ScreenHelpers.make_button(row, tr("Zainstaluj aktualizację »"), func(): InAppUpdate.complete_update())
+	update_ready_button.visible = false
+
 
 func _update_turn_summary() -> void:
 	var lines: Array[String] = []
@@ -307,6 +316,16 @@ func _update_turn_summary() -> void:
 		turn_summary_button.visible = true
 	else:
 		turn_summary_button.visible = false
+
+	## Aktualizacja z Google Play pobrana w tle (patrz InAppUpdate.gd) —
+	## czeka na restart gry, żeby się zainstalować. update_ready zostaje
+	## true dopóki gracz nie kliknie przycisku (Play Core sam restartuje
+	## apkę po completeUpdate(), więc nic tu nie trzeba ręcznie zerować).
+	if InAppUpdate.update_ready:
+		lines.append(tr("Aktualizacja pobrana i gotowa do zainstalowania."))
+		update_ready_button.visible = true
+	else:
+		update_ready_button.visible = false
 
 	var plantation_index := PlayerPlantations.find_plantation_index(Travel.current_city)
 	if not Travel.is_traveling() and plantation_index != -1:

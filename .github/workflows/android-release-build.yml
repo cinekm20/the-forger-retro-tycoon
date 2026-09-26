@@ -47,6 +47,21 @@ jobs:
           yes | sdkmanager --licenses > /dev/null || true
           sdkmanager "platform-tools" "build-tools;34.0.0" "platforms;android-34"
 
+      # Plugin Androida InAppUpdate (sprawdzanie aktualizacji z Google Play,
+      # patrz game/scripts/autoload/InAppUpdate.gd i android_plugins/README.md) —
+      # WŁASNY, samodzielny projekt Gradle poza game/ (res://), budowany
+      # NIEZALEŻNIE od głównego projektu, PRZED eksportem .aab niżej. Wynik
+      # (.aar) NIE jest commitowany do repo (patrz game/.gitignore) — musi
+      # istnieć w tym konkretnym miejscu w chwili eksportu, bo na niego
+      # wskazuje game/android/plugins/InAppUpdate.gdap.
+      - name: Build InAppUpdate Android plugin
+        working-directory: android_plugins/in_app_update
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleRelease
+          mkdir -p ../../game/android/plugins
+          cp build/outputs/aar/in_app_update-release.aar ../../game/android/plugins/InAppUpdate.aar
+
       - name: Cache Godot binary
         id: godot-cache
         uses: actions/cache@v6

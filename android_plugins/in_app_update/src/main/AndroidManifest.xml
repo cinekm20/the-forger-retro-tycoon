@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Minimalny manifest modułu-biblioteki — żadnych własnych uprawnień: Play
+     Core (com.google.android.play:app-update) rozmawia z aplikacją Google
+     Play na urządzeniu, nie potrzebuje INTERNET/innych uprawnień poza tymi,
+     które główna aplikacja i tak już ma. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" />

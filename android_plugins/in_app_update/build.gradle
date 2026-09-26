@@ -1,0 +1,41 @@
+// Samodzielny moduł Gradle (NIE część głównego projektu Godota — patrz
+// android_plugins/README.md) budujący natywny plugin Androida InAppUpdate,
+// który owija Google Play In-App Updates (biblioteka Play Core). Wynik
+// (release .aar) trzeba skopiować do game/android/plugins/InAppUpdate.aar
+// razem z game/android/plugins/InAppUpdate.gdap PRZED eksportem Androida —
+// patrz .github/workflows/android-release-build.yml (robi to automatycznie)
+// albo android_plugins/README.md (instrukcja ręczna).
+plugins {
+    id 'com.android.library' version '8.6.0'
+}
+
+android {
+    namespace 'com.theforger.inappupdate'
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 21
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+}
+
+dependencies {
+    // Godot udostępnia godot-lib przez Maven Central od 4.3 — to jedyna
+    // zależność potrzebna, żeby zaimplementować GodotPlugin bez ściągania
+    // pełnych szablonów eksportu silnika. compileOnly: klasy Godota są w
+    // czasie działania już dostarczone przez samą aplikację/apk, plugin nie
+    // ma ich pakować powtórnie do własnego .aar.
+    compileOnly "org.godotengine:godot:4.7.1.stable"
+    // Google Play In-App Updates — patrz docs/DODATKOWE_MECHANIKI.md i
+    // InAppUpdate.gd (autoload GDScript, które ten plugin owija).
+    implementation "com.google.android.play:app-update:2.1.0"
+}
