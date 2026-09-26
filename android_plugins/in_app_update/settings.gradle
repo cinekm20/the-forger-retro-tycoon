@@ -1,1 +1,19 @@
+// pluginManagement.repositories steruje TYLKO rozwiązywaniem samych
+// pluginów (blok `plugins { id ... }` w build.gradle) — domyślnie Gradle
+// szuka WYŁĄCZNIE w Gradle Plugin Portal, a Android Gradle Plugin
+// (com.android.library) jest opublikowany w google(), nie tam. Bez tego
+// bloku `./gradlew assembleRelease` failuje: "Plugin [id: 'com.android.library'...]
+// was not found ... Searched in the following repositories: Gradle Central
+// Plugin Repository" — dokładnie to zgłoszone przez użytkownika po
+// pierwszym uruchomieniu CI. `repositories { google(); mavenCentral() }` w
+// build.gradle (osobny blok, dla ZWYKŁYCH zależności, np. Play Core) to
+// inny mechanizm i zostaje bez zmian.
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = 'in_app_update'
